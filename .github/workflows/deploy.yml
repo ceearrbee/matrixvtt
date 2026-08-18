@@ -112,6 +112,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: [preflight, build]
     steps:
+      # The health check below compares the live version stamp against
+      # package.json, so this job needs the same pinned checkout the
+      # build used.
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
