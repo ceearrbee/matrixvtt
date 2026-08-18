@@ -2,7 +2,7 @@
  * Leaving a room must produce a blank slate.
  *
  * Three combined fixes:
- *   1. The header "Leave" button (StandaloneApp.leaveRoom) actually
+ *   1. The global menu's "Leave room" (StandaloneApp.leaveRoom) actually
  *      calls Matrix client.leaveRoom and removes the recent.
  *   2. The discovery scan's pruneDeletedRecent drops recents for
  *      rooms the user is no longer joined to.
@@ -33,7 +33,7 @@ async function leaveViaDialog(app, confirmIt = true) {
   document.querySelectorAll('.modal-overlay').forEach((n) => n.remove());
 }
 
-describe('leaveRoom (header button)', () => {
+describe('leaveRoom (global menu)', () => {
   it('calls client.leaveRoom and removes the recent on confirm', async () => {
     saveRecentSessions([
       { userId: '@me:hs', roomId: '!a:hs', roomName: 'A', homeserver: 'h', lastUsed: 1 },

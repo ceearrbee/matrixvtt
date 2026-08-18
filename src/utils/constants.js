@@ -256,6 +256,7 @@ export const VTT_EVENTS = {
   SYNC_RECOVERED: 'vtt:sync-recovered',
   SYNC_DEAD: 'vtt:sync-dead',
   LEAVE_ROOM: 'vtt:leave-room',
+  RETURN_TO_ROOMS: 'vtt:return-to-rooms',
   DELETE_SESSION: 'vtt:delete-session',
   CAPABILITIES_DENIED: 'vtt:capabilities-denied',
   ROOM_UPGRADED: 'vtt:room-upgraded'

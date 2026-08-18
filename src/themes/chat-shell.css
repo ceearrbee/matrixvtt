@@ -1098,9 +1098,8 @@
   .vtt-header__right [data-sync-status] {
     display: none !important;
   }
-  /* Leave-room button is reachable from the Journal pane / Settings on
-     mobile; the header is too narrow for a destructive action. */
-  #leave-room-btn-header { display: none !important; }
+  /* The room-list return stays in the header on mobile (icon-only via
+     the .dbt__label hide): it is the only non-destructive way back. */
 
   /* === C. Touch-target minimums (WCAG / Material 44×44) ========== *
    * Every interactive chip / pill / icon button gets a minimum

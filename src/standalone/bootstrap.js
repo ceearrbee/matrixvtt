@@ -23,6 +23,7 @@ import {
   handleCreateRoom,
   handleFactoryReset,
   leaveRoom,
+  returnToRoomList,
   startVTT,
 } from './session.js';
 import { mountStandaloneShell } from './StandaloneShell.jsx';
@@ -56,6 +57,7 @@ export class StandaloneApp {
     this._disposers = [];
 
     this.leaveRoom = () => leaveRoom(this);
+    this.returnToRoomList = () => returnToRoomList(this);
   }
 
   async bootstrap() {
@@ -124,6 +126,7 @@ export class StandaloneApp {
     };
 
     on(this.win, VTT_EVENTS.LEAVE_ROOM, this.leaveRoom);
+    on(this.win, VTT_EVENTS.RETURN_TO_ROOMS, this.returnToRoomList);
 
     const onDeleteSession = async () => {
       try { await this.matrixVTTClient?.state?.awaitQueueDrain?.(5000); } catch { /* ignore */ }

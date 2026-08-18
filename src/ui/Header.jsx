@@ -21,7 +21,7 @@ import { h } from 'preact';
 import { useState, useCallback } from 'preact/hooks';
 import { VTT_EVENTS, UI_MODES } from '../utils/constants.js';
 import { labelFor } from './mode-registry.js';
-import { confirmKick, confirmBan, confirmLeave } from './destructive-actions.js';
+import { confirmKick, confirmBan } from './destructive-actions.js';
 import { syncOkSignal, tablePhaseSignal, queueCountSignal, gmPrepActiveSignal, layoutModeSignal } from '../state/ui-signals.js';
 import { LAYOUT_MODES } from '../utils/constants.js';
 import { syncChipText } from './sync-chip.js';
@@ -103,7 +103,7 @@ export function Header({
   settingsSignal.value; initiativeSignal.value; roomMembersSignal.value;
   const phase = tablePhaseSignal.value;
   // Icon layout drops the text labels on the icon-bearing header controls
-  // (sync, Leave); their title tooltip + aria-label carry the name.
+  // (sync, Rooms); their title tooltip + aria-label carry the name.
   const iconMode = layoutModeSignal.value === LAYOUT_MODES.ICON;
   const isGM = !!ui?.state?.isGM?.();
   const sheetToggleLabel = labelFor(phase, isGM, gmPrepActiveSignal.value).label;
@@ -116,8 +116,8 @@ export function Header({
     ? `Round ${round} · ${order[current_index]?.name || '-'}`
     : phase === UI_MODES.COMBAT ? 'Combat staged' : 'No combat';
 
-  const leaveRoom = useCallback(
-    () => window.dispatchEvent(new CustomEvent(VTT_EVENTS.LEAVE_ROOM)),
+  const returnToRooms = useCallback(
+    () => window.dispatchEvent(new CustomEvent(VTT_EVENTS.RETURN_TO_ROOMS)),
     [],
   );
 
@@ -175,12 +175,12 @@ export function Header({
         ]);
       })(),
       ui.widgetManager?.canLeave && h('button', {
-        class: 'dbt dbt--danger',
-        id: 'leave-room-btn-header',
-        title: 'Leave room',
-        'aria-label': 'Leave room',
-        onClick: () => confirmLeave(leaveRoom),
-      }, [h(LeaveIcon, {}), !iconMode && h('span', { class: 'dbt__label' }, ' Leave')]),
+        class: 'dbt',
+        id: 'back-to-rooms-btn-header',
+        title: 'Return to room list',
+        'aria-label': 'Return to room list',
+        onClick: returnToRooms,
+      }, [h(LeaveIcon, {}), !iconMode && h('span', { class: 'dbt__label' }, ' Rooms')]),
       onToggleSheet && h('button', {
         type: 'button',
         class: 'shell__mobile-toggle shell__mobile-toggle--sheet',

@@ -19,7 +19,7 @@ const BLOCKING = new Set(['critical', 'serious', 'moderate']);
 test.describe('VTT shell - accessibility', () => {
   test('header passes axe-core blocking rules in the logged-in shell', async ({ page }) => {
     await waitForVttShell(page);
-    await expect(page.locator('#leave-room-btn-header')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#back-to-rooms-btn-header')).toBeVisible({ timeout: 10_000 });
 
     const results = await new AxeBuilder({ page })
       .include('.vtt-header')
@@ -35,8 +35,8 @@ test.describe('VTT shell - accessibility', () => {
 
   test('header and global menu expose the expected controls', async ({ page }) => {
     await waitForVttShell(page);
-    // Leave lives in the header itself.
-    await expect(page.getByLabel(/leave room/i)).toBeVisible({ timeout: 10_000 });
+    // The room-list return lives in the header itself.
+    await expect(page.getByLabel(/return to room list/i)).toBeVisible({ timeout: 10_000 });
 
     // Settings and theme are consolidated into the lower-left global menu.
     await page.locator('.left-index__menu-btn').click();

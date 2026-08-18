@@ -217,6 +217,14 @@ export function handleFactoryReset(app) {
   );
 }
 
+export async function returnToRoomList(app) {
+  saveActiveRoom(null);
+  try { await app.matrixVTTClient?.state?.awaitQueueDrain?.(5000); } catch { /* ignore */ }
+  app.matrixVTTClient?.destroy();
+  app.currentSession = null;
+  app.showScreen('discovery');
+}
+
 export async function leaveRoom(app) {
   const session = app.currentSession;
   saveActiveRoom(null);

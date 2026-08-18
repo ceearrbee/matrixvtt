@@ -32,23 +32,23 @@ function makeUi() {
 
 describe('Phase C - line icon swap', () => {
   it('Header buttons render an SVG icon and keep their aria-label', () => {
-    // Settings / Maps moved to the consolidated GlobalMenu; the leave
+    // Settings / Maps moved to the consolidated GlobalMenu; the rooms
     // button is the remaining icon button in the header.
     render(h(Header, { ui: makeUi() }), host);
-    const leaveBtn = host.querySelector('#leave-room-btn-header');
-    expect(leaveBtn).not.toBeNull();
-    expect(leaveBtn.querySelector('svg')).not.toBeNull();
-    expect(leaveBtn.getAttribute('aria-label')).toBe('Leave room');
+    const roomsBtn = host.querySelector('#back-to-rooms-btn-header');
+    expect(roomsBtn).not.toBeNull();
+    expect(roomsBtn.querySelector('svg')).not.toBeNull();
+    expect(roomsBtn.getAttribute('aria-label')).toBe('Return to room list');
   });
 
   it('Header buttons do not contain emoji glyphs in their text content', () => {
     render(h(Header, { ui: makeUi() }), host);
     // Walk all descendants (labels are wrapped in .dbt__label spans for
-    // mobile hide-on-narrow). Text should mention Leave and never
+    // mobile hide-on-narrow). Text should mention Rooms and never
     // contain a door emoji.
-    const text = host.querySelector('#leave-room-btn-header').textContent ?? '';
+    const text = host.querySelector('#back-to-rooms-btn-header').textContent ?? '';
     expect(text).not.toMatch(/🚪/);
-    expect(text).toMatch(/Leave/);
+    expect(text).toMatch(/Rooms/);
   });
 
   it('layout-toggle button is gone (conversation-first shell, no map/forum dichotomy)', () => {

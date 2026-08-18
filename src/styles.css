@@ -6055,11 +6055,11 @@ button.item-card__tag--holder:hover {
   #restart-tour-btn-header { display: none; }
   #maps-btn .dbt__label,
   #settings-btn .dbt__label,
-  #leave-room-btn-header .dbt__label,
+  #back-to-rooms-btn-header .dbt__label,
   [data-sync-status] .dbt__label { display: none; }
   #maps-btn,
   #settings-btn,
-  #leave-room-btn-header,
+  #back-to-rooms-btn-header,
   [data-sync-status] {
     /* Bump the icon a touch so a 1em SVG reads at ~14px on mobile. */
     font-size: 14px;

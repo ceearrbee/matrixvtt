@@ -1,14 +1,15 @@
 /**
- * Destructive-action guardrails: Kick / Ban / Leave must route through a
+ * Destructive-action guardrails: Kick / Ban must route through a
  * confirm before the irreversible/social action fires. The confirm copy
  * names the target and uses the danger vocabulary; the action only runs
- * when the user confirms.
+ * when the user confirms. (Leave confirms inside session.leaveRoom -
+ * covered by sessionLeaveRoom.test.js.)
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../ui/confirm-dialogs.jsx', () => ({ confirmAsync: vi.fn() }));
 import { confirmAsync } from '../ui/confirm-dialogs.jsx';
-import { confirmKick, confirmBan, confirmLeave } from '../ui/destructive-actions.js';
+import { confirmKick, confirmBan } from '../ui/destructive-actions.js';
 
 beforeEach(() => { confirmAsync.mockReset(); });
 
@@ -44,16 +45,5 @@ describe('destructive-action guardrails', () => {
     expect(ui.banUser).not.toHaveBeenCalled();
     onConfirm();
     expect(ui.banUser).toHaveBeenCalledWith('@eve:server');
-  });
-
-  it('confirmLeave runs the provided leave action only on confirm', () => {
-    const onLeave = vi.fn();
-    confirmLeave(onLeave);
-
-    const [, onConfirm, opts] = confirmAsync.mock.calls[0];
-    expect(opts).toMatchObject({ title: 'Leave room', confirmText: 'Leave', confirmClass: 'dbt--danger' });
-    expect(onLeave).not.toHaveBeenCalled();
-    onConfirm();
-    expect(onLeave).toHaveBeenCalledTimes(1);
   });
 });

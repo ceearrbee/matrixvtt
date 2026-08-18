@@ -13,7 +13,6 @@ import { restartOnboardingTour } from './onboarding-tour.js';
 import { showKeyboardHelp } from './keyboard-help.js';
 import { showFeedbackModal } from './feedback.js';
 import { showInvitePlayerModal } from './invite-player.js';
-import { confirmLeave } from './destructive-actions.js';
 import { libraryAvailable, openLibraryBrowser } from './library/open-library.js';
 import { docsHref } from '../utils/docs-link.js';
 
@@ -80,7 +79,9 @@ export function buildGlobalMenuItems(ui, { isGM, canLeave }) {
       key: 'leave',
       label: 'Leave room',
       danger: true,
-      action: () => confirmLeave(() => window.dispatchEvent(new CustomEvent(VTT_EVENTS.LEAVE_ROOM))),
+      // The confirmation lives in session.leaveRoom, which every
+      // LEAVE_ROOM dispatch funnels through - no wrapper dialog here.
+      action: () => window.dispatchEvent(new CustomEvent(VTT_EVENTS.LEAVE_ROOM)),
     });
   }
   return items;

@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { buildGlobalMenuItems } from '../ui/global-menu-items.js';
+import { VTT_EVENTS } from '../utils/constants.js';
 
 const ui = { openSettings() {}, toggleTheme() {}, openMapsPanel() {} };
 
@@ -42,6 +43,19 @@ describe('buildGlobalMenuItems', () => {
     const leave = buildGlobalMenuItems(ui, { isGM: false, canLeave: true }).find((i) => i.key === 'leave');
     expect(leave).toBeTruthy();
     expect(leave.danger).toBe(true);
+  });
+
+  it('Leave dispatches LEAVE_ROOM directly - the single confirm lives in session.leaveRoom', () => {
+    const leave = buildGlobalMenuItems(ui, { isGM: false, canLeave: true }).find((i) => i.key === 'leave');
+    const seen = vi.fn();
+    window.addEventListener(VTT_EVENTS.LEAVE_ROOM, seen);
+    try {
+      leave.action();
+    } finally {
+      window.removeEventListener(VTT_EVENTS.LEAVE_ROOM, seen);
+    }
+    expect(seen).toHaveBeenCalledOnce();
+    expect(document.querySelector('.modal-overlay')).toBeNull();
   });
 
   it('includes Content library only in standalone mode with a raw client', () => {
