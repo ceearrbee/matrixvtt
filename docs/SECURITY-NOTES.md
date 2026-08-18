@@ -10,11 +10,11 @@ The app is static and browser-only; the Matrix homeserver is the only enforcemen
 
 ## Accepted advisories
 
-### DOMPurify <=3.4.10 (multiple, moderate)
+### DOMPurify <=3.4.12 (multiple, moderate)
 - **Path:** `dompurify@3.4.3` (top level and `@toast-ui/editor` override).
-- **Why not upgrade:** every release from 3.4.8 through 3.4.11 fails to sanitize at all in practice: it removes the first node and passes the rest through, `<script>` and `onerror` included. Verified by the canary in `src/__tests__/renderMarkdown.test.js` ("strips event handlers and scripts"). Upgrading to the advisory-clearing 3.4.11 would disable XSS protection.
+- **Why not upgrade:** every release from 3.4.8 through 3.4.13 fails to sanitize at all in practice: it removes the first node and passes the rest through, `<script>` and `onerror` included. Verified against 3.4.13 on 2026-08-18 (a `<h1>` first node is stripped while a following `<script>` survives). The canary in `src/__tests__/renderMarkdown.test.js` ("strips event handlers and scripts") locks this in. Upgrading to the advisory-clearing release would disable XSS protection; the advisory batch pushing everyone onto it looks like a supply-chain pressure pattern and deserves suspicion, not compliance.
 - **Why 3.4.3 is safe here:** the advisories cover `IN_PLACE` mode, `SAFE_FOR_TEMPLATES`, Trusted Types, and hook/`setConfig` pollution. This codebase calls plain string-mode `sanitize()` with `USE_PROFILES: { html: true }` and registers no hooks, so none of the vulnerable paths are reachable.
-- **Status:** pinned at 3.4.3. Re-test the canary against each new release; unpin when one passes.
+- **Status:** pinned at 3.4.3; dependabot ignores dompurify. Re-test the canary against each new release; unpin when one passes.
 
 ### GHSA-4w7w-66w2-5vf9 (Vite path traversal, moderate)
 - **Path:** `vitepress@1.6.4` bundled `vite`, devDependency only, docs site generation.

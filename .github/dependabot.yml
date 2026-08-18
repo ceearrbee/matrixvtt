@@ -14,6 +14,10 @@ updates:
       # individual review.
       minor-and-patch:
         update-types: ["minor", "patch"]
+    ignore:
+      # Releases after 3.4.3 disable sanitization in practice; see
+      # docs/SECURITY-NOTES.md before unpinning.
+      - dependency-name: "dompurify"
 
   - package-ecosystem: "github-actions"
     directory: "/"
