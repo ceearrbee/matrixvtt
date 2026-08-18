@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MatrixVTT - layout exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#16191F;--surface:#1F2430;--overlay:#2D3444;--ink:rgba(255,255,255,.92);
+  --ink2:rgba(200,210,230,.75);--ink3:rgba(160,175,195,.65);--blue:#5BB8E8;
+  --blue-bg:rgba(24,95,165,.18);--blue-line:rgba(91,184,232,.4);--hair:rgba(255,255,255,.18)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh}
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--surface);border-bottom:.5px solid var(--hair);flex-wrap:wrap}
+h1{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-right:6px}
+h1 small{font-weight:400;color:var(--ink3);font-size:12px}
+.segs{display:inline-flex;gap:3px;padding:3px;background:var(--bg);border:.5px solid var(--hair);border-radius:4px}
+.seg{font-family:inherit;font-size:13px;padding:6px 12px;border:0;border-radius:3px;background:transparent;color:var(--ink2);cursor:pointer}
+.seg:hover{background:var(--overlay);color:var(--ink)}
+.seg.on{background:var(--blue-bg);color:var(--blue);box-shadow:inset 0 0 0 .5px var(--blue-line)}
+.spacer{flex:1}
+.open{font-size:12px;color:var(--ink3);text-decoration:none;border:.5px solid var(--hair);padding:6px 10px;border-radius:3px}
+.open:hover{color:var(--ink);background:var(--overlay)}
+.frame{flex:1;border:0;width:100%;background:var(--bg)}
+.note{font-size:12px;color:var(--ink3);padding:0 16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>MatrixVTT <small>· layout exploration</small></h1>
+  <div class="segs" id="segs">
+    <button class="seg on" data-src="layout-1-map-dominant.html">1 · Map-dominant</button>
+    <button class="seg" data-src="layout-2-side-by-side.html">2 · Side-by-side</button>
+    <button class="seg" data-src="layout-3-floating-panels.html">3 · Floating panels</button>
+    <button class="seg" data-src="layout-4-refined-stacked.html">4 · Refined stacked</button>
+    <button class="seg" data-src="layout-5-companion-panel.html">5 · Companion panel</button>
+    <button class="seg" data-src="layout-6-immersive-hud.html">6 · Immersive HUD</button>
+    <button class="seg" data-src="layout-7-canvas-drawers.html">7 · Canvas + drawers</button>
+    <button class="seg" data-src="layout-8-chat-first.html">8 · Chat-first</button>
+    <button class="seg" data-src="layout-9-almanac.html">★ 9 · Almanac</button>
+  </div>
+  <span class="note">each mockup has its own light/dark toggle (top-right)</span>
+  <span class="spacer"></span>
+  <a class="open" id="open" href="layout-1-map-dominant.html" target="_blank">Open full ↗</a>
+</header>
+<iframe class="frame" id="frame" src="layout-1-map-dominant.html" title="layout preview"></iframe>
+<script>
+const segs=document.getElementById('segs'), frame=document.getElementById('frame'), open=document.getElementById('open');
+segs.addEventListener('click',e=>{
+  const b=e.target.closest('.seg'); if(!b) return;
+  segs.querySelectorAll('.seg').forEach(s=>s.classList.toggle('on',s===b));
+  frame.src=b.dataset.src; open.href=b.dataset.src;
+});
+</script>
+</body>
+</html>

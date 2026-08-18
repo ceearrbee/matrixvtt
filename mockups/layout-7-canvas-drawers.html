@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout 7 - Canvas + on-demand drawers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="dark"]{--bg:#16191F;--surface:#1F2430;--overlay:#2D3444;--map-void:#0A0E14;--ink:rgba(255,255,255,.92);--ink2:rgba(200,210,230,.75);--ink3:rgba(160,175,195,.65);--blue:#5BB8E8;--blue-bg:rgba(24,95,165,.18);--blue-line:rgba(91,184,232,.4);--green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;--hair:rgba(255,255,255,.18);--hair-soft:rgba(255,255,255,.10);--panel:rgba(31,36,48,.94);--shadow:rgba(0,0,0,.5)}
+:root[data-theme="light"]{--bg:#fff;--surface:#f5f7fa;--overlay:#e8ecf1;--map-void:#e5e8ec;--ink:rgba(0,0,0,.87);--ink2:rgba(0,0,0,.65);--ink3:rgba(0,0,0,.52);--blue:#1565C0;--blue-bg:rgba(24,95,165,.08);--blue-line:rgba(21,101,192,.3);--green:#0F6E56;--amber:#C77700;--red:#C62828;--hair:rgba(0,0,0,.14);--hair-soft:rgba(0,0,0,.07);--panel:rgba(255,255,255,.95);--shadow:rgba(0,0,0,.18)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{position:relative;height:100vh;display:flex}
+/* slim edge tab rail */
+.edge{width:52px;flex:0 0 auto;background:var(--bg);border-right:.5px solid var(--hair);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;z-index:20}
+.edge .logo{font-size:11px;font-weight:800;color:var(--blue);margin-bottom:6px}
+.edge button{width:38px;height:38px;border-radius:3px;border:0;background:transparent;color:var(--ink3);font-size:17px;cursor:pointer;display:grid;place-items:center;position:relative}
+.edge button:hover{background:var(--overlay);color:var(--ink)}
+.edge button.on{color:var(--blue)}.edge button.on::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--blue)}
+.edge button small{display:block;font-size:7px;letter-spacing:.03em}
+.edge .grow{flex:1}
+/* canvas */
+.canvas{flex:1;position:relative;background:var(--map-void);overflow:hidden}
+.board{position:absolute;inset:0;background-image:linear-gradient(var(--hair-soft) 1px,transparent 1px),linear-gradient(90deg,var(--hair-soft) 1px,transparent 1px);background-size:50px 50px;background-color:#2a2118}
+.fog{position:absolute;inset:0;background:radial-gradient(circle at 48% 46%,transparent 200px,rgba(226,75,74,.15) 320px),conic-gradient(from 18deg at 60% 26%,rgba(239,159,39,.16),transparent 100deg);pointer-events:none}
+.unit{position:absolute;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:22px;border:2px solid rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.5)}.unit span{position:absolute;top:-16px;font-size:11px;color:var(--ink2);white-space:nowrap}
+.hpbar{position:absolute;bottom:-7px;left:4px;right:4px;height:3px;border-radius:2px;background:rgba(0,0,0,.5)}.hpbar i{display:block;height:100%;border-radius:2px;background:var(--green)}
+/* floating top-right utilities only */
+.util{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:15;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;padding:5px;box-shadow:0 4px 16px var(--shadow);backdrop-filter:blur(8px)}
+.pill{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:3px;border:.5px solid var(--hair);background:transparent;color:var(--ink2);cursor:pointer}.pill:hover{background:var(--overlay);color:var(--ink)}.pill--live{color:var(--green);border-color:transparent}.pill--live::before{content:"●";margin-right:5px;font-size:9px}.pill--danger{color:var(--red)}.pill--active{background:var(--blue-bg);color:var(--blue);box-shadow:inset 0 0 0 .5px var(--blue-line)}
+.titlechip{position:absolute;top:12px;left:64px;z-index:15;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;padding:7px 11px;box-shadow:0 4px 16px var(--shadow);backdrop-filter:blur(8px)}
+.titlechip .title{font-size:14px;font-weight:700}.titlechip .subtitle{font-size:11px;color:var(--ink2)}
+/* an OPEN drawer (Party), slid in from the edge rail */
+.drawer{position:absolute;left:52px;top:0;bottom:0;width:260px;background:var(--panel);border-right:.5px solid var(--hair);box-shadow:8px 0 24px var(--shadow);backdrop-filter:blur(8px);z-index:18;display:flex;flex-direction:column}
+.drawer h2{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);font-weight:600;padding:10px 12px;border-bottom:.5px solid var(--hair-soft);display:flex;justify-content:space-between}
+.pcard{padding:10px 12px;border-bottom:.5px solid var(--hair-soft)}.pcard .nm{font-size:13px;font-weight:600}.pcard .cl{font-size:11px;color:var(--ink3)}.pcard .hp{font-size:11px;color:var(--ink2);margin-top:5px;display:flex;justify-content:space-between}
+.pbar{height:4px;border-radius:2px;background:var(--overlay);margin-top:3px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--green)}.pbar i.amber{background:var(--amber)}.pbar i.red{background:var(--red)}
+/* slim persistent chat ticker pinned bottom */
+.ticker{position:absolute;left:64px;right:12px;bottom:12px;z-index:16;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;box-shadow:0 8px 24px var(--shadow);backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:8px 12px}
+.ticker .recent{flex:1;min-width:0;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticker .recent b{color:var(--ink)}.ticker .recent .roll{color:var(--blue)}
+.ticker input{width:240px;background:var(--bg);border:.5px solid var(--hair);border-radius:2px;color:var(--ink);padding:7px;font-family:inherit;font-size:12px}
+.ticker .chip{font-size:12px;padding:6px 9px;border:.5px solid var(--hair);border-radius:3px;color:var(--ink2);background:transparent;cursor:pointer}
+.ticker .expand{font-size:11px;color:var(--ink3);cursor:pointer;border:0;background:transparent}
+/* initiative thin chip top-center */
+.initchip{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:15;display:flex;gap:5px;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;padding:5px 8px;box-shadow:0 4px 16px var(--shadow);backdrop-filter:blur(8px)}
+.tok{display:flex;gap:4px;padding:3px 7px;border-radius:3px;border:.5px solid var(--hair);font-size:11px;color:var(--ink2);white-space:nowrap}.tok--turn{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}.tok--down{opacity:.5;text-decoration:line-through}
+.cap2{position:fixed;right:16px;bottom:78px;max-width:440px;z-index:30;background:var(--surface);border:.5px solid var(--hair);border-radius:4px;padding:10px 12px;box-shadow:0 4px 16px var(--shadow)}
+.cap2 b{color:var(--blue)}.cap2 p{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:3px}.themetoggle{font-size:11px}
+</style></head>
+<body>
+<div class="app">
+  <nav class="edge">
+    <div class="logo">VTT</div>
+    <button class="on">👥<small>PARTY</small></button>
+    <button>💬<small>CHAT</small></button>
+    <button>📖<small>JOURNAL</small></button>
+    <button>👹<small>NPCS</small></button>
+    <button>🎬<small>SCENES</small></button>
+    <div class="grow"></div>
+    <button>⚙<small>SET</small></button>
+  </nav>
+
+  <main class="canvas">
+    <div class="board"></div><div class="fog"></div>
+    <div class="unit" style="left:40%;top:42%;background:#5b3a8a">🧙‍♀️<span>Sora</span><div class="hpbar"><i style="width:61%"></i></div></div>
+    <div class="unit" style="left:40%;top:52%;background:#1d6e56">☘<span>Finn</span><div class="hpbar"><i style="width:100%"></i></div></div>
+    <div class="unit" style="left:40%;top:62%;background:#7a5a1a">⚔<span>Kael</span><div class="hpbar"><i style="width:0;background:var(--red)"></i></div></div>
+    <div class="unit" style="left:48%;top:52%;background:#3a4a6a">🚶<span style="color:var(--blue)">Aria ◄</span><div class="hpbar"><i style="width:70%;background:var(--amber)"></i></div></div>
+    <div class="unit" style="left:60%;top:38%;background:#7a1f1a;width:66px;height:66px;font-size:28px">👹<span>War Boss</span><div class="hpbar"><i style="width:75%"></i></div></div>
+
+    <div class="titlechip"><div class="title">The Sunken Keep</div><div class="subtitle">Round 3 · Aria</div></div>
+    <div class="initchip"><div class="tok tok--turn">Aria</div><div class="tok">War Boss</div><div class="tok tok--down">Kael</div><div class="tok">Finn</div><div class="tok">Sora</div><div class="tok">Lt.Orc</div></div>
+    <div class="util"><button class="pill">GM</button><button class="pill pill--active">Prep</button><button class="pill">⋯</button><button class="pill pill--live">Live</button><button class="pill pill--danger">Leave</button><button class="pill themetoggle" onclick="t()">◐</button></div>
+
+    <!-- one drawer shown open (Party); others open on demand from the edge rail -->
+    <aside class="drawer">
+      <h2>Party <span style="color:var(--ink3)">✕</span></h2>
+      <div class="pcard"><div class="nm">Aria Blackwood</div><div class="cl">Rogue 5 · Halfling</div><div class="hp"><span>HP</span><span>28 / 40</span></div><div class="pbar"><i class="amber" style="width:70%"></i></div></div>
+      <div class="pcard"><div class="nm">Kael Ironforge</div><div class="cl">Fighter 5 · Human</div><div class="hp"><span>HP</span><span>0 / 35</span></div><div class="pbar"><i class="red" style="width:2%"></i></div></div>
+      <div class="pcard"><div class="nm">Finn Stonehelm</div><div class="cl">Cleric 5 · Dwarf</div><div class="hp"><span>HP</span><span>35 / 35</span></div><div class="pbar"><i style="width:100%"></i></div></div>
+      <div class="pcard"><div class="nm">Sora Moonwhisper</div><div class="cl">Wizard 5 · Elf</div><div class="hp"><span>HP</span><span>22 / 36</span></div><div class="pbar"><i class="amber" style="width:61%"></i></div></div>
+    </aside>
+
+    <!-- persistent slim chat ticker; expands to a full panel on click -->
+    <div class="ticker">
+      <div class="recent"><b>GM:</b> The War Boss staggers back, snarling · <b>Sora:</b> <span class="roll">Fire Bolt → 7</span> · <b>Aria:</b> <span class="roll">1d20+7 → 24 hit</span></div>
+      <input placeholder="Message the table…">
+      <button class="chip">d20</button>
+      <button class="expand">⌃ expand</button>
+    </div>
+  </main>
+</div>
+<div class="cap2"><b>Layout 7 - Canvas + on-demand drawers.</b><p>The map is a clean full canvas. Nothing permanently flanks it: the left rail is just tabs that <i>slide a drawer in</i> when you want it (Party shown open here), and chat lives as a slim always-glanceable ticker pinned to the bottom that expands to a full panel on demand. Most focus on the map, least chrome. Trade-off: chat & party aren't both fully visible at once - you summon what you need (closest in spirit to the "summon panels" idea, but with sensible defaults).</p></div>
+<script>function t(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';}</script>
+</body></html>

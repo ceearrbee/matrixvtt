@@ -1,0 +1,27 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "src/app-client.js",
+    "src/standalone/bootstrap.js",
+    "src/matrix-widget-stub.js"
+  ],
+  "project": [
+    "src/**/*.{js,jsx}"
+  ],
+  "ignore": [
+    "src/utils/no-op.js",
+    "src/ui/_public-surface.js",
+    "src/ui/first-time-setup.js",
+    "src/ui/handouts-panel.js",
+    "src/ui/MapForm.jsx",
+    "src/map/input/tools.js"
+  ],
+  "ignoreDependencies": [
+    "matrix-widget-api",
+    "y-protocols",
+    "@testing-library/dom",
+    "@types/matrix-js-sdk",
+    "@axe-core/playwright",
+    "@playwright/test"
+  ]
+}

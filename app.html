@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    See index.html for the policy rationale. `script-src 'unsafe-inline'`
+    stays until the inline theme preload, bootstrap shim, and service-
+    worker registration are extracted; the other directives enforce.
+    `connect-src https: wss:` is required so users can point at any
+    Matrix homeserver.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="Virtual tabletop powered by Matrix">
+  <meta name="theme-color" content="#16191f">
+  <!-- Open Graph + Twitter Card so shared links render proper preview cards. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MatrixVTT">
+  <meta property="og:title" content="MatrixVTT - Virtual Tabletop Powered by Matrix">
+  <meta property="og:description" content="Open-source virtual tabletop running entirely in the browser against a Matrix homeserver - fog of war, initiative, tokens, multi-system rules engine.">
+  <meta name="twitter:card" content="summary">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="%BASE_URL%icon.svg">
+  <link rel="manifest" href="%BASE_URL%manifest.json">
+  <title>MatrixVTT</title>
+  <script>try{const acc=JSON.parse(localStorage.getItem('vtt:accessibility')||'{}');const theme=(acc.theme&&acc.theme!=='auto')?acc.theme:(acc.high_contrast?'high-contrast':null);if(theme)document.documentElement.setAttribute('data-theme',theme);if(acc.reduced_motion)document.documentElement.classList.add('reduced-motion');}catch(e){}</script>
+  <!-- Self-hosted fonts (public/fonts/, latin variable woff2). Work Sans
+       is the chrome family, so it is the only one the pre-auth screens
+       paint with; it blocks. Source Serif 4 (prose) and Bodoni Moda
+       (display) are ~352 KB of woff2 that no first paint needs, so their
+       stylesheet loads non-blocking and swaps in. -->
+  <link rel="stylesheet" href="%BASE_URL%fonts/work-sans.css">
+  <link rel="stylesheet" href="%BASE_URL%fonts/serif-display.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="%BASE_URL%fonts/serif-display.css">
+  </noscript>
+  <link rel="stylesheet" href="src/styles.css">
+  <style>
+    /* ── Typography tokens (only used inside .standalone-shell) ───────────── */
+    .standalone-shell {
+      --font-headline: 'Work Sans', system-ui, -apple-system, sans-serif;
+    }
+    /* ── Screen visibility ──────────────────────────────────────────────────── */
+    /* `.screen.active` is kept as a fallback for the VTT branch only. The
+       non-VTT screens now sit inside `.standalone-main` and use the shell
+       grid for layout instead of flex-centering each card. */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    #screen-vtt.active { display: block; min-height: unset; }
+
+    /* ── Standalone shell (sidebar + main) ────────────────────────────────── */
+    .standalone-shell {
+      display: grid;
+      grid-template-columns: 450px 1fr;
+      min-height: 100vh;
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+    }
+    .standalone-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      padding: 60px 40px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--color-border-secondary);
+      background: var(--color-background-primary);
+      box-sizing: border-box;
+    }
+    .standalone-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .standalone-pitch {
+      list-style: none;
+      margin: 4px 0 0;
+      padding: 0;
+      font-family: var(--font-body);
+      font-size: 0.95em;
+      line-height: 1.5;
+      color: var(--color-text-secondary);
+    }
+    .standalone-pitch li {
+      padding: 4px 0 4px 16px;
+      position: relative;
+    }
+    .standalone-pitch li::before {
+      content: '-';
+      position: absolute;
+      left: 0;
+      color: var(--color-text-secondary);
+    }
+    .sidebar-epilogue {
+      margin-top: 24px;
+    }
+    .sidebar-epilogue summary {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    .sidebar-epilogue p {
+      font-family: var(--font-body);
+      font-size: 0.9em;
+      line-height: 1.5;
+      color: var(--color-text-secondary);
+      margin: 10px 0 0;
+    }
+    .standalone-logo {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    .standalone-title {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: 3em;
+      line-height: 0.95;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+    .standalone-tagline {
+      font-family: var(--font-body);
+      font-size: 1.05em;
+      line-height: 1.45;
+      margin: 0;
+      color: var(--color-text-secondary);
+    }
+    .standalone-sidenav {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 24px;
+    }
+    .standalone-sidenav a {
+      font-size: 1em;
+      text-transform: lowercase;
+      letter-spacing: 0.02em;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      padding: 2px 0;
+    }
+    .standalone-sidenav a:hover {
+      text-decoration: underline;
+      color: var(--color-text-secondary);
+    }
+    .standalone-sidebar-actions {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 24px;
+      border-top: 1px solid var(--color-border-primary);
+    }
+    .standalone-side-btn {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border-secondary);
+      padding: 10px 14px;
+      cursor: pointer;
+      text-align: left;
+    }
+    .standalone-side-btn:hover {
+      background: var(--color-background-secondary);
+    }
+    .standalone-side-btn--danger {
+      color: var(--color-text-danger);
+      border-color: var(--color-border-danger);
+    }
+    .standalone-side-btn--danger:hover {
+      background: var(--color-background-danger);
+    }
+    .standalone-main {
+      padding: 48px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+    .standalone-link-btn {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--color-text-secondary);
+      border: none;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+    .standalone-link-btn:hover {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+    }
+
+    /* ── Auth card (sits inside .standalone-main) ─────────────────────────── */
+    .auth-card {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .auth-heading {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: 2.2em;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      margin: 0 0 8px;
+      color: var(--color-text-primary);
+    }
+    .auth-intro {
+      font-family: var(--font-body);
+      font-size: 1.05em;
+      line-height: 1.5;
+      color: var(--color-text-secondary);
+      margin: 0 0 24px;
+    }
+    .auth-card label {
+      display: block;
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+      margin-top: 24px;
+    }
+    .auth-card label:first-of-type { margin-top: 0; }
+    .auth-card input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      font-size: var(--font-size-sm);
+      background: transparent;
+      border: 1px solid var(--color-border-secondary);
+      color: var(--color-text-primary);
+    }
+    .auth-card input:focus {
+      outline: none;
+      border-color: var(--color-text-primary);
+    }
+    .auth-card details { margin: 12px 0 4px; }
+    .auth-card details summary {
+      font-size: 13px;
+      padding: 2px 0;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+    .auth-card details p {
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+      margin: 10px 0 0;
+    }
+    .auth-card details a {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+    }
+    .auth-card details[open] > label { margin-top: 12px; }
+    .auth-disclosure {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--color-border-primary);
+    }
+    .auth-disclosure summary {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+    }
+    .auth-disclosure p {
+      font-family: var(--font-body);
+      font-size: 0.95em;
+      line-height: 1.55;
+      color: var(--color-text-secondary);
+      margin: 12px 0 0;
+    }
+    #login-form .btn-primary { width: 100%; margin-top: 28px; padding: 12px; }
+    .auth-card .btn-secondary { width: 100%; margin-top: 12px; padding: 10px; }
+    .auth-error {
+      margin-top: 12px;
+      padding: 8px 10px;
+      background: var(--color-background-danger);
+      border: 0.5px solid var(--color-border-danger);
+      border-radius: var(--border-radius-sm);
+      color: var(--color-text-danger);
+      font-size: var(--font-size-xs);
+      display: none;
+    }
+    .auth-error.visible { display: block; }
+    #register-form .btn-primary { width: 100%; margin-top: 20px; padding: 12px; }
+    .register-terms { margin-top: 12px; }
+    .register-terms__list { margin: 4px 0 0; padding-left: 20px; }
+    .register-terms__list a {
+      color: var(--color-text-primary);
+      text-decoration: underline;
+    }
+    .register-email-actions {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    #register-back { width: 100%; margin-top: 12px; padding: 10px; }
+
+    /* ── Session cards ──────────────────────────────────────────────────────── */
+    .session-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border: 0.5px solid var(--color-border-primary);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 8px;
+      background: var(--color-background-tertiary);
+    }
+    .session-card-info { flex: 1; min-width: 0; }
+    .session-name {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .session-meta {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-tertiary);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .session-card-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+    .session-remove {
+      color: var(--color-text-tertiary);
+      flex-shrink: 0;
+    }
+    .session-remove:hover {
+      color: var(--color-text-danger);
+      border-color: var(--color-border-danger);
+      background: var(--color-background-danger);
+    }
+    .new-server-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-info);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .new-server-link:hover { text-decoration: underline; }
+
+    /* ── Discovery card ───────────────────────────────────────────────────── */
+    .discovery-card {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+    .discovery-account {
+      padding-bottom: 18px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--color-border-primary);
+    }
+    .discovery-name {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 1.25em;
+      color: var(--color-text-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .discovery-userid {
+      font-size: 0.95em;
+      color: var(--color-text-secondary);
+      margin-top: 4px;
+    }
+    .section-heading {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 28px 0 12px;
+      font-weight: 700;
+    }
+
+    /* Nondescript-style bordered nav block for every room / session card. */
+    .room-card,
+    .session-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px;
+      border: 1px solid var(--color-border-secondary);
+      background: transparent;
+      margin-bottom: 12px;
+    }
+    .room-card:hover,
+    .session-card:hover {
+      background: var(--color-background-secondary);
+    }
+    .room-card-info,
+    .session-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .room-card-info .room-name,
+    .session-card .session-name {
+      font-family: var(--font-headline);
+      font-weight: 800;
+      font-size: 1.4em;
+      line-height: 1.1;
+      color: var(--color-text-primary);
+      text-transform: uppercase;
+      letter-spacing: -0.005em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .room-card-info .room-meta,
+    .session-card .session-meta {
+      font-size: 0.95em;
+      color: var(--color-text-secondary);
+      margin-top: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .room-card button,
+    .session-card-actions { flex-shrink: 0; }
+    .room-empty {
+      font-family: var(--font-body);
+      color: var(--color-text-secondary);
+      font-size: 0.95em;
+      padding: 8px 0 16px;
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .discovery-loading {
+      font-family: var(--font-headline);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--color-text-secondary);
+      padding: 10px 0;
+    }
+
+    /* ── New session form ───────────────────────────────────────────────────── */
+    .new-session-form { display: flex; gap: 8px; margin: 8px 0; align-items: stretch; }
+    .new-session-form .form-input { flex: 1; padding: 6px 10px; min-width: 0; }
+    .new-session-form .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
+    .new-session-divider { font-size: 0.8em; color: var(--text-muted, #888); margin: 6px 0 2px; text-align: center; }
+    .create-room-form { display: flex; gap: 8px; margin: 8px 0; align-items: stretch; }
+    .create-room-form .form-input { flex: 1; padding: 6px 10px; min-width: 0; }
+    .create-room-form .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
+    .inspector-panel { /* same flex-input pattern as new-session-form */ }
+    .inspector-panel .form-input { padding: 6px 10px; min-width: 0; }
+    .inspector-panel .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
+
+    /* ── Mobile: collapse the sidebar above the main pane ─────────────────── */
+    @media (max-width: 768px) {
+      .standalone-shell {
+        grid-template-columns: 1fr;
+      }
+      .standalone-sidebar {
+        position: relative;
+        height: auto;
+        padding: 32px 24px;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border-secondary);
+      }
+      .standalone-brand { margin-top: 0; }
+      .standalone-title { font-size: 2.2em; }
+      .standalone-main { padding: 32px 24px; }
+      .standalone-sidebar-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
+
+    /* ── Auth notices (beta disclosure, probe/storage hints) ──────────────── */
+    .auth-beta-notice {
+      font-size: 0.85em;
+      line-height: 1.5;
+      color: var(--color-text-tertiary);
+      border-top: 0.5px solid var(--color-border-primary);
+      padding-top: 12px;
+      margin: 0 0 20px;
+    }
+    .auth-hint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85em;
+      color: var(--color-text-secondary);
+      background: var(--color-background-secondary);
+      border: 0.5px solid var(--color-border-primary);
+      border-radius: 3px;
+      padding: 8px 10px;
+      margin: 0 0 16px;
+    }
+    .auth-hint__retry {
+      background: transparent;
+      border: 0.5px solid var(--color-border-primary);
+      border-radius: 2px;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      font: inherit;
+      padding: 2px 10px;
+    }
+    .auth-hint__retry:hover { background: var(--color-background-hover); }
+
+    .sidebar-a11y {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 20px;
+      font-size: 0.85em;
+      color: var(--color-text-secondary);
+    }
+    .sidebar-a11y select { max-width: 220px; }
+    .sidebar-a11y__toggle { display: flex; align-items: center; gap: 6px; }
+
+    .vtt-noscript {
+      max-width: 480px;
+      margin: 15vh auto 0;
+      padding: 24px;
+      text-align: center;
+      color: var(--color-text-primary);
+    }
+
+    /* ── VTT leave button - replaced by in-header button, kept hidden ──────── */
+    #leave-room-btn { display: none !important; }
+
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div class="vtt-noscript">
+      <h1>MatrixVTT requires JavaScript</h1>
+      <p>The whole app runs in your browser against the Matrix homeserver you choose; nothing works without JavaScript enabled. Current Chromium, Firefox, and WebKit browsers are supported.</p>
+    </div>
+  </noscript>
+  <a class="skip-nav" href="#vtt-root-anchor">Skip to main content</a>
+
+  <!-- Root for StandaloneShell.jsx. The static loading shell paints
+       before any JS parses; mountStandaloneShell clears it. -->
+  <div id="vtt-shell-root"><div class="vtt-loading">
+    <div class="loading-spinner"></div>
+    <p>Loading your table&hellip;</p>
+    <div class="vtt-loading__bar" aria-hidden="true"><div class="vtt-loading__bar-fill"></div></div>
+  </div></div>
+
+  <div id="vtt-root-anchor" tabindex="-1" style="position:absolute"></div>
+
+  <script type="module" src="/src/app-client.js"></script>
+
+  <script type="module">
+    import { bootstrapStandaloneApp } from '/src/standalone/bootstrap.js';
+    bootstrapStandaloneApp({
+      doc: document,
+      win: window,
+      container: document.getElementById('vtt-shell-root'),
+      // Playwright e2e specs install a fake matrix client via
+      // page.addInitScript before this script runs. The global is
+      // never set in production - Vite has nothing to tree-shake,
+      // the prod bundle is unchanged. See tests/e2e/fixtures/.
+      matrixClientClass: window.__VTT_E2E_MATRIX_CLIENT_CLASS || undefined,
+    });
+  </script>
+
+  <script>
+    // Register the service worker in production only. In dev (localhost
+    // / LAN IPs over the Vite HTTPS cert), the SW precaches HTML and can
+    // serve stale modules after file deletions or renames - hard to
+    // diagnose and not worth it for development. Any already-registered
+    // dev SW gets actively unregistered so refresh actually shows edits.
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      const isDev = ['localhost', '127.0.0.1'].includes(location.hostname)
+        || location.port === '5173'
+        || /^192\.168\./.test(location.hostname)
+        || /^10\./.test(location.hostname);
+      if (isDev) {
+        navigator.serviceWorker.getRegistrations()
+          .then(regs => Promise.all(regs.map(r => r.unregister())))
+          .then(had => {
+            if (had.some(Boolean)) {
+              console.log('[SW] Unregistered dev-mode service worker; reload once to clear module cache.');
+            }
+          })
+          .catch(() => {});
+        return;
+      }
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('%BASE_URL%sw.js', { scope: '%BASE_URL%' })
+          .then(reg => console.log('[SW] Registered, scope:', reg.scope))
+          .catch(err => console.warn('[SW] Registration failed:', err));
+      });
+    })();
+  </script>
+
+</body>
+</html>

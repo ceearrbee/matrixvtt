@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--
+    Static GitHub Pages can only deliver CSP via meta. `script-src` keeps
+    `'unsafe-inline'` because the bootstrap (top-frame redirect, theme
+    preload, SW registration) lives inline. The directives that *do*
+    enforce - base-uri, form-action, object-src, plus the constrained
+    default-src - close `<base href>` hijack, form exfil, and
+    `<object>`/`<embed>` injection without needing the inline-script
+    extraction. Tightening script-src further is tracked as a follow-up.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: wss:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>MatrixVTT</title>
+  <!-- Redirect standalone browser visits to the app - this page only works as a Matrix widget (embedded iframe).
+       Guarded to only fire on the actual entry path; otherwise a dev-server SPA fallback (or a missing prod path
+       like /matrixvtt/docs/) would re-serve this index and the relative redirect would resolve back onto the same
+       missing path, looping forever. -->
+  <script>
+    (function () {
+      if (window.self !== window.top) return;
+      var p = window.location.pathname;
+      var onEntry = p === '/' || p === '/index.html' || p === '/matrixvtt/' || p === '/matrixvtt/index.html';
+      if (onEntry) window.location.replace('app.html');
+    })();
+  </script>
+  <!-- Self-hosted fonts (public/fonts/, latin variable woff2). Work Sans
+       is the chrome family, so it is the only one the pre-auth screens
+       paint with; it blocks. Source Serif 4 (prose) and Bodoni Moda
+       (display) are ~352 KB of woff2 that no first paint needs, so their
+       stylesheet loads non-blocking and swaps in. -->
+  <link rel="stylesheet" href="%BASE_URL%fonts/work-sans.css">
+  <link rel="stylesheet" href="%BASE_URL%fonts/serif-display.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="%BASE_URL%fonts/serif-display.css">
+  </noscript>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <!-- Skip navigation for keyboard users -->
+  <a href="#main-content" class="skip-nav">Skip to main content</a>
+
+  <div id="app">
+    <div class="vtt-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading your table&hellip;</p>
+      <div class="vtt-loading__bar" aria-hidden="true"><div class="vtt-loading__bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Application entry point - Vite will bundle dependencies -->
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

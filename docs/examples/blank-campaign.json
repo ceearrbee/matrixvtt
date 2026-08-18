@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "exported_at": 0,
+  "settings": {
+    "name": "Example Campaign",
+    "system": "dnd5e",
+    "gm_user_ids": [
+      "@gm:example.org"
+    ],
+    "grid_px": 40,
+    "active_map_id": "00000000-0000-4000-8000-000000000001"
+  },
+  "maps": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Empty Map",
+      "image_url": null,
+      "width_cells": 10,
+      "height_cells": 10,
+      "cell_px": 40,
+      "offset_x": 0,
+      "offset_y": 0
+    }
+  ],
+  "tokens": [],
+  "characters": [],
+  "npcs": [],
+  "items": [],
+  "spells": [],
+  "handouts": [],
+  "tables": [],
+  "pins": [],
+  "walls": [],
+  "templates": [],
+  "fog": {},
+  "initiative": {
+    "active": false,
+    "round": 0,
+    "current_index": 0,
+    "order": []
+  },
+  "drawings": [],
+  "activeMapId": "00000000-0000-4000-8000-000000000001"
+}

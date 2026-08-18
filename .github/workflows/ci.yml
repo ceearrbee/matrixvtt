@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - main
+  push:
+    branches:
+      - master
+      - main
+
+# A new push to the same branch cancels in-flight runs so we don't
+# burn minutes on stale commits.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint + typecheck + test + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Scan bad patterns
+        # Grep for always-bad patterns that are cheap to detect but
+        # awkward to express as ESLint rules (deep-clone via JSON,
+        # stray console.log, eval/new Function).
+        run: bash scripts/scan-bad-patterns.sh
+
+      - name: Dead-code (knip)
+        # Fails on unused exports, files, or devDependencies — keeps
+        # the codebase pruned as features come and go.
+        run: npm run knip
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests + coverage thresholds
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: Static-build smoke
+        # Verifies the built dist/ ships index.html + app.html with the
+        # GitHub Pages base path. Must run after build because the
+        # smoke test reads dist/ directly.
+        run: npm run test:smoke
+
+      - name: Bundle-size gate
+        # size-limit reads thresholds from package.json. Failing here
+        # blocks the PR before merge so chunks can't drift past the cap.
+        run: npm run size
+
+      - name: Production dependency audit
+        # Production-only audit gate; dev-only advisories (e.g. VitePress)
+        # are tracked separately in docs/SECURITY-NOTES.md.
+        run: npm audit --audit-level=high --omit=dev
+
+  e2e:
+    name: Playwright + axe-core (Chromium / Firefox / WebKit / mobile)
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: E2E (full browser matrix + axe-core)
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Lighthouse-CI (perf / a11y / SEO budgets)
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build (root-base) + Lighthouse audits
+        # `test:lhci` rebuilds with VITE_BASE=/ so the LHCI static
+        # server can serve dist/app.html at /app.html. Restores nothing
+        # — CI artifacts are ephemeral.
+        run: npm run test:lhci

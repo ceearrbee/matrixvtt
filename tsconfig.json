@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    // Type-check JS files without compiling them
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+
+    // JSX support so .jsx files (Preact components) type-check
+    // alongside the .js sources. `jsxImportSource: 'preact'` routes
+    // h() / Fragment through Preact's runtime types.
+    "jsx": "preserve",
+    "jsxImportSource": "preact",
+
+    // Language target — matches Vite's esbuild target
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    // Practical strictness — catches real bugs without requiring full type annotations
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    // Allow synthetic default imports (e.g. import x from 'module')
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    // Skip type-checking of .d.ts files in node_modules — only check our source
+    "skipLibCheck": true,
+
+    // Vite-specific globals: import.meta.env, import.meta.hot, etc.
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.d.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.js",
+    "**/*.spec.js",
+    "tests/**",
+    // Vendored / minified files — type-check via node_modules types instead
+    "src/matrix-widget-api.js",
+    "src/matrix-widget-stub.js"
+  ]
+}

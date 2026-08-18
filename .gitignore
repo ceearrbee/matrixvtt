@@ -1,0 +1,52 @@
+# Node modules
+node_modules/
+
+# SSL certificates (auto-generated)
+.ssl/
+*.pem
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+# .vscode/extensions.json is checked in (recommended extensions); ignore
+# the rest of the directory so per-developer settings don't leak.
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Build outputs (if we add a build step later)
+dist/
+build/
+
+# Generated icon library (rebuilt from the .zip files by scripts/build-icons.mjs)
+public/icons/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.clone/
+.clone/
+.clone/
+coverage/
+
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+.lighthouseci/
+
+# Deploy artifacts from scripts/package.sh
+/release/

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MatrixVTT - The Chronicler's Journal</title>
+<meta name="viewport" content="width=1280, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     MatrixVTT - The Chronicler's Journal
+     "The Map is the Sheet, the Rest are Notes."
+     ============================================================ */
+
+  :root {
+    --desk-surface: #d1d1d1;
+    --paper-sheet: #fdfcf0;
+    --ink: #1a1a1a;
+    --blueprint-ink: #1e3a5f;
+    --note-font: 'Architects Daughter', cursive;
+    --tech-font: 'Inter', sans-serif;
+    --mono-font: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--desk-surface);
+    background-image: radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    font-family: var(--tech-font);
+    color: var(--ink);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* The Central Drafting Sheet */
+  .drafting-sheet {
+    width: 95vw;
+    height: 92vh;
+    background-color: var(--paper-sheet);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15), 
+                0 0 5px rgba(0,0,0,0.05);
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    grid-template-rows: 80px 1fr 140px;
+    position: relative;
+    border-radius: 2px;
+  }
+
+  /* Spiral Binding Visual */
+  .drafting-sheet::before {
+    content: "";
+    position: absolute;
+    left: 10px; top: 20px; bottom: 20px;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, transparent 0, transparent 20px, #aaa 20px, #aaa 22px);
+    opacity: 0.3;
+  }
+
+  /* ─── PAGE MARGINS (Notes) ────────────────────────── */
+
+  .margin-notes {
+    padding: 30px 20px;
+    font-family: var(--note-font);
+    font-size: 1rem;
+    line-height: 1.3;
+    color: #333;
+  }
+
+  .margin-notes h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #888;
+    margin: 0 0 15px 0;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .note-entry {
+    margin-bottom: 12px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .note-entry:hover {
+    color: var(--blueprint-ink);
+  }
+
+  .note-entry.active::before {
+    content: ">>";
+    position: absolute;
+    left: -20px;
+    font-weight: 900;
+  }
+
+  /* ─── THE DRAWING (Map) ────────────────────────────── */
+
+  .the-drawing {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-image: 
+      linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    overflow: hidden;
+  }
+
+  /* Heavy technical lines for the "actual" drawing */
+  .draft-line {
+    position: absolute;
+    background: var(--ink);
+    z-index: 2;
+  }
+
+  .marker-point {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--ink);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.85rem;
+    z-index: 10;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .marker-point.hostile {
+    background: var(--ink);
+    color: white;
+  }
+
+  .marker-label {
+    position: absolute;
+    top: -18px;
+    left: 0;
+    font-size: 0.6rem;
+    font-family: var(--mono-font);
+    text-transform: uppercase;
+    background: var(--paper-sheet);
+    padding: 0 2px;
+    border: 1px solid var(--ink);
+    white-space: nowrap;
+  }
+
+  /* ─── HEADER (Technical Info) ──────────────────────── */
+
+  header.sheet-header {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding: 0 10px;
+    font-family: var(--tech-font);
+  }
+
+  .sheet-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .sheet-meta {
+    font-size: 0.7rem;
+    font-family: var(--mono-font);
+    opacity: 0.6;
+    text-align: right;
+  }
+
+  /* ─── RIGHT MARGIN (Field Data) ────────────────────── */
+
+  .field-data {
+    padding: 30px 25px;
+    border-left: 1px solid rgba(0,0,0,0.05);
+    background: rgba(0,0,0,0.01);
+  }
+
+  .data-section {
+    margin-bottom: 30px;
+  }
+
+  .data-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-family: var(--note-font);
+    font-size: 1.1rem;
+  }
+
+  .data-item span:last-child {
+    font-family: var(--mono-font);
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  /* ─── FOOTER (The Chronicle) ───────────────────────── */
+
+  footer.the-chronicle {
+    grid-column: 2;
+    grid-row: 3;
+    padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--note-font);
+  }
+
+  .log-feed {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 1rem;
+  }
+
+  .log-row {
+    margin-bottom: 4px;
+    display: flex;
+    gap: 15px;
+    opacity: 0.8;
+  }
+
+  .log-time { font-family: var(--mono-font); font-size: 0.7rem; opacity: 0.5; padding-top: 4px; }
+
+  .scribe-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 10px;
+  }
+
+  .scribe-input input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-family: var(--note-font);
+    font-size: 1.1rem;
+    outline: none;
+  }
+
+  /* ─── DECORATIVE MARGINALIA ─────────────────────────── */
+
+  .north-point {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    border: 1px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+  }
+
+  .dimension-tick {
+    position: absolute;
+    border-top: 1px solid var(--blueprint-ink);
+    display: flex; justify-content: center; align-items: center;
+  }
+  .dimension-tick::before, .dimension-tick::after {
+    content: "";
+    position: absolute;
+    width: 8px; height: 1px;
+    background: var(--blueprint-ink);
+    transform: rotate(45deg);
+  }
+  .dimension-tick::before { left: 0; }
+  .dimension-tick::after { right: 0; }
+
+  .dim-label {
+    background: var(--paper-sheet);
+    padding: 0 4px;
+    font-size: 0.65rem;
+    font-family: var(--mono-font);
+    color: var(--blueprint-ink);
+    transform: translateY(-50%);
+  }
+
+  /* Dice Tabs on the side of the desk */
+  .dice-shelf {
+    position: absolute;
+    left: -50px; top: 100px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .dice-slug {
+    width: 50px; height: 36px;
+    background: #c9c0a3;
+    border: 1px solid #1a1a1a;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 0.7rem;
+    cursor: pointer;
+    box-shadow: -2px 2px 5px rgba(0,0,0,0.1);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="drafting-sheet">
+  
+  <!-- LEFT MARGIN: Navigation & Docs -->
+  <aside class="margin-notes">
+    <h3>Index</h3>
+    <div class="note-entry">Whispering_Woods</div>
+    <div class="note-entry active">Keep_Entrance</div>
+    <div class="note-entry">Sunken_Crypt_B1</div>
+
+    <h3 style="margin-top: 40px;">Documents</h3>
+    <div class="note-entry">GM_Field_Notes</div>
+    <div class="note-entry">Aria_Backstory</div>
+    <div class="note-entry">Orc_Tactics</div>
+  </aside>
+
+  <!-- CENTER: Header + Map Drawing -->
+  <header class="sheet-header">
+    <div class="sheet-title">The Sunken Keep</div>
+    <div class="sheet-meta">
+      SHEET_REF: SK-04 // SCALE: 1:50<br>
+      SURVEY_ID: 2026.05.19.VTT
+    </div>
+  </header>
+
+  <main class="the-drawing">
+    <div class="north-point">N</div>
+
+    <!-- Walls: Heavy Tech Ink -->
+    <div class="draft-line" style="left: 10%; top: 15%; width: 80%; height: 4px;"></div>
+    <div class="draft-line" style="left: 10%; top: 15%; width: 4px; height: 75%;"></div>
+    <div class="draft-line" style="left: 10%; top: 90%; width: 80%; height: 4px;"></div>
+    <div class="draft-line" style="left: 90%; top: 15%; width: 4px; height: 79%;"></div>
+    
+    <div class="draft-line" style="left: 50%; top: 15%; width: 4px; height: 25%;"></div>
+    <div class="draft-line" style="left: 10%; top: 40%; width: 40%; height: 4px;"></div>
+
+    <!-- Dimensions -->
+    <div class="dimension-tick" style="left: 10%; top: 8%; width: 80%;">
+      <span class="dim-label">40.00m_X</span>
+    </div>
+
+    <!-- Technical Markers (Tokens) -->
+    <div class="marker-point" style="left: 20%; top: 30%;">A
+      <div class="marker-label">ARIA_BLACKWOOD</div>
+    </div>
+    <div class="marker-point" style="left: 35%; top: 60%;">F
+      <div class="marker-label">FINN_STONEHELM</div>
+    </div>
+    
+    <div class="marker-point hostile" style="left: 70%; top: 40%;">B
+      <div class="marker-label" style="border-color: red; color: red;">ORC_WAR_BOSS</div>
+    </div>
+    <div class="marker-point hostile" style="left: 78%; top: 48%;">G
+      <div class="marker-label">ORC_GRD_01</div>
+    </div>
+
+    <!-- Handwritten annotation on the drawing -->
+    <div style="position: absolute; bottom: 30px; left: 30px; font-family: var(--note-font); font-size: 1.2rem; color: var(--blueprint-ink); transform: rotate(-3deg); opacity: 0.6;">
+      "Check for hidden floor panels<br>near the north wall divider."
+    </div>
+  </main>
+
+  <!-- RIGHT MARGIN: Field Data -->
+  <aside class="margin-notes field-data">
+    <div class="data-section">
+      <h3>Initiative</h3>
+      <div class="data-item" style="background: var(--ink); color: var(--paper-sheet); padding: 4px 8px; margin-left: -8px;">
+        <span>Aria_B</span>
+        <span>ACTING</span>
+      </div>
+      <div class="data-item">
+        <span>War_Boss</span>
+        <span>WAIT</span>
+      </div>
+      <div class="data-item">
+        <span style="text-decoration: line-through;">Kael_I</span>
+        <span>INCAP</span>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <h3>Unit Telemetry</h3>
+      <div class="data-item">
+        <span>HP_Index</span>
+        <span>28 / 40</span>
+      </div>
+      <div class="data-item">
+        <span>Armor_Class</span>
+        <span>16</span>
+      </div>
+      <div class="data-item">
+        <span>Pos_XY</span>
+        <span>12.5, 08.4</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- FOOTER: The Chronicle -->
+  <footer class="the-chronicle">
+    <div class="log-feed">
+      <div class="log-row">
+        <span class="log-time">12:01:05</span>
+        <span>Aria B. - Action: Sneak Attack. Result: 27. Success.</span>
+      </div>
+      <div class="log-row">
+        <span class="log-time">12:00:15</span>
+        <span>Orc Boss - "I'll smash you, half-pint!"</span>
+      </div>
+      <div class="log-row">
+        <span class="log-time">11:59:30</span>
+        <span>Sora T. - Event: Fire Damage (14). Concentration Check Required.</span>
+      </div>
+    </div>
+    <div class="scribe-input">
+      <span style="font-family: var(--tech-font); font-size: 0.6rem; opacity: 0.4; font-weight: 900;">SCRIBE_CMD:</span>
+      <input type="text" placeholder="Add a note to the chronicle..." />
+    </div>
+  </footer>
+
+  <!-- Dice Tabs "Pinned" to the desk -->
+  <div class="dice-shelf">
+    <div class="dice-slug">d20</div>
+    <div class="dice-slug">d12</div>
+    <div class="dice-slug">d10</div>
+    <div class="dice-slug">d8</div>
+    <div class="dice-slug">d6</div>
+  </div>
+
+</div>
+
+</body>
+</html>

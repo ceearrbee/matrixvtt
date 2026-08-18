@@ -1,0 +1,126 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "custom",
+  "name": "Custom System",
+  "version": "1.0",
+  "author": "",
+  "license": "",
+  "description": "Custom ruleset - import a .vttruleset.json or edit this preset.",
+  "attributes": [
+    {
+      "key": "attr1",
+      "label": "Attr 1",
+      "full": "Attribute 1",
+      "default": 10,
+      "min": 1,
+      "max": 20,
+      "description": "First attribute."
+    },
+    {
+      "key": "attr2",
+      "label": "Attr 2",
+      "full": "Attribute 2",
+      "default": 10,
+      "min": 1,
+      "max": 20,
+      "description": "Second attribute."
+    },
+    {
+      "key": "attr3",
+      "label": "Attr 3",
+      "full": "Attribute 3",
+      "default": 10,
+      "min": 1,
+      "max": 20,
+      "description": "Third attribute."
+    }
+  ],
+  "modifier": {
+    "type": "dnd"
+  },
+  "hasSkills": false,
+  "skills": [],
+  "hasSavingThrows": false,
+  "savingThrows": [],
+  "hasCR": false,
+  "crValues": [],
+  "npc": {
+    "sizeCategories": [
+      "Small",
+      "Medium",
+      "Large"
+    ],
+    "creatureTypes": [],
+    "hasAlignment": false
+  },
+  "conditions": [
+    {
+      "key": "hindered",
+      "label": "Hindered",
+      "icon": "⬇️",
+      "description": "Movement or actions reduced."
+    },
+    {
+      "key": "boosted",
+      "label": "Boosted",
+      "icon": "⬆️",
+      "description": "Enhanced performance."
+    },
+    {
+      "key": "dead",
+      "label": "Dead",
+      "icon": "💀",
+      "description": "Removed from play."
+    }
+  ],
+  "dice": [
+    "d6",
+    "d10",
+    "d20"
+  ],
+  "rolls": {
+    "attribute": "1d20+{mod}",
+    "skill": "1d20+{bonus}",
+    "save": "1d20+{bonus}",
+    "initiative": "1d20+{bonus}",
+    "attack": "1d20+{bonus}"
+  },
+  "movement": {
+    "unitsPerCell": 5,
+    "defaultSpeed": 30,
+    "diagonals": "chebyshev"
+  },
+  "combat": {
+    "critThreshold": 20,
+    "fumbleThreshold": 1,
+    "defenseKey": "ac"
+  },
+  "initiative": {
+    "mode": "individual",
+    "tieBreakStat": "dex"
+  },
+  "hasSpellSystem": false,
+  "action_economy": [
+    {
+      "key": "action_used",
+      "label": "A",
+      "title": "Action"
+    },
+    {
+      "key": "bonus_action_used",
+      "label": "B",
+      "title": "Bonus Action"
+    },
+    {
+      "key": "reaction_used",
+      "label": "R",
+      "title": "Reaction"
+    }
+  ],
+  "health": {
+    "label": "HP",
+    "acLabel": "AC"
+  },
+  "character_templates": []
+}

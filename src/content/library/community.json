@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "name": "MatrixVTT Community Library",
+    "version": 1,
+    "note": "Seed catalog of reusable content. Contribute entries via a GitHub pull request."
+  },
+  "entries": [
+    {
+      "id": "community-npc-town-guard",
+      "kind": "npc",
+      "name": "Town Guard",
+      "data": {
+        "name": "Town Guard",
+        "hp": 11,
+        "max_hp": 11,
+        "notes": "A generic city watch guard. Neutral until provoked."
+      }
+    },
+    {
+      "id": "community-item-torch",
+      "kind": "item",
+      "name": "Torch",
+      "data": {
+        "name": "Torch",
+        "notes": "Sheds bright light in a short radius for about an hour."
+      }
+    }
+  ]
+}

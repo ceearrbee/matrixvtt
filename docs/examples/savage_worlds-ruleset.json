@@ -1,0 +1,182 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "savage_worlds",
+  "meta": {
+    "name": "Savage Worlds (generic)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file).",
+    "description": "Generic implementation of the Savage Worlds core mechanic only: trait dice (d4-d12); a trait roll is the trait die plus a wild d6, both exploding, keep the higher result. Target 4; raises on +4 over target. Shaken/Wounds track injuries. No Savage Worlds content (skills, edges, hindrances, powers, bestiary) ships with this file because the system has no open SRD; everything here is a mechanics-level description written for MatrixVTT.",
+    "sources": []
+  },
+  "attributes": [
+    {
+      "key": "agility",
+      "label": "Agility",
+      "min": 4,
+      "max": 12,
+      "step": 2
+    },
+    {
+      "key": "smarts",
+      "label": "Smarts",
+      "min": 4,
+      "max": 12,
+      "step": 2
+    },
+    {
+      "key": "spirit",
+      "label": "Spirit",
+      "min": 4,
+      "max": 12,
+      "step": 2
+    },
+    {
+      "key": "strength",
+      "label": "Strength",
+      "min": 4,
+      "max": 12,
+      "step": 2
+    },
+    {
+      "key": "vigor",
+      "label": "Vigor",
+      "min": 4,
+      "max": 12,
+      "step": 2
+    }
+  ],
+  "dice": {
+    "check": "1d4"
+  },
+  "rolls": {
+    "attribute": "{1d{score}!|1d6!}+{bonus}",
+    "skill": "{1d{score}!|1d6!}+{bonus}",
+    "save": "{1d{score}!|1d6!}+{bonus}",
+    "initiative": "1d6",
+    "attack": "{1d{score}!|1d6!}+{bonus}"
+  },
+  "formulas": {
+    "ability_mod": "@score"
+  },
+  "harm_model": {
+    "type": "wounds",
+    "thresholds": [
+      {
+        "tier": "shaken",
+        "max": 1
+      },
+      {
+        "tier": "wound_1",
+        "max": 2
+      },
+      {
+        "tier": "wound_2",
+        "max": 3
+      },
+      {
+        "tier": "wound_3",
+        "max": 4
+      },
+      {
+        "tier": "incapacitated",
+        "max": null
+      }
+    ]
+  },
+  "progression": {
+    "type": "points",
+    "pool_field": "advances"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "badge",
+        "field": "wounds_count",
+        "prefix": "W"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
+    ]
+  }
+}

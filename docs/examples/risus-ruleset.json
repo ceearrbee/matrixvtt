@@ -1,0 +1,383 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "risus",
+  "meta": {
+    "name": "Risus: The Anything RPG",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file). Fan implementation in original words; Risus: The Anything RPG is by S. John Ross, published by Big Dice Games.",
+    "description": "Rules-light comedy engine. Characters are Cliches rated in d6 dice (10 dice at creation, max 4 in one). Write each cliche's name in its slot and set its dice in the matching rating; roll the rating's d6 pool against a target (5 easy, 10 challenging, 15 heroic, 20 superhuman, 30 impossible) or an opposed roll. Combat: both sides roll an appropriate cliche; the round's loser loses one die (three if beaten by an inappropriate cliche). At zero dice you are out of the conflict."
+  },
+  "narrative": true,
+  "attributes": [
+    {
+      "key": "cliche1",
+      "label": "Cliché 1 dice",
+      "min": 0,
+      "max": 6
+    },
+    {
+      "key": "cliche2",
+      "label": "Cliché 2 dice",
+      "min": 0,
+      "max": 6
+    },
+    {
+      "key": "cliche3",
+      "label": "Cliché 3 dice",
+      "min": 0,
+      "max": 6
+    },
+    {
+      "key": "cliche4",
+      "label": "Cliché 4 dice",
+      "min": 0,
+      "max": 6
+    },
+    {
+      "key": "cliche5",
+      "label": "Cliché 5 dice",
+      "min": 0,
+      "max": 6
+    },
+    {
+      "key": "cliche6",
+      "label": "Cliché 6 dice",
+      "min": 0,
+      "max": 6
+    }
+  ],
+  "dice": {
+    "check": "3d6"
+  },
+  "rolls": {
+    "attribute": "{bonus}d6",
+    "skill": "{bonus}d6",
+    "initiative": "1d6",
+    "attack": "{bonus}d6"
+  },
+  "action_economy": [],
+  "formulas": {
+    "ability_mod": "@score"
+  },
+  "tables": {
+    "target_numbers": {
+      "easy": 5,
+      "challenging": 10,
+      "heroic": 15,
+      "superhuman": 20,
+      "impossible": 30
+    }
+  },
+  "harm_model": {
+    "type": "stress",
+    "boxes": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "pip_track",
+        "field": "stress",
+        "count": 6,
+        "filled_color": "#E24B4A",
+        "empty_color": "rgba(0,0,0,0.3)"
+      }
+    ]
+  },
+  "character_card": {
+    "overlays": [
+      {
+        "kind": "text",
+        "field": "cliches",
+        "with_attribute_ratings": true
+      },
+      {
+        "kind": "pip_track",
+        "field": "stress",
+        "count": 6,
+        "label": "Dice lost"
+      }
+    ]
+  },
+  "progression": {
+    "type": "milestones"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "slot_list",
+        "field": "cliches",
+        "label": "Clichés",
+        "slots": [
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          },
+          {
+            "key": "cliche4",
+            "label": "Cliché 4"
+          },
+          {
+            "key": "cliche5",
+            "label": "Cliché 5"
+          },
+          {
+            "key": "cliche6",
+            "label": "Cliché 6"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "pending_modifiers_list",
+        "label": "Pending bonuses"
+      },
+      {
+        "kind": "tagged_list",
+        "field": "hooks",
+        "label": "Hooks & Tales",
+        "editable": true,
+        "placeholder": "Add a hook or tale…"
+      },
+      {
+        "kind": "resource_pool",
+        "field": "lucky_shots",
+        "label": "Lucky Shots",
+        "min": 0,
+        "max_field": "lucky_shots_max"
+      },
+      {
+        "kind": "button_action",
+        "label": "Pump Cliché",
+        "announce": "{actor} pumps a cliché: extra dice now, lost after the roll",
+        "increment_field": "pumped_dice",
+        "amount": 1
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Dice Lost (combat)",
+        "tracks": [
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_form": {
+    "fields": [
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "textarea",
+        "id": "notes",
+        "label": "Notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "slot_list",
+        "field": "cliches",
+        "label": "Clichés",
+        "slots": [
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          },
+          {
+            "key": "cliche4",
+            "label": "Cliché 4"
+          },
+          {
+            "key": "cliche5",
+            "label": "Cliché 5"
+          },
+          {
+            "key": "cliche6",
+            "label": "Cliché 6"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "tagged_list",
+        "field": "hooks",
+        "label": "Hooks & Tales"
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Dice Lost (combat)",
+        "tracks": [
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "slot_list",
+        "field": "cliches",
+        "label": "Clichés",
+        "slots": [
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Dice Lost (combat)",
+        "tracks": [
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
+    ]
+  },
+  "combat": {
+    "common_actions": [
+      {
+        "label": "Single Combat",
+        "description": "Both sides roll an appropriate cliché. The round's loser loses one die from the cliché in use. At zero dice, you're out and the winner decides what that means."
+      },
+      {
+        "label": "Inappropriate Cliché",
+        "description": "Fight with a cliché that doesn't fit the conflict. If you win the round anyway, your opponent loses three dice instead of one."
+      },
+      {
+        "label": "Pump",
+        "description": "Declare extra dice before rolling. Roll them now, lose them after, win or lose. Pumped dice return at a rate the GM sets."
+      },
+      {
+        "label": "Team Up",
+        "description": "Join a team behind a leader. Helpers add their dice; sixes count double. If the team loses a round, a volunteer (or the leader) takes the die loss."
+      },
+      {
+        "label": "Concede",
+        "description": "Give up the conflict before losing your last die. You lose, but you choose how it looks."
+      }
+    ]
+  }
+}

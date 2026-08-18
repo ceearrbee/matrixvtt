@@ -1,0 +1,92 @@
+/* Light theme - explicit (data-theme="light") + auto-mode follow-system
+   variant (no data-theme + prefers-color-scheme: light). Token list
+   must stay in sync across both blocks. */
+/* Explicit Light Mode */
+:root[data-theme="light"] {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f7fa;
+  --color-background-tertiary: #e8ecf1;
+  --color-background-hover: rgba(0, 0, 0, 0.04);
+  --vendor-icon-filter: none;
+  --color-background-info: rgba(24, 95, 165, 0.08);
+  --color-background-success: rgba(29, 158, 117, 0.08);
+  --color-background-warning: rgba(239, 159, 39, 0.08);
+  --color-background-danger: rgba(226, 75, 74, 0.08);
+
+  --color-text-primary: rgba(0, 0, 0, 0.87);
+  --color-text-secondary: rgba(0, 0, 0, 0.65);
+  --color-text-tertiary: rgba(0, 0, 0, 0.58);
+  --color-text-info: #1565C0;
+  --color-text-success: #0F6E56;
+  --color-text-warning: #8A5200;
+  --color-text-danger: #C62828;
+
+  --color-border-primary: rgba(0, 0, 0, 0.12);
+  --color-border-secondary: rgba(0, 0, 0, 0.18);
+  --color-border-tertiary: rgba(0, 0, 0, 0.22);
+  --color-border-info: rgba(21, 101, 192, 0.3);
+  --color-border-success: rgba(15, 110, 86, 0.3);
+  --color-border-warning: rgba(199, 119, 0, 0.3);
+  --color-border-danger: rgba(198, 40, 40, 0.3);
+
+  --color-map-bg: #e5e8ec;
+  --color-map-floor: #d0d6e0;
+  --color-focus: #1565C0;
+  --color-kind-fiction: #7C4DAB;
+
+  --color-grid-line: rgba(0, 0, 0, 0.10);
+  --color-area-reveal: rgba(21, 101, 192, 0.15);
+  --color-area-hide: rgba(198, 40, 40, 0.15);
+
+  --color-border: var(--color-border-primary);
+  --color-primary: var(--color-text-info);
+  --color-success: var(--color-text-success);
+  --color-overlay: rgba(0, 0, 0, 0.4);
+  --color-shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* Auto Mode - System Preference - SYNC WITH light block above */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f7fa;
+    --color-background-tertiary: #e8ecf1;
+    --color-background-hover: rgba(0, 0, 0, 0.04);
+  --vendor-icon-filter: none;
+    --color-background-info: rgba(24, 95, 165, 0.08);
+    --color-background-success: rgba(29, 158, 117, 0.08);
+    --color-background-warning: rgba(239, 159, 39, 0.08);
+    --color-background-danger: rgba(226, 75, 74, 0.08);
+
+    --color-text-primary: rgba(0, 0, 0, 0.87);
+    --color-text-secondary: rgba(0, 0, 0, 0.65);
+    --color-text-tertiary: rgba(0, 0, 0, 0.58);
+    --color-text-info: #1565C0;
+    --color-text-success: #0F6E56;
+    --color-text-warning: #8A5200;
+    --color-text-danger: #C62828;
+
+    --color-border-primary: rgba(0, 0, 0, 0.12);
+    --color-border-secondary: rgba(0, 0, 0, 0.18);
+    --color-border-tertiary: rgba(0, 0, 0, 0.22);
+    --color-border-info: rgba(21, 101, 192, 0.3);
+    --color-border-success: rgba(15, 110, 86, 0.3);
+    --color-border-warning: rgba(199, 119, 0, 0.3);
+    --color-border-danger: rgba(198, 40, 40, 0.3);
+
+    --color-map-bg: #f0f2f5;
+    --color-map-floor: #dce1ea;
+    --color-focus: #1565C0;
+    --color-kind-fiction: #7C4DAB;
+
+    --color-grid-line: rgba(0, 0, 0, 0.10);
+    --color-area-reveal: rgba(21, 101, 192, 0.15);
+    --color-area-hide: rgba(198, 40, 40, 0.15);
+
+    --color-border: var(--color-border-primary);
+    --color-primary: var(--color-text-info);
+    --color-success: var(--color-text-success);
+    --color-overlay: rgba(0, 0, 0, 0.4);
+    --color-shadow: rgba(0, 0, 0, 0.15);
+  }
+}

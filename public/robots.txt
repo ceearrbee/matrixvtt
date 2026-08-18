@@ -1,0 +1,7 @@
+# MatrixVTT - virtual tabletop hosted on GitHub Pages.
+# Allow crawling; nothing here is sensitive and the standalone
+# entry (app.html) is the canonical address.
+User-agent: *
+Allow: /
+
+Sitemap: __SITE_ORIGIN____BASE_URL__sitemap.xml

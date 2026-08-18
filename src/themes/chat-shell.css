@@ -1,0 +1,1421 @@
+/* chat-shell.css - visual styling for the chat-first shell rebuild.
+ *
+ * Imported by src/styles.css after chat-shell-tokens.css so every
+ * --md-* / --radius-* / --ease-* / --elev-* / --chrome-hairline
+ * variable is in scope. Tokens are theme-driven; rules below reference
+ * tokens only - no raw hex, no per-theme overrides.
+ *
+ * Sections, in order:
+ *   1. Top-level layout (.chat-shell grid)
+ *   2. Header (ChatShellHeader + tool-cluster)
+ *   3. ComposerChip primitive (pill button)
+ *   4. QuickTray (one-tap action row)
+ *   5. Composer (chat cluster)
+ *   6. FloatingPopup (portal)
+ *   7. DockSlot (rails + strips)
+ *   8. OOCPanel
+ *   9. BrowsePanel
+ *  10. ModePopup
+ *  11. Mobile / narrow-viewport overrides
+ */
+
+/* ============================================================== *
+ *  1. Top-level chat-shell layout                                  *
+ * ============================================================== */
+
+.chat-shell {
+  display: grid;
+  /* Five named areas so the empty top-strip / bottom-strip dock slots
+   * can `display: none` without bumping the chat body into an `auto`
+   * track. With plain `grid-template-rows: auto auto 1fr auto auto`,
+   * visible children fall into the next available row in source
+   * order - when the strips are hidden, the body ends up in row 2
+   * (auto) instead of row 3 (1fr) and the log collapses. Naming the
+   * areas pins each child to a fixed row regardless of sibling
+   * visibility. */
+  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-areas:
+    "header"
+    "topstrip"
+    "body"
+    "botstrip"
+    "footer";
+  /* #app is `display: flex; flex-direction: column; height: 100vh`,
+   * so we fill the parent rather than re-asserting 100vh - a flex
+   * child with `height: 100vh` can still shrink below that, but
+   * `flex: 1; min-height: 0` lets the grid 1fr row claim every
+   * pixel between header and footer. */
+  flex: 1;
+  min-height: 0;
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  font-family: var(--font-body, system-ui, sans-serif);
+}
+
+.chat-shell > .chat-shell__header { grid-area: header; }
+.chat-shell > .dock-slot[data-dock-slot="top-strip"] { grid-area: topstrip; }
+.chat-shell > .chat-shell__body { grid-area: body; }
+.chat-shell > .dock-slot[data-dock-slot="bottom-strip"] { grid-area: botstrip; }
+.chat-shell > .chat-shell__footer { grid-area: footer; }
+
+.chat-shell__header {
+  padding: 10px 16px;
+  border-bottom: var(--chrome-hairline);
+  background: var(--md-surface);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.chat-shell__body {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  min-height: 0;
+}
+
+.chat-shell__main {
+  overflow-y: auto;
+  min-height: 0;
+  min-width: 0;
+  padding: 12px 16px;
+  outline: none;
+}
+
+.chat-shell__footer {
+  padding: 10px 16px 12px;
+  border-top: var(--chrome-hairline);
+  background: var(--md-surface);
+}
+
+.chat-shell__footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================================================== *
+ *  2. Header - title + tool-cluster                                *
+ * ============================================================== */
+
+.chat-shell-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.chat-shell-header__title {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-display, var(--font-headline, inherit));
+  font-size: var(--type-h2, 1.3em);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-shell-header__cluster {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.chat-shell-header__extra {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================== *
+ *  3. ComposerChip - the pill button primitive                     *
+ * ============================================================== */
+
+.composer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--md-primary);
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-standard),
+              color 0.15s var(--ease-standard),
+              border-color 0.15s var(--ease-standard),
+              transform 0.12s var(--ease-emphasized);
+  white-space: nowrap;
+}
+
+.composer-chip:hover:not([disabled]) {
+  background: color-mix(in oklch, var(--md-primary) 8%, transparent);
+}
+
+.composer-chip:active:not([disabled]) {
+  transform: scale(0.96);
+}
+
+.composer-chip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.composer-chip[aria-pressed="true"] {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border-color: var(--md-primary);
+}
+
+.composer-chip[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.composer-chip[data-variant="danger"] {
+  color: var(--md-error);
+  border-color: var(--md-error);
+}
+
+.composer-chip[data-variant="danger"]:hover:not([disabled]) {
+  background: color-mix(in oklch, var(--md-error) 8%, transparent);
+}
+
+.composer-chip[data-variant="primary"] {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border-color: var(--md-primary);
+}
+
+.composer-chip__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.composer-chip__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: var(--radius-pill);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.composer-chip[aria-pressed="true"] .composer-chip__badge {
+  background: var(--md-on-primary);
+  color: var(--md-primary);
+}
+
+/* ============================================================== *
+ *  4. QuickTray                                                    *
+ * ============================================================== */
+
+.quick-tray {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.quick-tray__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--md-primary);
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-standard),
+              transform 0.12s var(--ease-emphasized);
+}
+
+.quick-tray__btn:hover:not([disabled]) {
+  background: color-mix(in oklch, var(--md-primary) 8%, transparent);
+}
+
+.quick-tray__btn:active:not([disabled]) {
+  transform: scale(0.94);
+}
+
+.quick-tray__btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quick-tray__btn[aria-pressed="true"] {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  border-color: var(--md-primary);
+}
+
+/* ============================================================== *
+ *  5. Composer                                                     *
+ * ============================================================== */
+
+.composer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.composer__chat-mode {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.composer__tone-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.composer__speak-as {
+  padding: 6px 10px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.85em;
+  max-width: 180px;
+}
+
+.composer__input {
+  flex: 1 1 240px;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.95em;
+  line-height: 1.4;
+  resize: none;
+  overflow-y: auto;
+  transition: border-color 0.15s var(--ease-standard);
+}
+
+.composer__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -1px;
+  border-color: var(--md-primary);
+}
+
+/* Scene banner / reply chip sit on their own row above the textarea. */
+.composer .scene-banner,
+.composer .reply-context-chip {
+  flex: 1 1 100%;
+}
+
+/* ============================================================== *
+ *  6. FloatingPopup                                                *
+ * ============================================================== */
+
+.floating-popup {
+  position: fixed;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-popup, 9999);
+  width: min(540px, 92vw);
+  max-height: min(70vh, 640px);
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: floating-popup-in 0.18s var(--ease-decelerate);
+}
+
+@keyframes floating-popup-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.floating-popup__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: var(--chrome-hairline);
+  background: var(--md-surface-variant);
+  color: var(--md-on-surface-variant);
+}
+
+.floating-popup__title-text {
+  font-weight: 700;
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.floating-popup__title-actions {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.floating-popup__pin,
+.floating-popup__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-size: 1em;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s var(--ease-standard),
+              background 0.15s var(--ease-standard);
+}
+
+.floating-popup__pin:hover,
+.floating-popup__close:hover {
+  opacity: 1;
+  background: color-mix(in oklch, var(--md-on-surface-variant) 12%, transparent);
+}
+
+.floating-popup__pin[aria-pressed="true"] {
+  opacity: 1;
+  color: var(--md-primary);
+  background: color-mix(in oklch, var(--md-primary) 14%, transparent);
+}
+
+.floating-popup__close {
+  font-size: 1.4em;
+  line-height: 1;
+}
+
+.floating-popup__body {
+  padding: 14px;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+/* When pinned, the popup sticks even after blur - give a faint outline. */
+.floating-popup[data-pinned] {
+  border-color: color-mix(in oklch, var(--md-primary) 40%, var(--md-outline));
+}
+
+/* ============================================================== *
+ *  7. DockSlot                                                     *
+ * ============================================================== */
+
+.dock-slot {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  background: var(--md-surface);
+}
+
+.dock-slot[data-empty] {
+  display: none;
+}
+
+.dock-slot[data-dock-slot="left-rail"],
+.dock-slot[data-dock-slot="right-rail"] {
+  flex-direction: column;
+  width: 300px;
+  max-width: 38vw;
+  overflow-y: auto;
+}
+
+.dock-slot[data-dock-slot="left-rail"] {
+  border-right: var(--chrome-hairline);
+}
+
+.dock-slot[data-dock-slot="right-rail"] {
+  border-left: var(--chrome-hairline);
+}
+
+.dock-slot[data-dock-slot="top-strip"] {
+  flex-direction: row;
+  border-bottom: var(--chrome-hairline);
+  overflow-x: auto;
+  max-height: 240px;
+}
+
+.dock-slot[data-dock-slot="bottom-strip"] {
+  flex-direction: row;
+  border-top: var(--chrome-hairline);
+  overflow-x: auto;
+  max-height: 200px;
+}
+
+.dock-slot__panel {
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.dock-slot[data-dock-slot="left-rail"] .dock-slot__panel,
+.dock-slot[data-dock-slot="right-rail"] .dock-slot__panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dock-slot[data-dock-slot="top-strip"] .dock-slot__panel,
+.dock-slot[data-dock-slot="bottom-strip"] .dock-slot__panel {
+  flex: 1;
+  min-width: 280px;
+}
+
+.dock-slot__panel + .dock-slot__panel {
+  border-top: var(--chrome-hairline);
+}
+
+.dock-slot[data-dock-slot="top-strip"] .dock-slot__panel + .dock-slot__panel,
+.dock-slot[data-dock-slot="bottom-strip"] .dock-slot__panel + .dock-slot__panel {
+  border-top: none;
+  border-left: var(--chrome-hairline);
+}
+
+/* ============================================================== *
+ *  8. OOCPanel                                                     *
+ * ============================================================== */
+
+.ooc-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ooc-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ooc-panel__entry {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--md-primary) 5%, transparent);
+  font-size: 0.92em;
+  line-height: 1.4;
+}
+
+.ooc-panel__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--md-on-surface-variant);
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
+.ooc-panel__composer {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.ooc-panel__input {
+  flex: 1;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.92em;
+  resize: vertical;
+}
+
+.ooc-panel__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -1px;
+  border-color: var(--md-primary);
+}
+
+.ooc-panel__send {
+  padding: 8px 18px;
+  border: 1px solid var(--md-primary);
+  border-radius: var(--radius-pill);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: opacity 0.15s var(--ease-standard);
+}
+
+.ooc-panel__send:hover { opacity: 0.9; }
+
+/* ============================================================== *
+ *  9. BrowsePanel                                                  *
+ * ============================================================== */
+
+.browse-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.browse-panel__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: var(--chrome-hairline);
+  margin-bottom: 4px;
+}
+
+.browse-panel__tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: 500;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.15s var(--ease-standard),
+              border-color 0.15s var(--ease-standard);
+  margin-bottom: -1px;
+}
+
+.browse-panel__tab:hover { opacity: 0.9; }
+
+.browse-panel__tab--active {
+  opacity: 1;
+  color: var(--md-primary);
+  border-bottom-color: var(--md-primary);
+}
+
+.browse-panel__view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.browse-panel__input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.92em;
+  box-sizing: border-box;
+}
+
+.browse-panel__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -1px;
+  border-color: var(--md-primary);
+}
+
+.browse-panel__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.browse-panel__result {
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--md-primary) 4%, transparent);
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.browse-panel__empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--md-on-surface-variant);
+  opacity: 0.7;
+  font-size: 0.9em;
+}
+
+/* ============================================================== *
+ *  10. ModePopup                                                   *
+ * ============================================================== */
+
+.mode-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mode-popup__radios {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--md-surface-variant);
+  border-radius: var(--radius-pill);
+}
+
+.mode-popup__radio {
+  flex: 1;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  color: var(--md-on-surface-variant);
+  font-family: inherit;
+  font-size: 0.88em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-standard),
+              color 0.15s var(--ease-standard);
+}
+
+.mode-popup__radio:hover:not(.mode-popup__radio--active) {
+  background: color-mix(in oklch, var(--md-primary) 10%, transparent);
+}
+
+.mode-popup__radio--active {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+
+.mode-popup__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mode-popup__title {
+  margin: 0;
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--md-on-surface-variant);
+}
+
+.mode-popup__row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mode-popup__input {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.92em;
+}
+
+.mode-popup__input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -1px;
+  border-color: var(--md-primary);
+}
+
+.mode-popup__btn {
+  padding: 8px 16px;
+  border: 1px solid var(--md-outline);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--md-primary);
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background 0.15s var(--ease-standard);
+}
+
+.mode-popup__btn:hover {
+  background: color-mix(in oklch, var(--md-primary) 8%, transparent);
+}
+
+.mode-popup__hint {
+  margin: 0;
+  font-size: 0.78em;
+  opacity: 0.65;
+  color: var(--md-on-surface-variant);
+}
+
+.mode-popup__hint code {
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--md-surface-variant);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.92em;
+}
+
+/* ============================================================== *
+ *  11. Narrow viewport overrides                                   *
+ * ============================================================== */
+
+/* ============================================================== *
+ *  11. Hosted-panel sizing overrides                               *
+ *                                                                  *
+ *  Panels designed for the legacy shell (SheetPanel / PartyRoster  *
+ *  / InitiativeBar / MapStrip / IconRail / NotesPanel / DicePanel) *
+ *  were sized by ancestor selectors like `.shell__chat > .map-    *
+ *  strip`. When they're re-hosted inside a floating popup or a    *
+ *  dock slot, those ancestors don't match and the panels collapse *
+ *  or overflow. These rules normalise each panel to fill its new  *
+ *  host without disturbing the legacy-shell mount.                *
+ * ============================================================== */
+
+/* Every panel root fills the container width. */
+.floating-popup__body > *,
+.dock-slot__panel > * {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* MapStrip - normally sized via `.shell__chat > .map-strip`. Give
+ * it explicit dimensions in each new host so the Konva canvas has
+ * a measurable rect. */
+.floating-popup__body > .map-strip {
+  height: 360px;
+  max-height: 100%;
+}
+.dock-slot[data-dock-slot="top-strip"] .map-strip,
+.dock-slot[data-dock-slot="bottom-strip"] .map-strip {
+  height: 100%;
+  min-height: 200px;
+}
+.dock-slot[data-dock-slot="left-rail"] .map-strip,
+.dock-slot[data-dock-slot="right-rail"] .map-strip {
+  height: 360px;
+}
+
+/* Strip the rail-edge borders the legacy shell painted, so the new
+ * dock-slot's own divider doesn't double up. Also drop the rail
+ * min-widths - the dock-slot owns sizing now. */
+.floating-popup__body .sheet-panel,
+.floating-popup__body .initiative-panel,
+.dock-slot__panel .sheet-panel,
+.dock-slot__panel .initiative-panel {
+  border-left: none;
+  border-right: none;
+  min-width: 0;
+}
+
+/* Rail-docked panels fill the slot's vertical space so their inner
+ * scroll regions activate. */
+.dock-slot[data-dock-slot="left-rail"] > .dock-slot__panel,
+.dock-slot[data-dock-slot="right-rail"] > .dock-slot__panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.dock-slot[data-dock-slot="left-rail"] .dock-slot__panel > *,
+.dock-slot[data-dock-slot="right-rail"] .dock-slot__panel > * {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* PartyRoster legacy rule sets `height: 100%`; inside a popup body
+ * that's bounded by max-height, keep its inner scroll. */
+.floating-popup__body > .party-roster {
+  max-height: 100%;
+}
+
+/* IconRail - host adapts to whatever width the container provides. */
+.floating-popup__body .icon-rail-host,
+.dock-slot__panel .icon-rail-host {
+  width: 100%;
+  height: 100%;
+}
+
+/* DicePanel docked to the bottom-strip becomes a wrappable horizontal
+ * row; in a popup it stays compact. */
+.dock-slot[data-dock-slot="bottom-strip"] .dice-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================== *
+ *  12. Legacy integration polish                                   *
+ *                                                                  *
+ *  Visual cohesion pass for the chat-shell rebuild's pieces when   *
+ *  mounted alongside the existing App.jsx chrome:                  *
+ *    - header right cluster grouped with subtle dividers           *
+ *    - chat-tool chips (Mode / OOC / Browse) read as one group     *
+ *    - QuickTray distinguished from the DiceBar below              *
+ *    - chat log gets a faint surface-variant tint so it reads as   *
+ *      a first-class region instead of empty white space           *
+ * ============================================================== */
+
+/* Header right cluster - group chips with thin vertical dividers
+ * so 10 buttons in a row stop looking like an undifferentiated wall. */
+.vtt-header__right > .dbt + .dbt::before {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 14px;
+  margin-right: var(--space-sm);
+  background: var(--color-border-primary);
+  opacity: 0.5;
+  vertical-align: middle;
+}
+
+/* QuickTray inside the legacy shell - make it feel like a banner
+ * above the DiceBar rather than another button row. */
+.shell__chat > .quick-tray,
+.shell__chat .quick-tray {
+  padding: 6px 12px;
+  background: color-mix(in oklch, var(--md-surface-variant) 50%, transparent);
+  border-top: var(--chrome-hairline);
+  flex-shrink: 0;
+}
+
+/* Chat log feed - a faint surface-variant tint so the log reads as
+ * a distinct section, not just white space below the map. */
+.shell__chat .log-panel__feed {
+  background: color-mix(in oklch, var(--md-surface-variant) 30%, transparent);
+}
+
+/* Persona chip in the composer + the native <select> it gates.
+ * The select stays in the DOM so existing tests (and screen
+ * readers) still find #speak-as-select, but is visually hidden
+ * until the chip toggles personaPickerOpen. */
+.persona-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 0.85em;
+}
+.persona-chip__icon { opacity: 0.7; }
+.persona-chip__label { white-space: nowrap; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.dice-bar__speak-as--collapsed {
+  /* Hidden visually + from layout, but stays focusable for users who
+   * tab into it before clicking the chip. Tests still resolve the
+   * element via querySelector. */
+  display: none;
+}
+
+/* ============================================================== *
+ *  Button vocabulary unification - header context                  *
+ *                                                                  *
+ *  Restyle .dbt buttons inside .vtt-header so they read as the     *
+ *  same pill family as the new chat-shell chips                    *
+ *  (.composer-chip / .persona-chip / .quick-tray__btn). Scoped to  *
+ *  the header so dice toolbars and other rectangular toolbars      *
+ *  elsewhere keep their existing density.                          *
+ * ============================================================== */
+
+.vtt-header .dbt {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--md-outline);
+  background: transparent;
+  color: var(--md-primary);
+  padding: 6px 12px;
+  transition: background 0.15s var(--ease-standard),
+              color 0.15s var(--ease-standard),
+              border-color 0.15s var(--ease-standard);
+}
+.vtt-header .dbt:hover:not([disabled]) {
+  background: color-mix(in oklch, var(--md-primary) 8%, transparent);
+}
+/* Active header pills inherit the global .dbt--active treatment (blue
+   tint + blue ink + blue hairline). No solid-fill override here - that
+   violated the rationed-accent rule and read as heavy dark blobs. */
+.vtt-header .dbt--danger {
+  color: var(--md-error);
+  border-color: var(--md-error);
+  background: transparent;
+}
+.vtt-header .dbt--danger:hover:not([disabled]) {
+  background: color-mix(in oklch, var(--md-error) 8%, transparent);
+  color: var(--md-error);
+}
+.vtt-header .dbt--icon-only {
+  padding: 6px 10px;
+}
+/* Mode selector inline buttons (desktop) follow the same vocabulary. */
+.vtt-header .mode-selector__btn {
+  font-size: 0.85em;
+}
+
+/* ============================================================== *
+ *  Empty state tuning                                              *
+ *                                                                  *
+ *  "Quiet here" used the editorial Bodoni serif at the inherited   *
+ *  size (~22-28px), which visually competed with the map above. *
+ *  Keep the editorial moment (it's intentional) but scale down so  *
+ *  it sits comfortably inside the log feed. */
+.log-panel__feed .empty-state__title {
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+.log-panel__feed .empty-state__glyph {
+  font-size: 22px;
+}
+.log-panel__feed .empty-state__msg {
+  font-size: 0.92em;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+/* Eyebrow label above the log feed - only renders if the legacy
+ * log adds a header element with this class. Pre-styling so the
+ * follow-up commit just adds the markup. */
+.shell__chat .log-panel__eyebrow {
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--md-on-surface-variant);
+  padding: 6px 16px 4px;
+  border-bottom: var(--chrome-hairline);
+  background: var(--md-surface);
+}
+
+/* (Mobile rules consolidated into the single block at end of file.) */
+
+/* ModeSelector - inline 3-button segmented control on desktop,
+ * collapsed to a single `current mode ▾` trigger + popover on mobile.
+ *
+ * Desktop default: list renders inline as before; the mobile-only
+ * `__current` trigger is hidden. Mobile rules (below) flip it. */
+.mode-selector { position: relative; }
+.mode-selector__list {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.mode-selector__current { display: none; }
+
+/* Chat-tool chips (Mode / OOC / Browse) and their ⋯ overflow moved out
+ * of the header entirely: the composer owns speaking mode and persona,
+ * and the GlobalMenu carries Browse / OOC / chat helpers. */
+.vtt-header__right {
+  position: relative;
+}
+
+
+/* ============================================================== *
+ *  Mobile cohesion pass - single consolidated breakpoint           *
+ *                                                                  *
+ *  All mobile-specific rules live in this one @media block at the *
+ *  end of the file, at 768px to match the legacy breakpoint in    *
+ *  src/styles.css. Earlier passes used a mix of 720px / 960px and *
+ *  scattered the rules across 4 blocks. One block here means      *
+ *  every mobile override wins the cascade and is auditable in one *
+ *  place.                                                          *
+ *                                                                  *
+ *  Sections (in document order):                                  *
+ *    A. Header layout + slot pattern                              *
+ *    B. Hide non-essential header controls (with specific         *
+ *       selectors that beat the legacy cascade)                    *
+ *    C. Touch-target minimums (44×44px) on every interactive      *
+ *       chip / pill / icon button                                  *
+ *    D. Overflow ⋯ menu + ModeSelector collapse                    *
+ *    E. Map drawing toolbar - hidden                              *
+ *    F. IconRail drawer - labels off, scrim above header          *
+ *    G. Composer + textarea constraints                            *
+ *    H. FloatingPopup → bottom sheet                              *
+ *    I. ChatShell internal padding (only used when the new shell  *
+ *       is mounted; currently inert behind feature flag)          *
+ * ============================================================== */
+
+@media (max-width: 768px) {
+
+  /* === A. Header layout =========================================== */
+  .vtt-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+  }
+  .vtt-header__left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .vtt-header__right {
+    flex: 0 1 auto;
+    margin-left: auto;
+    gap: 4px;
+    min-width: 0;
+  }
+  /* The sheet/drawer toggle carries a word label ("Combat" / "Party" /
+     "Sheet") and was the one right-zone item with no overflow strategy,
+     so at ≤402px it ran off the right edge. Cap + ellipsize it so it
+     stays fully on-screen and tappable; the full intent is still on the
+     button's accessible name. */
+  .shell__mobile-toggle--sheet {
+    flex: 0 1 auto;
+    min-width: 44px;
+    max-width: 6.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* === B. Hide non-essential header controls ===================== *
+   * Use specific .vtt-header selectors so they win against the
+   * legacy base rules without resorting to !important. */
+  .vtt-header .presence-badge,
+  .vtt-header__right .presence-badge {
+    display: none !important;
+  }
+  .vtt-header [data-sync-status],
+  .vtt-header__right [data-sync-status] {
+    display: none !important;
+  }
+  /* Leave-room button is reachable from the Journal pane / Settings on
+     mobile; the header is too narrow for a destructive action. */
+  #leave-room-btn-header { display: none !important; }
+
+  /* === C. Touch-target minimums (WCAG / Material 44×44) ========== *
+   * Every interactive chip / pill / icon button gets a minimum
+   * touch area on touch viewports. Padding may be larger than
+   * visual chrome - that's intentional. */
+  .dbt,
+  .composer-chip,
+  .persona-chip,
+  .quick-tray__btn,
+  .mode-selector__current,
+  .shell__mobile-toggle,
+  .modal-close,
+  .floating-popup__close,
+  .floating-popup__pin {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .dbt--icon-only {
+    padding: 0 10px;
+  }
+
+  /* === C2. Compact the log empty state ========================== *
+   * In Combat the map dominates the viewport, leaving the log feed a
+   * short band. The empty-state hero (glyph + title + 2-line body) at
+   * its desktop padding overflows that band, cutting the body copy
+   * ("…events will" in the screenshot). Tighten padding + glyph on
+   * mobile so the full message fits; the feed still scrolls if not. */
+  .log-panel__feed .empty-state {
+    padding: 8px 12px;
+    gap: 2px;
+  }
+  .log-panel__feed .empty-state__glyph {
+    font-size: 16px;
+  }
+  .log-panel__feed .empty-state__title {
+    font-size: 1em;
+  }
+  .log-panel__feed .editorial-body {
+    max-width: 100%;
+    font-size: 0.85em;
+  }
+
+  /* === D. ModeSelector collapse ================================== *
+   *  The ⋯ overflow toggle and the secondary dropdown now live in the
+   *  base rules above and apply at all widths, so only the mobile-only
+   *  mode-selector trigger remains here. */
+  .mode-selector__current {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    border: var(--chrome-hairline);
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--md-primary);
+    font-family: inherit;
+    font-size: 0.85em;
+    font-weight: 500;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  /* Open state mirrors the desktop .dbt--active vocabulary: rationed
+   * Table Blue as a tint + blue text + blue hairline, not a solid fill. */
+  .mode-selector__current[aria-expanded="true"] {
+    background: var(--color-background-info);
+    color: var(--color-text-info);
+    border-color: var(--color-border-info);
+  }
+  .mode-selector__list {
+    display: none;
+  }
+  .mode-selector--open .mode-selector__list {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--md-surface);
+    border: var(--chrome-hairline);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    box-shadow: var(--elev-3);
+    z-index: var(--z-popup, 9999);
+    min-width: 220px;
+  }
+  .mode-selector--open .mode-selector__list .dbt {
+    justify-content: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+  /* Keep mode labels on one line and never let the popover exceed the
+     viewport on a narrow phone (the visible clipping was the ⋯ overflow
+     popover overlapping this one - now mutually exclusive - but cap
+     defensively too). */
+  .mode-selector--open .mode-selector__list { max-width: calc(100vw - 16px); }
+  .mode-selector--open .mode-selector__list .dbt__label { white-space: nowrap; }
+
+  /* === E. Map drawing toolbar - hidden ============================ *
+   * Specific selector + !important to override the legacy
+   * absolute-positioned base rule. */
+  .shell__chat .draw-toolbar,
+  .map-strip .draw-toolbar,
+  .draw-toolbar {
+    display: none !important;
+  }
+
+  /* === F. IconRail drawer mobile ================================= */
+  .shell__channels .icon-rail {
+    width: 44px;
+  }
+  .shell__channels .icon-rail__label {
+    display: none;
+  }
+  .shell__channels .icon-rail__drawer {
+    min-width: 0;
+    padding: var(--space-md) var(--space-md);
+  }
+  /* Promote .shell above .vtt-header when a drawer is open so the
+   * scrim (which lives inside .shell) actually overlays the
+   * header. Otherwise .shell sits below the header (z-100) and
+   * the scrim can't cover it. */
+  .shell[data-channels-open],
+  .shell[data-sheet-open] {
+    z-index: 1001;
+    position: relative;
+  }
+
+  /* === G. Composer + textarea constraints ======================== *
+   * Textarea grows to fill but can shrink (flex: 1 1 0) so it
+   * shares a row with the Send button rather than wrapping to its
+   * own line. Send button keeps an explicit min-width so the touch
+   * target stays usable even with a short textarea. Combatant
+   * initiative strip gets compact padding so it doesn't dominate
+   * mobile vertical space. */
+  /* ── Mobile composer - single row + popover for actions ─────────────
+     The inline dice strip + QuickTray collapse behind a ⚙ button that
+     opens ComposerActionsPopover (rpglog-style). Every chip/button in
+     the composer row shares one height (34px) and rounded shape so it
+     reads as one consistent strip. The textarea is the dominant element;
+     scene/persona shrink so it claims the rest of the row. */
+  .dice-bar { position: relative; }
+  .dice-bar {
+    max-width: 100%;
+    overflow: hidden;
+    gap: 4px;
+    padding: 4px 6px;
+  }
+  .dice-bar__chat-cluster { gap: 4px; }
+  .dice-bar__chat-cluster .long-post-btn { display: none; }
+
+  /* Uniform control sizing inside the dice bar - overrides the 44× block
+     above for these specific controls so the action row + composer don't
+     look like five sizes stacked. */
+  .dice-bar .dbt,
+  .dice-bar .dbt--sm,
+  .dice-bar .quick-tray__btn,
+  .dice-bar .persona-chip,
+  .dice-bar .scene-banner,
+  .dice-bar .scene-start-btn,
+  .dice-bar .composer-action-toggle,
+  .dice-bar .composer-next-turn,
+  #chat-send {
+    min-height: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 0.85em;
+    border-radius: var(--radius-pill, 999px);
+  }
+  .quick-tray { gap: 4px; }
+
+  /* Mode chips (Say / Describe / OOC), the Tone pill, and the "Start
+     scene" button move into the actions popover on mobile so the composer
+     row holds only the input + persona + ⚙ + ▶ + Send. The compact 34px
+     persona chip stays inline as a glanceable speaking-as indicator. */
+  .dice-bar__chat-cluster .dice-bar__chat-mode,
+  .dice-bar__chat-cluster .dice-bar__tone-anchor,
+  .dice-bar__chat-cluster .scene-start-btn {
+    display: none;
+  }
+  .persona-chip__label { display: none; }
+  .dice-bar .persona-chip { padding: 0 8px; min-width: 34px; }
+  /* The active-scene banner (when actually in a scene) is kept - it's the
+     "where am I posting?" context. Stays narrow. */
+  .dice-bar .scene-banner { max-width: 28%; padding: 0 8px; gap: 4px; }
+  .dice-bar .scene-banner__title { font-size: 0.8em; }
+
+  /* Chat input: the dominant element of the row. Slightly taller than the
+     chips, growing to fill the space the shrunken neighbours give back. */
+  .dice-bar__chat-input,
+  #chat-input {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 0.95em;
+    /* Wrap typed text downward (default textarea behaviour) rather than
+       horizontal-scroll, even if a parent sets nowrap somewhere. */
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #chat-send {
+    flex: 0 0 auto;
+    min-height: 34px;
+    min-width: 56px;
+    padding: 0 12px;
+  }
+
+  /* ComposerActionsPopover - floating panel anchored just above the
+   * composer; `--composer-h` is written by a ResizeObserver in DiceBar so
+   * it tracks the live composer height (multiline textarea growth). */
+  .composer-popover {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: calc(var(--composer-h, 52px) + 8px);
+    background: var(--md-surface, var(--color-background-secondary));
+    border: 1px solid var(--md-outline, var(--color-border-tertiary));
+    border-radius: var(--radius-lg, 8px);
+    box-shadow: var(--elev-3, 0 8px 24px rgba(0, 0, 0, 0.18));
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 20;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .composer-popover__section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px dashed var(--md-surface-variant, var(--color-border-tertiary));
+    padding-top: 8px;
+  }
+  .composer-popover__section:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .composer-popover__section--row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .composer-popover__label {
+    font-size: 0.72em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+  }
+  .composer-popover__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .composer-popover__dice-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .composer-popover__dice-grid .dbt {
+    height: 36px;
+    padding: 0;
+  }
+  .composer-popover__roll {
+    flex: 1 1 auto;
+  }
+
+  /* Combatant initiative strip - compact on mobile so it doesn't
+   * eat as much vertical space between map and composer. */
+  .combat-init-strip {
+    min-height: 0;
+    padding: 3px 8px;
+    font-size: 0.85em;
+  }
+  .combat-init-strip__row {
+    padding: 2px 6px;
+  }
+
+  /* Sheet/drawer toggle in the header is icon-only on mobile (the word
+   * duplicates the ModeSelector pill and overflowed the right edge). */
+  .shell__mobile-toggle--sheet .shell__mobile-toggle__label { display: none; }
+  .shell__mobile-toggle--sheet { max-width: none; }
+
+  /* === H. FloatingPopup → bottom sheet =========================== */
+  .floating-popup {
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-bottom: none;
+    animation: floating-popup-in-mobile 0.2s var(--ease-decelerate);
+  }
+  @keyframes floating-popup-in-mobile {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  /* === I. ChatShell internal padding (inert until shell mounts) === */
+  .chat-shell__main { padding: 8px 12px; }
+  .chat-shell__header { padding: 8px 12px; }
+  .chat-shell__footer { padding: 8px 12px 10px; }
+  .chat-shell-header__title { font-size: 1.1em; }
+  .chat-shell__body { grid-template-columns: 1fr; }
+  .dock-slot[data-dock-slot="left-rail"],
+  .dock-slot[data-dock-slot="right-rail"] {
+    display: none;
+  }
+}

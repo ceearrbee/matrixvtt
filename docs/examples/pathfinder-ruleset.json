@@ -1,0 +1,522 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "pathfinder",
+  "name": "Pathfinder 1e",
+  "version": "1.0",
+  "author": "Paizo Publishing (PRD)",
+  "license": "OGL-1.0a",
+  "description": "Pathfinder 1st Edition - d20 OGL rules set.",
+  "attributes": [
+    {
+      "key": "str",
+      "label": "STR",
+      "full": "Strength",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Muscle power and physical force."
+    },
+    {
+      "key": "dex",
+      "label": "DEX",
+      "full": "Dexterity",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Hand-eye coordination and fine motor control."
+    },
+    {
+      "key": "con",
+      "label": "CON",
+      "full": "Constitution",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Physical toughness and resistance to damage."
+    },
+    {
+      "key": "int",
+      "label": "INT",
+      "full": "Intelligence",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Reasoning ability, memory, and skill points."
+    },
+    {
+      "key": "wis",
+      "label": "WIS",
+      "full": "Wisdom",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Willpower, common sense, and perceptiveness."
+    },
+    {
+      "key": "cha",
+      "label": "CHA",
+      "full": "Charisma",
+      "default": 10,
+      "min": 1,
+      "max": 30,
+      "description": "Force of personality and social presence."
+    }
+  ],
+  "modifier": {
+    "type": "dnd"
+  },
+  "hasSkills": true,
+  "skills": [
+    {
+      "key": "acrobatics",
+      "label": "Acrobatics",
+      "attribute": "dex"
+    },
+    {
+      "key": "appraise",
+      "label": "Appraise",
+      "attribute": "int"
+    },
+    {
+      "key": "bluff",
+      "label": "Bluff",
+      "attribute": "cha"
+    },
+    {
+      "key": "climb",
+      "label": "Climb",
+      "attribute": "str"
+    },
+    {
+      "key": "craft",
+      "label": "Craft",
+      "attribute": "int"
+    },
+    {
+      "key": "diplomacy",
+      "label": "Diplomacy",
+      "attribute": "cha"
+    },
+    {
+      "key": "disable_device",
+      "label": "Disable Device",
+      "attribute": "dex"
+    },
+    {
+      "key": "disguise",
+      "label": "Disguise",
+      "attribute": "cha"
+    },
+    {
+      "key": "escape_artist",
+      "label": "Escape Artist",
+      "attribute": "dex"
+    },
+    {
+      "key": "fly",
+      "label": "Fly",
+      "attribute": "dex"
+    },
+    {
+      "key": "handle_animal",
+      "label": "Handle Animal",
+      "attribute": "cha"
+    },
+    {
+      "key": "heal",
+      "label": "Heal",
+      "attribute": "wis"
+    },
+    {
+      "key": "intimidate",
+      "label": "Intimidate",
+      "attribute": "cha"
+    },
+    {
+      "key": "knowledge_arcana",
+      "label": "Knowledge (Arcana)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_dungeon",
+      "label": "Knowledge (Dungeoneering)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_history",
+      "label": "Knowledge (History)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_local",
+      "label": "Knowledge (Local)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_nature",
+      "label": "Knowledge (Nature)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_planes",
+      "label": "Knowledge (Planes)",
+      "attribute": "int"
+    },
+    {
+      "key": "knowledge_religion",
+      "label": "Knowledge (Religion)",
+      "attribute": "int"
+    },
+    {
+      "key": "linguistics",
+      "label": "Linguistics",
+      "attribute": "int"
+    },
+    {
+      "key": "perception",
+      "label": "Perception",
+      "attribute": "wis"
+    },
+    {
+      "key": "perform",
+      "label": "Perform",
+      "attribute": "cha"
+    },
+    {
+      "key": "profession",
+      "label": "Profession",
+      "attribute": "wis"
+    },
+    {
+      "key": "ride",
+      "label": "Ride",
+      "attribute": "dex"
+    },
+    {
+      "key": "sense_motive",
+      "label": "Sense Motive",
+      "attribute": "wis"
+    },
+    {
+      "key": "sleight_of_hand",
+      "label": "Sleight of Hand",
+      "attribute": "dex"
+    },
+    {
+      "key": "spellcraft",
+      "label": "Spellcraft",
+      "attribute": "int"
+    },
+    {
+      "key": "stealth",
+      "label": "Stealth",
+      "attribute": "dex"
+    },
+    {
+      "key": "survival",
+      "label": "Survival",
+      "attribute": "wis"
+    },
+    {
+      "key": "swim",
+      "label": "Swim",
+      "attribute": "str"
+    },
+    {
+      "key": "use_magic_device",
+      "label": "Use Magic Device",
+      "attribute": "cha"
+    }
+  ],
+  "hasSavingThrows": true,
+  "savingThrows": [
+    {
+      "key": "fortitude",
+      "label": "Fortitude",
+      "attribute": "con",
+      "description": "Resists physical threats - poison, disease, energy drain."
+    },
+    {
+      "key": "reflex",
+      "label": "Reflex",
+      "attribute": "dex",
+      "description": "Avoids area effects - explosions, traps, breath weapons."
+    },
+    {
+      "key": "will",
+      "label": "Will",
+      "attribute": "wis",
+      "description": "Resists mental effects - charms, compulsions, illusions."
+    }
+  ],
+  "hasCR": true,
+  "crValues": [
+    "1/2",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25"
+  ],
+  "npc": {
+    "sizeCategories": [
+      "Fine",
+      "Diminutive",
+      "Tiny",
+      "Small",
+      "Medium",
+      "Large",
+      "Huge",
+      "Gargantuan",
+      "Colossal"
+    ],
+    "creatureTypes": [
+      "Aberration",
+      "Animal",
+      "Construct",
+      "Dragon",
+      "Fey",
+      "Humanoid",
+      "Magical Beast",
+      "Monstrous Humanoid",
+      "Ooze",
+      "Outsider",
+      "Plant",
+      "Undead",
+      "Vermin"
+    ],
+    "hasAlignment": true
+  },
+  "conditions": [
+    {
+      "key": "blinded",
+      "label": "Blinded",
+      "icon": "👁️",
+      "description": "-2 AC; loses Dex bonus to AC; -4 Perception vs sighted; 50% miss chance."
+    },
+    {
+      "key": "confused",
+      "label": "Confused",
+      "icon": "🌀",
+      "description": "Acts randomly each turn per the confusion table."
+    },
+    {
+      "key": "dazed",
+      "label": "Dazed",
+      "icon": "⚡",
+      "description": "Can take no actions for one round; AC unaffected."
+    },
+    {
+      "key": "dazzled",
+      "label": "Dazzled",
+      "icon": "✨",
+      "description": "-1 attack rolls and sight-based Perception checks."
+    },
+    {
+      "key": "deafened",
+      "label": "Deafened",
+      "icon": "🔇",
+      "description": "-4 initiative; 20% arcane spell failure for verbal spells."
+    },
+    {
+      "key": "entangled",
+      "label": "Entangled",
+      "icon": "⛓️",
+      "description": "-2 attacks, -4 Dex; half speed; Concentration check to cast."
+    },
+    {
+      "key": "exhausted",
+      "label": "Exhausted",
+      "icon": "😫",
+      "description": "-6 Str and Dex; half speed; becomes Fatigued after 1h rest."
+    },
+    {
+      "key": "fatigued",
+      "label": "Fatigued",
+      "icon": "😤",
+      "description": "-2 Str and Dex; cannot charge or run."
+    },
+    {
+      "key": "flat_footed",
+      "label": "Flat-Footed",
+      "icon": "😲",
+      "description": "Loses Dex bonus to AC; can't make attacks of opportunity."
+    },
+    {
+      "key": "frightened",
+      "label": "Frightened",
+      "icon": "😨",
+      "description": "Flees from source if possible; -2 attacks, saves, checks while source visible."
+    },
+    {
+      "key": "grappled",
+      "label": "Grappled",
+      "icon": "🤝",
+      "description": "-4 Dex; -2 attacks vs non-grappler; must succeed CMB check to cast."
+    },
+    {
+      "key": "helpless",
+      "label": "Helpless",
+      "icon": "🔒",
+      "description": "Paralyzed, sleeping, or bound; effective Dex 0."
+    },
+    {
+      "key": "invisible",
+      "label": "Invisible",
+      "icon": "👻",
+      "description": "+2 attack bonus; opponents lose Dex bonus to AC."
+    },
+    {
+      "key": "nauseated",
+      "label": "Nauseated",
+      "icon": "🤢",
+      "description": "Can only take a single move action per turn; no attacks, spells, or items."
+    },
+    {
+      "key": "panicked",
+      "label": "Panicked",
+      "icon": "😱",
+      "description": "Drops held items; flees blindly; -2 saves while in flight."
+    },
+    {
+      "key": "paralyzed",
+      "label": "Paralyzed",
+      "icon": "🔒",
+      "description": "Frozen in place; helpless; attackers make a melee touch attack."
+    },
+    {
+      "key": "petrified",
+      "label": "Petrified",
+      "icon": "🗿",
+      "description": "Turned to stone; unconscious; immune to most effects."
+    },
+    {
+      "key": "pinned",
+      "label": "Pinned",
+      "icon": "📌",
+      "description": "Immobile; helpless; cannot speak clearly or cast spells with verbal components."
+    },
+    {
+      "key": "poisoned",
+      "label": "Poisoned",
+      "icon": "☠️",
+      "description": "Suffering ongoing poison track effects."
+    },
+    {
+      "key": "prone",
+      "label": "Prone",
+      "icon": "⬇️",
+      "description": "-4 melee attacks; +4 AC vs ranged; -4 AC vs melee."
+    },
+    {
+      "key": "shaken",
+      "label": "Shaken",
+      "icon": "😰",
+      "description": "-2 attack rolls, saving throws, skill checks, and ability checks."
+    },
+    {
+      "key": "sickened",
+      "label": "Sickened",
+      "icon": "🤒",
+      "description": "-2 attack and damage rolls, saves, skill and ability checks."
+    },
+    {
+      "key": "staggered",
+      "label": "Staggered",
+      "icon": "🥴",
+      "description": "Only one move action or standard action per round (not both)."
+    },
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "icon": "💫",
+      "description": "Drops everything held; can't take actions; -2 AC; loses Dex bonus to AC."
+    },
+    {
+      "key": "unconscious",
+      "label": "Unconscious",
+      "icon": "💤",
+      "description": "Helpless and unaware of surroundings."
+    },
+    {
+      "key": "dead",
+      "label": "Dead",
+      "icon": "💀",
+      "description": "HP below negative Constitution score."
+    }
+  ],
+  "dice": [
+    "d4",
+    "d6",
+    "d8",
+    "d10",
+    "d12",
+    "d20",
+    "d100"
+  ],
+  "rolls": {
+    "attribute": "1d20+{mod}",
+    "skill": "1d20+{bonus}",
+    "save": "1d20+{bonus}",
+    "initiative": "1d20+{bonus}",
+    "attack": "1d20+{bonus}"
+  },
+  "movement": {
+    "unitsPerCell": 5,
+    "defaultSpeed": 30,
+    "diagonals": "manhattan"
+  },
+  "combat": {
+    "critThreshold": 20,
+    "fumbleThreshold": 1,
+    "defenseKey": "ac"
+  },
+  "initiative": {
+    "mode": "individual",
+    "tieBreakStat": "dex"
+  },
+  "hasSpellSystem": true,
+  "action_economy": [
+    {
+      "key": "action_used",
+      "label": "A",
+      "title": "Action"
+    },
+    {
+      "key": "bonus_action_used",
+      "label": "B",
+      "title": "Bonus Action"
+    },
+    {
+      "key": "reaction_used",
+      "label": "R",
+      "title": "Reaction"
+    }
+  ],
+  "health": {
+    "label": "HP",
+    "acLabel": "AC"
+  },
+  "character_templates": []
+}

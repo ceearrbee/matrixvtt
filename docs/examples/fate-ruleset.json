@@ -1,0 +1,372 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "fate",
+  "meta": {
+    "name": "FATE Core",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file). Fate SRD content: CC BY 3.0.",
+    "description": "Fate with the Accelerated approaches for quick play plus the full Fate Core skill list. 4dF against a difficulty ladder; aspects, fate points, stress, and consequences.",
+    "attribution": "This work is based on Fate Core System and Fate Accelerated Edition (found at http://www.faterpg.com/), products of Evil Hat Productions, LLC, developed, authored, and edited by Leonard Balsera, Brian Engard, Jeremy Keller, Ryan Macklin, Mike Olson, Clark Valentine, Amanda Valentine, Fred Hicks, and Rob Donoghue, and licensed for our use under the Creative Commons Attribution 3.0 Unported license (http://creativecommons.org/licenses/by/3.0/).",
+    "sources": [
+      {
+        "title": "Fate Core System",
+        "license": "CC-BY-3.0",
+        "url": "https://fate-srd.com/fate-core"
+      },
+      {
+        "title": "Fate Accelerated Edition",
+        "license": "CC-BY-3.0",
+        "url": "https://fate-srd.com/fate-accelerated"
+      }
+    ]
+  },
+  "narrative": true,
+  "attributes": [
+    {
+      "key": "careful",
+      "label": "Careful"
+    },
+    {
+      "key": "clever",
+      "label": "Clever"
+    },
+    {
+      "key": "flashy",
+      "label": "Flashy"
+    },
+    {
+      "key": "forceful",
+      "label": "Forceful"
+    },
+    {
+      "key": "quick",
+      "label": "Quick"
+    },
+    {
+      "key": "sneaky",
+      "label": "Sneaky"
+    }
+  ],
+  "skills": [
+    {
+      "key": "athletics",
+      "label": "Athletics",
+      "description": "Running, jumping, dodging, and physical agility."
+    },
+    {
+      "key": "burglary",
+      "label": "Burglary",
+      "description": "Bypassing security, picking locks, casing a location."
+    },
+    {
+      "key": "contacts",
+      "label": "Contacts",
+      "description": "Knowing people and making connections."
+    },
+    {
+      "key": "crafts",
+      "label": "Crafts",
+      "description": "Making, building, fixing, and breaking machinery."
+    },
+    {
+      "key": "deceive",
+      "label": "Deceive",
+      "description": "Lying, misdirection, and false faces."
+    },
+    {
+      "key": "drive",
+      "label": "Drive",
+      "description": "Operating vehicles under pressure."
+    },
+    {
+      "key": "empathy",
+      "label": "Empathy",
+      "description": "Reading people and their intentions."
+    },
+    {
+      "key": "fight",
+      "label": "Fight",
+      "description": "Close combat, armed or unarmed."
+    },
+    {
+      "key": "investigate",
+      "label": "Investigate",
+      "description": "Deliberate, careful search for the truth."
+    },
+    {
+      "key": "lore",
+      "label": "Lore",
+      "description": "Knowledge, education, and arcane learning."
+    },
+    {
+      "key": "notice",
+      "label": "Notice",
+      "description": "Passive awareness and quick reactions."
+    },
+    {
+      "key": "physique",
+      "label": "Physique",
+      "description": "Raw strength and endurance."
+    },
+    {
+      "key": "provoke",
+      "label": "Provoke",
+      "description": "Getting a rise out of people; intimidation and taunts."
+    },
+    {
+      "key": "rapport",
+      "label": "Rapport",
+      "description": "Building trust and goodwill honestly."
+    },
+    {
+      "key": "resources",
+      "label": "Resources",
+      "description": "Wealth and material means."
+    },
+    {
+      "key": "shoot",
+      "label": "Shoot",
+      "description": "Ranged combat of any kind."
+    },
+    {
+      "key": "stealth",
+      "label": "Stealth",
+      "description": "Staying hidden and moving unseen."
+    },
+    {
+      "key": "will",
+      "label": "Will",
+      "description": "Mental fortitude against fear and manipulation."
+    }
+  ],
+  "stunts": [
+    {
+      "label": "Add a bonus",
+      "pattern": "Because I [describe how you are amazing], I get +2 when I [pick one: attack, defend, create an advantage, overcome] with [a skill] when [describe a circumstance]."
+    },
+    {
+      "label": "Rule exception",
+      "pattern": "Because I [describe how you are amazing], I can use [a skill] in place of [another skill] when [describe a circumstance]."
+    },
+    {
+      "label": "New action",
+      "pattern": "Because I [describe how you are amazing], once per session I can [describe a special effect that bends the rules]."
+    }
+  ],
+  "dice": {
+    "check": "4dF"
+  },
+  "rolls": {
+    "attribute": "4dF+{mod}",
+    "skill": "4dF+{bonus}",
+    "initiative": "4dF+{bonus}",
+    "attack": "4dF+{bonus}"
+  },
+  "formulas": {
+    "check_total": {
+      "$": "+",
+      "args": [
+        "@roll.total",
+        "@approach"
+      ]
+    }
+  },
+  "harm_model": {
+    "type": "stress",
+    "boxes": [
+      1,
+      2,
+      3
+    ]
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "pip_track",
+        "field": "stress",
+        "count": 3,
+        "filled_color": "#E24B4A",
+        "empty_color": "rgba(0,0,0,0.3)"
+      }
+    ]
+  },
+  "progression": {
+    "type": "milestones"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "tagged_list",
+        "field": "aspects",
+        "label": "Aspects",
+        "editable": true,
+        "placeholder": "Add an aspect…",
+        "row_action": {
+          "label": "Invoke",
+          "announce": "{actor} invokes [{value}] for +{modifier}",
+          "decrement_field": "fate_points",
+          "modifier": 2,
+          "disable_when_lte": {
+            "field": "fate_points",
+            "value": 0
+          }
+        }
+      },
+      {
+        "kind": "pending_modifiers_list",
+        "label": "Pending bonuses"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "skill_list",
+        "label": "Skills"
+      },
+      {
+        "kind": "tagged_list",
+        "field": "stunts",
+        "label": "Stunts",
+        "editable": true,
+        "placeholder": "Add a stunt…"
+      },
+      {
+        "kind": "resource_pool",
+        "field": "fate_points",
+        "label": "Fate Points",
+        "refresh_field": "fate_refresh",
+        "min": 0,
+        "max_field": "fate_max"
+      },
+      {
+        "kind": "button_action",
+        "label": "Accept Compel",
+        "announce": "{actor} accepts a compel for +1 fate point",
+        "increment_field": "fate_points",
+        "amount": 1
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Stress",
+        "tracks": [
+          {
+            "name": "Physical",
+            "capacities": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "name": "Mental",
+            "capacities": [
+              1,
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "slot_list",
+        "field": "consequences",
+        "label": "Consequences",
+        "slots": [
+          {
+            "key": "mild",
+            "label": "Mild (+2)"
+          },
+          {
+            "key": "moderate",
+            "label": "Moderate (+4)"
+          },
+          {
+            "key": "severe",
+            "label": "Severe (+6)"
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "tagged_list",
+        "field": "aspects",
+        "label": "Aspects"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "stress_boxes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "tagged_list",
+        "field": "aspects",
+        "label": "Aspects"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "stress_boxes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
+    ]
+  }
+}

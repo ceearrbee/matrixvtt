@@ -1,0 +1,372 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "savageworlds",
+  "name": "Savage Worlds",
+  "version": "1.0",
+  "author": "Pinnacle Entertainment Group",
+  "license": "proprietary",
+  "description": "Fast, Furious, and Fun - a universal RPG using die types as attributes.",
+  "attributes": [
+    {
+      "key": "agility",
+      "label": "Agl",
+      "full": "Agility",
+      "default": 6,
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "description": "Speed, coordination, and reaction time."
+    },
+    {
+      "key": "smarts",
+      "label": "Smt",
+      "full": "Smarts",
+      "default": 6,
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "description": "Intelligence, perception, and willpower."
+    },
+    {
+      "key": "spirit",
+      "label": "Spr",
+      "full": "Spirit",
+      "default": 6,
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "description": "Courage, inner strength, and recovery."
+    },
+    {
+      "key": "strength",
+      "label": "Str",
+      "full": "Strength",
+      "default": 6,
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "description": "Physical power and brawn."
+    },
+    {
+      "key": "vigor",
+      "label": "Vgr",
+      "full": "Vigor",
+      "default": 6,
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "description": "Endurance, health, and toughness."
+    }
+  ],
+  "modifier": {
+    "type": "none"
+  },
+  "hasSkills": true,
+  "skills": [
+    {
+      "key": "athletics",
+      "label": "Athletics",
+      "attribute": "agility",
+      "description": "Climbing, jumping, swimming, and throwing."
+    },
+    {
+      "key": "battle",
+      "label": "Battle",
+      "attribute": "smarts",
+      "description": "Military strategy and large-scale combat."
+    },
+    {
+      "key": "boating",
+      "label": "Boating",
+      "attribute": "agility",
+      "description": "Operating watercraft."
+    },
+    {
+      "key": "common_knowledge",
+      "label": "Common Knowledge",
+      "attribute": "smarts",
+      "description": "General world knowledge."
+    },
+    {
+      "key": "driving",
+      "label": "Driving",
+      "attribute": "agility",
+      "description": "Operating ground vehicles."
+    },
+    {
+      "key": "electronics",
+      "label": "Electronics",
+      "attribute": "smarts",
+      "description": "Repairing and using electronic equipment."
+    },
+    {
+      "key": "faith",
+      "label": "Faith",
+      "attribute": "spirit",
+      "description": "Channeling divine power."
+    },
+    {
+      "key": "fighting",
+      "label": "Fighting",
+      "attribute": "agility",
+      "description": "Close-quarters combat."
+    },
+    {
+      "key": "focus",
+      "label": "Focus",
+      "attribute": "spirit",
+      "description": "Channeling arcane power (psionics/magic)."
+    },
+    {
+      "key": "gambling",
+      "label": "Gambling",
+      "attribute": "smarts",
+      "description": "Games of chance and cheating."
+    },
+    {
+      "key": "healing",
+      "label": "Healing",
+      "attribute": "smarts",
+      "description": "First aid and medical treatment."
+    },
+    {
+      "key": "intimidation",
+      "label": "Intimidation",
+      "attribute": "spirit",
+      "description": "Frightening or coercing others."
+    },
+    {
+      "key": "language",
+      "label": "Language",
+      "attribute": "smarts",
+      "description": "Speaking additional languages."
+    },
+    {
+      "key": "notice",
+      "label": "Notice",
+      "attribute": "smarts",
+      "description": "Perception and awareness."
+    },
+    {
+      "key": "performance",
+      "label": "Performance",
+      "attribute": "spirit",
+      "description": "Acting, music, and entertainment."
+    },
+    {
+      "key": "persuasion",
+      "label": "Persuasion",
+      "attribute": "spirit",
+      "description": "Influencing others through charm or argument."
+    },
+    {
+      "key": "piloting",
+      "label": "Piloting",
+      "attribute": "agility",
+      "description": "Operating aircraft."
+    },
+    {
+      "key": "repair",
+      "label": "Repair",
+      "attribute": "smarts",
+      "description": "Fixing mechanical and electronic devices."
+    },
+    {
+      "key": "research",
+      "label": "Research",
+      "attribute": "smarts",
+      "description": "Gathering and analysing information."
+    },
+    {
+      "key": "riding",
+      "label": "Riding",
+      "attribute": "agility",
+      "description": "Controlling mounts."
+    },
+    {
+      "key": "shooting",
+      "label": "Shooting",
+      "attribute": "agility",
+      "description": "Ranged weapons."
+    },
+    {
+      "key": "spellcasting",
+      "label": "Spellcasting",
+      "attribute": "smarts",
+      "description": "Casting arcane spells."
+    },
+    {
+      "key": "stealth",
+      "label": "Stealth",
+      "attribute": "agility",
+      "description": "Moving silently and hiding."
+    },
+    {
+      "key": "survival",
+      "label": "Survival",
+      "attribute": "smarts",
+      "description": "Navigation, tracking, and foraging."
+    },
+    {
+      "key": "taunt",
+      "label": "Taunt",
+      "attribute": "smarts",
+      "description": "Mocking or distracting opponents."
+    },
+    {
+      "key": "thievery",
+      "label": "Thievery",
+      "attribute": "agility",
+      "description": "Picking pockets, locks, and disarming traps."
+    },
+    {
+      "key": "tracking",
+      "label": "Tracking",
+      "attribute": "smarts",
+      "description": "Following trails and hunting prey."
+    }
+  ],
+  "hasSavingThrows": false,
+  "savingThrows": [],
+  "hasCR": false,
+  "crValues": [],
+  "npc": {
+    "sizeCategories": [
+      "Normal",
+      "Large",
+      "Huge",
+      "Gargantuan"
+    ],
+    "creatureTypes": [
+      "Human",
+      "Construct",
+      "Beast",
+      "Demon",
+      "Undead",
+      "Supernatural"
+    ],
+    "hasAlignment": false
+  },
+  "conditions": [
+    {
+      "key": "shaken",
+      "label": "Shaken",
+      "icon": "😰",
+      "description": "Cannot perform normal actions; must spend Benny or make Spirit roll to recover."
+    },
+    {
+      "key": "distracted",
+      "label": "Distracted",
+      "icon": "🌀",
+      "description": "-2 to all Trait rolls until end of next turn."
+    },
+    {
+      "key": "vulnerable",
+      "label": "Vulnerable",
+      "icon": "🎯",
+      "description": "Opponents gain +2 to attacks against this character until end of next turn."
+    },
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "icon": "⚡",
+      "description": "Distracted and Vulnerable; must make Vigor roll or remain Stunned."
+    },
+    {
+      "key": "entangled",
+      "label": "Entangled",
+      "icon": "⛓️",
+      "description": "Cannot move; -2 Parry."
+    },
+    {
+      "key": "bound",
+      "label": "Bound",
+      "icon": "📌",
+      "description": "Cannot move or take actions."
+    },
+    {
+      "key": "wound_1",
+      "label": "Wound ×1",
+      "icon": "🩸",
+      "description": "-1 to all Trait rolls and Pace."
+    },
+    {
+      "key": "wound_2",
+      "label": "Wound ×2",
+      "icon": "🩸",
+      "description": "-2 to all Trait rolls and Pace."
+    },
+    {
+      "key": "wound_3",
+      "label": "Wound ×3",
+      "icon": "🩸",
+      "description": "-3 to all Trait rolls and Pace; Vigor roll or Incapacitated."
+    },
+    {
+      "key": "incapacitated",
+      "label": "Incapacitated",
+      "icon": "🔒",
+      "description": "Out of the fight; may recover with a Benny."
+    },
+    {
+      "key": "bleeding_out",
+      "label": "Bleeding Out",
+      "icon": "❤️‍🩹",
+      "description": "Making Vigor rolls each round to avoid death."
+    },
+    {
+      "key": "dead",
+      "label": "Dead",
+      "icon": "💀",
+      "description": "Character is permanently removed from play."
+    }
+  ],
+  "dice": [
+    "d4",
+    "d6",
+    "d8",
+    "d10",
+    "d12",
+    "d20",
+    "d100"
+  ],
+  "rolls": {
+    "attribute": "1d{score}",
+    "skill": "1d{bonus}",
+    "initiative": "1d{bonus}",
+    "attack": "1d{bonus}"
+  },
+  "movement": {
+    "unitsPerCell": 1,
+    "defaultSpeed": 6,
+    "diagonals": "chebyshev"
+  },
+  "combat": {
+    "critThreshold": 6,
+    "fumbleThreshold": 1,
+    "defenseKey": "parry"
+  },
+  "initiative": {
+    "mode": "side",
+    "tieBreakStat": "agility"
+  },
+  "hasSpellSystem": false,
+  "action_economy": [
+    {
+      "key": "action_used",
+      "label": "A",
+      "title": "Action"
+    },
+    {
+      "key": "wild_die_used",
+      "label": "W",
+      "title": "Wild Die"
+    }
+  ],
+  "health": {
+    "label": "Wounds",
+    "acLabel": "Parry"
+  },
+  "character_templates": []
+}

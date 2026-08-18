@@ -1,0 +1,146 @@
+{
+  "meta": {
+    "name": "OpenD6 (generic)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file). OpenD6 SRD content: OGL 1.0a.",
+    "description": "Dice-pool system: N d6 + pips. One die is the wild die; it explodes on max, flags a complication on 1. Skill list from the D6 Adventure SRD.",
+    "attribution": "Skill list derived from D6 Adventure (WEG 51011), Copyright 2004, Purgatory Publishing Inc., used under the Open Game License 1.0a (bundled at licenses/OGL-1.0a.txt). See THIRD-PARTY-NOTICES.md.",
+    "sources": [
+      { "title": "D6 Adventure (WEG 51011)", "license": "OGL-1.0a", "url": "https://opend6project.org/" }
+    ]
+  },
+
+  "narrative": true,
+
+  "attributes": [
+    { "key": "reflexes",     "label": "Reflexes",     "min": 1, "max": 12 },
+    { "key": "coordination", "label": "Coordination", "min": 1, "max": 12 },
+    { "key": "physique",     "label": "Physique",     "min": 1, "max": 12 },
+    { "key": "knowledge",    "label": "Knowledge",    "min": 1, "max": 12 },
+    { "key": "perception",   "label": "Perception",   "min": 1, "max": 12 },
+    { "key": "presence",     "label": "Presence",     "min": 1, "max": 12 }
+  ],
+
+  "dice": {
+    "check": "3d6"
+  },
+
+  "rolls": {
+    "attribute":  "{bonus}d6w+{pips}",
+    "skill":      "{bonus}d6w+{pips}",
+    "save":       "{bonus}d6w+{pips}",
+    "initiative": "{bonus}d6w",
+    "attack":     "{bonus}d6w+{pips}"
+  },
+
+  "formulas": {
+    "ability_mod": "@score"
+  },
+
+  "harm_model": { "type": "pool", "track_key": "body_points" },
+
+  "progression": { "type": "points", "pool_field": "character_points" },
+
+  "skills": [
+    { "key": "acrobatics",      "label": "Acrobatics",      "attribute": "reflexes",     "description": "Tumbling, flips, and balance." },
+    { "key": "brawling",        "label": "Brawling",        "attribute": "reflexes",     "description": "Unarmed close combat." },
+    { "key": "climbing",        "label": "Climbing",        "attribute": "reflexes",     "description": "Scaling walls and cliffs." },
+    { "key": "contortion",      "label": "Contortion",      "attribute": "reflexes",     "description": "Escaping bonds and squeezing through gaps." },
+    { "key": "dodge",           "label": "Dodge",           "attribute": "reflexes",     "description": "Evading attacks and hazards." },
+    { "key": "jumping",         "label": "Jumping",         "attribute": "reflexes",     "description": "Leaping distance and height." },
+    { "key": "melee_combat",    "label": "Melee Combat",    "attribute": "reflexes",     "description": "Fighting with hand weapons." },
+    { "key": "riding",          "label": "Riding",          "attribute": "reflexes",     "description": "Controlling mounts." },
+    { "key": "sneak",           "label": "Sneak",           "attribute": "reflexes",     "description": "Moving quietly and staying unseen." },
+    { "key": "driving",         "label": "Driving",         "attribute": "coordination", "description": "Operating ground vehicles." },
+    { "key": "flying",          "label": "Flying",          "attribute": "coordination", "description": "Operating aircraft." },
+    { "key": "lockpicking",     "label": "Lockpicking",     "attribute": "coordination", "description": "Opening mechanical locks." },
+    { "key": "marksmanship",    "label": "Marksmanship",    "attribute": "coordination", "description": "Firing guns and energy weapons." },
+    { "key": "missile_weapons", "label": "Missile Weapons", "attribute": "coordination", "description": "Bows, slings, and other projectiles." },
+    { "key": "piloting",        "label": "Piloting",        "attribute": "coordination", "description": "Operating exotic or heavy vehicles." },
+    { "key": "sleight_of_hand", "label": "Sleight of Hand", "attribute": "coordination", "description": "Palming, picking pockets, and tricks." },
+    { "key": "throwing",        "label": "Throwing",        "attribute": "coordination", "description": "Thrown weapons and objects." },
+    { "key": "lifting",         "label": "Lifting",         "attribute": "physique",     "description": "Raw feats of strength." },
+    { "key": "running",         "label": "Running",         "attribute": "physique",     "description": "Sprints and long-distance endurance." },
+    { "key": "stamina",         "label": "Stamina",         "attribute": "physique",     "description": "Resisting fatigue, poison, and disease." },
+    { "key": "swimming",        "label": "Swimming",        "attribute": "physique",     "description": "Moving and surviving in water." },
+    { "key": "business",        "label": "Business",        "attribute": "knowledge",    "description": "Commerce, finance, and negotiation of deals." },
+    { "key": "demolitions",     "label": "Demolitions",     "attribute": "knowledge",    "description": "Setting and disarming explosives." },
+    { "key": "forgery",         "label": "Forgery",         "attribute": "knowledge",    "description": "Faking documents and detecting fakes." },
+    { "key": "languages",       "label": "Languages",       "attribute": "knowledge",    "description": "Speaking and reading other tongues." },
+    { "key": "medicine",        "label": "Medicine",        "attribute": "knowledge",    "description": "First aid, treatment, and surgery." },
+    { "key": "navigation",      "label": "Navigation",      "attribute": "knowledge",    "description": "Plotting courses and reading maps." },
+    { "key": "scholar",         "label": "Scholar",         "attribute": "knowledge",    "description": "Academic and specialized learning." },
+    { "key": "security",        "label": "Security",        "attribute": "knowledge",    "description": "Bypassing and installing security systems." },
+    { "key": "tech",            "label": "Tech",            "attribute": "knowledge",    "description": "Understanding and using technology." },
+    { "key": "artist",          "label": "Artist",          "attribute": "perception",   "description": "Creating and appraising works of art." },
+    { "key": "gambling",        "label": "Gambling",        "attribute": "perception",   "description": "Games of chance and reading players." },
+    { "key": "hide",            "label": "Hide",            "attribute": "perception",   "description": "Concealing objects and yourself." },
+    { "key": "investigation",   "label": "Investigation",   "attribute": "perception",   "description": "Finding and connecting clues." },
+    { "key": "know_how",        "label": "Know-How",        "attribute": "perception",   "description": "Practical improvisation for everyday tasks." },
+    { "key": "repair",          "label": "Repair",          "attribute": "perception",   "description": "Fixing machines and equipment." },
+    { "key": "search",          "label": "Search",          "attribute": "perception",   "description": "Spotting the hidden and the out of place." },
+    { "key": "streetwise",      "label": "Streetwise",      "attribute": "perception",   "description": "Underworld contacts and urban survival." },
+    { "key": "survival",        "label": "Survival",        "attribute": "perception",   "description": "Enduring wilderness and hostile environments." },
+    { "key": "tracking",        "label": "Tracking",        "attribute": "perception",   "description": "Following trails and signs." },
+    { "key": "animal_handling", "label": "Animal Handling", "attribute": "presence",     "description": "Calming and directing animals." },
+    { "key": "bluff",           "label": "Bluff",           "attribute": "presence",     "description": "Misdirection and confident lies." },
+    { "key": "charm",           "label": "Charm",           "attribute": "presence",     "description": "Winning people over with warmth." },
+    { "key": "command",         "label": "Command",         "attribute": "presence",     "description": "Leading and coordinating others." },
+    { "key": "con",             "label": "Con",             "attribute": "presence",     "description": "Swindles and confidence games." },
+    { "key": "disguise",        "label": "Disguise",        "attribute": "presence",     "description": "Changing appearance and persona." },
+    { "key": "intimidation",    "label": "Intimidation",    "attribute": "presence",     "description": "Coercion through fear." },
+    { "key": "persuasion",      "label": "Persuasion",      "attribute": "presence",     "description": "Convincing through argument and appeal." },
+    { "key": "willpower",       "label": "Willpower",       "attribute": "presence",     "description": "Resisting fear, coercion, and mental strain." }
+  ],
+
+  "character_sheet": {
+    "sections": [
+      { "kind": "resource_track", "id": "body_points", "label": "Body Points",
+        "current_field": "body_points_current", "max_field": "body_points_max" },
+      { "kind": "attributes" },
+      { "kind": "skill_list", "label": "Skills" },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "token": {
+    "overlays": [
+      { "kind": "resource_bar", "current_field": "body_points_current", "max_field": "body_points_max" }
+    ]
+  },
+
+  "character_preview": {
+    "sections": [
+      { "kind": "resource_track", "id": "body_points", "label": "Body Points", "current_field": "body_points_current", "max_field": "body_points_max" },
+      { "kind": "attributes" },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "npc_preview": {
+    "sections": [
+      { "kind": "resource_track", "id": "body_points", "label": "Body Points", "current_field": "body_points_current", "max_field": "body_points_max" },
+      { "kind": "attributes" },
+      { "kind": "defenses" },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "item_preview": {
+    "sections": [
+      { "kind": "description" },
+      { "kind": "attack_roll" },
+      { "kind": "damage_roll" },
+      { "kind": "use_consumable" },
+      { "kind": "stat_row", "stats": [
+        { "label": "Type",   "field": "type" },
+        { "field": "weight", "unit": "lb" }
+      ]}
+    ]
+  }
+}

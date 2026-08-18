@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout 8 - Chat-first (map pinned in thread)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="dark"]{--bg:#16191F;--surface:#1F2430;--overlay:#2D3444;--map-void:#0A0E14;--ink:rgba(255,255,255,.92);--ink2:rgba(200,210,230,.75);--ink3:rgba(160,175,195,.65);--blue:#5BB8E8;--blue-bg:rgba(24,95,165,.18);--blue-line:rgba(91,184,232,.4);--green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;--hair:rgba(255,255,255,.18);--hair-soft:rgba(255,255,255,.10);--shadow:rgba(0,0,0,.45)}
+:root[data-theme="light"]{--bg:#fff;--surface:#f5f7fa;--overlay:#e8ecf1;--map-void:#e5e8ec;--ink:rgba(0,0,0,.87);--ink2:rgba(0,0,0,.65);--ink3:rgba(0,0,0,.52);--blue:#1565C0;--blue-bg:rgba(24,95,165,.08);--blue-line:rgba(21,101,192,.3);--green:#0F6E56;--amber:#C77700;--red:#C62828;--hair:rgba(0,0,0,.12);--hair-soft:rgba(0,0,0,.07);--shadow:rgba(0,0,0,.15)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface);border-bottom:.5px solid var(--hair)}
+.titles{display:flex;flex-direction:column;line-height:1.15}.title{font-size:16px;font-weight:700;letter-spacing:-.3px}.subtitle{font-size:12px;color:var(--ink2)}
+.cluster{display:flex;gap:6px}.pill{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:3px;border:.5px solid var(--hair);background:transparent;color:var(--ink2);cursor:pointer}.pill:hover{background:var(--overlay);color:var(--ink)}.pill--live{color:var(--green);border-color:transparent}.pill--live::before{content:"●";margin-right:5px;font-size:9px}.pill--danger{color:var(--red)}.pill--active{background:var(--blue-bg);color:var(--blue);box-shadow:inset 0 0 0 .5px var(--blue-line)}
+.shell{flex:1;display:grid;grid-template-columns:56px 1fr 236px;min-height:0}
+.rail{background:var(--bg);border-right:.5px solid var(--hair);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0}
+.rail__btn{width:40px;height:40px;border-radius:3px;border:0;background:transparent;color:var(--ink3);font-size:18px;cursor:pointer;display:grid;place-items:center}.rail__btn:hover{background:var(--overlay);color:var(--ink)}.rail__btn small{display:block;font-size:8px}
+
+/* chat-first center: conversation is the spine; map is a pinned card at top */
+.thread{display:flex;flex-direction:column;min-height:0;min-width:0;border-right:.5px solid var(--hair)}
+.scroll{flex:1;overflow-y:auto;min-height:0;display:flex;flex-direction:column;align-items:center}
+.col{width:100%;max-width:760px;padding:0 24px}
+/* pinned map card */
+.mapcard{position:sticky;top:0;z-index:5;margin:14px 0 4px;background:var(--map-void);border:.5px solid var(--hair);border-radius:4px;overflow:hidden;box-shadow:0 2px 8px var(--shadow)}
+.mapcard__bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--surface);border-bottom:.5px solid var(--hair)}
+.mapcard__bar h2{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);font-weight:600}
+.mapcard__bar .ctrls{display:flex;gap:5px}.mapcard__bar .ctrls button{font-size:11px;border:.5px solid var(--hair);background:transparent;color:var(--ink2);border-radius:3px;padding:3px 7px;cursor:pointer}
+.mapcard__view{position:relative;height:300px;display:grid;place-items:center;overflow:hidden}
+.board{position:relative;width:560px;height:280px;background-image:linear-gradient(var(--hair-soft) 1px,transparent 1px),linear-gradient(90deg,var(--hair-soft) 1px,transparent 1px);background-size:40px 40px;background-color:#2a2118;border:.5px solid var(--hair)}
+.fog{position:absolute;inset:0;background:radial-gradient(circle at 44% 52%,transparent 90px,rgba(226,75,74,.16) 150px),conic-gradient(from 20deg at 60% 30%,rgba(239,159,39,.2),transparent 95deg);pointer-events:none}
+.unit{position:absolute;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;border:2px solid rgba(0,0,0,.4)}.unit span{position:absolute;top:-14px;font-size:9px;color:var(--ink2);white-space:nowrap}
+/* messages */
+.daymark{text-align:center;font-size:11px;color:var(--ink3);margin:14px 0 6px}
+.msg{padding:8px 0;border-top:.5px solid var(--hair-soft)}
+.msg .who{font-weight:600;color:var(--ink);font-size:13px}.msg .meta{font-size:10px;color:var(--ink3);margin-left:6px}
+.msg .body{color:var(--ink2);font-size:14px;line-height:1.55;margin-top:2px}
+.msg--ic .body{font-family:'Source Serif 4',Georgia,serif;font-size:15px}
+.msg--roll .body{color:var(--blue);font-family:'Work Sans'}
+.composerwrap{border-top:.5px solid var(--hair);display:flex;justify-content:center;padding:10px 0;background:var(--bg)}
+.composer{width:100%;max-width:760px;padding:0 24px;display:flex;gap:6px;align-items:center}
+.composer input{flex:1;background:var(--bg);border:.5px solid var(--hair);border-radius:2px;color:var(--ink);padding:9px;font-family:inherit;font-size:14px}
+.composer .chip{font-size:12px;padding:7px 9px;border:.5px solid var(--hair);border-radius:3px;color:var(--ink2);background:transparent;cursor:pointer}
+/* right rail: party + initiative */
+.side{background:var(--bg);display:flex;flex-direction:column;min-height:0}
+.side h2{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);font-weight:600;padding:9px 12px;border-bottom:.5px solid var(--hair-soft)}
+.initlist{padding:6px 10px;display:flex;flex-direction:column;gap:4px;border-bottom:.5px solid var(--hair)}
+.tok{display:flex;justify-content:space-between;padding:4px 8px;border-radius:3px;border:.5px solid var(--hair);font-size:12px;color:var(--ink2)}.tok--turn{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}.tok--down{opacity:.5;text-decoration:line-through}.tok .hp{font-size:10px;color:var(--ink3)}
+.pcard{padding:8px 12px;border-bottom:.5px solid var(--hair-soft)}.pcard .nm{font-size:12px;font-weight:600}.pcard .hp{font-size:10px;color:var(--ink2);display:flex;justify-content:space-between;margin-top:3px}
+.pbar{height:3px;border-radius:2px;background:var(--overlay);margin-top:3px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--green)}.pbar i.amber{background:var(--amber)}.pbar i.red{background:var(--red)}
+.caption{position:fixed;left:64px;bottom:64px;max-width:430px;z-index:9;background:var(--surface);border:.5px solid var(--hair);border-radius:4px;padding:10px 12px;box-shadow:0 4px 16px var(--shadow)}
+.caption b{color:var(--blue)}.caption p{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:3px}.themetoggle{font-size:11px}
+</style></head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="titles"><div class="title">The Sunken Keep</div><div class="subtitle">Round 3 · Aria</div></div>
+    <div class="cluster"><button class="pill">1 online</button><button class="pill">GM</button><button class="pill pill--active">Prep</button><button class="pill">⋯</button><button class="pill pill--live">Live</button><button class="pill pill--danger">Leave</button><button class="pill themetoggle" onclick="t()">◐ theme</button></div>
+  </header>
+  <div class="shell">
+    <nav class="rail"><button class="rail__btn">☰<small>MENU</small></button><button class="rail__btn">🎬<small>SCENES</small></button><button class="rail__btn">📖<small>NOTES</small></button><button class="rail__btn">👥<small>NPCS</small></button><button class="rail__btn">🗺<small>MAPS</small></button></nav>
+
+    <!-- conversation spine; map pinned at the top of the thread -->
+    <section class="thread">
+      <div class="scroll">
+        <div class="col">
+          <div class="mapcard">
+            <div class="mapcard__bar"><h2>Battlemap · Sunken Crypt</h2><div class="ctrls"><button>＋</button><button>－</button><button>collapse ⌃</button></div></div>
+            <div class="mapcard__view"><div class="board"><div class="fog"></div>
+              <div class="unit" style="left:200px;top:110px;background:#5b3a8a">🧙‍♀️<span>Sora</span></div>
+              <div class="unit" style="left:200px;top:150px;background:#1d6e56">☘<span>Finn</span></div>
+              <div class="unit" style="left:200px;top:190px;background:#7a5a1a">⚔<span>Kael</span></div>
+              <div class="unit" style="left:248px;top:150px;background:#3a4a6a">🚶<span style="color:var(--blue)">Aria ◄</span></div>
+              <div class="unit" style="left:340px;top:96px;background:#7a1f1a;width:52px;height:52px;font-size:22px">👹<span>War Boss</span></div>
+            </div></div>
+          </div>
+
+          <div class="daymark">- Round 3 · Aria's turn -</div>
+          <div class="msg msg--ic"><span class="who">Aria</span><span class="meta">now</span><div class="body">Aria darts behind the pillar, blade flashing toward the War Boss's flank.</div></div>
+          <div class="msg msg--roll"><span class="who">Aria</span><span class="meta">now</span><div class="body">⚔ Attack - 1d20+7 → <b>24</b> vs AC 16 · hit · 2d6+4 → <b>13</b> slashing</div></div>
+          <div class="msg"><span class="who">GM</span><span class="meta">now</span><div class="body">The blade bites deep between the plates of its armor - the War Boss roars and staggers back a step, blood matting its hide.</div></div>
+          <div class="msg msg--roll"><span class="who">Sora</span><span class="meta">1m</span><div class="body">🔥 Fire Bolt - 1d10 → <b>7</b> fire</div></div>
+          <div class="msg msg--ic"><span class="who">Finn</span><span class="meta">2m</span><div class="body">"Hold the line - I've got Kael. Don't let it flank us!"</div></div>
+        </div>
+      </div>
+      <div class="composerwrap"><div class="composer"><button class="chip">d20</button><button class="chip">IC ▾</button><input placeholder="Speak, describe, or /roll…"><button class="chip">Send</button></div></div>
+    </section>
+
+    <!-- right rail: initiative + party -->
+    <aside class="side">
+      <h2>Initiative</h2>
+      <div class="initlist">
+        <div class="tok tok--turn">Aria <span class="hp">28/40</span></div>
+        <div class="tok">War Boss <span class="hp">45/60</span></div>
+        <div class="tok tok--down">Kael <span class="hp">0/35</span></div>
+        <div class="tok">Finn <span class="hp">35/35</span></div>
+        <div class="tok">Orc Guard <span class="hp">8/11</span></div>
+        <div class="tok">Sora <span class="hp">22/36</span></div>
+        <div class="tok">Lieutenant Orc <span class="hp">32/32</span></div>
+      </div>
+      <h2>Party</h2>
+      <div class="pcard"><div class="nm">Aria Blackwood</div><div class="hp"><span>Rogue 5</span><span>28/40</span></div><div class="pbar"><i class="amber" style="width:70%"></i></div></div>
+      <div class="pcard"><div class="nm">Kael Ironforge</div><div class="hp"><span>Fighter 5</span><span>0/35</span></div><div class="pbar"><i class="red" style="width:2%"></i></div></div>
+      <div class="pcard"><div class="nm">Finn Stonehelm</div><div class="hp"><span>Cleric 5</span><span>35/35</span></div><div class="pbar"><i style="width:100%"></i></div></div>
+      <div class="pcard"><div class="nm">Sora Moonwhisper</div><div class="hp"><span>Wizard 5</span><span>22/36</span></div><div class="pbar"><i class="amber" style="width:61%"></i></div></div>
+    </aside>
+  </div>
+</div>
+<div class="caption"><b>Layout 8 - Chat-first (map pinned in the thread).</b><p>Conversation is the spine (the Matrix-native reality): a centered, readable thread with IC prose in serif and rolls inline. The map is a <i>pinned, collapsible card</i> at the top of the thread - always there, resizable, but the talk leads. Initiative + party sit in a right rail. Best for roleplay-forward tables. Trade-off: the map is smaller than a canvas layout, so heavy tactical combat may want it expanded/popped out.</p></div>
+<script>function t(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';}</script>
+</body></html>

@@ -1,0 +1,234 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "gurps",
+  "meta": {
+    "name": "GURPS (minimal)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file).",
+    "description": "3d6 roll-under against attribute or skill targets. Generic mechanics implementation only: GURPS has no open SRD, so no skills, advantages, disadvantages, or equipment ship with this file. Everything here is a mechanics-level description written for MatrixVTT.",
+    "sources": []
+  },
+  "attributes": [
+    {
+      "key": "st",
+      "label": "Strength",
+      "min": 1
+    },
+    {
+      "key": "dx",
+      "label": "Dexterity",
+      "min": 1
+    },
+    {
+      "key": "iq",
+      "label": "Intelligence",
+      "min": 1
+    },
+    {
+      "key": "ht",
+      "label": "Health",
+      "min": 1
+    }
+  ],
+  "dice": {
+    "check": "3d6"
+  },
+  "rolls": {
+    "attribute": "3d6",
+    "skill": "3d6",
+    "save": "3d6",
+    "initiative": "3d6",
+    "attack": "3d6"
+  },
+  "formulas": {
+    "success": {
+      "$": "lt",
+      "args": [
+        "@roll.total",
+        {
+          "$": "+",
+          "args": [
+            "@target",
+            1
+          ]
+        }
+      ]
+    },
+    "margin_of_success": {
+      "$": "-",
+      "args": [
+        "@target",
+        "@roll.total"
+      ]
+    },
+    "basic_lift_lbs": {
+      "$": "floor",
+      "args": [
+        {
+          "$": "/",
+          "args": [
+            {
+              "$": "*",
+              "args": [
+                "@st",
+                "@st"
+              ]
+            },
+            5
+          ]
+        }
+      ]
+    }
+  },
+  "harm_model": {
+    "type": "tracks",
+    "tracks": [
+      "hp",
+      "fp"
+    ]
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "resource_bar",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "resource_bar",
+        "current_field": "fp_current",
+        "max_field": "fp_max",
+        "thresholds": [
+          {
+            "min": 0.5,
+            "color": "#3af"
+          },
+          {
+            "min": 0,
+            "color": "#36a"
+          }
+        ]
+      }
+    ]
+  },
+  "progression": {
+    "type": "points",
+    "pool_field": "character_points"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "fp",
+        "label": "FP",
+        "current_field": "fp_current",
+        "max_field": "fp_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "fp",
+        "label": "FP",
+        "current_field": "fp_current",
+        "max_field": "fp_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "fp",
+        "label": "FP",
+        "current_field": "fp_current",
+        "max_field": "fp_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
+    ]
+  }
+}

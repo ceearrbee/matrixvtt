@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatrixVTT</title>
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="vtt-loading">
+      <div class="loading-spinner"></div>
+      <p>Connecting to Matrix...</p>
+    </div>
+  </div>
+
+  <!-- Debug: Force console output -->
+  <script>
+    console.log('=== WIDGET HTML LOADED ===');
+    console.log('Window location:', window.location.href);
+    console.log('Is iframe?', window.self !== window.top);
+  </script>
+
+  <!-- Matrix Widget API (local bundle) -->
+  <script src="src/matrix-widget-api.js"></script>
+  <script>
+    console.log('=== MATRIX WIDGET API LOADED ===');
+    console.log('Available globals:', Object.keys(window).filter(k => k.toLowerCase().includes('widget') || k.toLowerCase().includes('matrix')));
+  </script>
+
+  <!-- Application modules -->
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

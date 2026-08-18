@@ -1,0 +1,71 @@
+/* Chat-shell design tokens.
+ *
+ * Bridges rpglog (Prose Pals) `--md-*` semantic names onto matrixvtt's
+ * existing `--color-*` / `--space-*` system so the new chat-shell
+ * components can reference one stable vocabulary while themes keep
+ * driving the whole app from `src/themes/*.css`.
+ *
+ * Imported by src/styles.css after the four theme files so every theme
+ * variable is in scope.
+ */
+
+:root {
+  /* Surface scale */
+  --md-surface: var(--color-background-primary);
+  --md-on-surface: var(--color-text-primary);
+  --md-surface-variant: var(--color-background-secondary);
+  --md-on-surface-variant: var(--color-text-secondary);
+
+  /* Primary / accent */
+  --md-primary: var(--color-primary);
+  --md-on-primary: var(--color-text-inverse);
+  --md-secondary: var(--color-text-secondary);
+  --md-outline: var(--color-border-primary);
+
+  /* Channel-tagged ink (IC / GM / Roll / Desc) - used by message rows */
+  --md-ic: var(--color-text-success);
+  --md-gm: var(--color-text-warning);
+  --md-roll: var(--color-text-info);
+  --md-desc: var(--color-text-tertiary);
+
+  /* Semantic states */
+  --md-error: var(--color-text-danger);
+  --md-on-error: var(--color-text-inverse);
+  --md-warning: var(--color-text-warning);
+  --md-success: var(--color-text-success);
+
+  /* Shape scale - resolves onto the DESIGN.md sharp-corner contract
+   * (2-3px radii, pill only for chips/avatars). The --radius-* alias
+   * names stay so chat-shell components keep one vocabulary, but they
+   * are no longer a parallel Material scale (was 4/8/12/18/24px): every
+   * step maps onto --border-radius-* or the chip pill. Sharp corners
+   * also reinforce the "not a chat-app clone" brand line. */
+  --radius-xs: var(--border-radius-sm);   /* 2px */
+  --radius-sm: var(--border-radius-md);   /* 3px */
+  --radius-md: var(--border-radius-md);   /* 3px */
+  --radius-lg: var(--border-radius-lg);   /* 4px */
+  --radius-xl: var(--border-radius-lg);   /* 4px */
+  --radius-pill: 999px;                   /* chips / avatars stay fully pill */
+
+  /* Motion easing */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  /* Elevation */
+  --elev-1: 0 1px 2px var(--color-shadow), 0 1px 3px var(--color-shadow);
+  --elev-2: 0 4px 12px var(--color-shadow);
+  --elev-3: 0 8px 24px var(--color-shadow);
+
+  /* Hairline - the 0.5px DESIGN.md hairline (was a 1px border that
+   * the "hairline" name belied). Cards, rows, and modal headers all
+   * read this. */
+  --chrome-hairline: 0.5px solid var(--color-border-primary);
+
+  /* Floating popup sits above the log feed but BELOW legacy modals
+   * (--z-modal: 10000) and toasts (--z-toast: 11000) so a dialog
+   * focus-trap is never obscured by a side-channel popup. Derived from
+   * the semantic z-scale in styles.css rather than a magic number. */
+  --z-popup: calc(var(--z-modal) - 1);
+}

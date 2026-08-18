@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Fast checks on every commit:
+#   - lint-staged: eslint --max-warnings 0 against the files staged for commit
+#   - typecheck: tsc --noEmit across the whole project (JSDoc-based)
+#   - scan-bad-patterns: the same grep gate CI runs (JSON deep-clone, bare
+#     console.log, eval / new Function)
+#
+# Bypass with `git commit --no-verify` when you intentionally want to
+# commit a WIP that doesn't yet pass. CI still gates the merge.
+
+set -e
+
+npx lint-staged
+npm run typecheck
+bash scripts/scan-bad-patterns.sh

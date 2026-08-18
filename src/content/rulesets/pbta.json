@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "name": "Powered by the Apocalypse (generic)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file). The basic moves below are original generic text written for MatrixVTT; no Apocalypse World text is reproduced.",
+    "description": "2d6 + stat; 10+ full hit, 7-9 partial, 6- miss. Ships generic basic moves as scaffolding; replace them with the moves of the specific Powered by the Apocalypse game you are running.",
+    "attribution": "The Powered by the Apocalypse framework originates in Apocalypse World by D. Vincent Baker and Meguey Baker. This file credits that design lineage and reproduces none of its text.",
+    "sources": [
+      { "title": "Apocalypse World", "license": "Proprietary (design lineage credited, no text reused)", "url": "http://apocalypse-world.com/" }
+    ]
+  },
+
+  "narrative": true,
+
+  "attributes": [
+    { "key": "cool",    "label": "Cool",    "min": -2, "max": 3 },
+    { "key": "hard",    "label": "Hard",    "min": -2, "max": 3 },
+    { "key": "hot",     "label": "Hot",     "min": -2, "max": 3 },
+    { "key": "sharp",   "label": "Sharp",   "min": -2, "max": 3 },
+    { "key": "weird",   "label": "Weird",   "min": -2, "max": 3 }
+  ],
+
+  "dice": {
+    "check": "2d6",
+    "crit": { "low": 2, "high": 12 }
+  },
+
+  "rolls": {
+    "attribute":  "2d6+{mod}",
+    "skill":      "2d6+{bonus}",
+    "save":       "2d6+{bonus}",
+    "initiative": "2d6+{bonus}",
+    "attack":     "2d6+{bonus}"
+  },
+
+  "formulas": {
+    "ability_mod": "@score"
+  },
+
+  "harm_model": { "type": "pool", "track_key": "harm" },
+
+  "progression": { "type": "milestones" },
+
+  "skills": [
+    { "key": "act_under_pressure", "label": "Act Under Pressure", "attribute": "cool",
+      "description": "When you do something risky while danger bears down, roll 2d6+Cool. 10+: you pull it off cleanly. 7-9: you manage it, but the GM offers a cost, a compromise, or an ugly choice. 6-: it goes wrong and the danger lands." },
+    { "key": "use_force", "label": "Use Force", "attribute": "hard",
+      "description": "When you take something by force or threat, roll 2d6+Hard. 10+: you take it and choose the terms. 7-9: you take it, but pick one: you draw unwanted attention, you take harm, or you break something you needed. 6-: they turn it back on you." },
+    { "key": "charm_someone", "label": "Charm Someone", "attribute": "hot",
+      "description": "When you press someone with charm, leverage, or promises, roll 2d6+Hot. 10+: they go along with what you want. 7-9: they need something concrete first, a promise, proof, or payment. 6-: you have shown your hand." },
+    { "key": "read_the_scene", "label": "Read the Scene", "attribute": "sharp",
+      "description": "When you size up a charged situation, roll 2d6+Sharp. 10+: ask the GM three questions about the scene. 7-9: ask one. 6-: you misread it, and acting on the wrong picture costs you." },
+    { "key": "read_a_person", "label": "Read a Person", "attribute": "sharp",
+      "description": "When you study someone in a charged interaction, roll 2d6+Sharp. 10+: hold three questions to ask about them while you interact. 7-9: hold one. 6-: they read you instead." },
+    { "key": "open_your_mind", "label": "Open Your Mind", "attribute": "weird",
+      "description": "When you reach past the ordinary, whatever that means in your setting, roll 2d6+Weird. 10+: a clear vision, contact, or truth. 7-9: a partial, distorted, or costly glimpse. 6-: something notices you." },
+    { "key": "help_or_hinder", "label": "Help or Hinder", "attribute": "cool",
+      "description": "When you help or get in the way of someone rolling a move, roll 2d6+Cool. 10+: they take +2 or -2 to their roll, your choice. 7-9: same, but you expose yourself to the same danger or fallout. 6-: you make it worse for both of you." }
+  ],
+
+  "character_sheet": {
+    "sections": [
+      { "kind": "resource_track", "id": "harm", "label": "Harm",
+        "current_field": "harm_current", "max_field": "harm_max" },
+      { "kind": "attributes" },
+      { "kind": "skill_list", "label": "Basic Moves" },
+      {
+        "kind": "tagged_list",
+        "field": "bonds",
+        "label": "Bonds",
+        "editable": true,
+        "placeholder": "Add a bond…"
+      },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "character_preview": {
+    "sections": [
+      { "kind": "resource_track", "id": "harm", "label": "Harm",
+        "current_field": "harm_current", "max_field": "harm_max" },
+      { "kind": "attributes" },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "npc_preview": {
+    "sections": [
+      { "kind": "resource_track", "id": "harm", "label": "Harm",
+        "current_field": "harm_current", "max_field": "harm_max" },
+      { "kind": "attributes" },
+      { "kind": "defenses" },
+      { "kind": "conditions" },
+      { "kind": "notes" }
+    ]
+  },
+
+  "token": {
+    "overlays": [
+      { "kind": "resource_bar", "current_field": "harm_current", "max_field": "harm_max" }
+    ]
+  },
+
+  "item_preview": {
+    "sections": [
+      { "kind": "description" },
+      { "kind": "attack_roll" },
+      { "kind": "damage_roll" },
+      { "kind": "use_consumable" },
+      { "kind": "stat_row", "stats": [
+        { "label": "Type", "field": "type" }
+      ]}
+    ]
+  }
+}

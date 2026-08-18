@@ -1,0 +1,59 @@
+/* Dark theme - the central fallback when no data-theme attribute is set.
+   Imported first; subsequent themes override on [data-theme="X"] match. */
+:root, :root[data-theme="dark"] {
+  --color-background-primary: #16191f;
+  --color-background-secondary: #1f2430;
+  --color-background-tertiary: #2d3444;
+  --color-background-hover: rgba(255, 255, 255, 0.05);
+  --vendor-icon-filter: invert(0.85);
+  --color-background-info: rgba(24, 95, 165, 0.15);
+  --color-background-success: rgba(29, 158, 117, 0.15);
+  --color-background-warning: rgba(239, 159, 39, 0.15);
+  --color-background-danger: rgba(226, 75, 74, 0.15);
+
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(200, 210, 230, 0.75);
+  --color-text-tertiary: rgba(180, 195, 215, 0.8);
+  --color-text-info: #5BB8E8;
+  --color-text-success: #25BD8D;
+  --color-text-warning: #EF9F27;
+  --color-text-danger: #EC6B6A;
+  /* For text/icons sitting on a saturated solid background (accent badge,
+     warning button fill, danger hover): always rendered light regardless
+     of theme. Each theme below may override if a darker variant reads
+     better - e.g. light theme keeps it white because accent backgrounds
+     remain saturated. */
+  --color-text-inverse: #ffffff;
+
+  --color-border-primary: rgba(255, 255, 255, 0.18);
+  --color-border-secondary: rgba(255, 255, 255, 0.25);
+  --color-border-tertiary: rgba(255, 255, 255, 0.32);
+  --color-border-info: rgba(91, 184, 232, 0.3);
+  --color-border-success: rgba(29, 158, 117, 0.3);
+  --color-border-warning: rgba(239, 159, 39, 0.3);
+  --color-border-danger: rgba(226, 75, 74, 0.3);
+
+  --color-map-bg: #0a0e14;
+  --color-map-floor: #1a2035;
+  --color-focus: #5BB8E8;
+
+  /* Rationed accent (Table Blue) - aliases text-info so every theme's
+     override re-resolves it. Page-kind stripes alias semantic hues;
+     only fiction needs a literal (no purple in the semantic set), so
+     each theme overrides --color-kind-fiction. */
+  --color-accent: var(--color-text-info);
+  --color-kind-journal: var(--color-text-info);
+  --color-kind-lore: var(--color-text-success);
+  --color-kind-fiction: #A78BDB;
+  --color-kind-prep: var(--color-text-warning);
+
+  --color-grid-line: rgba(255, 255, 255, 0.08);
+  --color-area-reveal: rgba(74, 158, 255, 0.15);
+  --color-area-hide: rgba(255, 107, 107, 0.15);
+
+  --color-border: var(--color-border-primary);
+  --color-primary: var(--color-text-info);
+  --color-success: var(--color-text-success);
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-shadow: rgba(0, 0, 0, 0.4);
+}

@@ -1,0 +1,77 @@
+/* Theme overrides for driver.js (the onboarding tour). The vendor
+   stylesheet ships a light-only popover with off-brand radii and
+   shadow; these rules re-skin it onto the token contract so all four
+   themes track. Import order matters: this file loads after
+   driver.js/dist/driver.css (see onboarding-tour.js). */
+
+.driver-popover {
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elev-3);
+  font-family: var(--font-headline);
+}
+
+.driver-popover-title {
+  font: inherit;
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.driver-popover-description {
+  font: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.driver-popover-progress-text {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.driver-popover-footer button {
+  background: transparent;
+  border: 0.5px solid var(--color-border-primary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  text-shadow: none;
+  padding: 4px 10px;
+}
+
+.driver-popover-footer button:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.driver-popover-footer button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.driver-popover-close-btn {
+  color: var(--color-text-secondary);
+}
+
+.driver-popover-close-btn:hover {
+  color: var(--color-text-primary);
+}
+
+/* Driver's arrows are border triangles; each side's border color must
+   match the popover surface or the arrow renders vendor-white. */
+.driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: var(--color-background-secondary);
+}
+.driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: var(--color-background-secondary);
+}
+.driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: var(--color-background-secondary);
+}
+.driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: var(--color-background-secondary);
+}

@@ -1,0 +1,235 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "wod",
+  "meta": {
+    "name": "World of Darkness (generic d10 pool)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file).",
+    "description": "d10 dice pool; each die ≥ 8 is a success. Three health tracks: Bashing, Lethal, Aggravated. Generic mechanics implementation only: World of Darkness has no open SRD, so no skills, disciplines, or splats ship with this file. Everything here is a mechanics-level description written for MatrixVTT.",
+    "sources": []
+  },
+  "narrative": true,
+  "attributes": [
+    {
+      "key": "strength",
+      "label": "Strength",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "dexterity",
+      "label": "Dexterity",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "stamina",
+      "label": "Stamina",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "intelligence",
+      "label": "Intelligence",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "wits",
+      "label": "Wits",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "resolve",
+      "label": "Resolve",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "presence",
+      "label": "Presence",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "manipulation",
+      "label": "Manipulation",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "composure",
+      "label": "Composure",
+      "min": 1,
+      "max": 10
+    }
+  ],
+  "dice": {
+    "check": "1d10"
+  },
+  "rolls": {
+    "attribute": "{bonus}d10>=8",
+    "skill": "{bonus}d10>=8",
+    "save": "{bonus}d10>=8",
+    "initiative": "1d10+{bonus}",
+    "attack": "{bonus}d10>=8"
+  },
+  "formulas": {
+    "ability_mod": "@score"
+  },
+  "harm_model": {
+    "type": "tracks",
+    "tracks": [
+      "bashing",
+      "lethal",
+      "aggravated"
+    ]
+  },
+  "progression": {
+    "type": "points",
+    "pool_field": "experience"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "resource_bar",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          }
+        ]
+      }
+    ]
+  }
+}

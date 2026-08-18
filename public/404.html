@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; base-uri 'self'; form-action 'self'; object-src 'none'">
+  <title>404 - MatrixVTT</title>
+  <style>
+    :root {
+      --bg: #16191f;
+      --fg: rgba(255, 255, 255, 0.92);
+      --muted: rgba(200, 210, 230, 0.65);
+      --accent: #6c8cff;
+    }
+    @media (prefers-color-scheme: light) {
+      :root { --bg: #ffffff; --fg: rgba(0, 0, 0, 0.87); --muted: rgba(0, 0, 0, 0.55); }
+    }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; line-height: 1.5;
+    }
+    main { max-width: 480px; padding: 32px; text-align: center; }
+    h1 { font-size: 64px; margin: 0 0 8px; }
+    p { color: var(--muted); margin: 12px 0; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>404</h1>
+    <p>That path doesn't exist on this MatrixVTT deployment.</p>
+    <p><a href="__BASE_URL__app.html">Open the virtual tabletop</a></p>
+  </main>
+</body>
+</html>

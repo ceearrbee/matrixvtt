@@ -1,0 +1,45 @@
+/* High-contrast theme - accessibility-first variant with saturated
+   borders and pure-black background. */
+/* Explicit High Contrast Mode */
+:root[data-theme="high-contrast"] {
+  --color-background-primary: #000000;
+  --color-background-secondary: #1a1a1a;
+  --color-background-tertiary: #2d2d2d;
+  --color-background-hover: rgba(255, 255, 255, 0.08);
+  --vendor-icon-filter: invert(1);
+  --color-background-info: rgba(102, 178, 255, 0.2);
+  --color-background-success: rgba(76, 209, 55, 0.2);
+  --color-background-warning: rgba(255, 204, 0, 0.2);
+  --color-background-danger: rgba(255, 71, 87, 0.2);
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #E0E0E0;
+  --color-text-tertiary: #BBBBBB;
+  --color-text-info: #66B2FF;
+  --color-text-success: #4CD137;
+  --color-text-warning: #FFCC00;
+  --color-text-danger: #FF4757;
+
+  --color-border-primary: rgba(255, 255, 255, 0.45);
+  --color-border-secondary: rgba(255, 255, 255, 0.5);
+  --color-border-tertiary: rgba(255, 255, 255, 0.7);
+  --color-border-info: rgba(102, 178, 255, 0.6);
+  --color-border-success: rgba(76, 209, 55, 0.6);
+  --color-border-warning: rgba(255, 204, 0, 0.6);
+  --color-border-danger: rgba(255, 99, 112, 0.85);
+
+  --color-map-bg: #0a0a0a;
+  --color-map-floor: #1a1a1a;
+  --color-focus: #00FFFF;
+  --color-kind-fiction: #C99CFF;
+
+  --color-grid-line: rgba(255, 255, 255, 0.15);
+  --color-area-reveal: rgba(102, 178, 255, 0.25);
+  --color-area-hide: rgba(255, 71, 87, 0.25);
+
+  --color-border: var(--color-border-primary);
+  --color-primary: var(--color-text-info);
+  --color-success: var(--color-text-success);
+  --color-overlay: rgba(0, 0, 0, 0.85);
+  --color-shadow: rgba(0, 0, 0, 0.6);
+}

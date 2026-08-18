@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout 1 - Map-dominant + docked chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&family=Bodoni+Moda:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN.md token contract ─────────────────────────────────────────── */
+:root[data-theme="dark"]{
+  --bg:#16191F; --surface:#1F2430; --overlay:#2D3444; --map-void:#0A0E14;
+  --ink:rgba(255,255,255,.92); --ink2:rgba(200,210,230,.75); --ink3:rgba(160,175,195,.65);
+  --blue:#5BB8E8; --blue-bg:rgba(24,95,165,.18); --blue-line:rgba(91,184,232,.4);
+  --green:#1D9E75; --amber:#EF9F27; --red:#E24B4A;
+  --hair:rgba(255,255,255,.18); --hair-soft:rgba(255,255,255,.10);
+  --shadow:rgba(0,0,0,.45);
+}
+:root[data-theme="light"]{
+  --bg:#ffffff; --surface:#f5f7fa; --overlay:#e8ecf1; --map-void:#e5e8ec;
+  --ink:rgba(0,0,0,.87); --ink2:rgba(0,0,0,.65); --ink3:rgba(0,0,0,.52);
+  --blue:#1565C0; --blue-bg:rgba(24,95,165,.08); --blue-line:rgba(21,101,192,.3);
+  --green:#0F6E56; --amber:#C77700; --red:#C62828;
+  --hair:rgba(0,0,0,.12); --hair-soft:rgba(0,0,0,.07);
+  --shadow:rgba(0,0,0,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Work Sans',-apple-system,system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:14px;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Top bar (2-zone) ─────────────────────────────────────────────────── */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px;background:var(--surface);border-bottom:.5px solid var(--hair)}
+.titles{display:flex;flex-direction:column;line-height:1.15}
+.title{font-size:16px;font-weight:700;letter-spacing:-.3px}
+.subtitle{font-size:12px;color:var(--ink2)}
+.cluster{display:flex;align-items:center;gap:6px}
+.pill{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:3px;
+  border:.5px solid var(--hair);background:transparent;color:var(--ink2);cursor:pointer}
+.pill:hover{background:var(--overlay);color:var(--ink)}
+.pill--live{color:var(--green);border-color:transparent}
+.pill--live::before{content:"●";margin-right:5px;font-size:9px;vertical-align:middle}
+.pill--danger{color:var(--red)}
+.pill--active{background:var(--blue-bg);color:var(--blue);box-shadow:inset 0 0 0 .5px var(--blue-line)}
+
+/* ── Shell: icon rail | workspace ─────────────────────────────────────── */
+.shell{flex:1;display:grid;grid-template-columns:56px 1fr;min-height:0}
+.rail{background:var(--bg);border-right:.5px solid var(--hair);
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0}
+.rail__btn{width:40px;height:40px;border-radius:3px;border:0;background:transparent;
+  color:var(--ink3);font-size:18px;cursor:pointer;display:grid;place-items:center}
+.rail__btn:hover{background:var(--overlay);color:var(--ink)}
+.rail__btn small{display:block;font-size:8px;letter-spacing:.04em}
+
+/* ── Workspace: map dominant + right chat dock ────────────────────────── */
+.work{display:grid;grid-template-columns:1fr 320px;min-height:0;position:relative}
+.stage{position:relative;min-width:0;background:var(--map-void);overflow:hidden}
+
+/* initiative as a thin bar pinned to the top of the map */
+.initbar{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;gap:6px;
+  align-items:center;padding:6px 10px;background:color-mix(in srgb,var(--surface) 88%,transparent);
+  border-bottom:.5px solid var(--hair);backdrop-filter:blur(4px);overflow-x:auto}
+.initbar__label{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);flex:0 0 auto;margin-right:4px}
+.tok{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:3px;
+  border:.5px solid var(--hair);font-size:12px;color:var(--ink2);white-space:nowrap}
+.tok--turn{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+.tok--down{opacity:.5;text-decoration:line-through}
+.tok b{font-weight:600}
+.tok .hp{font-size:10px;color:var(--ink3)}
+
+/* the battlemap */
+.map{position:absolute;inset:44px 0 0 0;display:grid;place-items:center;overflow:hidden}
+.board{position:relative;width:560px;height:480px;
+  background-image:linear-gradient(var(--hair-soft) 1px,transparent 1px),
+    linear-gradient(90deg,var(--hair-soft) 1px,transparent 1px);
+  background-size:40px 40px;background-color:#2a2118;border:.5px solid var(--hair)}
+.fog{position:absolute;inset:0;background:
+   radial-gradient(circle at 42% 55%, transparent 120px, rgba(226,75,74,.18) 180px),
+   conic-gradient(from 20deg at 60% 30%, rgba(239,159,39,.22), transparent 90deg);pointer-events:none}
+.unit{position:absolute;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;
+  font-size:20px;border:2px solid rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.unit span{position:absolute;top:-16px;font-size:10px;color:var(--ink2);white-space:nowrap}
+.hpbar{position:absolute;bottom:-7px;left:4px;right:4px;height:3px;border-radius:2px;background:rgba(0,0,0,.5)}
+.hpbar i{display:block;height:100%;border-radius:2px;background:var(--green)}
+.mapctl{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:4px;z-index:3}
+.mapctl button{width:30px;height:30px;border-radius:3px;border:.5px solid var(--hair);
+  background:var(--surface);color:var(--ink2);cursor:pointer}
+.drawtools{position:absolute;right:10px;top:54px;z-index:3;display:flex;flex-direction:column;gap:3px;
+  padding:5px;background:var(--surface);border:.5px solid var(--hair);border-radius:3px}
+.drawtools button{width:26px;height:26px;border-radius:2px;border:0;background:transparent;color:var(--ink3);cursor:pointer}
+.drawtools button.on{background:var(--blue-bg);color:var(--blue)}
+
+/* right chat dock */
+.dock{display:flex;flex-direction:column;min-height:0;background:var(--bg);border-left:.5px solid var(--hair)}
+.dock__head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:.5px solid var(--hair)}
+.dock__head h2{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);font-weight:600}
+.feed{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.msg{font-size:13px;line-height:1.45}
+.msg .who{font-weight:600;color:var(--ink)}
+.msg .body{color:var(--ink2)}
+.msg--roll .body{color:var(--blue)}
+.msg .meta{font-size:10px;color:var(--ink3)}
+.composer{border-top:.5px solid var(--hair);padding:8px;display:flex;gap:6px;align-items:center}
+.composer input{flex:1;background:var(--bg);border:.5px solid var(--hair);border-radius:2px;
+  color:var(--ink);padding:8px;font-family:inherit;font-size:13px}
+.composer .chip{font-size:12px;padding:6px 8px;border:.5px solid var(--hair);border-radius:3px;color:var(--ink2);background:transparent;cursor:pointer}
+
+/* caption */
+.caption{position:fixed;left:64px;bottom:12px;max-width:520px;z-index:9;
+  background:var(--surface);border:.5px solid var(--hair);border-radius:4px;padding:10px 12px;box-shadow:0 4px 16px var(--shadow)}
+.caption b{color:var(--blue)}
+.caption p{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:3px}
+.themetoggle{font-size:11px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="titles">
+      <div class="title">The Sunken Keep</div>
+      <div class="subtitle">Round 3 · Aria</div>
+    </div>
+    <div class="cluster">
+      <button class="pill">1 online</button>
+      <button class="pill">GM</button>
+      <button class="pill pill--active">Prep</button>
+      <button class="pill">⋯</button>
+      <button class="pill pill--live">Live</button>
+      <button class="pill pill--danger">Leave</button>
+      <button class="pill themetoggle" onclick="t()">◐ theme</button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="rail">
+      <button class="rail__btn">☰<small>MENU</small></button>
+      <button class="rail__btn">🎬<small>SCENES</small></button>
+      <button class="rail__btn">📖<small>NOTES</small></button>
+      <button class="rail__btn">👥<small>NPCS</small></button>
+      <button class="rail__btn">📦<small>ITEMS</small></button>
+      <button class="rail__btn">🗺<small>MAPS</small></button>
+    </nav>
+
+    <div class="work">
+      <!-- MAP STAGE (dominant) -->
+      <section class="stage">
+        <div class="initbar">
+          <span class="initbar__label">Initiative</span>
+          <div class="tok tok--turn"><b>Aria</b><span class="hp">28/40</span></div>
+          <div class="tok"><b>War Boss</b><span class="hp">45/60</span></div>
+          <div class="tok tok--down"><b>Kael</b><span class="hp">0/35</span></div>
+          <div class="tok"><b>Finn</b><span class="hp">35/35</span></div>
+          <div class="tok"><b>Orc Guard</b><span class="hp">8/11</span></div>
+          <div class="tok"><b>Sora</b><span class="hp">22/36</span></div>
+          <div class="tok"><b>Lt. Orc</b><span class="hp">32/32</span></div>
+        </div>
+
+        <div class="drawtools">
+          <button class="on" title="Pointer">⤢</button>
+          <button title="Measure">📏</button>
+          <button title="Pencil">✎</button>
+          <button title="Wall">▟</button>
+        </div>
+
+        <div class="map">
+          <div class="board">
+            <div class="fog"></div>
+            <div class="unit" style="left:200px;top:170px;background:#5b3a8a">🧙‍♀️<span>Sora</span><div class="hpbar"><i style="width:61%"></i></div></div>
+            <div class="unit" style="left:200px;top:230px;background:#1d6e56">☘<span>Finn</span><div class="hpbar"><i style="width:100%"></i></div></div>
+            <div class="unit" style="left:200px;top:290px;background:#7a5a1a">⚔<span>Kael</span><div class="hpbar"><i style="width:0;background:var(--red)"></i></div></div>
+            <div class="unit" style="left:270px;top:230px;background:#3a4a6a">🚶<span style="color:var(--blue)">Aria ◄</span><div class="hpbar"><i style="width:70%;background:var(--amber)"></i></div></div>
+            <div class="unit" style="left:360px;top:160px;background:#7a1f1a;width:64px;height:64px;font-size:26px">👹<span>War Boss</span><div class="hpbar"><i style="width:75%"></i></div></div>
+          </div>
+        </div>
+
+        <div class="mapctl"><button>＋</button><button>－</button></div>
+      </section>
+
+      <!-- RIGHT CHAT DOCK -->
+      <aside class="dock">
+        <div class="dock__head"><h2>Table chat</h2><button class="pill">⌄</button></div>
+        <div class="feed">
+          <div class="msg msg--roll"><span class="who">Aria</span> <span class="body">rolls 1d20+7 → <b>24</b> to hit the War Boss</span><div class="meta">just now</div></div>
+          <div class="msg"><span class="who">GM</span> <span class="body">The blade bites deep - the War Boss snarls and staggers back a step.</span><div class="meta">just now</div></div>
+          <div class="msg msg--roll"><span class="who">Sora</span> <span class="body">casts Fire Bolt - 1d10 → <b>7</b> fire</span><div class="meta">1m</div></div>
+          <div class="msg"><span class="who">Finn</span> <span class="body">"Hold the line, I've got Kael!"</span><div class="meta">2m</div></div>
+        </div>
+        <div class="composer">
+          <button class="chip">d20</button>
+          <button class="chip">IC</button>
+          <input placeholder="Message the table…">
+          <button class="chip">Send</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="caption">
+  <b>Layout 1 - Map-dominant + docked chat.</b>
+  <p>The map is the star: it fills the workspace, with initiative as a thin bar pinned to its top and tools floating on the map. Chat is a fixed right dock that's always there but never competes for the map's space. Trade-off: chat is narrower; deep reading/scenes happen in the dock or the Journal drawer.</p>
+</div>
+
+<script>
+function t(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';}
+</script>
+</body>
+</html>

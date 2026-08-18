@@ -1,0 +1,109 @@
+/* Nondescript Theme - mirrors the palette of
+   https://nondescript.design / the matrixvtt.html mockup. Stark
+   white / near-black light mode + true black / near-white dark
+   inverse via prefers-color-scheme. Picks up the user's OS
+   light/dark preference automatically within the palette. */
+:root[data-theme="nondescript"] {
+  --color-background-primary: #FFFFFF;
+  --color-background-secondary: #F9F9F9;
+  --color-background-tertiary: #F4F4F4;
+  --color-background-hover: rgba(17, 17, 17, 0.04);
+  --vendor-icon-filter: none;
+  --color-background-info: rgba(17, 17, 17, 0.05);
+  --color-background-success: rgba(15, 110, 86, 0.08);
+  --color-background-warning: rgba(199, 119, 0, 0.08);
+  --color-background-danger: rgba(198, 40, 40, 0.08);
+
+  --color-text-primary: #111111;
+  --color-text-secondary: #595959;
+  --color-text-tertiary: #686868;
+  --color-text-info: #111111;
+  --color-text-success: #0F6E56;
+  --color-text-warning: #8A5200;
+  --color-text-danger: #C62828;
+
+  --color-border-primary: #111111;
+  --color-border-secondary: #111111;
+  --color-border-tertiary: rgba(17, 17, 17, 0.4);
+  --color-border-info: #111111;
+  --color-border-success: rgba(15, 110, 86, 0.5);
+  --color-border-warning: rgba(199, 119, 0, 0.5);
+  --color-border-danger: rgba(198, 40, 40, 0.5);
+
+  --color-map-bg: #F4F4F4;
+  --color-map-floor: #E8E8E8;
+  --color-focus: #005FCC;
+  --color-kind-fiction: var(--color-text-primary);
+
+  --color-grid-line: rgba(17, 17, 17, 0.08);
+  --color-area-reveal: rgba(17, 17, 17, 0.08);
+  --color-area-hide: rgba(198, 40, 40, 0.12);
+
+  --color-border: var(--color-border-primary);
+  --color-primary: var(--color-text-primary);
+  --color-success: var(--color-text-success);
+  --color-overlay: rgba(17, 17, 17, 0.5);
+  --color-shadow: rgba(17, 17, 17, 0.15);
+
+  /* Editorial vocabulary - hairline chrome, flat surfaces, sharp 3px
+     corners, denser spacing scale, heavier map-token labels. Consumers
+     read these tokens via var(--token, default) in styles.css. */
+
+  --border-radius-sm: 3px;
+  --border-radius-md: 3px;
+  --border-radius-lg: 3px;
+
+  --space-2xs: 1px;
+  --space-xs:  3px;
+  --space-sm:  5px;
+  --space-md:  7px;
+  --space-lg:  9px;
+  --space-xl:  11px;
+  --space-2xl: 14px;
+  --space-3xl: 18px;
+  --space-4xl: 22px;
+
+  --map-token-label-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="nondescript"] {
+    --color-background-primary: #000000;
+    --color-background-secondary: #111111;
+    --color-background-tertiary: #161616;
+    --color-background-hover: rgba(238, 238, 238, 0.06);
+    --vendor-icon-filter: invert(0.85);
+    --color-background-info: rgba(238, 238, 238, 0.06);
+    --color-background-success: rgba(76, 209, 55, 0.12);
+    --color-background-warning: rgba(239, 159, 39, 0.12);
+    --color-background-danger: rgba(226, 75, 74, 0.12);
+
+    --color-text-primary: #EEEEEE;
+    --color-text-secondary: #A6A6A6;
+    --color-text-tertiary: #8A8A8A;
+    --color-text-info: #EEEEEE;
+    --color-text-success: #4CD137;
+    --color-text-warning: #EF9F27;
+    --color-text-danger: #E24B4A;
+
+    --color-border-primary: #EEEEEE;
+    --color-border-secondary: #EEEEEE;
+    --color-border-tertiary: rgba(238, 238, 238, 0.4);
+    --color-border-info: #EEEEEE;
+    --color-border-success: rgba(76, 209, 55, 0.5);
+    --color-border-warning: rgba(239, 159, 39, 0.5);
+    --color-border-danger: rgba(226, 75, 74, 0.5);
+
+    --color-map-bg: #050505;
+    --color-map-floor: #121212;
+    --color-focus: #4DA6FF;
+    --color-kind-fiction: var(--color-text-primary);
+
+    --color-grid-line: rgba(238, 238, 238, 0.08);
+    --color-area-reveal: rgba(238, 238, 238, 0.06);
+    --color-area-hide: rgba(226, 75, 74, 0.15);
+
+    --color-overlay: rgba(0, 0, 0, 0.7);
+    --color-shadow: rgba(0, 0, 0, 0.6);
+  }
+}

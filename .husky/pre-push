@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# Full test suite before a push. ~20s today. Catches regressions like
+# the MigrationManager timer leak that lint + typecheck miss.
+#
+# Bypass with `git push --no-verify` when intentional. CI still gates
+# the merge.
+
+set -e
+
+npm test -- --run

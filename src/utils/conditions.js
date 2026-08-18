@@ -1,0 +1,18 @@
+export const COND_ICONS = {
+  prone: '↓',
+  poisoned: '☠',
+  stunned: '⚡',
+  paralyzed: '🔒',
+  charmed: '♥',
+  frightened: '😱',
+  blinded: '👁',
+  deafened: '👂',
+  exhausted: '⟳',
+  invisible: '👻',
+  unconscious: '💫',
+  concentration: '⊕',
+  burning: '🔥',
+  frozen: '❄',
+  slowed: '🐢',
+  hasted: '⏩',
+};

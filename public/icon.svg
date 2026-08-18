@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#16191f" rx="80"/>
+
+  <!-- d20 outer shape: irregular pentagon/icosahedral silhouette -->
+  <!-- Top point -->
+  <polygon
+    points="256,52 408,168 368,352 144,352 104,168"
+    fill="#1f2430"
+    stroke="#5BB8E8"
+    stroke-width="12"
+    stroke-linejoin="round"
+  />
+
+  <!-- Bottom triangle completing the d20 shape -->
+  <polygon
+    points="144,352 368,352 256,450"
+    fill="#1f2430"
+    stroke="#5BB8E8"
+    stroke-width="12"
+    stroke-linejoin="round"
+  />
+
+  <!-- Internal facet lines (d20 detail) -->
+  <!-- Center horizontal line -->
+  <line x1="144" y1="352" x2="368" y2="352" stroke="#5BB8E8" stroke-width="6" opacity="0.4"/>
+  <!-- Left diagonal from top to bottom-left -->
+  <line x1="256" y1="52" x2="144" y2="352" stroke="#5BB8E8" stroke-width="6" opacity="0.4"/>
+  <!-- Right diagonal from top to bottom-right -->
+  <line x1="256" y1="52" x2="368" y2="352" stroke="#5BB8E8" stroke-width="6" opacity="0.4"/>
+  <!-- Upper-left cross line -->
+  <line x1="104" y1="168" x2="368" y2="352" stroke="#5BB8E8" stroke-width="4" opacity="0.25"/>
+  <!-- Upper-right cross line -->
+  <line x1="408" y1="168" x2="144" y2="352" stroke="#5BB8E8" stroke-width="4" opacity="0.25"/>
+  <!-- Horizontal mid line -->
+  <line x1="104" y1="168" x2="408" y2="168" stroke="#5BB8E8" stroke-width="4" opacity="0.25"/>
+  <!-- Left to center-bottom -->
+  <line x1="104" y1="168" x2="256" y2="450" stroke="#5BB8E8" stroke-width="4" opacity="0.25"/>
+  <!-- Right to center-bottom -->
+  <line x1="408" y1="168" x2="256" y2="450" stroke="#5BB8E8" stroke-width="4" opacity="0.25"/>
+
+  <!-- "20" text centered on the main face -->
+  <text
+    x="256"
+    y="282"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-family="monospace, 'Courier New', Courier"
+    font-size="120"
+    font-weight="700"
+    fill="#5BB8E8"
+    letter-spacing="-4"
+  >20</text>
+</svg>

@@ -1,0 +1,153 @@
+{
+  "name": "matrixvtt",
+  "version": "1.1.0",
+  "description": "Production-ready virtual tabletop system built as a Matrix widget with fog of war, initiative tracking, and real-time multiplayer sync",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node scripts/build-icons.mjs",
+    "predev": "node scripts/build-icons.mjs",
+    "icons:build": "node scripts/build-icons.mjs --force",
+    "build": "vite build",
+    "preview": "vite preview",
+    "docs:generate": "node docs/scripts/generate-examples.mjs",
+    "docs:dev": "npm run docs:generate && vitepress dev docs",
+    "docs:build": "npm run docs:generate && vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "test": "vitest run",
+    "test:smoke": "vitest run --config vitest.smoke.config.js",
+    "verify:deploy": "node scripts/verify-deploy.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps",
+    "test:lhci": "VITE_BASE=/ npm run build && lhci autorun --config=./lighthouserc.json",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/ --max-warnings 0",
+    "lint:fix": "eslint src/ --fix",
+    "knip": "knip --no-progress",
+    "knip:prod": "knip --no-progress --config knip.prod.json",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "typecheck": "tsc --noEmit",
+    "audit": "npm audit --audit-level=high",
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "size": "size-limit",
+    "prepare": "husky",
+    "package": "bash scripts/package.sh"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": "eslint --max-warnings 0"
+  },
+  "overrides": {
+    "esbuild": "^0.25.12",
+    "joi": "^17.13.4",
+    "@toast-ui/editor": {
+      "dompurify": "3.4.3"
+    }
+  },
+  "size-limit": [
+    {
+      "name": "main app bundle",
+      "path": "dist/assets/app-*.js",
+      "limit": "50 kB"
+    },
+    {
+      "name": "matrix widget bundle",
+      "path": "dist/assets/matrix-widget-*.js",
+      "limit": "100 kB"
+    },
+    {
+      "name": "chat-integrator chunk",
+      "path": "dist/assets/chat-integrator-*.js",
+      "limit": "190 kB"
+    },
+    {
+      "name": "konva runtime",
+      "path": "dist/assets/konva-*.js",
+      "limit": "60 kB"
+    },
+    {
+      "name": "matrix-sdk chunk (lazy)",
+      "path": "dist/assets/matrix-sdk-*.js",
+      "limit": "270 kB"
+    },
+    {
+      "name": "toast-ui editor chunk (lazy)",
+      "path": "dist/assets/esm-*.js",
+      "limit": "160 kB"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ceearrbee/matrixvtt.git"
+  },
+  "homepage": "https://ceearrbee.github.io/matrixvtt/",
+  "keywords": [
+    "matrix",
+    "vtt",
+    "rpg",
+    "tabletop",
+    "dnd",
+    "widget"
+  ],
+  "author": "ceearrbee",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@matrix-widget-toolkit/api": "^5.0.3",
+    "@preact/preset-vite": "^2.10.5",
+    "@preact/signals": "^2.9.0",
+    "@testing-library/preact": "^3.2.4",
+    "@toast-ui/editor": "^3.2.2",
+    "dompurify": "3.4.3",
+    "driver.js": "^1.4.0",
+    "focus-trap": "^8.1.0",
+    "fuse.js": "^7.3.0",
+    "idb-keyval": "^6.2.2",
+    "konva": "^10.3.0",
+    "marked": "^18.0.3",
+    "matrix-js-sdk": "^41.5.0",
+    "matrix-widget-api": "^1.16.1",
+    "p-retry": "^8.0.0",
+    "preact": "^10.29.1",
+    "rxjs": "^7.8.1",
+    "sonner": "^2.0.7",
+    "tinykeys": "^3.0.0",
+    "valibot": "^1.4.0",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.30"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@eslint/js": "^10.0.1",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.61.0",
+    "@size-limit/preset-app": "^12.1.0",
+    "@testing-library/dom": "^10.4.1",
+    "@types/matrix-js-sdk": "^11.1.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/ui": "^4.1.2",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-security": "^4.0.1",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^17.6.0",
+    "happy-dom": "^20.10.3",
+    "husky": "^9.1.7",
+    "knip": "^6.14.1",
+    "lint-staged": "^17.0.7",
+    "msw": "^2.14.6",
+    "postcss": "^8.5.14",
+    "prettier": "^3.8.3",
+    "size-limit": "^12.1.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.13",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.2"
+  }
+}

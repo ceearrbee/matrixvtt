@@ -1,0 +1,559 @@
+{
+  "vtt_export_type": "ruleset",
+  "vtt_version": 1,
+  "system": "ose",
+  "meta": {
+    "name": "Old-School Essentials (OSR)",
+    "version": "0.1.0",
+    "spec_version": "1.0",
+    "author": "MatrixVTT",
+    "license": "AGPL-3.0-only (data file). B/X-derived content: OGL 1.0a.",
+    "description": "B/X-style old-school play: seven classes, five saving throws, ascending AC, side-based initiative. Classes, XP tables, and spell lists from the Old-School Essentials SRD.",
+    "attribution": "Classes, XP tables, and spell lists derived from the Old-School Essentials System Reference Document by Necrotic Gnome, used under the Open Game License 1.0a (bundled at licenses/OGL-1.0a.txt). See THIRD-PARTY-NOTICES.md.",
+    "sources": [
+      {
+        "title": "Old-School Essentials System Reference Document",
+        "license": "OGL-1.0a",
+        "url": "https://oldschoolessentials.necroticgnome.com/srd/"
+      }
+    ]
+  },
+  "attributes": [
+    {
+      "key": "str",
+      "label": "Strength",
+      "min": 3,
+      "max": 18
+    },
+    {
+      "key": "int",
+      "label": "Intelligence",
+      "min": 3,
+      "max": 18
+    },
+    {
+      "key": "wis",
+      "label": "Wisdom",
+      "min": 3,
+      "max": 18
+    },
+    {
+      "key": "dex",
+      "label": "Dexterity",
+      "min": 3,
+      "max": 18
+    },
+    {
+      "key": "con",
+      "label": "Constitution",
+      "min": 3,
+      "max": 18
+    },
+    {
+      "key": "cha",
+      "label": "Charisma",
+      "min": 3,
+      "max": 18
+    }
+  ],
+  "dice": {
+    "check": "1d20",
+    "crit": {
+      "low": 1,
+      "high": 20
+    }
+  },
+  "rolls": {
+    "attribute": "1d20+{mod}",
+    "skill": "1d20+{bonus}",
+    "save": "1d20+{bonus}",
+    "initiative": "1d6+{bonus}",
+    "attack": "1d20+{bonus}"
+  },
+  "classes": [
+    {
+      "key": "cleric",
+      "label": "Cleric",
+      "hit_die": "d6",
+      "prime_requisites": [
+        "wis"
+      ],
+      "xp_table": "xp_cleric"
+    },
+    {
+      "key": "dwarf",
+      "label": "Dwarf",
+      "hit_die": "d8",
+      "prime_requisites": [
+        "str"
+      ],
+      "xp_table": "xp_dwarf"
+    },
+    {
+      "key": "elf",
+      "label": "Elf",
+      "hit_die": "d6",
+      "prime_requisites": [
+        "int",
+        "str"
+      ],
+      "xp_table": "xp_elf"
+    },
+    {
+      "key": "fighter",
+      "label": "Fighter",
+      "hit_die": "d8",
+      "prime_requisites": [
+        "str"
+      ],
+      "xp_table": "xp_fighter"
+    },
+    {
+      "key": "halfling",
+      "label": "Halfling",
+      "hit_die": "d6",
+      "prime_requisites": [
+        "dex",
+        "str"
+      ],
+      "xp_table": "xp_halfling"
+    },
+    {
+      "key": "magic_user",
+      "label": "Magic-User",
+      "hit_die": "d4",
+      "prime_requisites": [
+        "int"
+      ],
+      "xp_table": "xp_magic_user"
+    },
+    {
+      "key": "thief",
+      "label": "Thief",
+      "hit_die": "d4",
+      "prime_requisites": [
+        "dex"
+      ],
+      "xp_table": "xp_thief"
+    }
+  ],
+  "spell_lists": {
+    "cleric": {
+      "1": [
+        "Cure Light Wounds",
+        "Detect Evil",
+        "Detect Magic",
+        "Light",
+        "Protection from Evil",
+        "Purify Food and Water",
+        "Remove Fear",
+        "Resist Cold"
+      ],
+      "2": [
+        "Bless",
+        "Find Traps",
+        "Hold Person",
+        "Know Alignment",
+        "Resist Fire",
+        "Silence 15' Radius",
+        "Snake Charm",
+        "Speak with Animals"
+      ],
+      "3": [
+        "Continual Light",
+        "Cure Disease",
+        "Growth of Animal",
+        "Locate Object",
+        "Remove Curse",
+        "Striking"
+      ]
+    },
+    "magic_user": {
+      "1": [
+        "Charm Person",
+        "Detect Magic",
+        "Floating Disc",
+        "Hold Portal",
+        "Light",
+        "Magic Missile",
+        "Protection from Evil",
+        "Read Languages",
+        "Read Magic",
+        "Shield",
+        "Sleep",
+        "Ventriloquism"
+      ],
+      "2": [
+        "Continual Light",
+        "Detect Evil",
+        "Detect Invisible",
+        "ESP",
+        "Invisibility",
+        "Knock",
+        "Levitate",
+        "Locate Object",
+        "Mirror Image",
+        "Phantasmal Force",
+        "Web",
+        "Wizard Lock"
+      ],
+      "3": [
+        "Clairvoyance",
+        "Dispel Magic",
+        "Fire Ball",
+        "Fly",
+        "Haste",
+        "Hold Person",
+        "Infravision",
+        "Invisibility 10' Radius",
+        "Lightning Bolt",
+        "Protection from Evil 10' Radius",
+        "Protection from Normal Missiles",
+        "Water Breathing"
+      ]
+    }
+  },
+  "tables": {
+    "xp_cleric": {
+      "1": 0,
+      "2": 1500,
+      "3": 3000,
+      "4": 6000,
+      "5": 12000,
+      "6": 25000,
+      "7": 50000,
+      "8": 100000,
+      "9": 200000,
+      "10": 300000,
+      "11": 400000,
+      "12": 500000,
+      "13": 600000,
+      "14": 700000
+    },
+    "xp_dwarf": {
+      "1": 0,
+      "2": 2200,
+      "3": 4400,
+      "4": 8800,
+      "5": 17000,
+      "6": 35000,
+      "7": 70000,
+      "8": 140000,
+      "9": 270000,
+      "10": 400000,
+      "11": 530000,
+      "12": 660000
+    },
+    "xp_elf": {
+      "1": 0,
+      "2": 4000,
+      "3": 8000,
+      "4": 16000,
+      "5": 32000,
+      "6": 64000,
+      "7": 120000,
+      "8": 250000,
+      "9": 400000,
+      "10": 600000
+    },
+    "xp_fighter": {
+      "1": 0,
+      "2": 2000,
+      "3": 4000,
+      "4": 8000,
+      "5": 16000,
+      "6": 32000,
+      "7": 64000,
+      "8": 120000,
+      "9": 240000,
+      "10": 360000,
+      "11": 480000,
+      "12": 600000,
+      "13": 720000,
+      "14": 840000
+    },
+    "xp_halfling": {
+      "1": 0,
+      "2": 2000,
+      "3": 4000,
+      "4": 8000,
+      "5": 16000,
+      "6": 32000,
+      "7": 64000,
+      "8": 120000
+    },
+    "xp_magic_user": {
+      "1": 0,
+      "2": 2500,
+      "3": 5000,
+      "4": 10000,
+      "5": 20000,
+      "6": 40000,
+      "7": 80000,
+      "8": 150000,
+      "9": 300000,
+      "10": 450000,
+      "11": 600000,
+      "12": 750000,
+      "13": 900000,
+      "14": 1050000
+    },
+    "xp_thief": {
+      "1": 0,
+      "2": 1200,
+      "3": 2400,
+      "4": 4800,
+      "5": 9600,
+      "6": 20000,
+      "7": 40000,
+      "8": 80000,
+      "9": 160000,
+      "10": 280000,
+      "11": 400000,
+      "12": 520000,
+      "13": 640000,
+      "14": 760000
+    },
+    "ability_mod_osr": {
+      "3": -3,
+      "4": -2,
+      "5": -2,
+      "6": -1,
+      "7": -1,
+      "8": -1,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 1,
+      "14": 1,
+      "15": 1,
+      "16": 2,
+      "17": 2,
+      "18": 3
+    },
+    "fighter_attack_bonus": {
+      "1": 0,
+      "2": 1,
+      "3": 1,
+      "4": 2,
+      "5": 2,
+      "6": 3,
+      "7": 3,
+      "8": 4,
+      "9": 5,
+      "10": 5,
+      "11": 6,
+      "12": 6,
+      "13": 7,
+      "14": 7
+    }
+  },
+  "formulas": {
+    "ability_mod": {
+      "$": "lookup",
+      "args": [
+        "ability_mod_osr",
+        "@score"
+      ]
+    },
+    "attack_bonus_fighter": {
+      "$": "lookup",
+      "args": [
+        "fighter_attack_bonus",
+        "@level"
+      ]
+    },
+    "armor_class_ascending": {
+      "$": "+",
+      "args": [
+        10,
+        "@dex.mod",
+        "@armor_bonus"
+      ]
+    }
+  },
+  "harm_model": {
+    "type": "pool",
+    "track_key": "hp"
+  },
+  "token": {
+    "overlays": [
+      {
+        "kind": "resource_bar",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      }
+    ]
+  },
+  "progression": {
+    "type": "levels_xp",
+    "level_field": "level"
+  },
+  "saves": [
+    {
+      "key": "death",
+      "label": "Death / Poison"
+    },
+    {
+      "key": "wands",
+      "label": "Wands"
+    },
+    {
+      "key": "paralysis",
+      "label": "Paralysis / Petrification"
+    },
+    {
+      "key": "breath",
+      "label": "Breath Attacks"
+    },
+    {
+      "key": "spells",
+      "label": "Spells / Rods / Staves"
+    }
+  ],
+  "initiative": {
+    "mode": "side",
+    "tie_break_stat": "dex"
+  },
+  "character_sheet": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "Level",
+            "field": "level"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "saves"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "character_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "Level",
+            "field": "level"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "saves"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "npc_preview": {
+    "sections": [
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "HD",
+            "field": "hd"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "saves"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes"
+      }
+    ]
+  },
+  "item_preview": {
+    "sections": [
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
+    ]
+  }
+}

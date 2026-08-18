@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MatrixVTT - Skeuomorphic Mockup</title>
+<meta name="viewport" content="width=1280, initial-scale=1" />
+<style>
+  /* ============================================================
+     MatrixVTT - Skeuomorphic mockup
+     A static, image-free demo of how MatrixVTT could look if it
+     leaned hard into wood-and-parchment realism. All textures are
+     CSS gradients; all icons are inline SVG or Unicode.
+     ============================================================ */
+
+  :root {
+    /* Wood palette */
+    --wood-dark:   #3a2515;
+    --wood-mid:    #5a3a22;
+    --wood-light:  #7a5232;
+    --wood-grain:  #2a1808;
+
+    /* Brass / iron */
+    --brass-1:     #d4a64a;
+    --brass-2:     #8a6a2a;
+    --brass-edge:  #5a4220;
+    --iron-1:      #4a4a52;
+    --iron-2:      #1a1a22;
+
+    /* Parchment / vellum */
+    --parch-1:     #f4e6c2;
+    --parch-2:     #e6d09a;
+    --parch-edge:  #8a6e3e;
+    --ink:         #2a1c0a;
+    --ink-faded:   #6a4a1c;
+
+    /* Leather */
+    --leather-1:   #4a2a18;
+    --leather-2:   #2a1408;
+    --stitch:      #d4a64a;
+
+    /* Wax / glow */
+    --wax-red:     #8a1a18;
+    --wax-red-2:   #4a0808;
+    --candle:      #f8d878;
+
+    --shadow-deep: rgba(0,0,0,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    color: var(--ink);
+    /* Background: a stone wall the table sits in front of */
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.05), transparent 60%),
+      repeating-linear-gradient(0deg, #1a1416 0 60px, #221a1a 60px 120px),
+      repeating-linear-gradient(90deg, #1a1416 0 80px, #221a1a 80px 160px),
+      #1a1416;
+    background-blend-mode: overlay, normal, normal, normal;
+    min-height: 100vh;
+  }
+
+  /* Helper: wood texture (used many places) */
+  .wood {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--wood-dark) 0 2px,
+        var(--wood-mid) 2px 6px,
+        var(--wood-dark) 6px 10px,
+        var(--wood-light) 10px 12px,
+        var(--wood-mid) 12px 18px
+      ),
+      linear-gradient(180deg, var(--wood-light), var(--wood-dark));
+    background-blend-mode: overlay, normal;
+    color: #f0d8a0;
+  }
+
+  /* Helper: parchment texture */
+  .parchment {
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(120,80,30,0.20), transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(140,90,40,0.18), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(180,140,80,0.10), transparent 70%),
+      linear-gradient(135deg, var(--parch-1), var(--parch-2));
+    color: var(--ink);
+  }
+
+  /* Helper: leather */
+  .leather {
+    background:
+      radial-gradient(ellipse 10px 6px at 30% 30%, rgba(0,0,0,0.20), transparent 70%),
+      radial-gradient(ellipse 10px 6px at 70% 70%, rgba(0,0,0,0.20), transparent 70%),
+      radial-gradient(ellipse 8px 4px at 50% 80%, rgba(255,255,255,0.06), transparent 70%),
+      linear-gradient(160deg, var(--leather-1), var(--leather-2));
+    color: #e8d4a8;
+  }
+
+  /* Brass rivet */
+  .rivet {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 35%, #fff8c8 0%, var(--brass-1) 30%, var(--brass-2) 70%, var(--brass-edge) 100%);
+    box-shadow:
+      inset 0 -2px 2px rgba(0,0,0,0.5),
+      inset 0 2px 2px rgba(255,255,255,0.3),
+      0 1px 2px rgba(0,0,0,0.7);
+  }
+
+  /* ─── PAGE FRAME ─────────────────────────────────────────────── */
+
+  .app {
+    max-width: 1280px;
+    margin: 24px auto;
+    border-radius: 12px;
+    box-shadow:
+      0 0 0 6px var(--brass-edge),
+      0 0 0 10px var(--brass-2),
+      0 30px 60px rgba(0,0,0,0.7),
+      inset 0 0 80px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ─── TOP BAR (wood with carved title + brass GM rail) ──────── */
+
+  .topbar {
+    height: 72px;
+    display: grid;
+    grid-template-columns: 320px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    border-bottom: 4px solid var(--wood-dark);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+    position: relative;
+  }
+
+  .campaign-plate {
+    height: 52px;
+    border-radius: 4px;
+    padding: 0 18px;
+    display: flex; align-items: center; gap: 12px;
+    background:
+      radial-gradient(ellipse at top, rgba(255,255,255,0.15), transparent 60%),
+      linear-gradient(180deg, #6a5028 0%, #3a2810 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,0.20),
+      inset 0 -2px 4px rgba(0,0,0,0.40),
+      0 2px 4px rgba(0,0,0,0.6);
+    border: 1px solid #1a1208;
+    position: relative;
+  }
+
+  .campaign-plate::before, .campaign-plate::after {
+    content: '';
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff8c8 0%, var(--brass-1) 30%, var(--brass-2) 70%, var(--brass-edge) 100%);
+    box-shadow: inset 0 -2px 2px rgba(0,0,0,0.5), inset 0 2px 2px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.7);
+  }
+  .campaign-plate::before { left: 6px; }
+  .campaign-plate::after  { right: 6px; }
+
+  .campaign-name {
+    font-family: 'IM Fell English', 'Palatino Linotype', Georgia, serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #f0c878;
+    text-shadow:
+      0 -1px 0 #1a0c00,
+      0 1px 1px rgba(255,255,255,0.15),
+      0 0 8px rgba(240,200,120,0.3);
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .map-tabs {
+    display: flex; gap: 6px;
+    padding: 0 12px;
+  }
+
+  .map-tab {
+    height: 40px;
+    padding: 0 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid #1a1208;
+    background:
+      linear-gradient(180deg, var(--wood-light), var(--wood-mid));
+    color: #f0d8a0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.15),
+      0 -2px 4px rgba(0,0,0,0.4) inset;
+    cursor: pointer;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    font-size: 14px;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+    transform: translateY(4px);
+    transition: transform 0.1s;
+  }
+
+  .map-tab.active {
+    background:
+      radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.25), transparent 60%),
+      linear-gradient(180deg, #f4e6c2, #c4a474);
+    color: var(--ink);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    transform: translateY(0);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.6),
+      0 -1px 0 #1a1208;
+  }
+
+  .map-tab .icon {
+    font-size: 16px;
+  }
+
+  .gm-rail {
+    display: flex; gap: 8px; align-items: center;
+  }
+
+  .gm-button {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 30%, #fff8c8 0%, var(--brass-1) 30%, var(--brass-2) 70%, var(--brass-edge) 100%);
+    box-shadow:
+      inset 0 -3px 4px rgba(0,0,0,0.5),
+      inset 0 3px 4px rgba(255,255,255,0.4),
+      0 2px 4px rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    color: #2a1808;
+    font-size: 18px;
+    cursor: pointer;
+    border: 1px solid var(--brass-edge);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  .gm-button:active {
+    box-shadow:
+      inset 0 3px 4px rgba(0,0,0,0.5),
+      inset 0 -1px 2px rgba(255,255,255,0.2);
+  }
+
+  /* ─── MAIN GRID ─────────────────────────────────────────────── */
+
+  .main {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    grid-template-rows: 1fr 200px;
+    grid-template-areas:
+      "left center right"
+      "left dock  right";
+    height: 760px;
+    background: var(--wood-dark);
+  }
+
+  /* ─── LEFT: leather-bound tab book ──────────────────────────── */
+
+  .left {
+    grid-area: left;
+    border-right: 6px solid var(--wood-dark);
+    display: flex; flex-direction: column;
+    box-shadow: inset -4px 0 8px rgba(0,0,0,0.5);
+  }
+
+  .leather-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    padding: 8px 6px 0;
+    background: var(--wood-dark);
+  }
+
+  .leather-tab {
+    height: 36px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid #0a0400;
+    border-bottom: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    color: #d4a64a;
+    cursor: pointer;
+    position: relative;
+    transform: translateY(2px);
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+  }
+
+  .leather-tab::before {
+    /* stitched border */
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px dashed rgba(212,166,74,0.4);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .leather-tab.active {
+    transform: translateY(0);
+    color: #f8d878;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.10),
+      inset 0 -8px 12px rgba(0,0,0,0.30);
+  }
+
+  .left-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    border-top: 2px solid #0a0400;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.4);
+  }
+
+  /* Handouts panel content (parchment tree) */
+  .handouts {
+    padding: 14px 14px 10px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .handout-card {
+    margin: 6px 0;
+    padding: 10px 12px;
+    border-radius: 4px;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.3),
+      inset 0 0 0 1px rgba(140,100,60,0.3);
+    position: relative;
+    border-left: 3px solid var(--wax-red);
+    cursor: pointer;
+  }
+
+  .handout-card.root {
+    border-left-color: var(--brass-1);
+    box-shadow:
+      0 3px 6px rgba(0,0,0,0.4),
+      inset 0 0 0 1px rgba(140,100,60,0.4);
+  }
+
+  .handout-children {
+    margin-left: 18px;
+    padding-left: 10px;
+    border-left: 2px dotted rgba(120,80,30,0.45);
+  }
+
+  .handout-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+    font-family: 'IM Fell English', Georgia, serif;
+  }
+
+  .handout-excerpt {
+    font-size: 11px;
+    color: var(--ink-faded);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Wax seal stamp on handouts */
+  .handout-card .seal {
+    position: absolute;
+    top: -6px; right: 8px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 30%, #c83838 0%, var(--wax-red) 50%, var(--wax-red-2) 100%);
+    box-shadow:
+      inset 0 -2px 4px rgba(0,0,0,0.5),
+      inset 0 2px 3px rgba(255,255,255,0.15),
+      0 2px 4px rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(0,0,0,0.6);
+    font-size: 12px;
+    font-weight: bold;
+    font-family: serif;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .handout-card .seal.gm { background: radial-gradient(circle at 30% 30%, #f8c848 0%, var(--brass-1) 50%, var(--brass-edge) 100%); }
+
+  /* ─── CENTER: parchment map ─────────────────────────────────── */
+
+  .center {
+    grid-area: center;
+    position: relative;
+    overflow: hidden;
+    border-right: 6px solid var(--wood-dark);
+  }
+
+  .map-canvas {
+    position: absolute; inset: 0;
+    background:
+      /* hex grid using two repeating linear gradients won't tile right; use SVG instead */
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='60' viewBox='0 0 52 60'><polygon points='26,2 50,16 50,44 26,58 2,44 2,16' fill='none' stroke='%23997040' stroke-width='0.6' opacity='0.45'/></svg>"),
+      radial-gradient(ellipse at 30% 25%, rgba(120,80,30,0.20), transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(140,90,40,0.20), transparent 60%),
+      radial-gradient(ellipse at 50% 50%, rgba(180,140,80,0.12), transparent 70%),
+      linear-gradient(135deg, var(--parch-1) 0%, var(--parch-2) 100%);
+    background-size: 52px 60px, auto, auto, auto, auto;
+    /* burnt edges */
+    box-shadow:
+      inset 0 0 60px 20px rgba(80,40,10,0.5),
+      inset 0 0 100px rgba(80,40,10,0.3);
+  }
+
+  /* Burnt-corner overlay */
+  .map-canvas::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(50,20,5,0.55), transparent 18%),
+      radial-gradient(ellipse at 100% 0%, rgba(50,20,5,0.55), transparent 18%),
+      radial-gradient(ellipse at 100% 100%, rgba(50,20,5,0.55), transparent 18%),
+      radial-gradient(ellipse at 0% 100%, rgba(50,20,5,0.55), transparent 18%);
+  }
+
+  /* Inked walls and structures */
+  .map-ink {
+    position: absolute; inset: 0;
+    pointer-events: none;
+  }
+
+  /* Token (token = a small wooden disc with token character on top) */
+  .token {
+    position: absolute;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 50%),
+      radial-gradient(circle at 50% 50%, var(--wood-light), var(--wood-dark));
+    box-shadow:
+      inset 0 -3px 4px rgba(0,0,0,0.4),
+      inset 0 2px 3px rgba(255,255,255,0.25),
+      0 4px 8px rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    border: 2px solid #2a1404;
+    user-select: none;
+    cursor: grab;
+    transform: translate(-50%, -50%);
+  }
+
+  .token.npc {
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 50%),
+      radial-gradient(circle at 50% 50%, #6a3018, #2a0a02);
+    border-color: #1a0500;
+  }
+  .token.boss {
+    width: 70px; height: 70px;
+    font-size: 32px;
+    background:
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.30), transparent 50%),
+      radial-gradient(circle at 50% 50%, #8a1818, #3a0808);
+    border-color: var(--brass-edge);
+    box-shadow:
+      inset 0 -4px 6px rgba(0,0,0,0.5),
+      inset 0 3px 4px rgba(255,255,255,0.3),
+      0 6px 12px rgba(0,0,0,0.6),
+      0 0 0 3px var(--brass-2);
+  }
+  .token.you {
+    border-color: var(--brass-1);
+    box-shadow:
+      inset 0 -3px 4px rgba(0,0,0,0.4),
+      inset 0 2px 3px rgba(255,255,255,0.25),
+      0 4px 8px rgba(0,0,0,0.5),
+      0 0 0 2px var(--brass-1),
+      0 0 16px rgba(248,216,120,0.5);
+  }
+  .token.hidden {
+    opacity: 0.55;
+    filter: grayscale(40%) blur(0.6px);
+  }
+
+  .token .hp {
+    position: absolute;
+    bottom: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--wax-red-2);
+    color: #f4e6c2;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--brass-2);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+
+  .token .hp.bloodied { background: #5a0808; }
+  .token .hp.full     { background: #1a4a1a; }
+
+  /* Light source = candle glow */
+  .light {
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background:
+      radial-gradient(circle at center,
+        rgba(248,216,120,0.55) 0%,
+        rgba(248,200,80,0.35) 30%,
+        rgba(248,180,60,0.15) 60%,
+        rgba(0,0,0,0) 75%);
+    mix-blend-mode: screen;
+  }
+
+  .candle {
+    position: absolute;
+    width: 18px; height: 28px;
+    transform: translate(-50%, -50%);
+  }
+  .candle::before {
+    /* candle stick */
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 6px; height: 18px;
+    background: linear-gradient(180deg, #f4e6c2, #c4a474);
+    transform: translateX(-50%);
+    border-radius: 2px;
+    box-shadow: inset -1px 0 1px rgba(0,0,0,0.3);
+  }
+  .candle::after {
+    /* flame */
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    width: 8px; height: 14px;
+    background: radial-gradient(ellipse at center bottom, #fff8c0 0%, #f8c848 50%, #c84818 100%);
+    border-radius: 50% 50% 50% 50% / 80% 80% 30% 30%;
+    transform: translateX(-50%);
+    filter: blur(0.5px);
+  }
+
+  /* Door (open portal) */
+  .portal {
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+    width: 40px; height: 6px;
+    background:
+      linear-gradient(90deg, transparent, var(--wood-light) 20%, var(--wood-dark) 50%, var(--wood-light) 80%, transparent);
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    border-radius: 2px;
+  }
+  .portal.closed {
+    height: 8px;
+    background:
+      linear-gradient(90deg, var(--brass-2), var(--brass-1) 50%, var(--brass-2));
+    border: 1px solid var(--brass-edge);
+  }
+
+  /* AoE template */
+  .aoe-circle {
+    position: absolute;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background:
+      radial-gradient(circle at center,
+        rgba(255,80,40,0.25) 0%,
+        rgba(255,80,40,0.10) 60%,
+        rgba(255,80,40,0.04) 100%);
+    border: 2px dashed rgba(180,40,20,0.7);
+    pointer-events: none;
+  }
+
+  /* Pin */
+  .pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 24px; height: 36px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  .pin::before {
+    /* pin head - wax-stamped marker */
+    content: attr(data-label);
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #f8c848 0%, var(--brass-1) 60%, var(--brass-edge) 100%);
+    box-shadow:
+      inset 0 -2px 3px rgba(0,0,0,0.4),
+      inset 0 2px 2px rgba(255,255,255,0.3),
+      0 2px 4px rgba(0,0,0,0.5);
+    color: #2a1808;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IM Fell English', serif;
+  }
+  .pin::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 2px; height: 16px;
+    background: linear-gradient(180deg, var(--brass-2), var(--brass-edge));
+  }
+
+  /* Map title cartouche */
+  .cartouche {
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 24px;
+    background:
+      radial-gradient(ellipse at center, var(--parch-1), var(--parch-2));
+    border: 2px solid var(--parch-edge);
+    border-radius: 50% / 100%;
+    color: var(--ink);
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 16px;
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.4),
+      inset 0 0 0 4px rgba(140,100,60,0.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  /* Compass rose (top-right of map) */
+  .compass {
+    position: absolute;
+    top: 64px; right: 16px;
+    width: 80px; height: 80px;
+    pointer-events: none;
+  }
+
+  /* ─── RIGHT: scroll-styled initiative tracker ───────────────── */
+
+  .right {
+    grid-area: right;
+    background: var(--wood-dark);
+    padding: 14px 14px;
+    overflow: hidden;
+    box-shadow: inset 4px 0 8px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column;
+  }
+
+  .scroll {
+    flex: 1;
+    border-radius: 14px;
+    padding: 16px 14px;
+    position: relative;
+    overflow-y: auto;
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.5),
+      inset 0 0 0 2px var(--parch-edge),
+      inset 0 0 40px rgba(120,80,30,0.3);
+  }
+
+  .scroll-header {
+    text-align: center;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(120,80,30,0.4);
+    padding-bottom: 4px;
+  }
+  .round-marker {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-faded);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .init-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 4px;
+    border-bottom: 1px dashed rgba(120,80,30,0.30);
+    font-size: 13px;
+  }
+  .init-row.current {
+    background:
+      linear-gradient(90deg, transparent, rgba(248,216,120,0.30) 50%, transparent);
+    border-radius: 4px;
+    border-bottom-color: transparent;
+    box-shadow: 0 0 0 1px rgba(212,166,74,0.40);
+  }
+
+  .init-init {
+    width: 30px; height: 30px;
+    border-radius: 4px;
+    background:
+      linear-gradient(180deg, #f8e8c8, #c4a474);
+    border: 1px solid var(--ink-faded);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5);
+    font-family: 'IM Fell English', serif;
+  }
+
+  .init-name {
+    font-weight: 600;
+  }
+  .init-meta {
+    font-size: 11px;
+    color: var(--ink-faded);
+    display: flex; gap: 4px; flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .condition {
+    background: var(--wax-red);
+    color: #f4e6c2;
+    padding: 1px 5px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-style: italic;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+  .condition.concentration { background: #4a2070; }
+  .condition.unconscious   { background: #2a2a2a; }
+  .condition.stealth       { background: #2a4a2a; }
+
+  .init-hp {
+    font-weight: bold;
+    color: var(--wax-red-2);
+    font-family: 'IM Fell English', serif;
+  }
+
+  .death-saves {
+    display: flex; gap: 2px;
+    margin-top: 2px;
+  }
+  .death-save {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--ink);
+    background: transparent;
+  }
+  .death-save.fail { background: var(--wax-red); border-color: var(--wax-red-2); }
+
+  /* ─── BOTTOM: dock with dice tray + chat scribe ─────────────── */
+
+  .dock {
+    grid-area: dock;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 12px;
+    padding: 14px 14px;
+    border-top: 4px solid var(--wood-dark);
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.5);
+  }
+
+  /* Wooden dice tray */
+  .dice-tray {
+    border-radius: 12px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    box-shadow:
+      inset 0 4px 8px rgba(0,0,0,0.5),
+      inset 0 -2px 4px rgba(255,255,255,0.05);
+    border: 2px solid var(--wood-dark);
+    background:
+      radial-gradient(circle at 50% 50%, var(--leather-1), var(--leather-2));
+    position: relative;
+  }
+
+  /* Bone dice */
+  .die {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background:
+      radial-gradient(circle at 30% 25%, #fff 0%, #e6d8b4 30%, #c4a474 75%, #8a6a3a 100%);
+    box-shadow:
+      inset 0 -2px 3px rgba(0,0,0,0.3),
+      inset 0 2px 3px rgba(255,255,255,0.6),
+      0 2px 4px rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #1a0c00;
+    cursor: pointer;
+    border: 1px solid #6a4a1a;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    user-select: none;
+  }
+  .die:active {
+    box-shadow:
+      inset 0 2px 3px rgba(0,0,0,0.4),
+      inset 0 -1px 2px rgba(255,255,255,0.2);
+  }
+  .die.d20 { border-radius: 50% 12% 50% 12%; transform: rotate(-12deg); }
+
+  /* Scribe - chat surface */
+  .scribe {
+    border-radius: 6px;
+    padding: 10px 12px 8px;
+    display: flex; flex-direction: column;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,0.4),
+      inset 0 0 0 1px rgba(140,100,60,0.4),
+      inset 0 0 30px rgba(120,80,30,0.20);
+    font-family: 'IM Fell English', Georgia, serif;
+    color: var(--ink);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .log-entries {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 6px;
+  }
+  .log-row {
+    border-bottom: 1px dotted rgba(120,80,30,0.25);
+    padding: 4px 0;
+  }
+  .log-entry {
+    display: grid;
+    grid-template-columns: 22px 1fr 56px;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .log-entry .icon { font-size: 14px; }
+  .log-entry .body { color: var(--ink); }
+  .log-entry .ts { font-size: 10px; color: var(--ink-faded); text-align: right; font-style: italic; }
+
+  .speaker { font-weight: 700; font-style: italic; color: var(--wax-red-2); }
+  .roll-result {
+    background: var(--brass-1);
+    color: #1a0c00;
+    padding: 0 5px;
+    border-radius: 4px;
+    font-weight: bold;
+    border: 1px solid var(--brass-edge);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  .reactions {
+    display: flex; gap: 4px;
+    margin-top: 4px;
+    margin-left: 28px;
+  }
+  .reaction-badge {
+    background:
+      linear-gradient(180deg, #f4e6c2, #c4a474);
+    color: var(--ink);
+    padding: 1px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--ink-faded);
+    font-size: 11px;
+    cursor: pointer;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  }
+  .reaction-badge:hover { background: linear-gradient(180deg, #fff0d4, #d4b484); }
+  .reaction-badge.mine { border-color: var(--brass-1); box-shadow: 0 0 0 1px var(--brass-1); }
+
+  .quill-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    border-top: 1px solid rgba(120,80,30,0.4);
+    padding-top: 6px;
+  }
+  .quill {
+    font-size: 18px;
+    color: var(--ink);
+    text-align: center;
+    transform: rotate(-20deg);
+  }
+  .scribe input[type="text"] {
+    border: none;
+    background: transparent;
+    font-family: 'IM Fell English', Georgia, serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    border-bottom: 1px dotted rgba(120,80,30,0.5);
+    padding: 4px 0;
+    font-style: italic;
+  }
+  .scribe input[type="text"]::placeholder { color: var(--ink-faded); font-style: italic; }
+
+  .send-button {
+    width: 40px; height: 32px;
+    border-radius: 4px;
+    background:
+      radial-gradient(circle at 30% 30%, #c83838 0%, var(--wax-red) 60%, var(--wax-red-2) 100%);
+    color: #f4e6c2;
+    border: 1px solid var(--wax-red-2);
+    box-shadow:
+      inset 0 -2px 3px rgba(0,0,0,0.4),
+      inset 0 1px 2px rgba(255,255,255,0.20),
+      0 1px 2px rgba(0,0,0,0.5);
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 12px;
+    cursor: pointer;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+  }
+
+  /* Reply-in-thread chip */
+  .reply-chip {
+    margin-bottom: 4px;
+    background: rgba(212,166,74,0.20);
+    border-left: 3px solid var(--brass-1);
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--ink-faded);
+    font-style: italic;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .reply-chip .x {
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--brass-1);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-style: normal;
+    font-size: 10px;
+    border: 1px solid var(--brass-edge);
+  }
+
+  /* Thread indent */
+  .log-thread {
+    margin-left: 28px;
+    border-left: 2px solid rgba(212,166,74,0.40);
+    padding-left: 8px;
+  }
+  .log-thread .log-entry { font-size: 12px; }
+  .thread-toggle {
+    font-size: 11px;
+    color: var(--ink-faded);
+    margin-left: 28px;
+    margin-top: 2px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-style: italic;
+    font-family: inherit;
+  }
+
+  /* ─── FOOTER stamp ──────────────────────────────────────────── */
+
+  .footer {
+    text-align: center;
+    color: rgba(212,166,74,0.4);
+    font-size: 11px;
+    padding: 14px;
+    font-style: italic;
+    font-family: 'IM Fell English', Georgia, serif;
+    letter-spacing: 1px;
+  }
+
+  /* Floating handout modal sketch */
+  .handout-modal {
+    position: absolute;
+    top: 90px; left: 320px;
+    width: 360px;
+    max-height: 580px;
+    border-radius: 4px;
+    padding: 26px 32px 24px;
+    box-shadow:
+      0 30px 40px rgba(0,0,0,0.6),
+      0 0 0 12px rgba(58,34,18,0.6),
+      0 0 0 14px var(--brass-edge),
+      inset 0 0 60px rgba(120,80,30,0.25);
+    z-index: 5;
+    overflow-y: auto;
+    border: 1px solid var(--parch-edge);
+  }
+  .handout-modal h2 {
+    margin: 0 0 8px;
+    font-family: 'IM Fell English', serif;
+    text-align: center;
+    border-bottom: 2px solid rgba(120,80,30,0.4);
+    padding-bottom: 6px;
+    font-style: italic;
+  }
+  .handout-modal p { font-size: 13px; line-height: 1.5; }
+  .wikilink {
+    color: var(--wax-red-2);
+    font-style: italic;
+    text-decoration: underline wavy var(--wax-red);
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .wikilink.broken {
+    color: #888;
+    text-decoration: line-through;
+  }
+  .handout-modal .close-x {
+    position: absolute;
+    top: 10px; right: 12px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #c83838 0%, var(--wax-red) 60%, var(--wax-red-2) 100%);
+    color: #f4e6c2;
+    text-align: center;
+    line-height: 26px;
+    font-family: serif;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+
+  /* The "GM open" banner above the map */
+  .map-bar {
+    position: absolute;
+    bottom: 16px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px;
+    background: rgba(58,34,18,0.85);
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    border: 1px solid #1a0c00;
+  }
+  .map-tool {
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.20), transparent 60%),
+      linear-gradient(180deg, var(--wood-light), var(--wood-mid));
+    border: 1px solid #1a0c00;
+    color: #f0d8a0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .map-tool.active {
+    background: linear-gradient(180deg, var(--brass-1), var(--brass-2));
+    color: #1a0c00;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 3px rgba(0,0,0,0.3);
+  }
+
+  /* A subtle vignette over the whole app */
+  .app::before {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.45));
+    z-index: 4;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============== TOP BAR ============== -->
+  <header class="topbar wood">
+    <div class="campaign-plate">
+      <span class="campaign-name">The Sunken Keep</span>
+    </div>
+
+    <nav class="map-tabs">
+      <div class="map-tab"><span class="icon">🌲</span>Whispering Woods</div>
+      <div class="map-tab active"><span class="icon">🏰</span>Keep Entrance</div>
+      <div class="map-tab"><span class="icon">⬡</span>Sunken Crypt</div>
+    </nav>
+
+    <div class="gm-rail">
+      <div class="gm-button" title="Fog of war">🌫</div>
+      <div class="gm-button" title="Add NPC">👹</div>
+      <div class="gm-button" title="Roll initiative">⚔</div>
+      <div class="gm-button" title="Settings">⚙</div>
+    </div>
+  </header>
+
+  <!-- ============== MAIN GRID ============== -->
+  <div class="main">
+
+    <!-- ─── LEFT: leather book ─── -->
+    <aside class="left leather">
+      <div class="leather-tabs">
+        <div class="leather-tab" title="Maps">🗺</div>
+        <div class="leather-tab" title="Sheet">📜</div>
+        <div class="leather-tab active" title="Notes">📚</div>
+        <div class="leather-tab" title="Combat">⚔</div>
+        <div class="leather-tab" title="Settings">⚙</div>
+      </div>
+
+      <div class="left-body parchment">
+        <div class="handouts">
+          <div class="handout-card root parchment">
+            <span class="seal">W</span>
+            <div class="handout-title">Welcome to the Demo Tour</div>
+            <div class="handout-excerpt">This demo seeds the Sunken Keep. Cross-references…</div>
+
+            <div class="handout-children">
+              <div class="handout-card parchment">
+                <span class="seal gm">G</span>
+                <div class="handout-title">The Sunken Keep - GM Notes</div>
+                <div class="handout-excerpt">Campaign hook: the orcs are stalling for time…</div>
+              </div>
+              <div class="handout-card parchment">
+                <div class="handout-title">Aria's Backstory</div>
+                <div class="handout-excerpt">Halfling rogue, exiled from a thieves' guild.</div>
+              </div>
+              <div class="handout-card parchment">
+                <div class="handout-title">Local Rumors (d6)</div>
+                <div class="handout-excerpt">Roll a flavor hook each session.</div>
+              </div>
+              <div class="handout-card parchment">
+                <div class="handout-title">UVTT Import Guide</div>
+                <div class="handout-excerpt">Click Maps → Import UVTT and select a .dd2vtt…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─── CENTER: map ─── -->
+    <section class="center">
+      <div class="map-canvas"></div>
+
+      <!-- Title cartouche -->
+      <div class="cartouche">~ Keep Entrance ~</div>
+
+      <!-- Compass rose -->
+      <svg class="compass" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="34" fill="rgba(244,230,194,0.6)" stroke="#7a5232" stroke-width="1.5"/>
+        <circle cx="40" cy="40" r="28" fill="none" stroke="#8a6a2a" stroke-width="0.6" stroke-dasharray="2 3"/>
+        <polygon points="40,8 44,40 40,46 36,40" fill="#8a1818" stroke="#3a0808" stroke-width="0.5"/>
+        <polygon points="40,72 36,40 40,34 44,40" fill="#3a2810" stroke="#1a0c00" stroke-width="0.5"/>
+        <text x="40" y="14" text-anchor="middle" font-size="9" fill="#2a1c0a" font-family="serif" font-weight="bold">N</text>
+        <text x="40" y="74" text-anchor="middle" font-size="8" fill="#2a1c0a" font-family="serif">S</text>
+        <text x="6"  y="43" text-anchor="middle" font-size="8" fill="#2a1c0a" font-family="serif">W</text>
+        <text x="74" y="43" text-anchor="middle" font-size="8" fill="#2a1c0a" font-family="serif">E</text>
+      </svg>
+
+      <!-- Inked walls -->
+      <svg class="map-ink" viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <filter id="ink"><feTurbulence baseFrequency="0.9" numOctaves="2" /><feDisplacementMap in="SourceGraphic" scale="1.5"/></filter>
+        </defs>
+        <g stroke="#2a1c0a" stroke-linecap="round" fill="none" filter="url(#ink)">
+          <!-- Outer keep walls -->
+          <path d="M 90 60 L 510 60 L 510 380 L 90 380 Z" stroke-width="6" />
+          <!-- Inner room divider -->
+          <path d="M 320 60 L 320 250" stroke-width="4"/>
+          <path d="M 90 250 L 320 250" stroke-width="4"/>
+          <!-- Stairs / bridge -->
+          <path d="M 200 300 L 200 350" stroke-width="3" stroke-dasharray="6 6" />
+        </g>
+        <!-- Floor flourish -->
+        <text x="200" y="340" font-family="IM Fell English, serif" font-size="14" fill="#6a4a1c" font-style="italic" opacity="0.5" transform="rotate(-8 200 340)">to the cellar</text>
+        <text x="400" y="180" font-family="IM Fell English, serif" font-size="14" fill="#6a4a1c" font-style="italic" opacity="0.5" transform="rotate(4 400 180)">guard chamber</text>
+        <text x="200" y="180" font-family="IM Fell English, serif" font-size="14" fill="#6a4a1c" font-style="italic" opacity="0.5" transform="rotate(-3 200 180)">courtyard</text>
+      </svg>
+
+      <!-- Lights -->
+      <div class="light"  style="left: 18%; top: 86%;"></div>
+      <div class="light"  style="left: 42%; top: 86%;"></div>
+      <div class="candle" style="left: 18%; top: 86%;"></div>
+      <div class="candle" style="left: 42%; top: 86%;"></div>
+
+      <!-- Portals -->
+      <div class="portal"        style="left: 22%; top: 84%;"></div>
+      <div class="portal"        style="left: 38%; top: 84%;"></div>
+      <div class="portal closed" style="left: 90%; top: 18%; --rot: 90deg;"></div>
+
+      <!-- AoE template (Sora's planned Fireball aim point) -->
+      <div class="aoe-circle" style="left: 64%; top: 38%;"></div>
+
+      <!-- Tokens (mid-combat round 3) -->
+      <div class="token you"    style="left: 50%; top: 56%;" title="Aria - stealthed">🗡</div>
+      <div class="token"        style="left: 36%; top: 64%;" title="Kael - unconscious"><span style="opacity:0.5">⚔</span></div>
+      <div class="token"        style="left: 28%; top: 56%;" title="Finn">🛡</div>
+      <div class="token"        style="left: 26%; top: 46%;" title="Sora">🔮</div>
+      <div class="token npc boss" style="left: 64%; top: 38%;" title="Orc War Boss"><span>👹</span><span class="hp bloodied">45/60</span></div>
+      <div class="token npc"    style="left: 75%; top: 32%;" title="Lieutenant Orc">🪓<span class="hp full">32</span></div>
+      <div class="token npc"    style="left: 60%; top: 50%;" title="Orc Guard">👹<span class="hp">8/11</span></div>
+      <div class="token npc hidden" style="left: 86%; top: 26%;" title="Goblin Scout (hidden)">👁</div>
+
+      <!-- Pins -->
+      <div class="pin" style="left: 50%; top: 92%;" data-label="↘"></div>
+      <div class="pin" style="left: 90%; top: 14%;" data-label="↗"></div>
+
+      <!-- Map tools (dock) -->
+      <div class="map-bar">
+        <div class="map-tool active" title="Pointer">⌖</div>
+        <div class="map-tool" title="Move">✋</div>
+        <div class="map-tool" title="Wall">▰</div>
+        <div class="map-tool" title="Light">💡</div>
+        <div class="map-tool" title="Pin">📍</div>
+        <div class="map-tool" title="Measure">📏</div>
+        <div class="map-tool" title="Circle AoE">⭕</div>
+        <div class="map-tool" title="Cone AoE">🔺</div>
+        <div class="map-tool" title="Pencil">✏</div>
+      </div>
+
+      <!-- Handout modal sketch (front and center to show the look) -->
+      <div class="handout-modal parchment">
+        <div class="close-x">×</div>
+        <h2>Welcome to the Demo Tour</h2>
+        <p>This demo seeds <span class="wikilink">The Sunken Keep - GM Notes</span>, a mid-combat scenario. Cross-references:</p>
+        <ul style="font-size:13px; line-height:1.6;">
+          <li><span class="wikilink">Aria's Backstory</span> - owned-character handout</li>
+          <li><span class="wikilink">Local Rumors (d6)</span> - rollable table</li>
+          <li><span class="wikilink">UVTT Import Guide</span> - load DungeonDraft maps</li>
+          <li><span class="wikilink">Ancient Red Dragon</span> - bestiary</li>
+          <li><span class="wikilink broken">Missing Page</span> - broken link</li>
+        </ul>
+        <h2 style="margin-top:14px">Try these (interactive)</h2>
+        <p style="font-size:12px;">Roll dice, ping a square, whisper a player, react with an emoji, import a UVTT map, export markdown.</p>
+      </div>
+    </section>
+
+    <!-- ─── RIGHT: initiative scroll ─── -->
+    <aside class="right">
+      <div class="scroll parchment">
+        <div class="scroll-header">⚔ Initiative ⚔</div>
+        <div class="round-marker">- round 3 -</div>
+
+        <div class="init-row current">
+          <div class="init-init">18</div>
+          <div>
+            <div class="init-name">Aria Blackwood</div>
+            <div class="init-meta">
+              <span class="condition stealth">stealth</span>
+              <span class="condition stealth">hidden</span>
+            </div>
+          </div>
+          <div class="init-hp">28/40</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">14</div>
+          <div>
+            <div class="init-name">Orc War Boss</div>
+            <div class="init-meta">
+              <span style="font-style:italic;color:var(--wax-red-2);">bloodied</span>
+            </div>
+          </div>
+          <div class="init-hp">45/60</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">12</div>
+          <div>
+            <div class="init-name">Kael Ironforge</div>
+            <div class="init-meta">
+              <span class="condition unconscious">unconscious</span>
+            </div>
+            <div class="death-saves" title="Death saves">
+              <div class="death-save"></div>
+              <div class="death-save"></div>
+              <div class="death-save"></div>
+              <div class="death-save fail"></div>
+              <div class="death-save fail"></div>
+              <div class="death-save"></div>
+            </div>
+          </div>
+          <div class="init-hp" style="color:#5a0808;">0/35</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">11</div>
+          <div>
+            <div class="init-name">Finn Stonehelm</div>
+            <div class="init-meta"><span style="font-style:italic;">healthy</span></div>
+          </div>
+          <div class="init-hp">35/35</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">9</div>
+          <div>
+            <div class="init-name">Orc Guard</div>
+            <div class="init-meta"><span style="font-style:italic;">bonus action used</span></div>
+          </div>
+          <div class="init-hp">8/11</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">7</div>
+          <div>
+            <div class="init-name">Sora Moonwhisper</div>
+            <div class="init-meta">
+              <span class="condition concentration">concentration</span>
+              <span style="font-style:italic;">reaction used</span>
+            </div>
+          </div>
+          <div class="init-hp">22/36</div>
+        </div>
+
+        <div class="init-row">
+          <div class="init-init">5</div>
+          <div>
+            <div class="init-name">Lieutenant Orc</div>
+            <div class="init-meta"><span style="font-style:italic;">CR 3</span></div>
+          </div>
+          <div class="init-hp">32/32</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ─── DOCK ─── -->
+    <div class="dock wood">
+
+      <div class="dice-tray">
+        <div class="die d20" title="d20">d20</div>
+        <div class="die" title="d12">d12</div>
+        <div class="die" title="d10">d10</div>
+        <div class="die" title="d8">d8</div>
+        <div class="die" title="d6">d6</div>
+        <div class="die" title="d4">d4</div>
+      </div>
+
+      <div class="scribe parchment">
+        <div class="reply-chip">
+          <span>Replying to <strong>@boss:m</strong>: "I'll smash you, half-pint!"…</span>
+          <span class="x">×</span>
+        </div>
+
+        <div class="log-entries">
+          <div class="log-row">
+            <div class="log-entry">
+              <span class="icon">🎲</span>
+              <span class="body"><span class="speaker">Aria</span> rolled <em>Sneak Attack</em>: 1d20+11 = <span class="roll-result">27</span> (hit!) · 1d6+4d6 = <span class="roll-result">19</span> piercing</span>
+              <span class="ts">12:01p</span>
+            </div>
+            <div class="reactions">
+              <span class="reaction-badge mine">⚔ 1</span>
+              <span class="reaction-badge">🔥 2</span>
+              <span class="reaction-badge">💀 1</span>
+            </div>
+          </div>
+
+          <div class="log-row">
+            <div class="log-entry">
+              <span class="icon">💬</span>
+              <span class="body"><span class="speaker">War Boss</span>: I'll smash you, half-pint!</span>
+              <span class="ts">12:00p</span>
+            </div>
+            <div class="reactions">
+              <span class="reaction-badge">😂 3</span>
+              <span class="reaction-badge mine">👎 1</span>
+            </div>
+            <div class="thread-toggle">▸ 1 reply</div>
+            <div class="log-thread">
+              <div class="log-entry">
+                <span class="icon">💬</span>
+                <span class="body"><span class="speaker">Finn</span>: He's bloodied. Press the attack.</span>
+                <span class="ts">12:00p</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="log-row">
+            <div class="log-entry">
+              <span class="icon">⚠</span>
+              <span class="body"><em><strong>Sora</strong> takes 14 fire - concentration check, DC 10.</em></span>
+              <span class="ts">11:59</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quill-row">
+          <div class="quill">🪶</div>
+          <input type="text" placeholder="Whisper into the chronicle…" />
+          <button class="send-button">SEAL</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">⸻ Forged by candlelight in MatrixVTT ⸻</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout 6 - Immersive HUD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="dark"]{--bg:#16191F;--surface:#1F2430;--overlay:#2D3444;--map-void:#0A0E14;--ink:rgba(255,255,255,.92);--ink2:rgba(200,210,230,.75);--ink3:rgba(160,175,195,.65);--blue:#5BB8E8;--blue-bg:rgba(24,95,165,.18);--blue-line:rgba(91,184,232,.4);--green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;--hair:rgba(255,255,255,.18);--hair-soft:rgba(255,255,255,.10);--panel:rgba(31,36,48,.92);--shadow:rgba(0,0,0,.5)}
+:root[data-theme="light"]{--bg:#fff;--surface:#f5f7fa;--overlay:#e8ecf1;--map-void:#e5e8ec;--ink:rgba(0,0,0,.87);--ink2:rgba(0,0,0,.65);--ink3:rgba(0,0,0,.52);--blue:#1565C0;--blue-bg:rgba(24,95,165,.08);--blue-line:rgba(21,101,192,.3);--green:#0F6E56;--amber:#C77700;--red:#C62828;--hair:rgba(0,0,0,.14);--hair-soft:rgba(0,0,0,.07);--panel:rgba(255,255,255,.93);--shadow:rgba(0,0,0,.18)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:'Work Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{position:relative;height:100vh}
+/* full-bleed map */
+.canvas{position:absolute;inset:0;background:var(--map-void);overflow:hidden}
+.board{position:absolute;inset:0;background-image:linear-gradient(var(--hair-soft) 1px,transparent 1px),linear-gradient(90deg,var(--hair-soft) 1px,transparent 1px);background-size:50px 50px;background-color:#2a2118}
+.fog{position:absolute;inset:0;background:radial-gradient(circle at 46% 48%,transparent 200px,rgba(226,75,74,.15) 320px),conic-gradient(from 18deg at 58% 26%,rgba(239,159,39,.16),transparent 100deg);pointer-events:none}
+.unit{position:absolute;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:22px;border:2px solid rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.5)}.unit span{position:absolute;top:-16px;font-size:11px;color:var(--ink2);white-space:nowrap}
+.hpbar{position:absolute;bottom:-7px;left:4px;right:4px;height:3px;border-radius:2px;background:rgba(0,0,0,.5)}.hpbar i{display:block;height:100%;border-radius:2px;background:var(--green)}
+/* minimal top strip (title + utilities float, no full bar) */
+.topfloat{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;pointer-events:none}
+.topfloat>*{pointer-events:auto}
+.titlechip{background:var(--panel);border:.5px solid var(--hair);border-radius:4px;padding:8px 12px;box-shadow:0 4px 16px var(--shadow);backdrop-filter:blur(8px)}
+.titlechip .title{font-size:14px;font-weight:700}.titlechip .subtitle{font-size:11px;color:var(--ink2)}
+.cluster{display:flex;gap:6px;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;padding:5px;box-shadow:0 4px 16px var(--shadow);backdrop-filter:blur(8px)}
+.pill{font-family:inherit;font-size:12px;padding:5px 10px;border-radius:3px;border:.5px solid var(--hair);background:transparent;color:var(--ink2);cursor:pointer}.pill:hover{background:var(--overlay);color:var(--ink)}
+.pill--live{color:var(--green);border-color:transparent}.pill--live::before{content:"●";margin-right:5px;font-size:9px}.pill--danger{color:var(--red)}.pill--active{background:var(--blue-bg);color:var(--blue);box-shadow:inset 0 0 0 .5px var(--blue-line)}
+/* floating party roster, top-left under title */
+.party{position:absolute;top:70px;left:12px;width:178px;background:var(--panel);border:.5px solid var(--hair);border-radius:4px;box-shadow:0 8px 24px var(--shadow);backdrop-filter:blur(8px);z-index:9}
+.party h2{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);font-weight:600;padding:7px 10px;border-bottom:.5px solid var(--hair-soft)}
+.pcard{padding:7px 10px;border-bottom:.5px solid var(--hair-soft)}.pcard:last-child{border-bottom:0}.pcard .nm{font-size:12px;font-weight:600}.pcard .hp{font-size:10px;color:var(--ink2);display:flex;justify-content:space-between;margin-top:3px}
+.pbar{height:3px;border-radius:2px;background:var(--overlay);margin-top:3px;overflow:hidden}.pbar i{display:block;height:100%;background:var(--green)}.pbar i.amber{background:var(--amber)}.pbar i.red{background:var(--red)}
+.mapctl{position:absolute;right:12px;top:70px;display:flex;flex-direction:column;gap:5px;z-index:9}
+.mapctl button{width:34px;height:34px;border-radius:3px;border:.5px solid var(--hair);background:var(--panel);color:var(--ink2);cursor:pointer;box-shadow:0 2px 8px var(--shadow);backdrop-filter:blur(8px)}
+/* the HUD command bar across the bottom */
+.hud{position:absolute;left:12px;right:12px;bottom:12px;height:88px;z-index:10;display:grid;grid-template-columns:300px 1fr 220px;gap:10px}
+.hudcell{background:var(--panel);border:.5px solid var(--hair);border-radius:4px;box-shadow:0 8px 24px var(--shadow);backdrop-filter:blur(8px);display:flex;flex-direction:column;min-width:0}
+.hudcell h3{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);padding:6px 10px 0}
+.turnstrip{display:flex;gap:5px;padding:6px 10px;overflow-x:auto}
+.tok{flex:0 0 auto;display:flex;gap:4px;padding:3px 7px;border-radius:3px;border:.5px solid var(--hair);font-size:11px;color:var(--ink2);white-space:nowrap}.tok--turn{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}.tok--down{opacity:.5;text-decoration:line-through}
+.ticker{flex:1;overflow-y:auto;padding:4px 10px;display:flex;flex-direction:column;gap:4px;font-size:12px;line-height:1.35}
+.ticker .who{font-weight:600;color:var(--ink)}.ticker .roll{color:var(--blue)}.ticker .body{color:var(--ink2)}
+.hudchat{display:flex;flex-direction:column}
+.hudchat .composer{display:flex;gap:6px;padding:6px;border-top:.5px solid var(--hair-soft)}
+.hudchat input{flex:1;background:var(--bg);border:.5px solid var(--hair);border-radius:2px;color:var(--ink);padding:6px;font-family:inherit;font-size:12px}.hudchat .chip{font-size:11px;padding:5px 8px;border:.5px solid var(--hair);border-radius:3px;color:var(--ink2);background:transparent;cursor:pointer}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px 10px;align-content:center}
+.actions button{font-size:12px;padding:7px;border:.5px solid var(--hair);border-radius:3px;background:transparent;color:var(--ink2);cursor:pointer}
+.actions button.prime{grid-column:1/3;background:var(--blue-bg);color:var(--blue);border-color:var(--blue-line)}
+.caption{position:fixed;left:12px;top:62px;display:none}
+.cap2{position:fixed;left:200px;bottom:112px;max-width:460px;z-index:11;background:var(--surface);border:.5px solid var(--hair);border-radius:4px;padding:10px 12px;box-shadow:0 4px 16px var(--shadow)}
+.cap2 b{color:var(--blue)}.cap2 p{font-size:12px;color:var(--ink2);line-height:1.5;margin-top:3px}.themetoggle{font-size:11px}
+</style></head>
+<body>
+<div class="app">
+  <div class="canvas"><div class="board"></div><div class="fog"></div>
+    <div class="unit" style="left:36%;top:42%;background:#5b3a8a">🧙‍♀️<span>Sora</span><div class="hpbar"><i style="width:61%"></i></div></div>
+    <div class="unit" style="left:36%;top:52%;background:#1d6e56">☘<span>Finn</span><div class="hpbar"><i style="width:100%"></i></div></div>
+    <div class="unit" style="left:36%;top:62%;background:#7a5a1a">⚔<span>Kael</span><div class="hpbar"><i style="width:0;background:var(--red)"></i></div></div>
+    <div class="unit" style="left:44%;top:52%;background:#3a4a6a">🚶<span style="color:var(--blue)">Aria ◄</span><div class="hpbar"><i style="width:70%;background:var(--amber)"></i></div></div>
+    <div class="unit" style="left:56%;top:38%;background:#7a1f1a;width:66px;height:66px;font-size:28px">👹<span>War Boss</span><div class="hpbar"><i style="width:75%"></i></div></div>
+  </div>
+
+  <div class="topfloat">
+    <div class="titlechip"><div class="title">The Sunken Keep</div><div class="subtitle">Round 3 · Aria</div></div>
+    <div class="cluster"><button class="pill">1 online</button><button class="pill">GM</button><button class="pill pill--active">Prep</button><button class="pill">⋯</button><button class="pill pill--live">Live</button><button class="pill pill--danger">Leave</button><button class="pill themetoggle" onclick="t()">◐</button></div>
+  </div>
+
+  <div class="party"><h2>Party</h2>
+    <div class="pcard"><div class="nm">Aria Blackwood</div><div class="hp"><span>HP</span><span>28/40</span></div><div class="pbar"><i class="amber" style="width:70%"></i></div></div>
+    <div class="pcard"><div class="nm">Kael Ironforge</div><div class="hp"><span>HP</span><span>0/35</span></div><div class="pbar"><i class="red" style="width:2%"></i></div></div>
+    <div class="pcard"><div class="nm">Finn Stonehelm</div><div class="hp"><span>HP</span><span>35/35</span></div><div class="pbar"><i style="width:100%"></i></div></div>
+    <div class="pcard"><div class="nm">Sora Moonwhisper</div><div class="hp"><span>HP</span><span>22/36</span></div><div class="pbar"><i class="amber" style="width:61%"></i></div></div>
+  </div>
+  <div class="mapctl"><button>＋</button><button>－</button><button>⤢</button><button>✎</button></div>
+
+  <!-- HUD command bar -->
+  <div class="hud">
+    <div class="hudcell"><h3>Turn order</h3><div class="turnstrip"><div class="tok tok--turn">Aria</div><div class="tok">War Boss</div><div class="tok tok--down">Kael</div><div class="tok">Finn</div><div class="tok">Sora</div><div class="tok">Lt.Orc</div></div></div>
+    <div class="hudcell hudchat"><div class="ticker"><div><span class="who">Aria</span> <span class="roll">1d20+7 → 24 hit</span></div><div><span class="who">GM</span> <span class="body">The War Boss staggers back, snarling.</span></div><div><span class="who">Sora</span> <span class="roll">Fire Bolt → 7</span></div></div><div class="composer"><button class="chip">d20</button><input placeholder="Message…"><button class="chip">Send</button></div></div>
+    <div class="hudcell"><h3>Aria · actions</h3><div class="actions"><button class="prime">Attack</button><button>Dash</button><button>Hide</button></div></div>
+  </div>
+
+  <div class="cap2"><b>Layout 6 - Immersive HUD.</b><p>The map is everything; there's no chrome frame - title, utilities, party, map tools, and a bottom <i>command bar</i> (turn order · chat ticker + input · current actions) all float as HUD over the board, like a game console. Maximum immersion and map space. Trade-off: chat is a condensed ticker (deep reading happens in an expanded panel), and floating HUD over a busy map needs careful contrast.</p></div>
+</div>
+<script>function t(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';}</script>
+</body></html>
