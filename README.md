@@ -1,3 +1,6 @@
+<img width="3840" height="1977" alt="image" src="https://github.com/user-attachments/assets/fb2e07b7-cc17-40e4-9969-ffaa63ff1224" />
+
+
 # MatrixVTT
 
 MatrixVTT is a virtual tabletop application utilizing Matrix room state for real-time multiplayer synchronization and persistent campaign storage.
