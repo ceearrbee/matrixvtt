@@ -12,7 +12,7 @@ import { themeSignal } from '../state/ui-signals.js';
 import { restartOnboardingTour } from './onboarding-tour.js';
 import { showKeyboardHelp } from './keyboard-help.js';
 import { showFeedbackModal } from './feedback.js';
-import { showInvitePlayerModal } from './invite-player.js';
+import { showInvitePlayerModal } from './InvitePlayerModal.jsx';
 import { libraryAvailable, openLibraryBrowser } from './library/open-library.js';
 import { docsHref } from '../utils/docs-link.js';
 
@@ -46,7 +46,7 @@ export function buildGlobalMenuItems(ui, { isGM, canLeave }) {
   ];
   if (isGM) {
     items.push(
-      { key: 'invite', label: 'Invite player', action: () => showInvitePlayerModal(ui) },
+      { key: 'invite', label: 'Invite players', action: () => showInvitePlayerModal(ui) },
       { key: 'maps', label: 'Maps manager', action: () => ui.openMapsPanel?.() },
     );
   }

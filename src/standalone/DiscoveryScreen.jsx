@@ -91,12 +91,12 @@ export function DiscoveryScreen({ app }) {
 
     h('div', { class: 'section-heading' }, 'New Session'),
     h('p', { class: 'room-empty', style: 'margin-top: 0;' },
-      'Creating a room makes you the GM. Players join with the ID or link their GM shares.'),
+      'Creating a room makes you the GM. Players get in by opening the invite link you share.'),
     h('div', { class: 'new-session-form' }, [
       h('label', { for: 'new-session-input', class: 'sr-only' }, 'Invite link, room ID, or alias'),
       h('input', {
         id: 'new-session-input', class: 'form-input', type: 'text',
-        placeholder: 'Invite link or room ID (!abc:server.org)',
+        placeholder: 'Paste an invite link, room ID, or alias',
         autocomplete: 'off', value: newRoomInput,
         onInput: (e) => setNewRoomInput(e.target.value),
         onKeyDown: (e) => { if (e.key === 'Enter') onNewSession(); }

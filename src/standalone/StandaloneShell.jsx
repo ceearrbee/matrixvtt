@@ -8,6 +8,7 @@ import { ErrorBoundary } from '../ui/ErrorBoundary.jsx';
 import { closeAllModals } from '../utils/modal-helpers.js';
 import { getAccessibilitySettings, setAccessibilitySetting } from '../ui/settings-helpers.js';
 import { docsHref } from '../utils/docs-link.js';
+import { consumePendingInvite, loadPendingInvite } from './pending-invite.js';
 
 const TAGLINE =
   'A browser-only virtual tabletop. Your campaigns live in Matrix rooms: no server to run, no data to lose.';
@@ -148,6 +149,14 @@ export function StandaloneShell({ app }) {
     setAuth(authObj);
     app.auth = authObj;
 
+    // An invite link the player just opened outranks whatever room they
+    // were last in.
+    if (loadPendingInvite()) {
+      app.showScreen('discovery');
+      consumePendingInvite(app);
+      return;
+    }
+
     const activeRoom = loadActiveRoom();
     if (activeRoom?.roomId) {
       app.enterRoom(activeRoom.roomId, activeRoom.roomName);
@@ -165,6 +174,7 @@ export function StandaloneShell({ app }) {
       : 'This browser is blocking storage (private browsing?), so you will need to sign in again next time.');
     setLoginError('');
     app.showScreen('discovery');
+    consumePendingInvite(app);
   };
   app.completeLogin = onLogin;
 
@@ -199,7 +209,7 @@ export function StandaloneShell({ app }) {
   return h('div', { class: 'standalone-shell' }, [
     h(StandaloneSidebar, { screen, onSignOut, onFactoryReset }),
     h('main', { class: 'standalone-main' }, [
-      screen === 'login' && h(AuthScreen, { app, onLogin, externalError: loginError }),
+      screen === 'login' && h(AuthScreen, { app, onLogin, externalError: loginError, invited: !!loadPendingInvite() }),
       screen === 'discovery' && storageNotice && h('div', {
         id: 'storage-notice', class: 'auth-hint', role: 'status',
       }, [

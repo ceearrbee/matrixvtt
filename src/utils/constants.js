@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
   // completions still count, never written.
   TUTORIAL_COMPLETED: 'vtt-tutorial-completed',
   ACTIVE_ROOM: 'vtt:active-room',
+  PENDING_INVITE: 'vtt:pending-invite',
   // Active UI mode (combat | narrative | gm-prep). Base key; per-room
   // storage builds `${UI_MODE}:${roomId}` and then user-scopes via
   // readUserScoped, so final key is `vtt:ui-mode:${roomId}::${userId}`.
@@ -180,6 +181,8 @@ export const EVENT_TYPES = {
   ROOM_MEMBER: 'm.room.member',
   ROOM_MESSAGE: 'm.room.message',
   POWER_LEVELS: 'm.room.power_levels',
+  JOIN_RULES: 'm.room.join_rules',
+  CANONICAL_ALIAS: 'm.room.canonical_alias',
   TOMBSTONE: 'm.room.tombstone',
   SPEAK_AS_TOKEN: 'com.vtt.speak_as_token',
   // Custom message-content field carrying the chosen tone for Say-mode

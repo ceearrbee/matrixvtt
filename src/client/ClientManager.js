@@ -8,6 +8,7 @@ import { MatrixClient } from './MatrixClient.js';
 import { MatrixApiAdapter } from './MatrixApiAdapter.js';
 import { EVENT_TYPES } from '../utils/constants.js';
 import { computeNewPowerLevels } from '../widget/capabilities.js';
+import { assertJoinRule } from '../utils/join-rules.js';
 import { logger } from '../utils/logger.js';
 
 export class ClientManager {
@@ -191,6 +192,11 @@ export class ClientManager {
 
   async inviteUser(userId) {
     return this._client.sdk.invite(this.roomId, userId);
+  }
+
+  async setJoinRule(rule) {
+    assertJoinRule(rule);
+    return this.sendStateEvent(EVENT_TYPES.JOIN_RULES, '', { join_rule: rule });
   }
 
   async kickUser(userId, reason = 'Kicked by GM') {

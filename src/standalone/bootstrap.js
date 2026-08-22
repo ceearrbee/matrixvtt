@@ -26,6 +26,7 @@ import {
   returnToRoomList,
   startVTT,
 } from './session.js';
+import { readInviteFromUrl, savePendingInvite } from './pending-invite.js';
 import { mountStandaloneShell } from './StandaloneShell.jsx';
 
 export class StandaloneApp {
@@ -62,6 +63,14 @@ export class StandaloneApp {
 
   async bootstrap() {
     this.bindUI();
+
+    // Parked before the shell mounts: the shell's restore effect reads
+    // the pending invite on its first render.
+    const invite = readInviteFromUrl(this.location);
+    if (invite) {
+      savePendingInvite(invite);
+      this.history.replaceState({}, '', this.location.pathname);
+    }
 
     mountStandaloneShell(this.container, this);
 

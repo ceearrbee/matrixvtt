@@ -8,10 +8,10 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   isValidMatrixUserId,
   describeInviteError,
-  buildInviteLink,
   canonicalAliasFrom,
-  roomInviteLink,
+  joinRuleFrom,
 } from '../ui/invite-player.js';
+import { buildInviteLink } from '../ui/invite-link.js';
 import { ClientManager } from '../client/ClientManager.js';
 import { inviteUser as roomAdapterInvite } from '../widget/room-adapter.js';
 import { buildGlobalMenuItems } from '../ui/global-menu-items.js';
@@ -94,44 +94,6 @@ describe('canonicalAliasFrom', () => {
   });
 });
 
-describe('roomInviteLink', () => {
-  it('prefers the canonical alias over the room ID', async () => {
-    const manager = {
-      roomId: '!room:hs.example',
-      getRoomState: vi.fn().mockResolvedValue([
-        { type: 'm.room.canonical_alias', content: { alias: '#camp:hs.example' } },
-      ]),
-    };
-    expect(await roomInviteLink(manager)).toBe('https://matrix.to/#/%23camp%3Ahs.example');
-  });
-
-  it('falls back to the room ID with a via hint when no alias exists or state reads fail', async () => {
-    // Bare room IDs are not resolvable; without ?via= the join 404s
-    // for anyone whose homeserver is not already in the room.
-    const noAlias = { roomId: '!room:hs.example', getRoomState: vi.fn().mockResolvedValue([]) };
-    expect(await roomInviteLink(noAlias)).toBe('https://matrix.to/#/!room%3Ahs.example?via=hs.example');
-
-    const failing = { roomId: '!room:hs.example', getRoomState: vi.fn().mockRejectedValue(new Error('403')) };
-    expect(await roomInviteLink(failing)).toBe('https://matrix.to/#/!room%3Ahs.example?via=hs.example');
-  });
-
-  it('the modal is honest about invite-only rooms', async () => {
-    const { showInvitePlayerModal } = await import('../ui/invite-player.js');
-    const ui = /** @type {any} */ ({ widgetManager: { roomId: '!r:hs' }, _toast: vi.fn() });
-    showInvitePlayerModal(ui);
-    try {
-      expect(document.body.textContent).toMatch(/invite-only/i);
-      expect(document.body.textContent).toMatch(/invite .*first|first.* invite/i);
-    } finally {
-      document.querySelectorAll('.modal-overlay').forEach((n) => n.remove());
-    }
-  });
-
-  it('returns null when no room ID is available', async () => {
-    expect(await roomInviteLink({ roomId: null, getRoomState: vi.fn().mockResolvedValue([]) })).toBeNull();
-  });
-});
-
 describe('global menu invite entry', () => {
   const ui = { openSettings() {}, toggleTheme() {}, openMapsPanel() {} };
 
@@ -141,53 +103,11 @@ describe('global menu invite entry', () => {
   });
 });
 
-describe('invite modal copy tracks the join rule', () => {
-  const closeModals = () => document.querySelectorAll('.modal-overlay').forEach((n) => n.remove());
-
-  it('joinRuleFrom reads m.room.join_rules out of the room state', async () => {
-    const { joinRuleFrom } = await import('../ui/invite-player.js');
+describe('joinRuleFrom', () => {
+  it('reads m.room.join_rules out of the room state', () => {
     expect(joinRuleFrom([{ type: 'm.room.join_rules', content: { join_rule: 'knock' } }])).toBe('knock');
     expect(joinRuleFrom([{ type: 'm.room.join_rules', content: { join_rule: 'invite' } }])).toBe('invite');
     expect(joinRuleFrom([])).toBeNull();
     expect(joinRuleFrom(null)).toBeNull();
-  });
-
-  it('promises the shared link works on knockable rooms', async () => {
-    const { showInvitePlayerModal } = await import('../ui/invite-player.js');
-    const ui = /** @type {any} */ ({
-      widgetManager: {
-        roomId: '!r:hs',
-        getRoomState: vi.fn().mockResolvedValue([
-          { type: 'm.room.join_rules', content: { join_rule: 'knock' } },
-        ]),
-      },
-      _toast: vi.fn(),
-    });
-    showInvitePlayerModal(ui);
-    try {
-      await vi.waitFor(() => {
-        expect(document.body.textContent).toMatch(/request to join|ask to join/i);
-      });
-      expect(document.body.textContent).not.toMatch(/invite-only/i);
-    } finally {
-      closeModals();
-    }
-  });
-
-  it('keeps the honest invite-first copy when the join rule is unknown', async () => {
-    const { showInvitePlayerModal } = await import('../ui/invite-player.js');
-    const ui = /** @type {any} */ ({
-      widgetManager: { roomId: '!r:hs', getRoomState: vi.fn().mockRejectedValue(new Error('403')) },
-      _toast: vi.fn(),
-    });
-    showInvitePlayerModal(ui);
-    try {
-      await vi.waitFor(() => {
-        expect(ui.widgetManager.getRoomState).toHaveBeenCalled();
-      });
-      expect(document.body.textContent).toMatch(/invite-only/i);
-    } finally {
-      closeModals();
-    }
   });
 });

@@ -20,6 +20,7 @@ const ROOM_METADATA_STATE_TYPES = [
   EVENT_TYPES.ROOM_NAME,
   'm.room.topic',
   EVENT_TYPES.POWER_LEVELS,
+  EVENT_TYPES.JOIN_RULES,
   EVENT_TYPES.ROOM_MEMBER,
   EVENT_TYPES.TOMBSTONE,
   'org.matrix.msc3401.call.member',
@@ -43,6 +44,7 @@ export function buildCapabilities() {
     ...ROOM_METADATA_STATE_TYPES.map((t) => `org.matrix.msc2762.receive.state_event:${t}`),
     `org.matrix.msc2762.send.state_event:${EVENT_TYPES.ROOM_MEMBER}`,
     `org.matrix.msc2762.send.state_event:${EVENT_TYPES.POWER_LEVELS}`,
+    `org.matrix.msc2762.send.state_event:${EVENT_TYPES.JOIN_RULES}`,
     // Yjs CRDT transport: all entity state rides in these. Without
     // them the widget can neither load nor publish the room snapshot.
     `org.matrix.msc2762.receive.state_event:${YJS_EVENT_TYPES.SNAPSHOT}`,

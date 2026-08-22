@@ -7144,3 +7144,47 @@ button.item-card__tag--holder:hover {
   white-space: nowrap;
   margin-right: var(--space-2xs);
 }
+
+/* ── Invite modal ───────────────────────────────────────────────────── */
+.invite-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+.invite-link-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: stretch;
+}
+.invite-link-row .form-input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: var(--font-size-xs);
+}
+.invite-link-row .dbt {
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 0;
+  white-space: nowrap;
+}
+.invite-access {
+  margin: 0;
+  padding: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+}
+.invite-details > summary {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+.invite-details[open] > summary {
+  margin-bottom: var(--space-md);
+}
+.invite-modal .form-actions {
+  margin-top: 0;
+}

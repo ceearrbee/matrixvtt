@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseRoomTarget } from '../standalone/room-target.js';
-import { buildInviteLink } from '../ui/invite-player.js';
+import { buildInviteLink } from '../ui/invite-link.js';
 
 describe('parseRoomTarget', () => {
   describe('raw identifiers', () => {

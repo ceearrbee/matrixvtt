@@ -11,7 +11,7 @@ import { loginRetryAfterMs } from './auth-errors.js';
 import { RegisterPanel } from './RegisterPanel.jsx';
 import { FEEDBACK_MATRIX, matrixUrl } from '../utils/feedback-contacts.js';
 
-export function AuthScreen({ app, onLogin, externalError = '' }) {
+export function AuthScreen({ app, onLogin, externalError = '', invited = false }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [ssoVisible, setSsoVisible] = useState(false);
@@ -138,7 +138,11 @@ export function AuthScreen({ app, onLogin, externalError = '' }) {
   }
 
   return h('div', { class: 'auth-card' }, [
-    h('h2', { class: 'auth-heading' }, 'Sign in to your homeserver'),
+    invited && h('div', { id: 'invite-banner', class: 'auth-hint auth-hint--invite', role: 'status' }, [
+      h('strong', null, 'You have been invited to a MatrixVTT session.'),
+      ' Sign in below, or create a free account, and you will land in the game.',
+    ]),
+    h('h2', { class: 'auth-heading' }, invited ? 'Sign in to join the session' : 'Sign in to your homeserver'),
     h('p', { class: 'auth-intro' },
       'Standalone mode connects directly to your Matrix account from this browser.'),
     h('p', { class: 'auth-beta-notice' }, [

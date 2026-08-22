@@ -36,7 +36,7 @@ describe('DiscoveryScreen - empty-state copy', () => {
     const root = document.createElement('div');
     render(h(DiscoveryScreen, { app: makeApp() }), root);
     expect(root.textContent).toMatch(/creating a room makes you the gm/i);
-    expect(root.textContent).toMatch(/players join with/i);
+    expect(root.textContent).toMatch(/invite link you share/i);
   });
 });
 

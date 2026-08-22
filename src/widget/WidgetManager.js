@@ -19,6 +19,7 @@ import {
   getRoomMembers,
   getPendingKnocks,
   inviteUser,
+  setJoinRule,
   kickUser,
   banUser,
   setRoomDisplayName,
@@ -234,6 +235,7 @@ export class WidgetManager {
   async getRoomMembers() { return getRoomMembers(this); }
   getPendingKnocks() { return getPendingKnocks(this); }
   inviteUser(userId) { return inviteUser(this, userId); }
+  setJoinRule(rule) { return setJoinRule(this, rule); }
   kickUser(userId, reason) { return kickUser(this, userId, reason); }
   banUser(userId, reason) { return banUser(this, userId, reason); }
 

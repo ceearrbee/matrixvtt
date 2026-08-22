@@ -32,12 +32,14 @@ You can also import a custom ruleset file if your table runs something else.
 
 ## 4. Invite your players
 
-Open the invite dialog from the GM tools. Two options:
+Open **Invite players** from the GM tools and use **Copy player link**. That link opens MatrixVTT, walks the player through signing in or creating a Matrix account, and drops them into your session. **Copy invite message** gives you the link plus a line of explanation, ready to paste into Discord or any chat.
 
-- Enter a player's Matrix ID (`@name:matrix.org`) to invite them directly.
-- Use **Copy invite link** and send the link over any channel. Players paste it into the Join field on their own discovery screen. Raw room IDs and aliases work there too.
+The dialog also states who can currently get in:
 
-Players need their own Matrix accounts, same as you.
+- *Anyone with this link can ask to join* means the link is all a player needs; approve each request from the party roster.
+- *Only players you invite by Matrix ID can use this link* means the room is invite-only. Use **Let anyone with the link request to join** to change that, or invite each player by Matrix ID under **Invite a specific Matrix user**.
+
+**Matrix link** under the dialog's disclosure is the `matrix.to` form, for players who already run a Matrix client. Raw room IDs and aliases still work in the Join field on the discovery screen.
 
 ## 5. Players claim characters
 
@@ -64,4 +66,4 @@ Everything below syncs live to every player in the room:
 
 - Matrix servers rate-limit bursts of changes. The app queues and retries automatically; a progress bar appears for large imports.
 - If the connection drops, the app shows a reconnect screen and recovers on its own once the network returns.
-- If a player cannot join, the room may be invite-only: invite them by Matrix ID first, or share the invite link again after inviting.
+- If a player cannot join, the room is probably invite-only: open **Invite players** and either allow join requests or invite them by Matrix ID.

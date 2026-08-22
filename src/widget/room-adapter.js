@@ -13,6 +13,7 @@ import { logger } from '../utils/logger.js';
 import { VTTError, ErrorType, showErrorNotification } from '../utils/errorHandling.js';
 import { computeNewPowerLevels, RECEIVABLE_STATE_TYPES } from './capabilities.js';
 import { retryOnRateLimit } from '../utils/matrixRetry.js';
+import { assertJoinRule } from '../utils/join-rules.js';
 
 const MOD_POWER_LEVEL = 50;
 
@@ -128,6 +129,11 @@ export async function setRoomPowerLevels(wm, gmUserIds = []) {
 
 export async function inviteUser(wm, userId) {
   return wm.sendStateEvent(EVENT_TYPES.ROOM_MEMBER, userId, { membership: 'invite' });
+}
+
+export async function setJoinRule(wm, rule) {
+  assertJoinRule(rule);
+  return wm.sendStateEvent(EVENT_TYPES.JOIN_RULES, '', { join_rule: rule });
 }
 
 export async function getPendingKnocks(wm) {

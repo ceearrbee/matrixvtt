@@ -32,10 +32,10 @@ function makeApp(overrides = {}) {
 }
 
 let root;
-function mount(app) {
+function mount(app, props = {}) {
   root = document.createElement('div');
   document.body.appendChild(root);
-  render(h(AuthScreen, { app, onLogin: vi.fn() }), root);
+  render(h(AuthScreen, { app, onLogin: vi.fn(), ...props }), root);
   return root;
 }
 
@@ -147,5 +147,21 @@ describe('create account entry', () => {
     el.querySelector('#register-back').click();
     await flush();
     expect(el.querySelector('#login-form')).not.toBeNull();
+  });
+});
+
+describe('invite banner', () => {
+  it('tells a player who followed an invite link what happens next', async () => {
+    const el = mount(makeApp(), { invited: true });
+    await flush();
+    expect(el.querySelector('#invite-banner')).not.toBeNull();
+    expect(el.textContent).toMatch(/invited to a MatrixVTT session/i);
+    expect(el.querySelector('#show-register-btn')).not.toBeNull();
+  });
+
+  it('stays out of the way for a normal sign-in', async () => {
+    const el = mount(makeApp());
+    await flush();
+    expect(el.querySelector('#invite-banner')).toBeNull();
   });
 });
