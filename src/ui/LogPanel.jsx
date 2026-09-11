@@ -330,7 +330,7 @@ export function LogPanel({ ui }) {
             title: search || filter !== 'all' ? 'No entries match' : 'Quiet here',
             body: search || filter !== 'all'
               ? 'Try clearing the filter or search to see the full log.'
-              : 'Chat, dice rolls, and combat events will appear here as the session unfolds.',
+              : 'Chat, dice rolls, and combat events will appear here as play unfolds.',
           })]
         : items.map(renderItem),
     ),

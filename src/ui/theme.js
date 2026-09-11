@@ -1,12 +1,13 @@
 /**
- * theme.js - Theme restore, toggle, and map-help visibility helpers.
+ * theme.js - re-apply the persisted theme on shell (re)mount.
  *
- * All functions receive the UIController instance as `ui`.
+ * Choosing a theme is the labelled select in Settings > Appearance; the
+ * lower-left menu used to carry a second, blind cycler through the same
+ * five values.
  */
 
 import { STORAGE_KEYS } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
-import { themeSignal } from '../state/ui-signals.js';
 import { setAccessibilitySetting, applyAccessibilitySettings } from './settings-helpers.js';
 
 /**
@@ -29,17 +30,3 @@ export function restoreTheme() {
   applyAccessibilitySettings();
 }
 
-const THEME_CYCLE = { auto: 'light', light: 'dark', dark: 'high-contrast', 'high-contrast': 'nondescript', nondescript: 'auto' };
-
-export function toggleTheme(ui) {
-  const currentTheme = themeSignal.value;
-  const newTheme = THEME_CYCLE[currentTheme] ?? 'auto';
-
-  setAccessibilitySetting('theme', newTheme);
-
-  // Re-render map with new colors
-  if (ui.mapRenderer) {
-    ui.mapRenderer.updateThemeColors();
-    ui.mapRenderer.render();
-  }
-}

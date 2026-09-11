@@ -35,7 +35,7 @@ export function ScenesDrawer({ ui }) {
   if (scenes.length === 0) {
     return h(EmptyState, {
       glyph: '🎬',
-      title: 'No scene threads started',
+      title: 'No scenes yet',
       body: 'A scene threads chat under a story beat (e.g. "The throne room confrontation"). Pages and handouts live in the Journal drawer.',
       cta: { label: 'Start a scene', onClick: () => showSceneStartModal(ui) },
     });
@@ -98,17 +98,23 @@ export function JournalDrawer({ ui }) {
   const toggle = (key) => () =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
+  // Writing a page is a player's right - `canEditPage` grants it to
+  // whoever authored one - but the only creation entry was the header
+  // Create menu, behind GM + Prep. The drawer is where a player looks.
+  const writePage = ui?.showPageForm
+    ? { label: 'Write a page', onClick: () => ui.showPageForm() }
+    : null;
+  const addHandout = isGM && ui?.showHandoutForm
+    ? { label: 'Add a handout', onClick: () => ui.showHandoutForm() }
+    : null;
+
   if (handouts.length === 0 && pages.length === 0) {
     return h(EmptyState, {
       glyph: '📖',
       title: 'No journal entries yet',
       body: 'Handouts (letters, maps, notes) and long-form pages (journals, lore, fiction) live here.',
-      // `showHandoutForm` is the wired entry point (modal-wiring.js); the old
-      // `openHandoutsPanel` was never defined, so this CTA never rendered -
-      // leaving GMs with no way to author a handout in the almanac shell.
-      cta: ui?.showHandoutForm
-        ? { label: 'Add a handout', onClick: () => ui.showHandoutForm() }
-        : null,
+      cta: addHandout ?? writePage,
+      secondary: addHandout ? writePage : null,
     });
   }
 
@@ -131,8 +137,8 @@ export function JournalDrawer({ ui }) {
     ]),
   );
 
-  return h('div', { class: 'icon-rail__sections' },
-    JOURNAL_CATEGORIES.flatMap((cat) => {
+  return h('div', { class: 'icon-rail__sections' }, [
+    ...JOURNAL_CATEGORIES.flatMap((cat) => {
       if (cat.gmOnly && !isGM) return [];
       const items = cat.key === 'handouts'
         ? handouts
@@ -150,7 +156,12 @@ export function JournalDrawer({ ui }) {
         children: rows,
       })];
     }),
-  );
+    writePage && h('button', {
+      type: 'button',
+      class: 'dbt dbt--sm icon-rail__section-cta',
+      onClick: writePage.onClick,
+    }, writePage.label),
+  ]);
 }
 
 export function NPCsDrawer({ ui }) {

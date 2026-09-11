@@ -21,10 +21,6 @@ vi.mock('../ui/App.jsx', () => {
 vi.mock('../ui/setup-tombstone.js', () => ({
   _countResidualEntities: () => 0,
 }));
-// The welcome branch auto-starts the driver.js tour, whose async DOM
-// teardown collides with happy-dom body resets between tests.
-vi.mock('../ui/onboarding-tour.js', () => ({ maybeAutoStartTour: vi.fn() }));
-import { maybeAutoStartTour } from '../ui/onboarding-tour.js';
 
 beforeEach(async () => {
   vi.resetModules();
@@ -47,7 +43,6 @@ function makeUi({ snapshotEvents, forceWizard = false, mapValue = null } = {}) {
     _welcomeShown: false,
     _forceWizard: forceWizard,
     showFirstTimeSetup: vi.fn(),
-    showPlayerWelcome: vi.fn(),
     isTutorialCompleted: () => true,
     startTutorial: vi.fn(),
     _receiveStateEvents: receiveStateEvents,
@@ -69,7 +64,6 @@ describe('renderUI - wizard suppression', () => {
     renderUI(ui);
     await tick();
     expect(ui.showFirstTimeSetup).toHaveBeenCalled();
-    expect(ui.showPlayerWelcome).not.toHaveBeenCalled();
   });
 
   it('SUPPRESSES the wizard on reload when the room has a snapshot', async () => {
@@ -79,7 +73,6 @@ describe('renderUI - wizard suppression', () => {
     renderUI(ui);
     await tick();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
   it('SUPPRESSES the wizard even when forceWizard=true if a snapshot exists', async () => {

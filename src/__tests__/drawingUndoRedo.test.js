@@ -41,8 +41,15 @@ function makeUI(extra = {}) {
 }
 
 describe('drawing toolbar undo/redo buttons', () => {
+  // Undo / redo / clear live behind the toolbar's ⋯ overflow; they are
+  // recovery actions rather than tools.
+  function openOverflow(container) {
+    fireEvent.click(container.querySelector('[data-map-overflow]'));
+  }
+
   it('renders undo and redo buttons with correct data-action', () => {
     const { container } = render(h(MapStrip, { ui: makeUI() }));
+    openOverflow(container);
     expect(container.querySelector('[data-action="undo-drawing"]')).toBeTruthy();
     expect(container.querySelector('[data-action="redo-drawing"]')).toBeTruthy();
   });
@@ -50,6 +57,7 @@ describe('drawing toolbar undo/redo buttons', () => {
   it('undo button click calls ui.undoDrawing()', async () => {
     const ui = makeUI();
     const { container } = render(h(MapStrip, { ui }));
+    openOverflow(container);
     fireEvent.click(container.querySelector('[data-action="undo-drawing"]'));
     await Promise.resolve();
     expect(ui.undoDrawing).toHaveBeenCalledTimes(1);
@@ -58,6 +66,7 @@ describe('drawing toolbar undo/redo buttons', () => {
   it('redo button click calls ui.redoDrawing()', async () => {
     const ui = makeUI();
     const { container } = render(h(MapStrip, { ui }));
+    openOverflow(container);
     fireEvent.click(container.querySelector('[data-action="redo-drawing"]'));
     await Promise.resolve();
     expect(ui.redoDrawing).toHaveBeenCalledTimes(1);

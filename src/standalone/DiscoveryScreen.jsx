@@ -11,10 +11,14 @@ import { useState } from 'preact/hooks';
 import { confirmAndEnterRoom } from './discovery/room-preview.js';
 import { clearRecentSessionsForUser } from './sessionStore.js';
 import { parseRoomTarget } from './room-target.js';
+import { getGameSystemPresets, describeRulesetContent, DEFAULT_RULESET_SLUG } from '../state/rulesets.js';
+
+const PRESETS = getGameSystemPresets();
 
 export function DiscoveryScreen({ app }) {
   const [newRoomInput, setNewRoomInput] = useState('');
   const [createRoomInput, setCreateRoomInput] = useState('');
+  const [system, setSystem] = useState(DEFAULT_RULESET_SLUG);
   const [knockable, setKnockable] = useState(true);
 
   const onNewSession = async () => {
@@ -51,18 +55,18 @@ export function DiscoveryScreen({ app }) {
       class: 'section-heading', id: 'recent-heading',
       style: 'display: flex; align-items: center; justify-content: space-between;',
     }, [
-      h('span', null, 'Recent Sessions'),
+      h('span', null, 'Recent campaigns'),
       h('button', {
         class: 'standalone-link-btn', id: 'clear-recent-btn',
-        title: 'Clear all recent sessions from this browser',
+        title: 'Clear all recent campaigns from this browser',
         onClick: onClearRecent
       }, 'Clear All')
     ]),
     h('div', { id: 'recent-list' }),
     h('p', { id: 'recent-empty', class: 'room-empty', style: 'display:none' },
-      'No recent sessions yet. Join a room or create one below to start.'),
+      'No recent campaigns yet. Open an invite link, or create one below.'),
 
-    h('div', { class: 'section-heading' }, 'Active Sessions'),
+    h('div', { class: 'section-heading' }, 'Active campaigns'),
     h('div', { id: 'active-loading', class: 'discovery-loading', style: 'display:flex;align-items:center;gap:8px;' }, [
       h('span', null, 'Loading rooms…'),
       h('button', {
@@ -75,23 +79,23 @@ export function DiscoveryScreen({ app }) {
     ]),
     h('div', { id: 'active-list' }),
     h('p', { id: 'active-empty', class: 'room-empty', style: 'display:none' },
-      'No active VTT sessions found. Create a new one below, or expand all joined rooms to start a session in a room you already have.'),
+      'No campaigns found. Create one below, or expand all joined rooms to start a campaign in a Matrix room you already have.'),
 
     h('button', {
       id: 'other-rooms-toggle',
       type: 'button',
       class: 'standalone-link-btn',
       style: 'display:none; margin-top:8px;',
-      title: 'Show every Matrix room your account is joined to. Click any room to start a new VTT session there.',
+      title: 'Show every Matrix room your account is joined to. Click any room to start a campaign there.',
     }),
     h('div', { id: 'other-list', style: 'display:none; margin-top:8px;' }),
 
     h('div', { class: 'section-heading', id: 'invites-heading', style: 'display:none' }, 'Pending Invites'),
     h('div', { id: 'invites-list' }),
 
-    h('div', { class: 'section-heading' }, 'New Session'),
+    h('div', { class: 'section-heading' }, 'New campaign'),
     h('p', { class: 'room-empty', style: 'margin-top: 0;' },
-      'Creating a room makes you the GM. Players get in by opening the invite link you share.'),
+      'Creating a campaign makes you its GM. Players get in by opening the invite link you share.'),
     h('div', { class: 'new-session-form' }, [
       h('label', { for: 'new-session-input', class: 'sr-only' }, 'Invite link, room ID, or alias'),
       h('input', {
@@ -105,15 +109,26 @@ export function DiscoveryScreen({ app }) {
     ]),
     h('div', { class: 'new-session-divider' }, '- or -'),
     h('div', { class: 'create-room-form' }, [
-      h('label', { for: 'create-room-input', class: 'sr-only' }, 'New session name'),
+      h('label', { for: 'create-room-input', class: 'sr-only' }, 'Campaign name'),
       h('input', {
         id: 'create-room-input', class: 'form-input', type: 'text',
-        placeholder: 'New session name', autocomplete: 'off',
+        placeholder: 'My Epic Campaign', autocomplete: 'off',
         value: createRoomInput,
         onInput: (e) => setCreateRoomInput(e.target.value),
         onKeyDown: (e) => { if (e.key === 'Enter') onCreateRoom(); }
       }),
-      h('button', { class: 'dbt btn-secondary', id: 'create-room-btn', onClick: onCreateRoom }, 'Create Room')
+      h('button', { class: 'dbt btn-secondary', id: 'create-room-btn', onClick: onCreateRoom }, 'Create campaign')
+    ]),
+    h('div', { class: 'create-room-system-row' }, [
+      h('label', { for: 'create-room-system', class: 'form-label' }, 'Game system'),
+      h('select', {
+        id: 'create-room-system', class: 'form-select',
+        value: system,
+        onChange: (e) => setSystem(e.target.value),
+      }, Object.entries(PRESETS).map(([slug, preset]) =>
+        h('option', { key: slug, value: slug }, preset.meta?.name ?? slug))),
+      h('p', { id: 'create-room-system-note', class: 'room-empty' },
+        describeRulesetContent(system, PRESETS[system])),
     ]),
     h('label', { class: 'form-check-row create-room-knock-row' }, [
       h('input', { type: 'checkbox', id: 'create-room-knock', checked: knockable, onChange: (e) => setKnockable(e.target.checked) }),

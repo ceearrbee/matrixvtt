@@ -12,7 +12,7 @@
 
 import { ErrorType, VTTError } from './errorHandling.js';
 import { EVENT_TYPES } from './constants.js';
-import { validateSettings, validateMap, validateFog, validateUiMode } from './schemas/world.js';
+import { validateSettings, validateMap, validateFog } from './schemas/world.js';
 import { validateToken, validateCharacter, validateInitiative } from './schemas/actors.js';
 import {
   validateItem,
@@ -54,7 +54,6 @@ const VALIDATORS = {
   [EVENT_TYPES.WALL]: validateWall,
   [EVENT_TYPES.LIGHT]: validateLight,
   [EVENT_TYPES.PIN]: validatePin,
-  [EVENT_TYPES.UI_MODE]: validateUiMode,
 };
 
 export function validateStateEvent(type, content, systemConfig = null) {

@@ -9,8 +9,7 @@
  *     wires an effect that watches `initiativeSignal.active` and
  *     auto-switches into Combat phase unless the user has manually
  *     overridden.
- *   - GM phase suggestion (SuggestedModeBanner) → `setPhase(userId, roomId, phase, { manual: true })`
- *   - GM Prep toggle → `gmPrepActiveSignal`
+ *   - GM Prep toggle (header button / Alt+P) → `setGmPrep(userId, roomId, active)`
  */
 
 import { effect } from '@preact/signals';
@@ -38,9 +37,10 @@ import {
 } from '../utils/constants.js';
 
 const DRAWER_VALUES = /** @type {Set<string>} */ (new Set(Object.values(ICON_RAIL_DRAWERS)));
-/** @returns {v is 'scenes' | 'journal' | 'npcs' | 'items' | 'menu'} */
+/** @returns {v is 'scenes' | 'journal' | 'menu'} */
 function isDrawerKey(v) { return typeof v === 'string' && DRAWER_VALUES.has(v); }
 function drawerBaseKey(roomId) { return `${STORAGE_KEY_PREFIXES.ICON_RAIL_DRAWER}${roomId}`; }
+function prepBaseKey(roomId) { return `${STORAGE_KEY_PREFIXES.GM_PREP}${roomId}`; }
 
 function baseKey(roomId) {
   return `${STORAGE_KEYS.UI_MODE}:${roomId}`;
@@ -88,6 +88,9 @@ export function hydratePhase(userId, roomId, isGM) {
     else if (raw === UI_MODES.GM_PREP) { phase = UI_MODES.NARRATIVE; prep = !!isGM; }
     else if (raw === UI_MODES.NARRATIVE) phase = UI_MODES.NARRATIVE;
   } catch { /* storage blocked - defaults */ }
+  try {
+    if (readUserScoped(prepBaseKey(roomId), userId) === '1') prep = !!isGM;
+  } catch { /* storage blocked - keep the migrated value */ }
   tablePhaseSignal.value = phase;
   gmPrepActiveSignal.value = prep;
 
@@ -116,6 +119,16 @@ export function setPhase(userId, roomId, phase, opts = {}) {
   if (manual) phaseManuallyOverriddenSignal.value = true;
   if (!userId || !roomId) return;
   try { writeUserScoped(baseKey(roomId), userId, phase); } catch { /* ignore */ }
+}
+
+/**
+ * Toggle the GM prep workspace and remember it per (user, room), the
+ * same scoping the phase uses.
+ */
+export function setGmPrep(userId, roomId, active) {
+  gmPrepActiveSignal.value = !!active;
+  if (!userId || !roomId) return;
+  try { writeUserScoped(prepBaseKey(roomId), userId, active ? '1' : '0'); } catch { /* ignore */ }
 }
 
 let _phaseDispose = null;

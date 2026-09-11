@@ -66,7 +66,7 @@ afterEach(() => cleanup());
 describe('ScenesDrawer', () => {
   it('shows the empty state when there are no scenes', () => {
     const { container } = render(h(ScenesDrawer, { ui: makeUi() }));
-    expect(container.textContent).toContain('No scene threads started');
+    expect(container.textContent).toContain('No scenes yet');
   });
 
   it('renders a row per scene-root (title + sender) and routes clicks to the scene channel', () => {

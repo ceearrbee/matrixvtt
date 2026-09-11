@@ -41,8 +41,7 @@ describe('keyboard move mode - Enter/Escape semantics', () => {
     const { mr, updates } = fakeMr();
     setupKeyboard(mr);
 
-    press('M');                 // enter move mode
-    press('ArrowRight');        // (3,5) → (4,5)
+    press('ArrowRight');        // arms move mode, (3,5) → (4,5)
     press('ArrowRight');        // (4,5) → (5,5)
     await Promise.resolve();    // flush microtasks for async updateToken
 
@@ -58,8 +57,7 @@ describe('keyboard move mode - Enter/Escape semantics', () => {
     const { mr, updates } = fakeMr();
     setupKeyboard(mr);
 
-    press('M');
-    press('ArrowDown');         // (3,5) → (3,6)
+    press('ArrowDown');         // arms move mode, (3,5) → (3,6)
     await Promise.resolve();
     const beforeEnter = updates.length;
 

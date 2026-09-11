@@ -10,6 +10,7 @@
  */
 
 import { esc } from '../utils/domHelpers.js';
+import { destinationOf, runTravel } from './actions/pin-travel.js';
 
 function closeAnyOpenMenu() {
   document.querySelectorAll('.context-menu').forEach((m) => m.remove());
@@ -89,12 +90,12 @@ function _mountMenu({ id, ariaLabel, screenX, screenY, items }) {
 export function showMapContextMenu(mr, screenX, screenY, col, row) {
   if (!mr.state.isGM?.()) return null;
   const items = [
-    { label: '➕ Add Token Here', action: () => mr.showAddTokenDialog?.(col, row) },
-    { label: '📌 Add Pin Here', action: () => mr.showPinForm?.(col, row) },
-    { label: '🌫️ Toggle Fog Cell', action: () => mr._toggleSingleFogCell?.(col, row) },
+    { label: 'Add Token Here', action: () => mr.showAddTokenDialog?.(col, row) },
+    { label: 'Add Pin Here', action: () => mr.showPinForm?.(col, row) },
+    { label: 'Toggle Fog Cell', action: () => mr._toggleSingleFogCell?.(col, row) },
     'separator',
-    { label: '👁️ Reveal Area', action: () => mr.startAreaSelection?.('reveal') },
-    { label: '🌫️ Hide Area', action: () => mr.startAreaSelection?.('hide') },
+    { label: 'Reveal Area', action: () => mr.startAreaSelection?.('reveal') },
+    { label: 'Hide Area', action: () => mr.startAreaSelection?.('hide') },
   ];
   return _mountMenu({
     id: 'map-context-menu', ariaLabel: 'Map actions',
@@ -104,9 +105,14 @@ export function showMapContextMenu(mr, screenX, screenY, col, row) {
 
 export function showPinContextMenu(mr, pin, screenX, screenY) {
   if (!mr.state.isGM?.()) return null;
+  const destination = destinationOf(mr.state.pins, pin);
   const items = [
-    { label: '✏️ Edit Pin', action: () => mr.showEditPinForm?.(pin) },
-    { label: '🗑️ Remove Pin', danger: true, action: () => mr.removePin?.(pin.id) },
+    ...(destination ? [{
+      label: `Move the party to ${destination.label || 'the other map'}`,
+      action: () => runTravel(mr, pin),
+    }] : []),
+    { label: 'Edit Pin', action: () => mr.showEditPinForm?.(pin) },
+    { label: 'Remove Pin', danger: true, action: () => mr.removePin?.(pin.id) },
   ];
   return _mountMenu({
     id: 'pin-context-menu', ariaLabel: `Actions for pin "${pin.label || ''}"`,
@@ -127,20 +133,21 @@ export function showTokenContextMenu(mr, token, screenX, screenY) {
   const isOwner = tokenData?.owner_user_id != null && tokenData.owner_user_id === selfId;
   const isNPC = tokenData?.type === 'npc';
 
-  // Selecting on right-click surfaces the action bar alongside the menu.
-  mr.setSelectedToken?.(token.id);
+  // Right-click is the menu and nothing else. Selecting here as well
+  // popped the TokenActionBar alongside it - eleven affordances from
+  // one click. Left-click selection is the bar's gesture.
 
   const items = [];
   const ui = window.ui;
 
   // Attack: non-owner player on their combat turn.
   if (!isGM && !isOwner && ui?._isMyCombatTurn?.() && mr.state.initiative?.active) {
-    items.push({ label: '⚔️ Attack', action: () => ui._showAttackFromTargetModal?.(token.id) });
+    items.push({ label: 'Attack', action: () => ui._showAttackFromTargetModal?.(token.id) });
     items.push('separator');
   }
 
   items.push({
-    label: '📋 View Sheet',
+    label: 'View Sheet',
     action: () => {
       window.dispatchEvent(new CustomEvent('vtt:view-sheet', { detail: { tokenId: token.id } }));
     },
@@ -149,12 +156,12 @@ export function showTokenContextMenu(mr, token, screenX, screenY) {
   if (isGM || isOwner) {
     const inOrder = mr.state.initiative?.order?.some((e) => e.token_id === token.id);
     items.push(inOrder
-      ? { label: '💀 Remove from Initiative', action: () => ui?.removeFromInitiative?.(token.id) }
-      : { label: '🎲 Add to Initiative', action: () => ui?.addTokenToInitiative?.(token.id) });
-    items.push({ label: '📋 Duplicate Token', action: () => ui?.duplicateToken?.(token.id) });
+      ? { label: 'Remove from Initiative', action: () => ui?.removeFromInitiative?.(token.id) }
+      : { label: 'Add to Initiative', action: () => ui?.addTokenToInitiative?.(token.id) });
+    items.push({ label: 'Duplicate Token', action: () => ui?.duplicateToken?.(token.id) });
     items.push(tokenData?.facing != null
-      ? { label: '🔄 Clear Facing', action: () => mr._clearFacing?.(token.id) }
-      : { label: '🧭 Set Facing', action: () => mr._startFacingMode?.(token.id) });
+      ? { label: 'Clear Facing', action: () => mr._clearFacing?.(token.id) }
+      : { label: 'Set Facing', action: () => mr._startFacingMode?.(token.id) });
     items.push('separator');
   }
 
@@ -162,11 +169,11 @@ export function showTokenContextMenu(mr, token, screenX, screenY) {
     if (isNPC) {
       const hpShown = tokenData.show_hp !== false;
       items.push({
-        label: hpShown ? '🙈 Hide HP from players' : '👁 Show HP to players',
+        label: hpShown ? 'Hide HP from players' : 'Show HP to players',
         action: () => mr.toggleTokenHPVisibility?.(token.id),
       });
     }
-    items.push({ label: '🗑️ Remove Token', danger: true, action: () => mr.removeToken?.(token.id) });
+    items.push({ label: 'Remove Token', danger: true, action: () => mr.removeToken?.(token.id) });
   }
 
   // Drop a trailing separator if the last entry is one (happens when

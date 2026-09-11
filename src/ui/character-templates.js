@@ -4,7 +4,10 @@
  * All functions receive the UIController instance as `ui`.
  */
 
-import { esc } from '../utils/domHelpers.js';
+import { h } from 'preact';
+import { useRef } from 'preact/hooks';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 
 /**
  * Templates persist at settings.character_templates. The legacy
@@ -50,56 +53,49 @@ function _buildTemplateFromCharacter(name, character) {
   };
 }
 
+function SaveTemplateForm({ ui, character, defaultName, onClose }) {
+  const inputRef = useRef(null);
+
+  const save = async () => {
+    const name = (inputRef.current?.value ?? '').trim();
+    if (!name) return;
+    const template = _buildTemplateFromCharacter(name, character);
+    await ui.state.updateSettings(addTemplateToSettings(ui.state.settings, template));
+    onClose();
+    ui._toast(`Template "${name}" saved`, 'success');
+  };
+
+  return h('div', null, [
+    h('div', { class: 'form-group' }, [
+      h('label', { class: 'form-label', for: 'template-name-input' }, 'Template Name'),
+      h('input', {
+        type: 'text', class: 'form-input', id: 'template-name-input',
+        ref: inputRef, defaultValue: defaultName,
+        placeholder: 'e.g., Fighter (STR build)',
+        onKeyDown: (e) => { if (e.key === 'Enter') save(); },
+      }),
+    ]),
+    h('div', { class: 'form-actions' }, [
+      h('button', { type: 'button', class: 'dbt', 'data-modal-close': true }, 'Cancel'),
+      h('button', { type: 'button', class: 'dbt btn-primary', id: 'confirm-template-btn', onClick: save }, 'Save Template'),
+    ]),
+  ]);
+}
+
 export async function saveCharacterAsTemplate(ui, charId) {
   const character = ui.state.characters.get(charId);
   if (!character) return;
+  const defaultName = character.class_level
+    ? `${character.class_level} Template`
+    : `${character.name} Template`;
 
-  const _trigger = /** @type {HTMLElement|null} */ (document.activeElement);
-  const defaultName = character.class_level ? `${character.class_level} Template` : `${character.name} Template`;
-
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.id = 'save-template-modal';
-  modal.innerHTML = `
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="save-template-title" style="max-width:380px;">
-      <div class="modal-header">
-        <h2 id="save-template-title">Save as Template</h2>
-        <button class="modal-close" aria-label="Close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label" for="template-name-input">Template Name</label>
-          <input type="text" class="form-input" id="template-name-input"
-                 value="${esc(defaultName)}" placeholder="e.g., Fighter (STR build)">
-        </div>
-        <div class="form-actions">
-          <button type="button" class="dbt" id="cancel-template-btn">Cancel</button>
-          <button type="button" class="dbt btn-primary" id="confirm-template-btn">Save Template</button>
-        </div>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-
-  const close = () => { modal.remove(); _trigger?.focus(); };
-  modal.querySelector('.modal-close').addEventListener('click', close);
-  modal.querySelector('#cancel-template-btn').addEventListener('click', close);
-  modal.addEventListener('click', e => { if (e.target === modal) close(); });
-
-  modal.querySelector('#confirm-template-btn').addEventListener('click', async () => {
-    const name = (modal.querySelector('#template-name-input')?.value ?? '').trim();
-    if (!name) return;
-
-    const template = _buildTemplateFromCharacter(name, character);
-    await ui.state.updateSettings(addTemplateToSettings(ui.state.settings, template));
-
-    close();
-    ui._toast(`Template "${name}" saved`, 'success');
-  });
-
-  modal.querySelector('#template-name-input')?.focus();
-  modal.querySelector('#template-name-input')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') modal.querySelector('#confirm-template-btn')?.click();
-  });
+  openModal((close) => h(Modal, {
+    id: 'save-template-modal',
+    title: 'Save as Template',
+    maxWidth: '380px',
+    autoFocusSelector: '#template-name-input',
+    onClose: close,
+  }, h(SaveTemplateForm, { ui, character, defaultName, onClose: close })));
 }
 
 export async function deleteCharacterTemplate(ui, index) {

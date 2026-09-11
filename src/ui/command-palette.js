@@ -1,9 +1,15 @@
 /**
- * Cmd-K-style command palette: a single fuzzy search across every
- * named entity in the campaign (tokens, characters, NPCs, items,
- * spells, handouts, pins). Opens on `/` from the global keymap; pick
- * a result with arrows + Enter, jump to the contextual action for
- * that entity's type (pan-to-token, open-sheet, scroll-to-item, …).
+ * Command palette: one fuzzy search across everything the campaign
+ * holds, and the commands you can run on it. Opens on Cmd/Ctrl+K
+ * anywhere (including the chat composer, which holds the shell's
+ * resting focus) or `/` outside a text field. Arrows + Enter picks;
+ * a noun jumps to its contextual action (pan-to-token, open-sheet),
+ * a verb runs it.
+ *
+ * The verbs live in `palette-commands.js`, which is where the
+ * permission matrix is. This is the answer to "where is X" for the
+ * features that otherwise need Prep, a right-click, or a tab inside
+ * a modal.
  *
  * Backed by `fuse.js` for fuzzy matching; the index is rebuilt each
  * time the palette opens so it always reflects the current state.
@@ -17,19 +23,25 @@ import { useRef, useLayoutEffect } from 'preact/hooks';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { logger } from '../utils/logger.js';
-import { emptyStateHtml } from './empty-state-html.js';
+import { selectedTokenSignal } from '../state/ui-signals.js';
+import { buildPaletteCommands } from './palette-commands.js';
+import { openGMPanelModal } from './GMTab.jsx';
 
 const PALETTE_ID = 'command-palette';
 const MAX_RESULTS = 12;
 
 const TYPE_LABELS = {
-  token: '🪙 Token',
-  character: '🧙 Character',
-  npc: '🐺 NPC',
-  item: '🗝 Item',
-  spell: '✨ Spell',
-  handout: '📜 Handout',
-  pin: '📌 Pin',
+  command: 'Command',
+  token: 'Token',
+  character: 'Character',
+  npc: 'NPC',
+  item: 'Item',
+  spell: 'Spell',
+  handout: 'Handout',
+  page: 'Page',
+  map: 'Map',
+  table: 'Roll table',
+  pin: 'Pin',
 };
 
 function _buildIndex(state) {
@@ -49,12 +61,40 @@ function _buildIndex(state) {
   push('item',      state.items);
   push('spell',     state.spells);
   push('handout',   state.handouts);
+  // Half the Journal was unsearchable, and a map could not be found
+  // from here at all.
+  push('page',      state.pages);
+  push('map',       state.maps);
+  push('table',     state.tables);
   push('pin',       state.pins);
   return entries;
 }
 
+/** Verbs first: a command is what someone types the palette to reach. */
+function _commandEntries(ui) {
+  const isGM = ui.state?.isGM?.() === true;
+  const combatActive = !!ui.state?.initiative?.active;
+  const selectedId = selectedTokenSignal.value;
+  const selectedToken = selectedId ? ui.state?.tokens?.get(selectedId) ?? null : null;
+  return buildPaletteCommands(ui, { isGM, combatActive, selectedToken }).map((c) => ({
+    id: c.id, kind: 'command', name: c.label, content: c,
+  }));
+}
+
 function _selectResult(ui, entry) {
   switch (entry.kind) {
+    case 'command':
+      entry.content.run();
+      break;
+    case 'map':
+      ui.state?.switchMap?.(entry.id);
+      break;
+    case 'page':
+      ui.openDoc?.('page', entry.id);
+      break;
+    case 'table':
+      openGMPanelModal(ui);
+      break;
     case 'token':
       ui.mapRenderer?.panToToken?.(entry.id);
       ui.previewToken?.(entry.id);
@@ -108,22 +148,6 @@ function _renderResults(modal, results, activeIndex) {
       <span class="cp-row__kind">${_escapeHtml(TYPE_LABELS[r.item.kind] || r.item.kind)}</span>
       <span class="cp-row__name">${_escapeHtml(r.item.name)}</span>
     </div>`).join('');
-}
-
-function EmptyPalette({ ui, onClose }) {
-  const rootRef = useRef(null);
-  useLayoutEffect(() => {
-    const cta = rootRef.current?.querySelector('[data-empty-cta="add-character"]');
-    const handler = () => { onClose(); ui.showCharacterWizard?.(); };
-    cta?.addEventListener('click', handler);
-    return () => cta?.removeEventListener('click', handler);
-  }, []);
-  return h('div', {
-    ref: rootRef,
-    dangerouslySetInnerHTML: {
-      __html: emptyStateHtml('Nothing to search yet.', { label: '+ Add Character', action: 'add-character' }),
-    },
-  });
 }
 
 function PaletteBody({ ui, entries, onClose }) {
@@ -183,22 +207,28 @@ function PaletteBody({ ui, entries, onClose }) {
 
   return h('div', { ref: rootRef }, [
     h('input', {
-      id: 'cp-input', type: 'text', class: 'form-input', placeholder: 'Search tokens, characters, items…',
-      'aria-label': 'Search tokens, characters, items', autocomplete: 'off',
+      id: 'cp-input', type: 'text', class: 'form-input', placeholder: 'Search, or run a command…',
+      'aria-label': 'Search the campaign, or run a command', autocomplete: 'off',
       'aria-controls': 'cp-results', 'aria-autocomplete': 'list',
     }),
     h('div', { id: 'cp-live', class: 'sr-only', 'aria-live': 'polite' }),
-    h('div', { id: 'cp-results', role: 'listbox', 'aria-label': 'Search results', class: 'cp-results' }),
+    // The list scrolls now that commands sit above the nouns, so it
+    // needs its own tab stop: arrow keys are driven from the input,
+    // but a keyboard user must still be able to reach and scroll it.
+    h('div', {
+      id: 'cp-results', role: 'listbox', 'aria-label': 'Search results',
+      class: 'cp-results', tabindex: '0',
+    }),
   ]);
 }
 
 export function showCommandPalette(ui) {
-  const entries = _buildIndex(ui.state);
+  const entries = [..._commandEntries(ui), ..._buildIndex(ui.state)];
   openModal((close) =>
-    h(Modal, { id: PALETTE_ID, title: 'Search', maxWidth: '480px', autoFocusSelector: '#cp-input', onClose: close },
-      entries.length === 0
-        ? h(EmptyPalette, { ui, onClose: close })
-        : h(PaletteBody, { ui, entries, onClose: close }),
+    h(Modal, { id: PALETTE_ID, title: 'Search or run a command', maxWidth: '480px', autoFocusSelector: '#cp-input', onClose: close },
+      // Never empty: the commands are always there, so a fresh
+      // campaign opens on what it can do rather than on an apology.
+      h(PaletteBody, { ui, entries, onClose: close }),
     ),
   );
 }

@@ -30,7 +30,7 @@ export function resetSignals() {
   lightsSignal.value = new Map();
   mapsSignal.value = new Map();
   pagesSignal.value = new Map();
-  settingsSignal.value = { gm_user_ids: [], name: 'MatrixVTT Session', system: 'generic', grid_px: DEFAULTS.GRID_PX };
+  settingsSignal.value = { gm_user_ids: [], name: DEFAULTS.CAMPAIGN_NAME, system: 'generic', grid_px: DEFAULTS.GRID_PX };
   activeMapIdSignal.value = null;
   fogSignal.value = new Map();
   initiativeSignal.value = { active: false, round: 0, current_index: 0, order: [] };

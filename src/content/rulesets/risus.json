@@ -61,20 +61,59 @@
   "character_sheet": {
     "sections": [
       {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
         "kind": "slot_list",
         "field": "cliches",
         "label": "Clichés",
         "slots": [
-          { "key": "cliche1", "label": "Cliché 1" },
-          { "key": "cliche2", "label": "Cliché 2" },
-          { "key": "cliche3", "label": "Cliché 3" },
-          { "key": "cliche4", "label": "Cliché 4" },
-          { "key": "cliche5", "label": "Cliché 5" },
-          { "key": "cliche6", "label": "Cliché 6" }
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          },
+          {
+            "key": "cliche4",
+            "label": "Cliché 4"
+          },
+          {
+            "key": "cliche5",
+            "label": "Cliché 5"
+          },
+          {
+            "key": "cliche6",
+            "label": "Cliché 6"
+          }
         ]
       },
-      { "kind": "attributes" },
-      { "kind": "pending_modifiers_list", "label": "Pending bonuses" },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "pending_modifiers_list",
+        "label": "Pending bonuses"
+      },
       {
         "kind": "tagged_list",
         "field": "hooks",
@@ -101,11 +140,26 @@
         "field": "stress",
         "label": "Dice Lost (combat)",
         "tracks": [
-          { "name": "Dice lost", "capacities": [1, 1, 1, 1, 1, 1] }
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
         ]
       },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
@@ -118,37 +172,114 @@
 
   "character_preview": {
     "sections": [
-      { "kind": "slot_list", "field": "cliches", "label": "Clichés", "slots": [
-        { "key": "cliche1", "label": "Cliché 1" },
-        { "key": "cliche2", "label": "Cliché 2" },
-        { "key": "cliche3", "label": "Cliché 3" },
-        { "key": "cliche4", "label": "Cliché 4" },
-        { "key": "cliche5", "label": "Cliché 5" },
-        { "key": "cliche6", "label": "Cliché 6" }
-      ]},
-      { "kind": "attributes" },
-      { "kind": "tagged_list", "field": "hooks", "label": "Hooks & Tales" },
-      { "kind": "box_track", "field": "stress", "label": "Dice Lost (combat)", "tracks": [
-        { "name": "Dice lost", "capacities": [1, 1, 1, 1, 1, 1] }
-      ]},
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "slot_list",
+        "field": "cliches",
+        "label": "Clichés",
+        "slots": [
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          },
+          {
+            "key": "cliche4",
+            "label": "Cliché 4"
+          },
+          {
+            "key": "cliche5",
+            "label": "Cliché 5"
+          },
+          {
+            "key": "cliche6",
+            "label": "Cliché 6"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "tagged_list",
+        "field": "hooks",
+        "label": "Hooks & Tales"
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Dice Lost (combat)",
+        "tracks": [
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "slot_list", "field": "cliches", "label": "Clichés", "slots": [
-        { "key": "cliche1", "label": "Cliché 1" },
-        { "key": "cliche2", "label": "Cliché 2" },
-        { "key": "cliche3", "label": "Cliché 3" }
-      ]},
-      { "kind": "attributes" },
-      { "kind": "box_track", "field": "stress", "label": "Dice Lost (combat)", "tracks": [
-        { "name": "Dice lost", "capacities": [1, 1, 1, 1, 1, 1] }
-      ]},
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "slot_list",
+        "field": "cliches",
+        "label": "Clichés",
+        "slots": [
+          {
+            "key": "cliche1",
+            "label": "Cliché 1"
+          },
+          {
+            "key": "cliche2",
+            "label": "Cliché 2"
+          },
+          {
+            "key": "cliche3",
+            "label": "Cliché 3"
+          }
+        ]
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "box_track",
+        "field": "stress",
+        "label": "Dice Lost (combat)",
+        "tracks": [
+          {
+            "name": "Dice lost",
+            "capacities": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

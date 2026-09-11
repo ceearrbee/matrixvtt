@@ -60,12 +60,12 @@ export class ErrorBoundary extends Component {
         [
           h('h2', { style: 'margin:0 0 12px;' }, 'Something went wrong'),
           h('p', { style: 'margin:0 0 16px;color:var(--color-text-secondary,rgba(200,210,230,0.7));' },
-            'MatrixVTT hit an unexpected error and stopped rendering. Reloading usually fixes it; if not, the Reset button clears local session data and starts fresh.'),
+            'MatrixVTT hit an unexpected error and stopped rendering. Reloading usually fixes it; if not, signing out clears local data and starts fresh.'),
           h('p', { style: 'margin:0 0 24px;font-size:12px;color:var(--color-text-tertiary,rgba(200,210,230,0.5));' },
             `Build ${BUILD_VERSION} - error: ${this.state.error?.message || 'unknown'}`),
           h('div', { style: 'display:flex;gap:12px;justify-content:center;' }, [
             h('button', { type: 'button', class: 'dbt btn-primary', onClick: reload }, 'Reload'),
-            h('button', { type: 'button', class: 'dbt', onClick: reset }, 'Reset session'),
+            h('button', { type: 'button', class: 'dbt', onClick: reset }, 'Sign out and reload'),
           ]),
         ],
       ),

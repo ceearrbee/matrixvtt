@@ -15,26 +15,26 @@ const search = (qs) => /** @type {any} */ ({ search: qs });
 
 describe('readInviteFromUrl', () => {
   it('reads a room ID with via hints', () => {
-    expect(readInviteFromUrl(search('?join=%21room%3Ahs.example&via=hs.example')))
+    expect(readInviteFromUrl(search('?join=%21room%3Ahs.example&via=hs.example')).invite)
       .toEqual({ target: '!room:hs.example', via: ['hs.example'] });
   });
 
   it('accepts an alias and a pasted matrix.to link', () => {
-    expect(readInviteFromUrl(search('?join=%23camp%3Ahs.example')))
+    expect(readInviteFromUrl(search('?join=%23camp%3Ahs.example')).invite)
       .toEqual({ target: '#camp:hs.example', via: [] });
-    expect(readInviteFromUrl(search(`?join=${encodeURIComponent('https://matrix.to/#/!r%3Ahs.example?via=hs.example')}`)))
+    expect(readInviteFromUrl(search(`?join=${encodeURIComponent('https://matrix.to/#/!r%3Ahs.example?via=hs.example')}`)).invite)
       .toEqual({ target: '!r:hs.example', via: ['hs.example'] });
   });
 
-  it('ignores a missing or malformed target', () => {
-    expect(readInviteFromUrl(search(''))).toBeNull();
-    expect(readInviteFromUrl(search('?join=nonsense'))).toBeNull();
-    expect(readInviteFromUrl(search('?join=javascript%3Aalert(1)'))).toBeNull();
+  it('parks no invite for a missing or malformed target', () => {
+    expect(readInviteFromUrl(search('')).invite).toBeNull();
+    expect(readInviteFromUrl(search('?join=nonsense')).invite).toBeNull();
+    expect(readInviteFromUrl(search('?join=javascript%3Aalert(1)')).invite).toBeNull();
   });
 });
 
 describe('pending invite storage', () => {
-  beforeEach(() => sessionStorage.clear());
+  beforeEach(() => localStorage.clear());
 
   it('round-trips and clears', () => {
     expect(loadPendingInvite()).toBeNull();
@@ -45,7 +45,7 @@ describe('pending invite storage', () => {
   });
 
   it('drops a stored record that no longer parses', () => {
-    sessionStorage.setItem('vtt:pending-invite', JSON.stringify({ target: 'nonsense', via: [] }));
+    localStorage.setItem('vtt:pending-invite', JSON.stringify({ target: 'nonsense', via: [] }));
     expect(loadPendingInvite()).toBeNull();
   });
 

@@ -62,10 +62,37 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "resource_track", "id": "harm", "label": "Harm",
-        "current_field": "harm_current", "max_field": "harm_max" },
-      { "kind": "attributes" },
-      { "kind": "skill_list", "label": "Basic Moves" },
+      {
+        "kind": "resource_track",
+        "id": "harm",
+        "label": "Harm",
+        "current_field": "harm_current",
+        "max_field": "harm_max"
+      },
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "skill_list",
+        "label": "Basic Moves",
+        "collapsed": true
+      },
       {
         "kind": "tagged_list",
         "field": "bonds",
@@ -73,29 +100,52 @@
         "editable": true,
         "placeholder": "Add a bond…"
       },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
   "character_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "harm", "label": "Harm",
-        "current_field": "harm_current", "max_field": "harm_max" },
-      { "kind": "attributes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "harm",
+        "label": "Harm",
+        "current_field": "harm_current",
+        "max_field": "harm_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "harm", "label": "Harm",
-        "current_field": "harm_current", "max_field": "harm_max" },
-      { "kind": "attributes" },
-      { "kind": "defenses" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "harm",
+        "label": "Harm",
+        "current_field": "harm_current",
+        "max_field": "harm_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

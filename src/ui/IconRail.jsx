@@ -34,8 +34,8 @@ import { SceneIcon, BookIcon, MenuIcon } from './icons/index.jsx';
 // NPCs and Items live in the right-rail tabs, not here - the left rail is
 // the story/navigation index. The Maps manager is a modal from the menu.
 const ICON_DEFS = [
-  { key: ICON_RAIL_DRAWERS.SCENES,  Icon: SceneIcon,  label: 'Scenes',  gmOnly: false },
-  { key: ICON_RAIL_DRAWERS.JOURNAL, Icon: BookIcon,   label: 'Journal', gmOnly: false },
+  { key: ICON_RAIL_DRAWERS.SCENES,  Icon: SceneIcon,  label: 'Scenes' },
+  { key: ICON_RAIL_DRAWERS.JOURNAL, Icon: BookIcon,   label: 'Journal' },
 ];
 
 function MenuDrawer({ ui }) {
@@ -60,7 +60,6 @@ const DRAWER_LABELS = {
 
 export function IconRail({ ui }) {
   const open = openIconRailDrawerSignal.value;
-  const isGM = typeof ui?.state?.isGM === 'function' ? ui.state.isGM() : false;
   const unread = unreadCount(notificationHistorySignal.value, lastSeenTsSignal.value);
 
   const toggle = (key) => {
@@ -75,7 +74,6 @@ export function IconRail({ ui }) {
   };
 
   const iconBtn = (entry) => {
-    if (entry.gmOnly && !isGM) return null;
     const active = open === entry.key;
     return h('button', {
       key: entry.key,

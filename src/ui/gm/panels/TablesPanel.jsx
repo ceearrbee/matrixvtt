@@ -4,6 +4,7 @@
  */
 import { h } from 'preact';
 import { tablesSignal } from '../../../state/signals.js';
+import { DiceIcon } from '../../icons/index.jsx';
 
 function TableRow({ ui, id, table, isGM }) {
   const count = table.entries?.length ?? 0;
@@ -32,7 +33,7 @@ function TableRow({ ui, id, table, isGM }) {
           title: `Roll on ${table.name}`,
           onClick: () => ui.rollTable(id),
         },
-        '🎲'
+        h(DiceIcon, {})
       ),
       isGM &&
         h(

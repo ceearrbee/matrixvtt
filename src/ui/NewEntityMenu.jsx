@@ -11,7 +11,7 @@ import { ENTITY_TYPES } from '../utils/constants.js';
 import { MODAL_WIDTHS } from '../utils/ui-constants.js';
 import { showSceneStartModal } from './SceneStartModal.js';
 import {
-  PersonIcon, PeopleIcon, BoxIcon, BookIcon, MapsIcon, SceneIcon,
+  CONCEPT_ICONS, BoxIcon, MapsIcon, SceneIcon,
   LongPostIcon, PinIcon, DiceIcon,
 } from './icons/index.jsx';
 
@@ -24,8 +24,8 @@ function groups(ui) {
     {
       title: 'Actors',
       items: [
-        { key: 'character', label: 'Character', Icon: PersonIcon, run: () => ui.showEntityForm(ENTITY_TYPES.PC) },
-        { key: 'npc', label: 'NPC', Icon: PeopleIcon, run: () => ui.showEntityForm(ENTITY_TYPES.NPC) },
+        { key: 'character', label: 'Character', Icon: CONCEPT_ICONS.character, run: () => ui.showEntityForm(ENTITY_TYPES.PC) },
+        { key: 'npc', label: 'NPC', Icon: CONCEPT_ICONS.npc, run: () => ui.showEntityForm(ENTITY_TYPES.NPC) },
         { key: 'token', label: 'Token', Icon: PinIcon, run: () => ui.showTokenForm(null) },
       ],
     },
@@ -33,7 +33,7 @@ function groups(ui) {
       title: 'Content',
       items: [
         { key: 'item', label: 'Item', Icon: BoxIcon, run: () => ui.showItemForm(null) },
-        { key: 'spell', label: 'Spell', Icon: BookIcon, run: () => ui.showSpellForm(null) },
+        { key: 'spell', label: 'Spell', Icon: CONCEPT_ICONS.spell, run: () => ui.showSpellForm(null) },
         { key: 'table', label: 'Roll table', Icon: DiceIcon, run: () => ui.showTableForm(null) },
       ],
     },
@@ -43,7 +43,7 @@ function groups(ui) {
         { key: 'map', label: 'Map', Icon: MapsIcon, run: () => ui.openMapsPanel() },
         { key: 'scene', label: 'Scene', Icon: SceneIcon, run: () => showSceneStartModal(ui) },
         { key: 'handout', label: 'Handout', Icon: LongPostIcon, run: () => ui.showHandoutForm(null) },
-        { key: 'page', label: 'Page', Icon: BookIcon, run: () => ui.showPageForm() },
+        { key: 'page', label: 'Page', Icon: CONCEPT_ICONS.journal, run: () => ui.showPageForm() },
       ],
     },
   ];

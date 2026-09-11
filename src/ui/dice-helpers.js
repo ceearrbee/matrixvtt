@@ -9,14 +9,39 @@ import { VTT_EVENTS } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
 import { secretRollSignal } from '../state/ui-signals.js';
 
-export function handleDiceRoll(ui) {
-  const activeDice = document.querySelector('[data-dice].dbt--active');
-  if (!activeDice) return;
+/**
+ * The composer's `mod` field, as a number. The single reader of that
+ * input: every quick-roll path goes through here so a value typed into
+ * it cannot be silently dropped, which is what rollDice, advantage and
+ * disadvantage all used to do by passing a literal 0.
+ */
+export function currentDiceModifier() {
+  const input = /** @type {HTMLInputElement | null} */ (document.getElementById('dice-modifier'));
+  const parsed = parseInt(input?.value ?? '', 10);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 
-  const diceType = activeDice.getAttribute('data-dice'); // e.g. "d20"
-  const sides = parseInt(diceType.slice(1));
-  const modifier = parseInt(/** @type {HTMLInputElement | null} */ (document.getElementById('dice-modifier'))?.value || '0');
-  fireRoll(ui, sides, modifier, '');
+/**
+ * Roll one die face with the composer's modifier. `dice` names the face
+ * ("d20"); without it, the face the strip shows as active.
+ */
+export function handleDiceRoll(ui, dice = '') {
+  const diceType = dice || document.querySelector('[data-dice].dbt--active')?.getAttribute('data-dice');
+  if (!diceType) return;
+  fireRoll(ui, parseInt(diceType.slice(1)), currentDiceModifier(), '');
+}
+
+/**
+ * What the composer would roll right now, as a formula string. Reads
+ * the same two controls `handleDiceRoll` does, so a saved macro
+ * matches the roll the user was about to make.
+ */
+export function currentDiceFormula() {
+  const activeDice = document.querySelector('[data-dice].dbt--active');
+  if (!activeDice) return '';
+  const modifier = currentDiceModifier();
+  const modStr = modifier > 0 ? `+${modifier}` : modifier < 0 ? `${modifier}` : '';
+  return `1${activeDice.getAttribute('data-dice')}${modStr}`;
 }
 
 export function rollAttributeCheck(ui, label, value) {
@@ -164,10 +189,15 @@ export function fireFormulaRoll(ui, formula, label) {
 function _rollTemplate(ui, key, fallback, modifier) {
   const rolls = ui.state.settings?.systemConfig?.rolls ?? {};
   const template = rolls[key] ?? fallback;
-  const signed = modifier >= 0 ? `+${modifier}` : `${modifier}`;
-  // {bonus} is substituted as a signed numeric term so negatives render
-  // as `-3` instead of `+-3` and zero still reduces cleanly.
-  return template.replace(/\{bonus\}/g, signed);
+  // Templates are written both ways: "2d20kh1+{bonus}" puts the operator
+  // in the template, "2d20kh1{bonus}" leaves it to the value. Consume a
+  // leading +/- so either spelling yields one operator. Signing the
+  // value into "+{bonus}" produced "2d20kh1++2", which threw and left
+  // fireFormulaRoll's catch rolling a plain 1d20 in its place.
+  return template.replace(/([+-]?)\{bonus\}/g, (_match, sign) => {
+    const value = sign === '-' ? -modifier : modifier;
+    return value >= 0 ? `+${value}` : `${value}`;
+  });
 }
 
 /** Roll the ruleset's `advantage` template and dispatch vtt:dice-roll-result */

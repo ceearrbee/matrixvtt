@@ -10,7 +10,9 @@
  *
  * Optional `options.parse` / `options.serialize` lets you treat the
  * stored value as something other than a raw string (e.g., '1' for
- * a boolean dismiss flag).
+ * a boolean dismiss flag). `options.userId` scopes the key per user,
+ * through the same `base::userId` shape `utils/user-storage.js` uses,
+ * so two accounts sharing a browser do not share the value.
  *
  * localStorage access is wrapped in try/catch to survive Firefox's
  * Enhanced Tracking Protection blocking it.
@@ -19,12 +21,17 @@ import { useEffect, useState } from 'preact/hooks';
 
 /**
  * @template T
- * @param {string} key
- * @param {{ parse?: (raw: string | null) => T, serialize?: (value: T) => string }} [options]
+ * @param {string} base
+ * @param {{ parse?: (raw: string | null) => T, serialize?: (value: T) => string, userId?: string | null }} [options]
  * @returns {[T, (next: T) => void]}
  */
-export function useStorageSubscription(key, options = {}) {
-  const { parse = /** @type {any} */ ((v) => v), serialize = /** @type {any} */ ((v) => v) } = options;
+export function useStorageSubscription(base, options = {}) {
+  const {
+    parse = /** @type {any} */ ((v) => v),
+    serialize = /** @type {any} */ ((v) => v),
+    userId = null,
+  } = options;
+  const key = userId ? `${base}::${userId}` : base;
 
   const readNow = () => {
     try { return parse(localStorage.getItem(key)); }

@@ -1,21 +1,19 @@
 
 import { h } from 'preact';
-import { chatModeSignal } from '../state/ui-signals.js';
 import { initiativeSignal } from '../state/signals.js';
 import { PlayIcon } from './icons/index.jsx';
 
 /**
+ * The two actions a player reaches for mid-turn. Speaking mode is not
+ * one of them - the composer's Say / Describe / OOC pills are the one
+ * place it changes, and the slash commands are the keyboard path.
+ *
  * @param {{ ui: any }} props
  */
 export function QuickTray({ ui }) {
-  // Subscribe so the buttons rerender on mode flip / combat start.
-  const mode = chatModeSignal.value;
+  // Subscribe so the turn button rerenders on combat start / end.
   const init = initiativeSignal.value;
   const combatActive = !!init?.active;
-  const modeLabel = mode === 'ooc' ? 'OOC' : 'IC';
-  const toggleMode = () => {
-    chatModeSignal.value = mode === 'ooc' ? 'say' : 'ooc';
-  };
   return h('div', {
     class: 'quick-tray',
     role: 'toolbar',
@@ -41,15 +39,5 @@ export function QuickTray({ ui }) {
       disabled: !combatActive,
       onClick: () => { if (combatActive) ui.nextTurn?.(); },
     }, h(PlayIcon, {})),
-    h('button', {
-      key: 't',
-      type: 'button',
-      class: 'quick-tray__btn',
-      'data-quick': 'mode-toggle',
-      title: 'Toggle IC / OOC',
-      'aria-label': `Switch to ${modeLabel === 'OOC' ? 'IC' : 'OOC'}`,
-      'aria-pressed': mode === 'ooc' ? 'true' : 'false',
-      onClick: toggleMode,
-    }, modeLabel),
   ]);
 }

@@ -34,7 +34,7 @@ export function FogPanel(props) {
             : 'Fog is off - click to hide the map',
           onClick: () => gm.toggleFog(),
         },
-        fogOn ? '🌫 Fog On' : '☀ Fog Off'
+        fogOn ? 'Fog on' : 'Fog off'
       ),
       h(
         'button',

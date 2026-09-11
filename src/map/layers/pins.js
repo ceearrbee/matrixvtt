@@ -13,6 +13,7 @@
 import { effect } from '@preact/signals';
 import Konva from 'konva';
 import { pinsSignal, activeMapIdSignal } from '../../state/signals.js';
+import { destinationOf } from '../actions/pin-travel.js';
 
 const DEFAULT_COLOR = '#e6c84a';
 
@@ -54,6 +55,17 @@ export function createPinsLayer(stage, mr) {
       x: cx, y: cy, radius: r * 0.35,
       fill: '#000', listening: false,
     }));
+    // A door wears a ring, so a GM can tell at a glance which pins
+    // lead somewhere and which are only notes to self.
+    if (destinationOf(mr.state?.pins, pin)) {
+      group.add(new Konva.Circle({
+        name: 'travel-ring',
+        x: cx, y: cy, radius: r * 1.8,
+        stroke: color, strokeWidth: 1.5 / zoom,
+        dash: [4 / zoom, 3 / zoom],
+        listening: false,
+      }));
+    }
     // Label. Provisional position below the marker; the combined map-label
     // pass (placeMapLabels, driven from the tokens layer) repositions it
     // above the marker and stacks it clear of token labels. `ellipsis` +
@@ -87,7 +99,8 @@ export function createPinsLayer(stage, mr) {
     const zoom = mr.zoom || 1;
     for (const [id, pin] of visible) {
       keep.add(id);
-      const sig = `${cellPx}|${zoom}|${JSON.stringify(pin)}`;
+      const linked = !!destinationOf(mr.state?.pins, { ...pin, id });
+      const sig = `${cellPx}|${zoom}|${linked}|${JSON.stringify(pin)}`;
       let group = groups.get(id);
       if (!group) {
         group = build();

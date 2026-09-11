@@ -21,7 +21,6 @@ vi.mock('../ui/setup-persistence.js', () => ({
   verifyInitialSave: vi.fn().mockResolvedValue({ verified: true, discrepancies: [] }),
   countInitialSaveSteps: () => 0,
 }));
-vi.mock('../ui/onboarding-tour.js', () => ({ maybeAutoStartTour: vi.fn() }));
 vi.mock('../ui/scene-mode.js', () => ({ startScene: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('../state/yjs-snapshot-publish.js', () => ({ publishYjsSnapshot: vi.fn() }));
 
@@ -50,7 +49,7 @@ describe('runSetupFlow snapshot durability gate', () => {
     const onDone = vi.fn();
     const ui = makeUi();
 
-    await expect(runSetupFlow(ui, { kind: 'blank' }, onDone)).rejects.toThrow(/snapshot/i);
+    await expect(runSetupFlow(ui, { kind: 'blank' }, onDone)).rejects.toThrow(/didn't finish saving/i);
 
     expect(onDone).not.toHaveBeenCalled();          // wizard stays open
     expect(ui.activityLog).toEqual(['SENTINEL']);   // not cleared

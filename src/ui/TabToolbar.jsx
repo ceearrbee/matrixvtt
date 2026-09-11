@@ -5,6 +5,7 @@
  */
 import { h } from 'preact';
 import { compendiumAvailable, openCompendiumBrowser } from './compendium/open-browser.js';
+import { BookIcon } from './icons/index.jsx';
 import { layoutModeSignal } from '../state/ui-signals.js';
 import { LAYOUT_MODES } from '../utils/constants.js';
 
@@ -21,7 +22,7 @@ export function TabToolbar({ title = undefined, modifier = undefined, children =
 export function SrdButton({
   ui,
   kind,
-  label = '📖 SRD',
+  label = 'SRD',
   class: className = 'dbt dbt--sm',
   style = undefined,
 }) {
@@ -39,6 +40,6 @@ export function SrdButton({
       title: 'Add from SRD',
       onClick: () => openCompendiumBrowser(ui, kind),
     },
-    iconMode ? '📖' : label
+    iconMode ? h(BookIcon, {}) : [h(BookIcon, {}), label]
   );
 }

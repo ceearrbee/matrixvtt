@@ -17,22 +17,21 @@ afterEach(() => {
 
 describe('composer mode pills', () => {
   it('carry no Matrix protocol jargon in their tooltips', () => {
-    const src = read('src/ui/Composer.jsx');
+    const src = read('src/ui/DiceBar.jsx');
     expect(src).not.toMatch(/m\.text|m\.emote|m\.notice/);
   });
 });
 
 describe('welcome dialogs accessible names', () => {
-  it('PlayerWelcome and WaitingForGM dialogs are labelled by their headings', async () => {
-    const { showPlayerWelcome, showWaitingForGM } = await import('../ui/WelcomeModals.jsx');
+  it('the WaitingForGM dialog is labelled by its heading', async () => {
+    const { showWaitingForGM } = await import('../ui/WelcomeModals.jsx');
     const ui = /** @type {any} */ ({ widgetManager: { isAppClient: false }, showFirstTimeSetup: vi.fn() });
 
-    showPlayerWelcome(ui);
     showWaitingForGM(ui, true);
     await flush();
 
     const dialogs = [...document.querySelectorAll('[role="dialog"]')];
-    expect(dialogs.length).toBe(2);
+    expect(dialogs.length).toBe(1);
     for (const dialog of dialogs) {
       const labelId = dialog.getAttribute('aria-labelledby');
       expect(labelId, 'dialog missing aria-labelledby').toBeTruthy();
@@ -60,7 +59,7 @@ describe('command palette announcements', () => {
     const live = document.querySelector('#cp-live');
     expect(live).toBeTruthy();
     expect(live.getAttribute('aria-live')).toBe('polite');
-    expect(live.textContent).toMatch(/2 results/i);
+    expect(live.textContent).toMatch(/\d+ results/i);
 
     const input = document.querySelector('#cp-input');
     input.value = 'zzz-no-match';

@@ -37,6 +37,25 @@ export function beginFlow(uia) {
   };
 }
 
+/**
+ * Can this app create an account on this homeserver? Answered at the
+ * homeserver field so the "Create account" button below it isn't a
+ * promise the server can't keep (matrix.org needs a CAPTCHA the static
+ * site's CSP blocks). 'unknown' when the probe itself fails - a network
+ * blip must never claim registration is impossible.
+ *
+ * @returns {Promise<'supported' | 'unsupported' | 'unknown'>}
+ */
+export async function probeRegistrationSupport(MatrixClient, homeserver) {
+  try {
+    const res = await MatrixClient.register(homeserver, {});
+    if (res?.done) return 'unknown';
+    return beginFlow(res?.uia).supported ? 'supported' : 'unsupported';
+  } catch {
+    return 'unknown';
+  }
+}
+
 /** The first stage of the chosen flow the server has not confirmed yet. */
 export function nextStage(flow) {
   if (!flow?.stages) return null;

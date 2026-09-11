@@ -66,13 +66,17 @@ export class StandaloneApp {
 
     // Parked before the shell mounts: the shell's restore effect reads
     // the pending invite on its first render.
-    const invite = readInviteFromUrl(this.location);
+    const { invite, error: inviteError } = readInviteFromUrl(this.location);
     if (invite) {
       savePendingInvite(invite);
       this.history.replaceState({}, '', this.location.pathname);
     }
 
     mountStandaloneShell(this.container, this);
+
+    // A link whose target won't parse used to drop the player on a
+    // plain login screen with no clue the invite had been discarded.
+    if (inviteError) this.setLoginError(inviteError);
 
     const urlParams = new URLSearchParams(this.location.search);
     const loginToken = urlParams.get('loginToken');

@@ -18,15 +18,32 @@ export function GlobalMenu({ ui, onSelect }) {
   const canLeave = !!ui?.widgetManager?.canLeave;
   const items = buildGlobalMenuItems(ui, { isGM, canLeave });
 
+  // Preserve the order buildGlobalMenuItems returns, but start a new
+  // section whenever the group changes, so Leave stays last.
+  const sections = [];
+  for (const item of items) {
+    const last = sections[sections.length - 1];
+    if (last && last.group === item.group) last.items.push(item);
+    else sections.push({ group: item.group, items: [item] });
+  }
+
   return h('div', { class: 'global-menu', role: 'menu' },
-    items.map((item) => h('button', {
-      key: item.key,
-      type: 'button',
-      role: 'menuitem',
-      class: `global-menu__item dbt dbt--sm${item.danger ? ' dbt--danger' : ''}`,
-      'data-menu-item': item.key,
-      title: item.title,
-      onClick: () => { item.action(); onSelect?.(); },
-    }, item.label)),
+    sections.map((section, i) => h('div', {
+      key: `${section.group}-${i}`,
+      class: 'global-menu__group',
+      role: 'group',
+      'aria-label': section.group,
+    }, [
+      h('div', { class: 'global-menu__group-label', 'aria-hidden': 'true' }, section.group),
+      ...section.items.map((item) => h('button', {
+        key: item.key,
+        type: 'button',
+        role: 'menuitem',
+        class: `global-menu__item dbt dbt--sm${item.danger ? ' dbt--danger' : ''}`,
+        'data-menu-item': item.key,
+        title: item.title,
+        onClick: () => { item.action(); onSelect?.(); },
+      }, item.label)),
+    ])),
   );
 }

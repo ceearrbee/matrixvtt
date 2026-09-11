@@ -48,29 +48,66 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "attributes" },
-      { "kind": "wounds" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
   "character_preview": {
     "sections": [
-      { "kind": "attributes" },
-      { "kind": "wounds" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "attributes" },
-      { "kind": "wounds" },
-      { "kind": "defenses" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "wounds"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

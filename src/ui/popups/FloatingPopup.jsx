@@ -106,6 +106,7 @@ export function FloatingPopup({ open, name, title, onClose, pinned = false, onTo
           class: 'floating-popup__close',
           'data-popup-close': '',
           'aria-label': 'Close',
+      title: 'Close',
           onClick: onClose,
         }, '×'),
       ]),

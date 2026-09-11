@@ -10,12 +10,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EVENT_TYPES } from '../utils/constants.js';
 import { openSettingsModal } from '../ui/Settings.jsx';
-import { restartOnboardingTour } from '../ui/onboarding-tour.js';
 import { layoutModeSignal } from '../state/ui-signals.js';
 import { LAYOUT_MODES } from '../utils/constants.js';
 import { withFacade } from './helpers/withFacade.js';
 
-vi.mock('../ui/onboarding-tour.js', () => ({ restartOnboardingTour: vi.fn() }));
 
 vi.mock('../utils/logger.js', () => ({ logger: { warn: vi.fn(), error: vi.fn() } }));
 vi.mock('../utils/errorHandling.js', () => ({
@@ -141,18 +139,12 @@ describe('Settings modal (Preact)', () => {
     });
   });
 
-  describe('Tour restart', () => {
-    it('offers a restart-tour button that closes the modal and restarts the onboarding tour', () => {
+  describe('Onboarding', () => {
+    it('carries no tour restart: the spotlight tour is gone', () => {
       const { ui } = makeUI(false);
       openSettingsModal(ui);
-
       const buttons = [...document.querySelectorAll('button')];
-      const restartBtn = buttons.find((b) => /restart tour/i.test(b.textContent));
-      expect(restartBtn).toBeTruthy();
-
-      restartBtn.click();
-      expect(restartOnboardingTour).toHaveBeenCalledWith(ui);
-      expect(document.querySelector('.modal-overlay')).toBeNull();
+      expect(buttons.find((b) => /restart tour/i.test(b.textContent))).toBeUndefined();
     });
   });
 

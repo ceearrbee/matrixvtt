@@ -59,9 +59,12 @@ describe('ComposerActionsPopover', () => {
   it('selecting a speaking mode updates chatModeSignal', () => {
     chatModeSignal.value = 'say';
     const ui = makeUi();
-    const { getByLabelText } = render(
+    const { container } = render(
       h(ComposerActionsPopover, { ui, selected: 'd20', onSelectedChange: () => {}, onClose: () => {} }),
     );
+    // The popover renders the shared Say / Describe / OOC pills.
+    const getByLabelText = (label) =>
+      container.querySelector(`[data-chat-mode="${label.toLowerCase()}"]`);
     fireEvent.click(getByLabelText('OOC'));
     expect(chatModeSignal.value).toBe('ooc');
     fireEvent.click(getByLabelText('Describe'));

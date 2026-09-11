@@ -62,7 +62,7 @@ export function ChatTonePicker({ onClose }) {
     ref: rootRef,
   }, [
     h('div', { class: 'tone-picker__header', style: 'display:flex;align-items:center;gap:4px;' }, [
-      h(HelpIcon, { term: 'persona' }),
+      h(HelpIcon, { term: 'tone' }),
       h('input', {
         type: 'search',
         class: 'form-input tone-picker__search',

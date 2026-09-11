@@ -96,7 +96,7 @@ export function renderActiveSessions(app, totalRooms, results) {
   }
   if (activeSessions.length === 0) {
     emptyEl.textContent =
-      'You have joined rooms, but none currently contain MatrixVTT session state.';
+      'You have joined Matrix rooms, but none of them holds a campaign yet. Create one below to start playing in a room you already have.';
     emptyEl.style.display = 'block';
     activeList.replaceChildren();
     return;

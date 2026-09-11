@@ -14,6 +14,8 @@ import { ConnectionLost } from '../ui/ConnectionLost.jsx';
 import { MatrixClient } from '../client/MatrixClient.js';
 import { confirmed, confirmTyped } from '../ui/confirm-dialogs.jsx';
 import { promptKnock } from './KnockDialog.jsx';
+import { DEFAULT_RULESET_SLUG } from '../state/rulesets.js';
+import { DEFAULTS } from '../utils/constants.js';
 
 export async function enterRoom(app, roomIdOrAlias, roomName, forceWizard = false, via = []) {
   app.appLog.add('info', `→ enterRoom ${roomIdOrAlias} forceWizard=${forceWizard}`);
@@ -155,14 +157,15 @@ export async function startVTT(app, session, forceWizard = false) {
     }
 
     app.showScreen('discovery');
-    app.setError('discovery-error', 'Failed to start session: ' + err.message);
+    app.setError('discovery-error', 'Failed to open campaign: ' + err.message);
   }
 }
 
 export async function handleCreateRoom(app) {
   const input = app.doc.getElementById('create-room-input');
-  const name = input.value.trim() || 'VTT Session';
+  const name = input.value.trim() || DEFAULTS.CAMPAIGN_NAME;
   const btn = app.doc.getElementById('create-room-btn');
+  const system = app.doc.getElementById('create-room-system')?.value || DEFAULT_RULESET_SLUG;
   const knockable = !!app.doc.getElementById('create-room-knock')?.checked;
   btn.disabled = true;
   btn.textContent = 'Creating…';
@@ -183,12 +186,16 @@ export async function handleCreateRoom(app) {
       await app.auth.client.sdk.sendStateEvent(
         roomId,
         'com.vtt.settings',
-        { name, pending_setup: true },
+        { name, system, pending_setup: true },
         '',
       );
     } catch (err) {
       app.appLog.add('warn', `settings seed write failed: ${err.message}`);
     }
+    // The setup wizard reads this instead of asking for a name and a
+    // system the GM has already given. The seeded state event above
+    // exists for discovery only - it is never loaded back into state.
+    if (app.matrixVTTClient) app.matrixVTTClient.pendingCampaign = { name, system };
     await app.enterRoom(roomId, name, true);
   } catch (err) {
     app.setError('discovery-error', 'Could not create room: ' + err.message);
@@ -200,9 +207,7 @@ export async function handleCreateRoom(app) {
 
 export function handleFactoryReset(app) {
   confirmTyped(
-    'Permanently delete all local data? This clears your login session, ' +
-    'recent rooms list, and all local settings. Campaign data stored on ' +
-    'Matrix servers is NOT deleted.',
+    'Permanently delete all local data? This clears your sign-in, recent campaigns list, and all local settings. Campaign data stored on Matrix servers is NOT deleted.',
     'RESET',
     async () => {
       localStorage.clear();

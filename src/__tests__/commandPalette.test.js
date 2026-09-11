@@ -1,7 +1,8 @@
 /**
- * Command palette: `/` opens a fuzzy search across every named entity
- * in the campaign. Each result routes to a contextual action when
- * picked.
+ * Command palette: Cmd/Ctrl+K anywhere, or `/` outside a text field,
+ * opens a fuzzy search across the commands you can run and every named
+ * entity in the campaign. Each result routes to a contextual action
+ * when picked.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { showCommandPalette } from '../ui/command-palette.js';
@@ -46,12 +47,17 @@ describe('command palette', () => {
     expect(document.getElementById('cp-input')).toBeTruthy();
   });
 
-  it('shows initial entries (truncated to MAX_RESULTS) before the user types', () => {
+  it('leads with commands, then the campaign, before the user types', () => {
     const ui = makeUi();
     showCommandPalette(ui);
-    const rows = document.querySelectorAll('.cp-row');
-    // 1 token + 1 character + 1 item + 1 pin = 4
-    expect(rows.length).toBe(4);
+    const rows = [...document.querySelectorAll('.cp-row')];
+    const kinds = rows.map((r) => r.querySelector('.cp-row__kind').textContent);
+    // Verbs come first: a palette is opened to reach one.
+    expect(kinds[0]).toBe('Command');
+    // The four seeded nouns are all reachable behind them.
+    for (const kind of ['Token', 'Character', 'Item', 'Pin']) {
+      expect(kinds, kind).toContain(kind);
+    }
   });
 
   it('filters results as the user types', async () => {
@@ -87,20 +93,18 @@ describe('command palette', () => {
     expect(ui.mapRenderer.panToToken).toHaveBeenCalledWith('t1');
   });
 
-  it('opens an empty-state palette with an Add Character CTA when the campaign is empty', () => {
-    const ui = makeUi({ state: {
-      tokens: new Map(), characters: new Map(), npcs: new Map(),
-      items: new Map(), spells: new Map(), handouts: new Map(), pins: new Map(),
-    }});
-    ui.showCharacterWizard = vi.fn();
+  it('offers commands even in an empty campaign, rather than an apology', () => {
+    const ui = makeUi({
+      state: {
+        tokens: new Map(), characters: new Map(), npcs: new Map(),
+        items: new Map(), spells: new Map(), handouts: new Map(), pins: new Map(),
+      },
+    });
     showCommandPalette(ui);
-    const modal = document.getElementById('command-palette');
-    expect(modal).not.toBeNull();
-    const cta = modal.querySelector('[data-empty-cta="add-character"]');
-    expect(cta?.textContent).toMatch(/Add Character/i);
-    cta.click();
-    expect(ui.showCharacterWizard).toHaveBeenCalled();
-    expect(document.getElementById('command-palette')).toBeNull();
+    const rows = [...document.querySelectorAll('.cp-row')];
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r.querySelector('.cp-row__kind').textContent === 'Command')).toBe(true);
+    expect(document.body.textContent).not.toMatch(/nothing to search/i);
   });
 
   it('character results select the character into the sidebar sheet', () => {

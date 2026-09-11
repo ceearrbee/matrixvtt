@@ -1,13 +1,15 @@
 /**
- * Header after menu consolidation - Settings / Theme / Tour / Maps moved
- * into the lower-left GlobalMenu, and the chat-tool chips (Mode / OOC /
+ * Header after menu consolidation - Settings / Theme / Maps moved into
+ * the lower-left GlobalMenu, and the chat-tool chips (Mode / OOC /
  * Browse) folded into the composer and GlobalMenu. The header keeps only
- * live controls: presence, GM tools, prep, sync, leave.
+ * live controls: presence, prep, sync, leave; the authoring entries ride
+ * the prep axis.
  */
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/preact';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/preact';
 import { h } from 'preact';
 import { Header } from '../ui/Header.jsx';
+import { gmPrepActiveSignal } from '../state/ui-signals.js';
 
 function makeUi() {
   return {
@@ -23,6 +25,9 @@ function makeUi() {
 }
 
 describe('Header after menu consolidation', () => {
+  beforeEach(() => { localStorage.clear(); gmPrepActiveSignal.value = false; });
+  afterEach(cleanup);
+
   it('no longer renders Settings / Theme / Tour / Maps controls', () => {
     render(h(Header, { ui: makeUi() }));
     expect(document.getElementById('settings-btn')).toBeNull();
@@ -38,10 +43,16 @@ describe('Header after menu consolidation', () => {
     expect(document.querySelector('.vtt-header__secondary')).toBeNull();
   });
 
-  it('keeps the live controls: GM tools, New, sync', () => {
+  it('keeps sync live, and discloses GM tools and New with the prep workspace', () => {
+    render(h(Header, { ui: makeUi() }));
+    expect(document.querySelector('[data-sync-status]')).not.toBeNull();
+    expect(document.getElementById('gm-controls-btn')).toBeNull();
+    expect(document.getElementById('new-entity-btn')).toBeNull();
+
+    cleanup();
+    gmPrepActiveSignal.value = true;
     render(h(Header, { ui: makeUi() }));
     expect(screen.getByRole('button', { name: /open gm tools/i })).not.toBeNull();
     expect(document.getElementById('new-entity-btn')).not.toBeNull();
-    expect(document.querySelector('[data-sync-status]')).not.toBeNull();
   });
 });

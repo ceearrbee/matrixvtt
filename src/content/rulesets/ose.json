@@ -138,44 +138,115 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",    "field": "ac" },
-        { "label": "Level", "field": "level" }
-      ]},
-      { "kind": "attributes" },
-      { "kind": "saves" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "Level",
+            "field": "level"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "saves",
+        "collapsed": true
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
   "character_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",    "field": "ac" },
-        { "label": "Level", "field": "level" }
-      ]},
-      { "kind": "attributes" },
-      { "kind": "saves" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "Level",
+            "field": "level"
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",  "field": "ac" },
-        { "label": "HD",  "field": "hd" }
-      ]},
-      { "kind": "attributes" },
-      { "kind": "defenses" },
-      { "kind": "saves" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "HD",
+            "field": "hd"
+          }
+        ]
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

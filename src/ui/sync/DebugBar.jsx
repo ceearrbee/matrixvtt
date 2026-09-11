@@ -2,6 +2,7 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { logger } from '../../utils/logger.js';
+import { CopyIcon } from '../icons/index.jsx';
 
 export function DebugBar({ ui }) {
   const [, setTick] = useState(0);
@@ -40,7 +41,7 @@ export function DebugBar({ ui }) {
     h('div', { class: 'debug-bar__actions' }, [
       h('span', { class: 'debug-bar__token' }, [
         'Token: ', h('code', null, masked),
-        h('button', { class: 'dbt dbt--sm', id: 'debug-copy-token', title: 'Copy debug token', 'aria-label': 'Copy debug token', onClick: () => ui._copyDebugToken() }, '📋'),
+        h('button', { class: 'dbt dbt--sm', id: 'debug-copy-token', title: 'Copy debug token', 'aria-label': 'Copy debug token', onClick: () => ui._copyDebugToken() }, h(CopyIcon, {})),
       ]),
       h('button', { class: 'dbt dbt--sm', id: 'debug-clear-storage', title: 'Clear cache', 'aria-label': 'Clear cache', onClick: () => ui._clearDebugStorage() }, '🧹'),
       h('button', { class: 'dbt dbt--sm', id: 'debug-reload', title: 'Reload', 'aria-label': 'Reload', onClick: () => ui._hardReload() }, '🔄'),

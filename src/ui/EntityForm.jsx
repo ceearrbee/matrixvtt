@@ -3,9 +3,10 @@
  * Form uses uncontrolled inputs; submit logic in entity-manager reads the DOM.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import { trapFocusIn } from '../utils/ui-helpers.js';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 import { VTTError, ErrorType, showErrorNotification } from '../utils/errorHandling.js';
 import { ENTITY_TYPES } from '../utils/constants.js';
 
@@ -58,13 +59,13 @@ function CommonBottomFields({ ui, entity, isEdit }) {
   ]);
 }
 
-function EntityFormModal({ ui, initialType, entityId, trigger, onClose }) {
+function EntityFormModal({ ui, initialType, entityId, onClose }) {
   const [entityType, setEntityType] = useState(initialType || ENTITY_TYPES.PC);
   const isEdit = !!entityId;
   const isPC = entityType === ENTITY_TYPES.PC;
   const entity = isEdit ? (isPC ? ui.state.characters.get(entityId) : ui.state.npcs.get(entityId)) : null;
 
-  const close = () => { onClose(); trigger?.focus(); };
+  const close = onClose;
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -80,23 +81,14 @@ function EntityFormModal({ ui, initialType, entityId, trigger, onClose }) {
     } catch (err) { showErrorNotification(new VTTError(ErrorType.UNKNOWN, err.message, err)); }
   };
 
-  return h('div', {
-    class: 'modal-overlay',
+  return h(Modal, {
     id: 'entity-form-modal',
-    tabIndex: -1,
-    onClick: (e) => { if (e.target === e.currentTarget) close(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') close(); },
+    title: isEdit ? `Edit ${isPC ? 'Character' : 'NPC/Monster'}` : 'Add Character/NPC',
+    maxWidth: '650px',
+    autoFocusSelector: '#entity-name',
+    onClose: close,
   },
-    h('div', {
-      class: 'modal-content', role: 'dialog', 'aria-modal': 'true',
-      'aria-labelledby': 'entity-form-title', style: 'max-width:650px;max-height:90vh;overflow-y:auto;',
-    }, [
-      h('div', { class: 'modal-header' }, [
-        h('h2', { id: 'entity-form-title' }, isEdit ? `Edit ${isPC ? 'Character' : 'NPC/Monster'}` : 'Add Character/NPC'),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: close }, '✕'),
-      ]),
-      h('div', { class: 'modal-body' },
-        h('form', { id: 'entity-form', 'data-entity-type': entityType, onSubmit }, [
+    h('form', { id: 'entity-form', 'data-entity-type': entityType, onSubmit }, [
           !isEdit && isPC && h(TemplatePicker, { ui }),
           !isEdit && h(TypeSelector, { isPC, onChange: setEntityType }),
           h('div', { class: 'form-group' }, [
@@ -127,28 +119,15 @@ function EntityFormModal({ ui, initialType, entityId, trigger, onClose }) {
             h('button', { type: 'button', class: 'dbt', onClick: close }, 'Cancel'),
             h('button', { type: 'submit', class: 'dbt btn-primary', id: 'entity-submit-btn' }, [
               isEdit ? 'Update ' : 'Create ',
-              h('span', { class: 'submit-entity-type' }, isPC ? (isEdit ? 'Character' : 'Character') : 'NPC'),
-            ]),
-          ]),
-        ])),
-    ]));
+        h('span', { class: 'submit-entity-type' }, isPC ? (isEdit ? 'Character' : 'Character') : 'NPC'),
+      ]),
+    ]),
+  ]));
 }
 
 export function showEntityForm(ui, entityType = ENTITY_TYPES.PC, entityId = null) {
-  // Clean up any stale overlay (e.g. from a prior render that errored mid-way)
-  // so subsequent edit clicks aren't silently swallowed by the guard. This is
-  // a Preact-rendered custom overlay (not a ModalFactory modal), so the
-  // factory's cleanup pipeline does not apply.
-  // eslint-disable-next-line vtt/no-direct-modal-remove
-  document.getElementById('entity-form-modal')?.remove();
-  const trigger = document.activeElement;
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-  const onClose = () => { render(null, host); host.remove(); };
-  render(h(EntityFormModal, { ui, initialType: entityType, entityId, trigger, onClose }), host);
-  const overlay = /** @type {HTMLElement|null} */ (host.querySelector('.modal-overlay'));
-  if (overlay) {
-    trapFocusIn(overlay);
-    /** @type {HTMLElement|null} */ (overlay.querySelector('input, select, button'))?.focus();
-  }
+  // openModal enforces one live modal per overlay id, so a stale
+  // entity-form left by a render that errored mid-way is torn down
+  // through its own disposer rather than yanked out of the DOM.
+  openModal((close) => h(EntityFormModal, { ui, initialType: entityType, entityId, onClose: close }));
 }

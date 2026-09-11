@@ -7,14 +7,16 @@ import { tinykeys } from 'tinykeys';
 import { showKeyboardHelp } from './keyboard-help.js';
 import { showCommandPalette } from './command-palette.js';
 import { cycleTokenId, announceTokenSelection } from '../map/token-cycle.js';
+import { setGmPrep } from './ui-mode.js';
+import { gmPrepActiveSignal } from '../state/ui-signals.js';
 
 const TOOL_MAP = {
   v: 'pointer', p: 'pencil', l: 'line', r: 'rect', c: 'circle',
-  k: 'cone', m: 'measure', e: 'erase', w: 'wall', t: 'template-circle',
-  o: 'light',
+  k: 'template-cone', m: 'measure', e: 'erase', w: 'wall', t: 'template-circle',
+  o: 'light', i: 'pin',
 };
 
-const GM_ONLY_TOOLS = new Set(['wall', 'light', 'template-circle']);
+const GM_ONLY_TOOLS = new Set(['wall', 'light', 'pin', 'template-circle', 'template-cone']);
 
 function _typingInForm() {
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
@@ -24,6 +26,10 @@ export function useKeyboardShortcuts(ui) {
   useEffect(() => {
     // Always-active shortcuts
     const alwaysActive = {
+      // Not guarded: the chat composer is a textarea and holds the
+      // shell's resting focus, so a guarded palette key is a palette
+      // nobody can open.
+      '$mod+KeyK': (e) => { e.preventDefault(); showCommandPalette(ui); },
       '$mod+Shift+KeyD': (e) => { e.preventDefault(); ui.toggleDebugMode(); },
       '$mod+KeyZ':       (e) => { e.preventDefault(); ui.undoDrawing(); },
       '$mod+Shift+KeyZ': (e) => { e.preventDefault(); ui.redoDrawing(); },
@@ -64,11 +70,16 @@ export function useKeyboardShortcuts(ui) {
       mr.setSelectedToken(nextId);
       announceTokenSelection(ui.state?.tokens?.get?.(nextId));
     });
+    toolShortcuts['Alt+KeyP'] = guarded((e) => {
+      if (ui.state?.isGM?.() !== true) return;
+      e.preventDefault();
+      setGmPrep(ui.widgetManager?.userId, ui.widgetManager?.roomId, !gmPrepActiveSignal.value);
+    });
     toolShortcuts.KeyN = cycleSelection(1);
     toolShortcuts['Shift+KeyN'] = cycleSelection(-1);
     toolShortcuts.Slash = guarded((e) => {
       e.preventDefault();
-      if (e.shiftKey) showKeyboardHelp(ui);
+      if (e.shiftKey) showKeyboardHelp();
       else showCommandPalette(ui);
     });
 

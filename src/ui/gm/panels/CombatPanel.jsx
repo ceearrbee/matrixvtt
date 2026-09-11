@@ -31,7 +31,7 @@ export function CombatPanel({ ui, gm }) {
           title: 'Next turn',
           onClick: () => ui.nextTurn(),
         },
-        'Next ▶'
+        'Next turn'
       ),
       h(
         'button',

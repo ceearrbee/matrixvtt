@@ -36,14 +36,26 @@ function playerConfig(page, { withCharacter = true } = {}) {
 }
 
 test.describe('player-perspective entry', () => {
-  test('welcome offers claiming when characters exist; claim writes state', async ({ page }) => {
+  test('the checklist asks a player for one thing; claim writes state', async ({ page }) => {
     await playerConfig(page);
     await waitForVttShell(page);
 
-    const welcome = page.locator('[aria-labelledby="player-welcome-title"]');
-    await expect(welcome).toBeVisible({ timeout: 15_000 });
-    await expect(welcome).toContainText(/claim/i);
-    await welcome.getByRole('button', { name: 'Got it' }).click();
+    // The checklist reads live state, and under load the shell can
+    // paint before the Yjs snapshot hydrates the seeded character. Wait
+    // for the character to land so the chip is asserted in its settled
+    // state rather than mid-hydration.
+    await page.waitForFunction(
+      () => (window.matrixVTTClient?.state?.characters?.size ?? 0) > 0,
+      null,
+      { timeout: 15_000 },
+    );
+
+    // One first-run surface, not a modal on top of a tour: the
+    // next-steps checklist, with exactly one item for a player.
+    const checklist = page.locator('.next-steps');
+    await expect(checklist).toBeVisible({ timeout: 15_000 });
+    await expect(checklist.locator('[data-step="character"]')).toContainText(/claim/i);
+    await expect(checklist.locator('.next-steps__chip')).toHaveCount(1);
 
     // GM-only chrome must not exist for a PL-0 player.
     await expect(page.locator('#gm-controls-btn')).toHaveCount(0);
@@ -60,13 +72,14 @@ test.describe('player-perspective entry', () => {
       .toBeGreaterThan(before);
   });
 
-  test('welcome does not promise claiming in an empty room', async ({ page }) => {
+  test('the claim step stays open in a room with no characters yet', async ({ page }) => {
     await playerConfig(page, { withCharacter: false });
     await page.goto('app.html');
 
-    const welcome = page.locator('[aria-labelledby="player-welcome-title"]');
-    await expect(welcome).toBeVisible({ timeout: 15_000 });
-    await expect(welcome).not.toContainText(/claim/i);
-    await expect(welcome).toContainText(/no characters/i);
+    const step = page.locator('.next-steps [data-step="character"]');
+    await expect(step).toBeVisible({ timeout: 15_000 });
+    await expect(step).toHaveAttribute('data-done', 'false');
+    // The chip makes a sheet rather than promising one that isn't there.
+    await expect(step).toHaveAttribute('title', /own/i);
   });
 });

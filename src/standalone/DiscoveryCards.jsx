@@ -1,6 +1,7 @@
 
 import { h, render } from 'preact';
 import { relativeDate } from './app-log.js';
+import { KickIcon } from '../ui/icons/index.jsx';
 
 function InviteCard({ invite, onAccept, onDecline }) {
   return h('div', { class: 'room-card' }, [
@@ -69,7 +70,7 @@ function ActiveSessionCard({ room, onJoin, onLeave }) {
         title: 'Leave this Matrix room',
         'aria-label': 'Leave room',
         onClick: (e) => { e.preventDefault(); e.stopPropagation(); onLeave(); },
-      }, h('span', { 'aria-hidden': 'true' }, '👢')),
+      }, h('span', { 'aria-hidden': 'true' }, h(KickIcon, {}))),
     ]),
   ]);
 }

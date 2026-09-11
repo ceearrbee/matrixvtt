@@ -19,7 +19,7 @@ import { activeTabSignal, layoutModeSignal } from '../state/ui-signals.js';
 
 import { CombatTab } from './CombatTab.jsx';
 import {
-  CombatIcon, SheetIcon, PeopleIcon, PersonIcon, BookIcon, WrenchIcon, BoxIcon,
+  CombatIcon, SheetIcon, CONCEPT_ICONS, BoxIcon,
 } from './icons/index.jsx';
 import { CharacterSheet } from './CharacterSheet.jsx';
 import { NPCSheet } from './NPCSheet.jsx';
@@ -104,13 +104,13 @@ export function RightCompanion({ ui }) {
         selected: false,
         onClick: select(TABS.SHEET),
       }),
-      h(CompanionTab, { id: TABS.PARTY, label: lbl(PeopleIcon, 'Party'), title: 'Party roster', current: tab, onClick: select(TABS.PARTY) }),
-      h(CompanionTab, { id: TABS.NPC, label: lbl(PersonIcon, 'NPCs'), title: 'NPC list', current: tab, onClick: select(TABS.NPC) }),
+      h(CompanionTab, { id: TABS.PARTY, label: lbl(CONCEPT_ICONS.party, 'Party'), title: 'Party roster', current: tab, onClick: select(TABS.PARTY) }),
+      h(CompanionTab, { id: TABS.NPC, label: lbl(CONCEPT_ICONS.npc, 'NPCs'), title: 'NPC list', current: tab, onClick: select(TABS.NPC) }),
     ]),
     inSheetFamily && h('div', { class: 'ctabs ctabs--sub', role: 'tablist', 'aria-label': 'Sheet sections' }, [
       h(CompanionTab, { id: TABS.SHEET, label: lbl(SheetIcon, 'Sheet'), title: 'Character sheet', current: tab, onClick: select(TABS.SHEET), sub: true }),
-      hasSpells && h(CompanionTab, { id: TABS.SPELLS, label: lbl(BookIcon, 'Spells'), title: 'Spell list', current: tab, onClick: select(TABS.SPELLS), sub: true }),
-      hasSkills && h(CompanionTab, { id: TABS.SKILLS, label: lbl(WrenchIcon, 'Skills'), title: 'Skill list', current: tab, onClick: select(TABS.SKILLS), sub: true }),
+      hasSpells && h(CompanionTab, { id: TABS.SPELLS, label: lbl(CONCEPT_ICONS.spell, 'Spells'), title: 'Spell list', current: tab, onClick: select(TABS.SPELLS), sub: true }),
+      hasSkills && h(CompanionTab, { id: TABS.SKILLS, label: lbl(CONCEPT_ICONS.skill, 'Skills'), title: 'Skill list', current: tab, onClick: select(TABS.SKILLS), sub: true }),
       h(CompanionTab, { id: TABS.ITEMS, label: lbl(BoxIcon, 'Items'), title: 'Item list', current: tab, onClick: select(TABS.ITEMS), sub: true }),
     ]),
     h('div', { class: 'cbody', id: 'companion-content', role: 'tabpanel', tabindex: '0' },

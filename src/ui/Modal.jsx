@@ -16,7 +16,9 @@ import { openModal } from './modal-host.js';
 export function Modal({
   id,
   title,
+  eyebrow = '',
   maxWidth = '600px',
+  contentClass = '',
   closeOnOverlay = true,
   closeOnEscape = true,
   autoFocusSelector = null,
@@ -77,6 +79,7 @@ export function Modal({
   }, []);
 
   const titleId = `${id}-title`;
+  const headingClass = eyebrow ? 'editorial-heading editorial-heading--lg' : '';
   const onRootClick = (e) => {
     // Delegated close: any [data-modal-close] inside the dialog tears down
     // without the dirty guard (an explicit user dismissal).
@@ -88,15 +91,18 @@ export function Modal({
   return h('div', { id, class: 'modal-overlay', onClick: onRootClick },
     h('div', {
       ref: dialogRef,
-      class: 'modal-content',
+      class: `modal-content${contentClass ? ` ${contentClass}` : ''}`,
       role: 'dialog',
       'aria-modal': 'true',
       'aria-labelledby': titleId,
       style: `max-width: ${maxWidth}`,
     }, [
       h('div', { class: 'modal-header' }, [
-        h('h2', { id: titleId }, title),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: () => requestClose(false) }, '✕'),
+        // Onboarding surfaces are the only place DESIGN.md allows the
+        // eyebrow; every other dialog leaves it empty.
+        eyebrow && h('span', { class: 'eyebrow wizard-eyebrow' }, eyebrow),
+        h('h2', { id: titleId, class: headingClass }, title),
+        h('button', { class: 'modal-close', 'aria-label': 'Close', title: 'Close', onClick: () => requestClose(false) }, '✕'),
       ]),
       h('div', { class: 'modal-body' }, children),
     ]),

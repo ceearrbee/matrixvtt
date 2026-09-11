@@ -12,19 +12,8 @@ import {
   pathOf,
 } from './helpers.js';
 import { FOG_MODES } from '../ui-constants.js';
-import { UI_MODE_VALUES } from '../constants.js';
 
 const FOG_MODE_VALUES = Object.values(FOG_MODES);
-
-const uiModeEventSchema = v.object({
-  mode: v.picklist(UI_MODE_VALUES),
-});
-
-export function validateUiMode(content) {
-  failIfNotObject(content, 'UI mode');
-  return parseOrThrow(uiModeEventSchema, content,
-    (issue) => `UI mode ${pathOf(issue)}: ${issue.message}`);
-}
 
 const settingsSchema = v.object({
   gm_user_ids: v.array(matrixUserId),

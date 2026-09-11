@@ -4,12 +4,13 @@
  */
 
 import { h } from 'preact';
-import { EditIcon, TrashIcon } from './icons/index.jsx';
+import { EditIcon, TrashIcon, DiceIcon } from './icons/index.jsx';
 import { charactersSignal } from '../state/signals.js';
 import { selectedCharacterIdSignal, selectedTokenSignal } from '../state/ui-signals.js';
 import { computeDerived } from '../engine/computeDerived.js';
 import { EmptyState } from './EmptyState.jsx';
 import { calcSkillBonus as calcBonus } from './skill-bonus.js';
+import { NoCharacterSelected } from './NoCharacterSelected.jsx';
 
 function SkillFullRow({ ui, skillDef, bonus, attrLabel, canEdit, character }) {
   const isProf = (character.skill_proficiencies ?? []).includes(skillDef.key);
@@ -40,7 +41,7 @@ function SkillFullRow({ ui, skillDef, bonus, attrLabel, canEdit, character }) {
     h('span', { class: 'skill-full-row__name' }, skillDef.label),
     h('span', { class: 'skill-full-row__attr' }, attrLabel),
     h('span', { class: 'skill-full-row__bonus' }, `${bonus >= 0 ? '+' : ''}${bonus}`),
-    h('span', { class: 'skill-full-row__roll-hint', 'aria-hidden': 'true' }, '🎲'),
+    h('span', { class: 'skill-full-row__roll-hint', 'aria-hidden': 'true' }, h(DiceIcon, {})),
   ]);
 }
 
@@ -72,7 +73,7 @@ function GenericSkillRow({ ui, skillKey, bonus, canEdit }) {
       style: 'color: var(--color-text-danger);',
       onClick: (e) => { e.stopPropagation(); ui.deleteSkillOverride(skillKey); },
     }, h(TrashIcon, {})),
-    h('span', { class: 'skill-full-row__roll-hint', 'aria-hidden': 'true' }, '🎲'),
+    h('span', { class: 'skill-full-row__roll-hint', 'aria-hidden': 'true' }, h(DiceIcon, {})),
   ]);
 }
 
@@ -81,9 +82,7 @@ export function Skills({ ui }) {
   charactersSignal.value;
   selectedCharacterIdSignal.value; selectedTokenSignal.value;
   const character = ui.state.getCurrentCharacter();
-  if (!character) {
-    return h('div', { class: 'empty-state' }, 'No character selected');
-  }
+  if (!character) return h(NoCharacterSelected, { ui });
 
   const ruleset = ui.state.settings.systemConfig;
   const canEdit = ui.state.canEditEntity(character);

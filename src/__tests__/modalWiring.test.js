@@ -22,7 +22,6 @@ vi.mock('../ui/FloatingDoc.jsx', () => ({
 vi.mock('../ui/tables/TableFormModal.jsx', () => ({ showTableForm: vi.fn() }));
 vi.mock('../ui/first-time-setup.js', () => ({
   showFirstTimeSetup: vi.fn(),
-  showPlayerWelcome: vi.fn(),
 }));
 vi.mock('../ui/AttackModal.jsx', () => ({
   openAttackResolveModal: vi.fn(),
@@ -98,12 +97,10 @@ describe('attachModalMethods(ui)', () => {
     expect(tableForm.showTableForm).toHaveBeenCalledWith(ui, 'tbl-1');
   });
 
-  it('showFirstTimeSetup and showPlayerWelcome forward', () => {
+  it('showFirstTimeSetup forwards', () => {
     const ui = makeUI(); attachModalMethods(ui);
     ui.showFirstTimeSetup({ reason: 'x' });
-    ui.showPlayerWelcome();
     expect(firstTimeSetup.showFirstTimeSetup).toHaveBeenCalledWith(ui, { reason: 'x' });
-    expect(firstTimeSetup.showPlayerWelcome).toHaveBeenCalledWith(ui);
   });
 
   it('_showAttackModal and _showAttackFromTargetModal forward', () => {

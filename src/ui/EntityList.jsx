@@ -119,7 +119,7 @@ export function EntityList({ ui, type }) {
       onClick: () => ui.showAddNPCForm(),
     }, '+ Add NPC'),
     isNPC && isGM && h(SrdButton, {
-      ui, kind: 'monster', label: '📖 Add from SRD',
+      ui, kind: 'monster', label: 'Add from SRD',
       class: 'dbt', style: 'width:100%;margin-top:8px;',
     }),
   ]);

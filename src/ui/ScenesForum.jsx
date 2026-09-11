@@ -121,7 +121,7 @@ export function ScenesForum({ ui }) {
     return h('div', { class: 'scenes-forum' },
       helpRow,
       h(EmptyState, {
-        eyebrow: 'The forum',
+        eyebrow: 'Scenes',
         heading: 'No scenes yet',
         body: 'Tap the Scene button above the chat input to open a thread for play-by-post. Anything you send while inside a scene threads under it, so the live timeline stays uncluttered.',
       }),

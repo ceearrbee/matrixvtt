@@ -4,6 +4,7 @@ import { useRef, useLayoutEffect } from 'preact/hooks';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { bindVisualEditorToggle } from './visual-editor-toggle.js';
+import { EditorModeToggle } from './EditorModeToggle.jsx';
 
 const DRAFT_PREFIX = 'vtt:chat-draft:';
 
@@ -60,10 +61,7 @@ function LongPostBody({ ui, syncInline, roomId, initial, onClose }) {
   };
 
   return h('div', { class: 'long-post-body', ref: rootRef }, [
-    h('div', { class: 'editor-mode-toggle', role: 'tablist', 'aria-label': 'Editor mode' }, [
-      h('button', { type: 'button', class: 'dbt dbt--sm', 'data-editor-mode': 'markdown', 'aria-pressed': 'true' }, 'Markdown'),
-      h('button', { type: 'button', class: 'dbt dbt--sm', 'data-editor-mode': 'visual', 'aria-pressed': 'false' }, 'Visual'),
-    ]),
+    h(EditorModeToggle, { chipClass: 'dbt dbt--sm' }),
     h('label', { for: 'long-post-textarea', class: 'sr-only' }, 'Long-form chat message'),
     h('textarea', { id: 'long-post-textarea', class: 'form-textarea long-post-textarea', rows: '14', placeholder: 'Write your post… (markdown supported)' }),
     h('div', { class: 'long-post-actions' }, [

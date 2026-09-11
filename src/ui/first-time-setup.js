@@ -2,14 +2,11 @@
  * first-time-setup.js - entry points for the setup flow. The wizard
  * modal body lives in `./setup-wizard.js`; tombstone + save
  * orchestration in `./setup-tombstone.js` + `./setup-persistence.js`.
- * This file only owns the auth gate and the player welcome overlay.
+ * This file only owns the auth gate in front of the wizard.
  */
 
 import { renderSetupWizard } from './setup-wizard.js';
-import {
-  showWaitingForGM,
-  showPlayerWelcome as showPlayerWelcomeFn,
-} from './WelcomeModals.jsx';
+import { showWaitingForGM } from './WelcomeModals.jsx';
 import {
   tombstoneOldEntities,
   tombstoneStaleEvents,
@@ -44,19 +41,3 @@ export async function showFirstTimeSetup(ui, { bypassAuthCheck = false } = {}) {
 
   renderSetupWizard(ui);
 }
-
-/**
- * Show a brief welcome overlay for players who haven't claimed a character yet.
- * Does nothing for GMs or players who already have a claimed character.
- */
-export function showPlayerWelcome(ui) {
-  if (ui.state.isGM()) return;
-
-  const userId = ui.state.widgetManager?.userId;
-  const hasClaimed = userId &&
-    Array.from(ui.state.characters.values()).some(c => c.claimed_by_user_id === userId);
-  if (hasClaimed) return;
-
-  showPlayerWelcomeFn(ui, { hasCharacters: ui.state.characters.size > 0 });
-}
-

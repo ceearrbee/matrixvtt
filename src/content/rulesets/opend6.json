@@ -97,12 +97,44 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "resource_track", "id": "body_points", "label": "Body Points",
-        "current_field": "body_points_current", "max_field": "body_points_max" },
-      { "kind": "attributes" },
-      { "kind": "skill_list", "label": "Skills" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "body_points",
+        "label": "Body Points",
+        "current_field": "body_points_current",
+        "max_field": "body_points_max"
+      },
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "skill_list",
+        "label": "Skills",
+        "collapsed": true
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
@@ -114,20 +146,40 @@
 
   "character_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "body_points", "label": "Body Points", "current_field": "body_points_current", "max_field": "body_points_max" },
-      { "kind": "attributes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "body_points",
+        "label": "Body Points",
+        "current_field": "body_points_current",
+        "max_field": "body_points_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "body_points", "label": "Body Points", "current_field": "body_points_current", "max_field": "body_points_max" },
-      { "kind": "attributes" },
-      { "kind": "defenses" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "body_points",
+        "label": "Body Points",
+        "current_field": "body_points_current",
+        "max_field": "body_points_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

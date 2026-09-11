@@ -12,7 +12,7 @@ import { clearRoomVisited } from '../../utils/room-visited.js';
 
 export async function deleteSession(ui) {
   if (!ui.state.isGM()) {
-    ui._toast('Only GMs can delete a session');
+    ui._toast('Only GMs can delete a campaign');
     return;
   }
 
@@ -27,7 +27,7 @@ export async function deleteSession(ui) {
   // our own permission mid-delete.
   targets.sort((a, b) => (a.type === EVENT_TYPES.SETTINGS ? 1 : 0) - (b.type === EVENT_TYPES.SETTINGS ? 1 : 0));
 
-  const progress = openProgress({ title: 'Deleting session', total: targets.length });
+  const progress = openProgress({ title: 'Deleting campaign', total: targets.length });
   let failures;
   try {
     failures = await tombstoneStaleEvents(ui, targets, (done, detail) => progress.update(done, detail));
@@ -58,7 +58,7 @@ export async function deleteSession(ui) {
     ui._toast(`Delete: ${summary}`);
   } else {
     progress.close();
-    ui._toast('Session deleted', 'success');
+    ui._toast('Campaign deleted', 'success');
   }
 
   if (ui.widgetManager.isAppClient) {

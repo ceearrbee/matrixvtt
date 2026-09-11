@@ -1,16 +1,23 @@
 /**
- * LeftIndex.jsx - the Almanac shell's left index.
+ * LeftIndex.jsx - the Almanac shell's left navigation, in one mount.
  *
- * Where the IconRail showed one drawer at a time, the index shows every
- * navigation section at once (Scenes / Journal / NPCs / Items / Maps·GM),
- * each individually collapsible, with a footer menu button that opens the
- * consolidated global menu (GlobalMenu) and carries the unread badge.
- * Section bodies reuse the same Matrix-wired drawer components the IconRail
- * uses (see index-sections.js); this module only owns the accordion chrome.
+ * Two variants, one of which renders: the roomy accordion shows every
+ * section at once (Scenes / Journal), each collapsible, with a footer
+ * menu button carrying the unread badge; `IconRail` is the compact
+ * variant that opens one drawer at a time. Both were previously mounted
+ * together and switched with `display: none`, so every section body
+ * rendered twice and every control existed twice in the tree.
+ *
+ * Section bodies live in index-sections.js; this module owns the
+ * accordion chrome and the variant choice.
  */
 
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
+import { IconRail } from './IconRail.jsx';
+import { useMediaQuery } from './hooks/use-media-query.js';
+import { layoutModeSignal } from '../state/ui-signals.js';
+import { LAYOUT_MODES } from '../utils/constants.js';
 import { ICON_RAIL_DRAWERS } from '../utils/constants.js';
 import { ScenesDrawer, JournalDrawer } from './index-sections.js';
 import { openPopup } from '../state/popup-signals.js';
@@ -44,7 +51,13 @@ function IndexSection({ section, isOpen, onToggle, ui }) {
   ]);
 }
 
+// Matches the ≤768px block in styles.css that used to hide the
+// accordion; a phone has no room for the always-expanded form.
+const COMPACT_QUERY = '(max-width: 768px)';
+
 export function LeftIndex({ ui }) {
+  const compactViewport = useMediaQuery(COMPACT_QUERY);
+  const iconLayout = layoutModeSignal.value === LAYOUT_MODES.ICON;
   const isGM = typeof ui?.state?.isGM === 'function' ? ui.state.isGM() : false;
   const sections = SECTIONS.filter((s) => !s.gmOnly || isGM);
 
@@ -52,6 +65,8 @@ export function LeftIndex({ ui }) {
     Object.fromEntries(SECTIONS.map((s) => [s.key, s.open])));
   const toggle = (key) => () =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  if (compactViewport || iconLayout) return h(IconRail, { ui });
 
   return h('aside', { class: 'left-index', role: 'navigation', 'aria-label': 'Index' }, [
     h('div', { class: 'left-index__sections' },

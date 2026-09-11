@@ -42,9 +42,25 @@ test.describe('invite link', () => {
     await expect(page.locator('#room-preview-modal')).toHaveCount(0);
   });
 
-  test('ignores a junk target and shows the plain login screen', async ({ page }) => {
+  test('says why a junk target was dropped instead of failing silently', async ({ page }) => {
     await page.goto('app.html?join=nonsense');
     await expect(page.locator('#login-form')).toBeVisible({ timeout: 15_000 });
     await expect(page.locator('#invite-banner')).toHaveCount(0);
+    await expect(page.locator('#login-error')).toContainText('nonsense');
+  });
+
+  test('survives the reload a registration detour costs', async ({ page }) => {
+    await page.goto(JOIN_URL);
+    await expect(page.locator('#invite-banner')).toBeVisible({ timeout: 15_000 });
+
+    // A player who leaves to create an account elsewhere and comes back
+    // used to lose the invite with the tab's sessionStorage.
+    await page.goto('app.html');
+    await expect(page.locator('#invite-banner')).toBeVisible({ timeout: 15_000 });
+
+    await page.fill('#username', 'playwright');
+    await page.fill('#password', 'hunter2');
+    await page.click('#login-form button[type="submit"]');
+    await expect(page.locator('#room-preview-modal')).toBeVisible({ timeout: 15_000 });
   });
 });

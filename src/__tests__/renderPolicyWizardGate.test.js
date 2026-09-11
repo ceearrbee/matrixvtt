@@ -18,10 +18,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // real UIController. The wizard-gate decision is pure logic and
 // doesn't need a mounted app - mock mountApp out.
 vi.mock('../ui/App.jsx', () => ({ mountApp: vi.fn() }));
-vi.mock('../ui/onboarding-tour.js', () => ({ maybeAutoStartTour: vi.fn() }));
 
 import { renderUI } from '../ui/render-policy.js';
-import { maybeAutoStartTour } from '../ui/onboarding-tour.js';
 
 function makeUi({ map = null, tokens = new Map(), forceWizard = false } = {}) {
   const ui = {
@@ -44,7 +42,6 @@ function makeUi({ map = null, tokens = new Map(), forceWizard = false } = {}) {
     restoreTheme: vi.fn(),
     _syncDisplayName: vi.fn(),
     showFirstTimeSetup: vi.fn(),
-    showPlayerWelcome: vi.fn(),
   };
   return ui;
 }
@@ -57,7 +54,6 @@ async function flushRaf() {
 describe('renderUI - wizard gate', () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="app"></div>';
-    maybeAutoStartTour.mockClear();
   });
 
   it('truly empty room (no map, no entities): show the wizard', async () => {
@@ -65,7 +61,6 @@ describe('renderUI - wizard gate', () => {
     renderUI(ui);
     await flushRaf();
     expect(ui.showFirstTimeSetup).toHaveBeenCalled();
-    expect(ui.showPlayerWelcome).not.toHaveBeenCalled();
   });
 
   it('forceWizard (just created the room) beats a racing visited stamp', async () => {
@@ -88,23 +83,15 @@ describe('renderUI - wizard gate', () => {
     renderUI(ui);
     await flushRaf();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
-  it('welcome waits for the tour: routed through onAfterTour, never stacked', async () => {
+  it('opens no overlay at all on the non-wizard branch', async () => {
     const tokens = new Map([['t1', { id: 't1', name: 'Hero' }]]);
     const ui = makeUi({ tokens, map: null });
     renderUI(ui);
     await flushRaf();
-
-    // The welcome must not open on its own while the tour spotlight is
-    // painting - it opens through the tour's onAfterTour continuation.
-    expect(ui.showPlayerWelcome).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
-    const opts = maybeAutoStartTour.mock.calls[0][0];
-    expect(opts.onAfterTour).toBeTypeOf('function');
-    opts.onAfterTour();
-    expect(ui.showPlayerWelcome).toHaveBeenCalledOnce();
+    expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
+    expect(document.querySelector('.modal-overlay')).toBeNull();
   });
 
   it('room has items but ui.state.map is empty: DO NOT show the wizard', async () => {
@@ -115,7 +102,6 @@ describe('renderUI - wizard gate', () => {
     renderUI(ui);
     await flushRaf();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
   it('forceWizard=true + residual=0: show the wizard', async () => {
@@ -131,24 +117,6 @@ describe('renderUI - wizard gate', () => {
     renderUI(ui);
     await flushRaf();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
-  it('welcome branch auto-starts the onboarding tour with the ui context', async () => {
-    const tokens = new Map([['t1', { id: 't1', name: 'Hero' }]]);
-    const ui = makeUi({ tokens, map: null });
-    renderUI(ui);
-    await flushRaf();
-    expect(maybeAutoStartTour).toHaveBeenCalledWith(
-      expect.objectContaining({ ui, onAfterTour: expect.any(Function) }),
-    );
-  });
-
-  it('wizard branch does NOT auto-start the tour', async () => {
-    const ui = makeUi();
-    renderUI(ui);
-    await flushRaf();
-    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
-    expect(maybeAutoStartTour).not.toHaveBeenCalled();
-  });
 });

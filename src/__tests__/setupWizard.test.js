@@ -52,7 +52,7 @@ describe('showFirstTimeSetup (Preact)', () => {
 
     // A "choice" UI with exactly one pre-selected card is noise.
     expect(document.querySelector('.setup-option')).toBeNull();
-    expect(findButtonByText('Create Blank Campaign')).toBeTruthy();
+    expect(findButtonByText('Create campaign')).toBeTruthy();
     // blank-specific inputs render
     expect(document.querySelector('#campaign-name')).not.toBeNull();
   });
@@ -64,7 +64,8 @@ describe('showFirstTimeSetup (Preact)', () => {
 
     const skip = document.querySelector('[data-wizard-open-room]');
     expect(skip).toBeTruthy();
-    expect(skip.textContent).toMatch(/skip setup for now/i);
-    expect(document.body.textContent).toMatch(/setup .*returns|comes back|next visit/i);
+    expect(skip.textContent).toMatch(/skip for now/i);
+    expect(skip.textContent).toMatch(/as-is/i);
+    expect(document.body.textContent).toMatch(/returns next visit|comes back|next visit/i);
   });
 });

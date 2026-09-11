@@ -1,7 +1,8 @@
 /**
- * Global-menu controls: theme toggle, tour restart, settings, and the
- * header sync status indicator. Theme/tour/settings are consolidated
- * into the lower-left global menu; the sync badge stays in the header.
+ * Global-menu controls: settings, and the header sync status
+ * indicator. Theme is the labelled select in Settings > Appearance -
+ * the menu's blind five-way cycler is gone, and so is the spotlight
+ * tour it sat beside.
  */
 import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
 
@@ -11,19 +12,17 @@ async function openGlobalMenu(page) {
 }
 
 test.describe('header controls', () => {
-  test('theme toggle flips data-theme', async ({ page }) => {
+  test('carries no second theme control and no tour restart', async ({ page }) => {
     await openGlobalMenu(page);
-    const initial = await page.locator('html').getAttribute('data-theme');
-    const btn = page.locator('[data-menu-item="theme"]');
-    await expect(btn).toBeVisible();
-    await btn.click();
-    const after = await page.locator('html').getAttribute('data-theme');
-    expect(after).not.toBe(initial);
+    await expect(page.locator('[data-menu-item="settings"]')).toBeVisible();
+    await expect(page.locator('[data-menu-item="theme"]')).toHaveCount(0);
+    await expect(page.locator('[data-menu-item="tour"]')).toHaveCount(0);
   });
 
-  test('tour restart control is present', async ({ page }) => {
+  test('reads as grouped sections rather than a flat list', async ({ page }) => {
     await openGlobalMenu(page);
-    await expect(page.locator('[data-menu-item="tour"]')).toBeVisible();
+    const groups = page.locator('.global-menu__group');
+    expect(await groups.count()).toBeGreaterThan(1);
   });
 
   test('sync status indicator shows a connection state', async ({ page }) => {

@@ -72,12 +72,14 @@ describe('Header structure', () => {
     expect(container.querySelector('.vtt-header__subtitle').textContent).toBe('Round 3 · Aria');
   });
 
-  it('shows a GM "+ New" create button', () => {
+  it('shows a GM "+ New" create button once prep is active', () => {
+    gmPrepActiveSignal.value = true;
     render(h(Header, { ui: makeUi({ isGM: true }) }));
     expect(document.getElementById('new-entity-btn')).not.toBeNull();
   });
 
   it('hides the "+ New" button from non-GMs', () => {
+    gmPrepActiveSignal.value = true;
     render(h(Header, { ui: makeUi({ isGM: false }) }));
     expect(document.getElementById('new-entity-btn')).toBeNull();
   });

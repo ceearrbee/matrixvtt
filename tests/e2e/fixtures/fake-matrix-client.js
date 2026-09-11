@@ -406,7 +406,19 @@
     }
     async createRoom(name) {
       const id = `!fake-${Date.now()}:fake.matrix.test`;
-      setCfg({ roomId: id, roomName: name });
+      // A real homeserver makes the creator PL 100, which is what
+      // `isGM` reads. It goes into initialState, not this instance's
+      // store: the VTT builds its own client, and only initialState
+      // carries across.
+      const powerLevels = {
+        type: 'm.room.power_levels',
+        state_key: '',
+        sender: this.userId,
+        room_id: id,
+        content: { users: { [this.userId]: 100 }, users_default: 0, state_default: 50 },
+      };
+      const seeded = (cfg().initialState || []).filter((e) => e.type !== 'm.room.power_levels');
+      setCfg({ roomId: id, roomName: name, initialState: [...seeded, powerLevels] });
       recordSend({ kind: 'createRoom', room_id: id, name });
       return id;
     }

@@ -189,27 +189,93 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "play_actions", "label": "Actions", "groups": [
-        { "label": "Attacks", "source": "character_actions", "filter": "attack" },
-        { "label": "Spells",  "source": "spell_ids" },
-        { "label": "Items",   "source": "inventory_consumables" },
-        { "label": "Common",  "source": "ruleset_common_actions" }
-      ]},
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",       "formula": "armor_class" },
-        { "label": "Speed",    "field":   "speed" },
-        { "label": "Init",     "field":   "initiative_bonus" },
-        { "label": "Prof",     "formula": "proficiency_bonus" },
-        { "label": "Passive",  "formula": "passive_perception" },
-        { "label": "Spell DC", "formula": "spell_save_dc" }
-      ]},
-      { "kind": "attributes", "label": "Attributes", "collapsed": true },
-      { "kind": "saves", "label": "Saving Throws", "collapsed": true },
-      { "kind": "conditions" },
-      { "kind": "currency", "label": "Coinage", "collapsed": true },
-      { "kind": "personality", "label": "Personality", "collapsed": true },
-      { "kind": "notes", "label": "Notes", "collapsed": true }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Attacks",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Spells",
+            "source": "spell_ids"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          },
+          {
+            "label": "Common",
+            "source": "ruleset_common_actions"
+          }
+        ]
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "formula": "armor_class"
+          },
+          {
+            "label": "Speed",
+            "field": "speed"
+          },
+          {
+            "label": "Init",
+            "field": "initiative_bonus"
+          },
+          {
+            "label": "Prof",
+            "formula": "proficiency_bonus"
+          },
+          {
+            "label": "Passive",
+            "formula": "passive_perception"
+          },
+          {
+            "label": "Spell DC",
+            "formula": "spell_save_dc"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "label": "Attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "saves",
+        "label": "Saving Throws",
+        "collapsed": true
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "currency",
+        "label": "Coinage",
+        "collapsed": true
+      },
+      {
+        "kind": "personality",
+        "label": "Personality",
+        "collapsed": true
+      },
+      {
+        "kind": "notes",
+        "label": "Notes",
+        "collapsed": true
+      }
     ]
   },
 
@@ -339,25 +405,65 @@
 
   "character_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",    "field": "armor_class" },
-        { "label": "Speed", "field": "speed" },
-        { "label": "Init",  "field": "initiative_bonus" }
-      ]},
-      { "kind": "conditions" }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "armor_class"
+          },
+          {
+            "label": "Speed",
+            "field": "speed"
+          },
+          {
+            "label": "Init",
+            "field": "initiative_bonus"
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "hp", "label": "HP", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "stat_grid", "stats": [
-        { "label": "AC",     "field": "ac" },
-        { "label": "Speed",  "field": "speed" },
-        { "label": "Init",   "field": "initiative_bonus" }
-      ]},
-      { "kind": "conditions" }
+      {
+        "kind": "resource_track",
+        "id": "hp",
+        "label": "HP",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "field": "ac"
+          },
+          {
+            "label": "Speed",
+            "field": "speed"
+          },
+          {
+            "label": "Init",
+            "field": "initiative_bonus"
+          }
+        ]
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

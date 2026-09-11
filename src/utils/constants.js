@@ -16,12 +16,7 @@ export const STORAGE_KEYS = {
   RECENT_SESSIONS: 'vtt-recent-sessions',
   ACCESSIBILITY: 'vtt:accessibility',
   COMBAT_AUTOMATION: 'vtt:combat-automation',
-  HIDE_MAP_HELP: 'vtt:hide-map-help',
-  DICE_MACROS: 'vtt:dice-macros',
-  TOUR_COMPLETED: 'mxvtt:tour-completed',
-  // Legacy key from the removed step-modal tutorial; read only so old
-  // completions still count, never written.
-  TUTORIAL_COMPLETED: 'vtt-tutorial-completed',
+  HIDE_NEXT_STEPS: 'vtt:hide-next-steps',
   ACTIVE_ROOM: 'vtt:active-room',
   PENDING_INVITE: 'vtt:pending-invite',
   // Active UI mode (combat | narrative | gm-prep). Base key; per-room
@@ -31,6 +26,8 @@ export const STORAGE_KEYS = {
   // Cached room id of the user's personal library, user-scoped via
   // readUserScoped so it survives a different account logging in.
   LIBRARY_ROOM: 'vtt:library-room',
+  // Saved dice formulas. Personal, device-local, user-scoped.
+  DICE_MACROS: 'vtt:dice-macros',
   // Per-user chrome layout preference (text | icon). User-scoped via
   // readUserScoped; a personal viewing choice, never synced to the room.
   LAYOUT_MODE: 'vtt:layout-mode',
@@ -41,26 +38,14 @@ export const STORAGE_KEYS = {
 // Canonical UI mode names. The shell reads `tablePhaseSignal` and sets
 // `data-ui-mode="<value>"` on the .shell root; CSS selectors keyed off
 // that attribute drive per-mode layout, widths, and visibility.
-// GM_PREP is a legacy value used only for migration (hydratePhase) and
-// backward-compat suggestion handling.
+// GM_PREP is a legacy value used only for migration (hydratePhase); the
+// prep workspace is its own axis now, not a phase.
 export const UI_MODES = Object.freeze({
   COMBAT: 'combat',
   NARRATIVE: 'narrative',
   GM_PREP: 'gm-prep',
 });
 
-export const UI_MODE_VALUES = /** @type {readonly string[]} */ (
-  Object.freeze(Object.values(UI_MODES))
-);
-
-/**
- * Type predicate: narrows `unknown` to a valid UI mode string.
- * @param {unknown} v
- * @returns {v is 'combat' | 'narrative' | 'gm-prep'}
- */
-export function isUiMode(v) {
-  return typeof v === 'string' && UI_MODE_VALUES.includes(v);
-}
 
 // Chrome layout modes. `App` stamps `data-layout="<value>"` on the .shell
 // root; CSS keyed off it flips the text index/tabs to the icon-only rail
@@ -90,6 +75,7 @@ export const STORAGE_KEY_PREFIXES = Object.freeze({
   CHANNELS_RAIL: 'vtt-channels-rail:',
   ICON_RAIL_DRAWER: 'vtt-icon-rail-drawer:',
   TOOL_GROUP: 'vtt-tool-group:',
+  GM_PREP: 'vtt-gm-prep:',
 });
 
 // IconRail drawer identifiers - values written to per-(user, room)
@@ -98,17 +84,14 @@ export const STORAGE_KEY_PREFIXES = Object.freeze({
 export const ICON_RAIL_DRAWERS = Object.freeze({
   SCENES:  'scenes',
   JOURNAL: 'journal',
-  NPCS:    'npcs',
-  ITEMS:   'items',
-  MAPS:    'maps',
   MENU:    'menu',
 });
 
 // MapStrip toolbar groups. The active group filters which tools are
-// visible; persisted per-(user, room).
+// visible; persisted per-(user, room). Measure is a Navigation tool -
+// reading the map is not a mode of its own.
 export const TOOL_GROUPS = Object.freeze({
   NAVIGATION:  'navigation',
-  MEASUREMENT: 'measurement',
   DRAWING:     'drawing',
   GM:          'gm',
 });
@@ -199,7 +182,6 @@ export const EVENT_TYPES = {
   // GM-suggested UI mode broadcast. Empty state_key (one per room).
   // Content: { mode: 'combat' | 'narrative' | 'gm-prep' }.
   // The local GM's own broadcast is echo-suppressed on the receive path.
-  UI_MODE: 'com.vtt.ui_mode',
   // Personal content library. LIBRARY_MARKER (empty state_key) tags a room
   // as a user's library; LIBRARY_ENTRY holds one reusable entry per
   // state_key. Both live in a dedicated library room, never a campaign room.
@@ -268,16 +250,10 @@ export const VTT_EVENTS = {
 export const TABS = {
   NPC: 'npc',
   SHEET: 'sheet',
-  LOG: 'log',
-  NOTES: 'notes',
-  SETTINGS: 'settings',
-  MAPS: 'maps',
-  DRAWING: 'drawing',
   ITEMS: 'items',
   SPELLS: 'spells',
   SKILLS: 'skills',
   COMBAT: 'combat',
-  PAGES: 'pages',
   PARTY: 'party',
   GM: 'gm'
 };
@@ -285,5 +261,9 @@ export const TABS = {
 export const DEFAULTS = {
   GRID_PX: 40,
   SYSTEM: 'generic',
-  DEBOUNCE_DELAY: 400
+  DEBOUNCE_DELAY: 400,
+  // Becomes the Matrix room's display name when the GM leaves the
+  // field blank, so it keeps the product prefix to stay findable in
+  // Element's room list.
+  CAMPAIGN_NAME: 'MatrixVTT Campaign'
 };

@@ -88,10 +88,12 @@ describe('InitiativeBar mount gating', () => {
     expect(host.querySelector('.initiative-panel')).toBeNull();
   });
 
-  it('Exploration mode (GM, no active combat) mounts the InitiativeBar "Start combat" affordance', () => {
+  it('Exploration mode (GM, no active combat) mounts the "Start combat" affordance', () => {
     tablePhaseSignal.value = UI_MODES.NARRATIVE;
     render(h(App, { ui: makeUi({ isGM: true }) }), host);
-    expect(host.querySelector('.initiative-panel--inactive')).not.toBeNull();
+    // At rest that affordance is one button, not a titled band.
+    expect(host.querySelector('.initiative-idle button')).not.toBeNull();
+    expect(host.querySelector('.initiative-panel')).toBeNull();
   });
 
   it('Narrative mode also mounts the bar (visible per mount logic)', () => {

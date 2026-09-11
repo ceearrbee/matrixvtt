@@ -1,34 +1,51 @@
 /**
- * Slash-key command palette. Opens via `/` and offers filtered
- * commands (switch tab, open modal, etc).
+ * The palette is the way in. It could not be opened in normal use:
+ * `/` sits inside the typing guard and the chat composer is a textarea
+ * holding the shell's resting focus, so the one documented entry point
+ * was blocked exactly where a user spends their time.
  */
-import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
+import { test, expect, waitForVttReady } from './fixtures/logged-in.js';
+
+const PALETTE = '#command-palette';
 
 test.describe('command palette', () => {
-  test('Slash opens the palette', async ({ page }) => {
-    await waitForVttShell(page);
-    await page.locator('body').focus();
-    await page.keyboard.press('/');
-    // Palette modal uses id="command-palette" per command-palette.js.
-    await expect(page.locator('#command-palette')).toBeVisible({ timeout: 5_000 });
+  test('opens with Ctrl+K while the chat composer has focus', async ({ page }) => {
+    await waitForVttReady(page);
+    await page.locator('#chat-input').click();
+    await expect(page.locator('#chat-input')).toBeFocused();
+
+    await page.keyboard.press('Control+k');
+    await expect(page.locator(PALETTE)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#cp-input')).toBeFocused();
   });
 
-  test('palette has a search input that takes focus', async ({ page }) => {
-    await waitForVttShell(page);
-    await page.locator('body').focus();
-    await page.keyboard.press('/');
-    const palette = page.locator('#command-palette');
-    await expect(palette).toBeVisible();
-    const input = palette.locator('input[type="text"], input[type="search"]').first();
-    await expect(input).toBeFocused();
+  test('finds a map, which it could not index at all before', async ({ page }) => {
+    await waitForVttReady(page);
+    await page.keyboard.press('Control+k');
+    await page.locator('#cp-input').fill('Playwright');
+    await expect(page.locator('.cp-row').first()).toBeVisible();
+    await expect(page.locator('.cp-results')).toContainText(/map/i);
   });
 
-  test('Escape closes the palette', async ({ page }) => {
-    await waitForVttShell(page);
-    await page.locator('body').focus();
-    await page.keyboard.press('/');
-    await expect(page.locator('#command-palette')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.locator('#command-palette')).toHaveCount(0);
+  test('runs a command instead of only finding a noun', async ({ page }) => {
+    await waitForVttReady(page);
+    await page.keyboard.press('Control+k');
+    await page.locator('#cp-input').fill('fog');
+
+    const row = page.locator('.cp-row', { hasText: /fog/i }).first();
+    await expect(row).toBeVisible();
+    await row.click();
+
+    await expect(page.locator(PALETTE)).toHaveCount(0);
+    await page.waitForFunction(
+      () => window.matrixVTTClient.state.fog.mode !== 'hidden',
+      null,
+      { timeout: 10_000 },
+    );
+  });
+
+  test('tells the user it exists, from the composer they are already looking at', async ({ page }) => {
+    await waitForVttReady(page);
+    await expect(page.locator('#chat-input')).toHaveAttribute('placeholder', /Ctrl\+K/);
   });
 });

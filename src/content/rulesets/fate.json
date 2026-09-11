@@ -82,6 +82,21 @@
   "character_sheet": {
     "sections": [
       {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
         "kind": "tagged_list",
         "field": "aspects",
         "label": "Aspects",
@@ -92,12 +107,25 @@
           "announce": "{actor} invokes [{value}] for +{modifier}",
           "decrement_field": "fate_points",
           "modifier": 2,
-          "disable_when_lte": { "field": "fate_points", "value": 0 }
+          "disable_when_lte": {
+            "field": "fate_points",
+            "value": 0
+          }
         }
       },
-      { "kind": "pending_modifiers_list", "label": "Pending bonuses" },
-      { "kind": "attributes" },
-      { "kind": "skill_list", "label": "Skills" },
+      {
+        "kind": "pending_modifiers_list",
+        "label": "Pending bonuses"
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "skill_list",
+        "label": "Skills",
+        "collapsed": true
+      },
       {
         "kind": "tagged_list",
         "field": "stunts",
@@ -125,8 +153,22 @@
         "field": "stress",
         "label": "Stress",
         "tracks": [
-          { "name": "Physical", "capacities": [1, 2, 3] },
-          { "name": "Mental",   "capacities": [1, 2, 3] }
+          {
+            "name": "Physical",
+            "capacities": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "name": "Mental",
+            "capacities": [
+              1,
+              2,
+              3
+            ]
+          }
         ]
       },
       {
@@ -134,33 +176,65 @@
         "field": "consequences",
         "label": "Consequences",
         "slots": [
-          { "key": "mild",     "label": "Mild (+2)" },
-          { "key": "moderate", "label": "Moderate (+4)" },
-          { "key": "severe",   "label": "Severe (+6)" }
+          {
+            "key": "mild",
+            "label": "Mild (+2)"
+          },
+          {
+            "key": "moderate",
+            "label": "Moderate (+4)"
+          },
+          {
+            "key": "severe",
+            "label": "Severe (+6)"
+          }
         ]
       },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
   "character_preview": {
     "sections": [
-      { "kind": "tagged_list", "field": "aspects", "label": "Aspects" },
-      { "kind": "attributes" },
-      { "kind": "stress_boxes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "tagged_list",
+        "field": "aspects",
+        "label": "Aspects"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "stress_boxes"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "tagged_list", "field": "aspects", "label": "Aspects" },
-      { "kind": "attributes" },
-      { "kind": "stress_boxes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "tagged_list",
+        "field": "aspects",
+        "label": "Aspects"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "stress_boxes"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

@@ -3,13 +3,13 @@
  * attack-modal.js.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
 import { CombatIcon, DiceIcon } from './icons/index.jsx';
 import { useRef, useState } from 'preact/hooks';
 import { resolveAttack } from './attack-modal.js';
 import { tokensSignal, charactersSignal, npcsSignal } from '../state/signals.js';
-
-const closeOverlay = (host) => { render(null, host); host.remove(); };
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 
 function SelectMode({ ui, attackerTokenId, targetTokenId, onConfirm, onClose }) {
   // Subscribe so the attacker's sheet, attacks, and target name stay
@@ -25,21 +25,12 @@ function SelectMode({ ui, attackerTokenId, targetTokenId, onConfirm, onClose }) 
 
   const confirm = () => onConfirm(attacks[parseInt(selectRef.current.value)]);
 
-  return h('div', {
-    class: 'modal-overlay',
-    tabIndex: -1,
-    onClick: (e) => { if (e.target === e.currentTarget) onClose(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') onClose(); },
-  },
-    h('div', {
-      class: 'modal-content', role: 'dialog', 'aria-modal': 'true',
-      'aria-labelledby': 'attack-select-title', style: 'max-width: 320px;',
-    }, [
-      h('div', { class: 'modal-header' }, [
-        h('h2', { id: 'attack-select-title' }, `Attack ${targetToken ? targetToken.name : 'Target'}`),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: onClose }, '✕'),
-      ]),
-      h('div', { class: 'modal-body' }, [
+  return h(Modal, {
+    id: 'attack-select-modal',
+    title: `Attack ${targetToken ? targetToken.name : 'Target'}`,
+    maxWidth: '320px',
+    onClose,
+  }, [
         h('label', { class: 'form-label', for: 'attack-select' }, 'Choose Attack'),
         h('select', {
           class: 'form-select', id: 'attack-select', ref: selectRef,
@@ -50,10 +41,9 @@ function SelectMode({ ui, attackerTokenId, targetTokenId, onConfirm, onClose }) 
         })),
         h('div', { class: 'form-actions' }, [
           h('button', { class: 'btn-primary', onClick: confirm, 'aria-label': 'Confirm attack selection and roll', title: 'Proceed to target selection' }, [h(CombatIcon, {}), ' Roll Attack']),
-          h('button', { class: 'btn-secondary', onClick: onClose, 'aria-label': 'Cancel attack', title: 'Discard attack' }, 'Cancel'),
-        ]),
-      ]),
-    ]));
+      h('button', { class: 'btn-secondary', onClick: onClose, 'aria-label': 'Cancel attack', title: 'Discard attack' }, 'Cancel'),
+    ]),
+  ]);
 }
 
 function ResolveMode({ ui, attackerTokenId, attackData, targetTokenId, onClose }) {
@@ -88,21 +78,12 @@ function ResolveMode({ ui, attackerTokenId, attackData, targetTokenId, onClose }
     });
   };
 
-  return h('div', {
-    class: 'modal-overlay',
-    tabIndex: -1,
-    onClick: (e) => { if (e.target === e.currentTarget) onClose(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') onClose(); },
-  },
-    h('div', {
-      class: 'modal-content', role: 'dialog', 'aria-modal': 'true',
-      'aria-labelledby': 'attack-modal-title', style: 'max-width: 360px;',
-    }, [
-      h('div', { class: 'modal-header' }, [
-        h('h2', { id: 'attack-modal-title' }, `Attack: ${attackData.name || 'Melee'}`),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: onClose }, '✕'),
-      ]),
-      h('div', { class: 'modal-body' }, [
+  return h(Modal, {
+    id: 'attack-modal',
+    title: `Attack: ${attackData.name || 'Melee'}`,
+    maxWidth: '360px',
+    onClose,
+  }, [
         h('div', { style: 'margin-bottom:12px;' }, [
           h('div', { style: 'font-size:var(--font-size-xs);color:var(--color-text-secondary);margin-bottom:6px;' }, [
             h('strong', null, attackerToken.name), ` · ${bonusStr} to hit`,
@@ -119,10 +100,9 @@ function ResolveMode({ ui, attackerTokenId, attackData, targetTokenId, onClose }
         h('div', { id: 'attack-result-area', ref: resultRef }),
         h('div', { class: 'form-actions' }, [
           h('button', { class: 'btn-primary', onClick: onRoll, 'aria-label': 'Roll the attack dice', title: 'Roll d20 + modifiers' }, [h(DiceIcon, {}), ' Roll Attack']),
-          h('button', { class: 'btn-secondary', onClick: onClose, 'aria-label': 'Close attack modal', title: 'Finish and close' }, 'Close'),
-        ]),
-      ]),
-    ]));
+      h('button', { class: 'btn-secondary', onClick: onClose, 'aria-label': 'Close attack modal', title: 'Finish and close' }, 'Close'),
+    ]),
+  ]);
 }
 
 function AttackModal({ ui, attackerTokenId, attackData, targetTokenId, initialMode, onClose }) {
@@ -139,10 +119,7 @@ function AttackModal({ ui, attackerTokenId, attackData, targetTokenId, initialMo
 }
 
 function mount(ui, props) {
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-  const onClose = () => closeOverlay(host);
-  render(h(AttackModal, { ui, onClose, ...props }), host);
+  openModal((close) => h(AttackModal, { ui, onClose: close, ...props }));
 }
 
 export async function openAttackSelectModal(ui, targetTokenId) {

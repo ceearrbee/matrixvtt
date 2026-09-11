@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { h } from 'preact';
-import { render, cleanup } from '@testing-library/preact';
+import { render, cleanup, fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { attachDataMethods } from '../ui/data-wiring.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
@@ -44,6 +44,8 @@ describe('clear all drawings', () => {
   it('asks for confirmation before wiping', async () => {
     const ui = mkUi();
     const { container } = render(h(MapStrip, { ui }));
+    // Clear lives behind the toolbar's ⋯ overflow with undo and redo.
+    fireEvent.click(container.querySelector('[data-map-overflow]'));
     const btn = container.querySelector('#clear-drawings');
     expect(btn).toBeTruthy();
 

@@ -46,11 +46,9 @@ describe('IconRail', () => {
     expect(ids).toContain(ICON_RAIL_DRAWERS.SCENES);
     expect(ids).toContain(ICON_RAIL_DRAWERS.JOURNAL);
     expect(ids).toContain(ICON_RAIL_DRAWERS.MENU);
-    // NPCs and Items live in the right-rail tabs, not the left rail.
-    expect(ids).not.toContain(ICON_RAIL_DRAWERS.NPCS);
-    expect(ids).not.toContain(ICON_RAIL_DRAWERS.ITEMS);
-    // The Maps manager is a modal, not a drawer.
-    expect(ids).not.toContain(ICON_RAIL_DRAWERS.MAPS);
+    // NPCs and Items live in the right-rail tabs and the Maps manager is
+    // a modal, so the rail declares no drawer for any of the three.
+    expect(ids.length).toBe(3);
   });
 
   it('clicking an icon opens its drawer; clicking the same icon collapses it', () => {
@@ -79,11 +77,6 @@ describe('IconRail', () => {
     expect(journal.getAttribute('aria-current')).toBe('true');
     const scenes = container.querySelector(`[data-drawer="${ICON_RAIL_DRAWERS.SCENES}"]`);
     expect(scenes.getAttribute('aria-current')).toBe('false');
-  });
-
-  it('hides the Maps icon for non-GMs', () => {
-    const { container } = render(h(IconRail, { ui: makeUi({ isGM: false }) }));
-    expect(container.querySelector(`[data-drawer="${ICON_RAIL_DRAWERS.MAPS}"]`)).toBeNull();
   });
 
   it('user click flips drawerManuallyChosenSignal so mode defaults stop overriding', () => {

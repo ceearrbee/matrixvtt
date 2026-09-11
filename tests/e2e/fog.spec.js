@@ -8,6 +8,9 @@
 import { test, expect, waitForVttReady } from './fixtures/logged-in.js';
 
 async function openFogPanel(page) {
+  // GM tools ride the Prep axis: they are disclosed on intent rather
+  // than sitting in the header all session.
+  await page.locator('#gm-prep-btn').click();
   await page.locator('#gm-controls-btn').click();
   await page.locator('[data-gm-subnav-id="fog"]').click();
   await expect(page.locator('.gm-panel--fog')).toBeVisible();

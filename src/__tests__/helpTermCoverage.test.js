@@ -2,8 +2,8 @@
  * The inline-help registry existed to fix a vocabulary problem, yet 7
  * of its 10 authored entries had no HelpIcon call site - dead copy.
  * Every remaining term must be wired somewhere in src/ui; terms with
- * no sensible home (prep, walls, lights, templates - toolbar tools
- * whose tooltips already explain them) are deleted, not stockpiled.
+ * no sensible home (walls, lights, templates - toolbar tools whose
+ * tooltips already explain them) are deleted, not stockpiled.
  */
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
@@ -37,7 +37,7 @@ describe('help-term coverage', () => {
   });
 
   it('the homeless entries are deleted, not stockpiled', () => {
-    for (const gone of ['prep', 'walls', 'lights', 'templates']) {
+    for (const gone of ['walls', 'lights', 'templates']) {
       expect(HELP_TERMS[gone], `${gone} should be deleted`).toBeUndefined();
     }
   });

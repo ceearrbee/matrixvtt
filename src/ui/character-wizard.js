@@ -2,7 +2,10 @@
  * character-wizard.js - Step-by-step character creation wizard for new players.
  */
 
+import { h } from 'preact';
 import { esc } from '../utils/domHelpers.js';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 import { FormReader } from '../utils/ui-helpers.js';
 import { ENTITY_TYPES } from '../utils/constants.js';
 
@@ -119,8 +122,8 @@ function _renderWizardProgress(steps, currentStep) {
   ).join('<span class="wizard-step-sep">›</span>');
 }
 
-async function _handleWizardStepSubmit(ui, modal, step, formData, system, ruleset, isLast) {
-  const form = new FormReader(modal);
+async function _handleWizardStepSubmit(ui, body, step, formData, system, ruleset, isLast, onFinish) {
+  const form = new FormReader(body);
   const stepData = form.collect(Object.fromEntries(step.fields.map(f => [
     f.key, f.type === 'int' ? { id: `wiz-${f.key}`, type: 'int' } : `wiz-${f.key}`,
   ])));
@@ -129,7 +132,7 @@ async function _handleWizardStepSubmit(ui, modal, step, formData, system, rulese
 
   if (!isLast) return true; // continue to next step
 
-  modal.remove();
+  onFinish();
   const character = buildCharacterFromWizardData(formData, system, ruleset);
   const charId = 'char-' + Date.now();
   character.id = charId;
@@ -153,17 +156,18 @@ export function showCharacterWizard(ui) {
   let currentStep = 0;
   const formData = {};
 
-  const existing = document.getElementById('char-wizard-modal');
-  if (existing) existing.remove();
+  // The step bodies are still built as HTML strings (every user-authored
+  // value routed through `esc`); the shared Modal owns the overlay,
+  // header, focus trap and Escape around them.
+  const body = document.createElement('div');
+  const close = openModal((dispose) => h(Modal, {
+    id: 'char-wizard-modal',
+    title: 'Create Character',
+    maxWidth: '480px',
+    onClose: dispose,
+  }, h('div', { ref: (el) => el?.appendChild(body) })));
 
-  const modal = document.createElement('div');
-  modal.id = 'char-wizard-modal';
-  modal.className = 'modal-overlay';
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.setAttribute('aria-labelledby', 'wizard-title');
-
-  async function renderStep() {
+  function renderStep() {
     const step = steps[currentStep];
     const isFirst = currentStep === 0;
     const isLast = currentStep === steps.length - 1;
@@ -173,43 +177,34 @@ export function showCharacterWizard(ui) {
     // through `esc(...)` before insertion. Trust contract verified in the
     // helper definitions above.
     // eslint-disable-next-line vtt/no-raw-html-interpolation
-    modal.innerHTML = `
-      <div class="modal-content" style="max-width:480px">
-        <div class="modal-header">
-          <h2 class="modal-title" id="wizard-title">Create Character - ${esc(step.label)}</h2>
-          <button class="modal-close dbt" aria-label="Close" id="wiz-close">&times;</button>
+    body.innerHTML = `
+      <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">${_renderWizardProgress(steps, currentStep)}</div>
+      <h3 class="wizard-step-label">${esc(step.label)}</h3>
+      <form id="wizard-step-form">
+        ${_renderStepFields(step, formData)}
+        <div style="margin-top: 16px; padding: 10px; background: var(--color-background-secondary); border-radius: 4px; border: 0.5px solid var(--color-border-primary);">
+          <p style="margin: 0; font-size: 11px; color: var(--color-text-secondary); line-height: 1.4;">
+            <strong>Character Note:</strong> Characters are stored securely on your Matrix accounts server. All changes are synced in real-time.
+          </p>
         </div>
-        <div class="modal-body">
-          <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">${_renderWizardProgress(steps, currentStep)}</div>
-          <form id="wizard-step-form">
-            ${_renderStepFields(step, formData)}
-            <div style="margin-top: 16px; padding: 10px; background: var(--color-background-secondary); border-radius: 4px; border: 0.5px solid var(--color-border-primary);">
-              <p style="margin: 0; font-size: 11px; color: var(--color-text-secondary); line-height: 1.4;">
-                <strong>Character Note:</strong> Characters are stored securely on your Matrix accounts server. All changes are synced in real-time.
-              </p>
-            </div>
-            <div class="form-actions">
-              ${!isFirst ? `<button type="button" class="dbt" id="wiz-back">← Back</button>` : ''}
-              <button type="submit" class="dbt btn-primary" style="flex:1;">${isLast ? 'Create Character' : 'Next →'}</button>
-            </div>
-          </form>
+        <div class="form-actions">
+          ${!isFirst ? `<button type="button" class="dbt" id="wiz-back">← Back</button>` : ''}
+          <button type="submit" class="dbt btn-primary" style="flex:1;">${isLast ? 'Create Character' : 'Next →'}</button>
         </div>
-      </div>
+      </form>
     `;
 
-    modal.querySelector('#wiz-close')?.addEventListener('click', () => modal.remove());
-    modal.querySelector('#wiz-back')?.addEventListener('click', () => { currentStep--; renderStep(); });
-    modal.querySelector('#wizard-step-form')?.addEventListener('submit', async (e) => {
+    body.querySelector('#wiz-back')?.addEventListener('click', () => { currentStep--; renderStep(); });
+    body.querySelector('#wizard-step-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      if (await _handleWizardStepSubmit(ui, modal, step, formData, system, ruleset, isLast)) {
+      if (await _handleWizardStepSubmit(ui, body, step, formData, system, ruleset, isLast, close)) {
         currentStep++;
         renderStep();
       }
     });
 
-    modal.querySelector(`#wiz-${step.fields[0].key}`)?.focus();
+    /** @type {HTMLElement|null} */ (body.querySelector(`#wiz-${step.fields[0].key}`))?.focus();
   }
 
   renderStep();
-  document.body.appendChild(modal);
 }

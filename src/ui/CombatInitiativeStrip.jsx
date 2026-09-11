@@ -5,7 +5,7 @@
  * Each combatant: 7px color dot (or token avatar later) + name + HP
  * fraction + a 3px HP bar in the token color. Active combatant gets
  * `background: --color-background-warning` (matches matrix_vtt_mockup
- * `.ie.cur`). GM gets a small `▶ End Turn` button at the right edge.
+ * `.ie.cur`). GM gets a small `End Turn` button at the right edge.
  *
  * Pure presentation read from initiativeSignal + tokensSignal. Replaces
  * the old InitiativeBar in Combat mode (which has been unmounted there
@@ -75,6 +75,6 @@ export function CombatInitiativeStrip({ ui }) {
       'aria-label': 'End turn',
       title: 'End turn',
       onClick: () => ui.nextTurn?.(),
-    }, '▶ End Turn'),
+    }, 'End Turn'),
   ]);
 }

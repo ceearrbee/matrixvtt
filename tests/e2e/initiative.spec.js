@@ -64,6 +64,8 @@ test.describe('combat and initiative', () => {
     await waitForVttReady(page);
     await startCombat(page);
 
+    // GM tools ride the Prep axis.
+    await page.locator('#gm-prep-btn').click();
     await page.locator('#gm-controls-btn').click();
     await page.locator('[data-gm-subnav-id="combat"]').click();
     await page.getByRole('button', { name: 'End combat and clear tracker' }).click();

@@ -89,7 +89,6 @@ Timeline events bypass state synchronization.
 - `vtt-theme`: UI theme.
 - `vtt:combat-automation`: GM automation configuration.
 - `vtt:accessibility`: Client rendering overrides.
-- `vtt:dice-macros`: User-defined dice expressions.
 - `vtt:audio-volume`: Local playback volume.
 
 ## 6. Operation Constraints

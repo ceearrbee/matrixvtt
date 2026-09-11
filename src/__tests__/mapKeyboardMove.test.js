@@ -1,8 +1,10 @@
 /**
- * Map keyboard move-mode - M to enter, arrow keys to move the selected
- * token by one grid cell, Escape to exit. Implements the
- * movement-mode flow that MapStrip.jsx has been documenting (and
- * keyboard-help.js has been advertising) without an actual handler.
+ * Map keyboard move-mode - an arrow key on a selected token arms the
+ * mode and moves by one grid cell, Enter commits, Escape rolls back.
+ *
+ * M is NOT the entry point: the document-level measure-tool binding in
+ * useKeyboardShortcuts claims the same letter, so both fired at once.
+ * Arming on the arrow key removes the mode instead of rebinding it.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setupKeyboard } from '../map/input/keyboard.js';
@@ -42,19 +44,27 @@ describe('map keyboard move-mode', () => {
     dispose?.();
   });
 
-  it('pressing M with a selected token enters move-mode', () => {
+  it('M no longer enters move-mode - it belongs to the measure tool', () => {
     dispatchKey('m');
-    expect(mr._moveMode).toBe(true);
-  });
-
-  it('pressing M with no selected token does not enter move-mode', () => {
-    mr.selectedToken = null;
-    dispatchKey('m');
+    expect(mr._moveMode).toBeFalsy();
+    dispatchKey('M');
     expect(mr._moveMode).toBeFalsy();
   });
 
-  it('arrow keys in move-mode move the token by one grid cell', async () => {
-    dispatchKey('m');
+  it('an arrow key on a selected token arms move-mode', () => {
+    dispatchKey('ArrowRight');
+    expect(mr._moveMode).toBe(true);
+  });
+
+  it('arrow keys with no selected token do not arm move-mode', async () => {
+    mr.selectedToken = null;
+    dispatchKey('ArrowRight');
+    await Promise.resolve();
+    expect(mr._moveMode).toBeFalsy();
+    expect(mr.state.updateToken).not.toHaveBeenCalled();
+  });
+
+  it('arrow keys move the token by one grid cell', async () => {
     dispatchKey('ArrowRight');
     await Promise.resolve();
     expect(mr.state.updateToken).toHaveBeenCalledWith('t1', expect.objectContaining({ col: 6, row: 5 }));
@@ -64,25 +74,21 @@ describe('map keyboard move-mode', () => {
     expect(mr.state.updateToken).toHaveBeenLastCalledWith('t1', expect.objectContaining({ col: 6, row: 6 }));
   });
 
-  it('arrow keys outside move-mode do not move the token', async () => {
-    dispatchKey('ArrowRight');
-    await Promise.resolve();
-    expect(mr.state.updateToken).not.toHaveBeenCalled();
-  });
-
   it('Escape exits move-mode', () => {
-    dispatchKey('m');
+    dispatchKey('ArrowRight');
     expect(mr._moveMode).toBe(true);
     dispatchKey('Escape');
     expect(mr._moveMode).toBe(false);
   });
 
-  it('M is ignored when typing into a text input', () => {
+  it('arrow keys are ignored when typing into a text input', async () => {
     const input = document.createElement('input');
     document.body.appendChild(input);
     input.focus();
-    dispatchKey('m', { target: input });
+    dispatchKey('ArrowRight', { target: input });
+    await Promise.resolve();
     expect(mr._moveMode).toBeFalsy();
+    expect(mr.state.updateToken).not.toHaveBeenCalled();
     input.remove();
   });
 });

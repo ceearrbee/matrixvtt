@@ -23,6 +23,7 @@ import {
   formatSayLogBody, formatEmoteLogBody, renderChatBody, isLongBody,
   formatSceneRootBody,
 } from './chat-log-format.js';
+import { loadDiceMacros } from './dice-macros.js';
 import { restoreActiveScene } from './scene-mode.js';
 import { closeSetupWizard } from './SetupWizard.jsx';
 import { logger } from '../utils/logger.js';
@@ -98,6 +99,7 @@ export function initUIController(ui, state, widgetManager, chat) {
     hydratePhase(userId, roomId, ui.state.isGM());
     hydrateIconRailDrawer(userId, roomId);
     hydrateLayoutMode(userId);
+    loadDiceMacros(userId);
     bindPhaseToInitiative(userId, roomId);
     bindAutoTabToMode(ui);
     bindAutoDrawerToMode(ui);

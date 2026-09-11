@@ -38,10 +38,11 @@ test.describe('VTT shell - accessibility', () => {
     // The room-list return lives in the header itself.
     await expect(page.getByLabel(/return to room list/i)).toBeVisible({ timeout: 10_000 });
 
-    // Settings and theme are consolidated into the lower-left global menu.
+    // Settings is consolidated into the lower-left global menu; theme is
+    // the labelled select inside it, not a second blind cycler here.
     await page.locator('.left-index__menu-btn').click();
     await expect(page.locator('[data-menu-item="settings"]')).toBeVisible();
-    await expect(page.locator('[data-menu-item="theme"]')).toBeVisible();
+    await expect(page.locator('[data-menu-item="theme"]')).toHaveCount(0);
   });
 
   test('a polite live region exists for screen-reader announcements', async ({ page }) => {

@@ -83,7 +83,7 @@ function StandaloneSidebar({ screen, onSignOut, onFactoryReset }) {
     screen === 'login' && h('details', { class: 'sidebar-epilogue' }, [
       h('summary', null, 'How is my data stored?'),
       h('p', null,
-        'Your Matrix homeserver stores all session data (maps, tokens, characters) natively within Matrix room state. MatrixVTT requires no third-party databases.'),
+        'Your Matrix homeserver stores all campaign data (maps, tokens, characters) natively within Matrix room state. MatrixVTT requires no third-party databases.'),
       h('p', null,
         'Because MatrixVTT syncs in real-time, heavy actions may trigger your homeserver’s API rate limits. MatrixVTT automatically queues and retries events when rate-limited.'),
     ]),

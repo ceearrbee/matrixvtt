@@ -45,7 +45,7 @@ function sectionAttackRoll({ item }) {
   const sign = item.attack_bonus >= 0 ? '+' : '';
   return `<button type="button" class="dbt dbt--sm item-card__action"
     data-item-action="attack-roll" data-item-id="${esc(String(item.id ?? ''))}"
-    aria-label="Roll attack with ${esc(String(item.name ?? 'item'))}">🎲 Attack ${sign}${item.attack_bonus}</button>`;
+    aria-label="Roll attack with ${esc(String(item.name ?? 'item'))}">Attack ${sign}${item.attack_bonus}</button>`;
 }
 
 function sectionDamageRoll({ item }) {
@@ -53,7 +53,7 @@ function sectionDamageRoll({ item }) {
   const dtype = item.damage_type ? ` ${esc(String(item.damage_type))}` : '';
   return `<button type="button" class="dbt dbt--sm item-card__action"
     data-item-action="damage-roll" data-item-id="${esc(String(item.id ?? ''))}" data-damage="${esc(String(item.damage))}"
-    aria-label="Roll ${esc(String(item.damage))} damage">🎲 Damage ${esc(String(item.damage))}${dtype}</button>`;
+    aria-label="Roll ${esc(String(item.damage))} damage">Damage ${esc(String(item.damage))}${dtype}</button>`;
 }
 
 function sectionUseConsumable({ item }) {

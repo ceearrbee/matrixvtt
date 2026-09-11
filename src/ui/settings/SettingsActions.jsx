@@ -1,25 +1,32 @@
 /**
- * Footer action row for the Settings modal: Save / Cancel / Reload /
- * Restore from autosave / Delete-session. Each destructive action is
- * gated behind ModalFactory.confirmAsync so accidental clicks don't
- * blow away local state.
+ * Settings actions, in two tiers.
+ *
+ * `SettingsActions` is the modal footer and holds only Cancel and Save.
+ * `SettingsAdvanced` is the recovery / destruction tier - reload,
+ * restore, delete - which lives in a collapsed disclosure inside About
+ * rather than under every tab including Appearance. Each destructive
+ * action is still gated behind confirmAsync.
  */
 import { h } from 'preact';
 import { confirmAsync } from '../confirm-dialogs.jsx';
 import { loadSnapshot, restoreSnapshot } from '../../utils/state-snapshot.js';
 
-export function SettingsActions({ ui, ops, isGM, overlayRef, closeModal }) {
-  return h('div', { class: 'form-actions', style: 'margin-top: 24px; flex-direction: column; gap: 8px;' }, [
-    h('div', { style: 'display: flex; gap: 8px;' }, [
-      h('button', { type: 'button', class: 'dbt', onClick: () => closeModal(overlayRef.current) }, 'Cancel'),
-      h('button', { type: 'submit', class: 'dbt btn-primary', style: 'flex: 1;' }, 'Save Settings'),
-    ]),
+export function SettingsActions({ onClose }) {
+  return h('div', { class: 'form-actions', style: 'margin-top: 24px; display: flex; gap: 8px;' }, [
+    h('button', { type: 'button', class: 'dbt', onClick: onClose }, 'Cancel'),
+    h('button', { type: 'submit', class: 'dbt btn-primary', style: 'flex: 1;' }, 'Save Settings'),
+  ]);
+}
+
+export function SettingsAdvanced({ ui, ops, isGM, onClose }) {
+  return h('details', { class: 'settings-advanced', 'data-settings-advanced': true }, [
+    h('summary', null, 'Advanced: recovery and deletion'),
     h('button', {
       type: 'button', class: 'dbt',
       style: 'width: 100%;',
       title: 'Discard local cache and re-fetch all room state from the homeserver. Useful after sync hiccups.',
       onClick: () => {
-        closeModal(overlayRef.current);
+        onClose();
         confirmAsync(
           'Reload from server? Discards any in-flight local edits and re-fetches all room state. Safe to use any time.',
           async () => {
@@ -32,7 +39,7 @@ export function SettingsActions({ ui, ops, isGM, overlayRef, closeModal }) {
           { title: 'Reload from server', confirmText: 'Reload', busyText: 'Reloading…' },
         );
       },
-    }, '↻ Reload from server'),
+    }, 'Reload from server'),
     h('button', {
       type: 'button', class: 'dbt',
       style: 'width: 100%;',
@@ -46,7 +53,7 @@ export function SettingsActions({ ui, ops, isGM, overlayRef, closeModal }) {
           return;
         }
         const ageMin = Math.round((Date.now() - snap.saved_at) / 60_000);
-        closeModal(overlayRef.current);
+        onClose();
         confirmAsync(
           `Restore the autosave from ${ageMin} minute${ageMin === 1 ? '' : 's'} ago? Local state changes since then will be lost. The snapshot is local only and won't push to the server.`,
           async () => {
@@ -61,13 +68,13 @@ export function SettingsActions({ ui, ops, isGM, overlayRef, closeModal }) {
       type: 'button', class: 'dbt',
       style: 'width: 100%; color: var(--color-text-danger); border-color: var(--color-border-danger);',
       onClick: () => {
-        closeModal(overlayRef.current);
+        onClose();
         confirmAsync(
-          'Delete this session? Permanent erase!',
+          'Delete this campaign? Permanent erase!',
           () => ops.deleteSession(),
-          { title: 'Delete Session', confirmText: 'Delete', busyText: 'Deleting…', confirmClass: 'btn-primary' },
+          { title: 'Delete campaign', confirmText: 'Delete', busyText: 'Deleting…', confirmClass: 'btn-primary' },
         );
       },
-    }, 'Delete Session'),
+    }, 'Delete campaign'),
   ]);
 }

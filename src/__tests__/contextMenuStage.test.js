@@ -71,12 +71,13 @@ describe('showMapContextMenu', () => {
 });
 
 describe('showTokenContextMenu', () => {
-  it('shows the slim GM menu and selects the token for the action bar', () => {
+  it('shows the slim GM menu on its own, without also selecting the token', () => {
     const tokens = new Map([['t1', { id: 't1', name: 'Goblin', type: 'npc', conditions: [] }]]);
     const mr = makeMr({ isGM: true, tokens });
     const menu = showTokenContextMenu(mr, { id: 't1', name: 'Goblin' }, 50, 60);
     expect(menu).toBeTruthy();
-    expect(mr.setSelectedToken).toHaveBeenCalledWith('t1');
+    // Selecting here too popped the TokenActionBar alongside the menu.
+    expect(mr.setSelectedToken).not.toHaveBeenCalled();
     const labels = [...menu.querySelectorAll('[role="menuitem"]')].map((el) => el.textContent);
     expect(labels).toEqual(expect.arrayContaining([
       expect.stringContaining('View Sheet'),

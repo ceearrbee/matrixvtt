@@ -9,15 +9,14 @@ import { h } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { MapCanvas } from './MapCanvas.jsx';
 import { TokenActionBar } from './TokenActionBar.jsx';
-import { useStorageSubscription } from './hooks/use-storage.js';
-import { STORAGE_KEYS, UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
+import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { activeMapIdSignal, tokensSignal } from '../state/signals.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { clampMapStripSize, useMapStripSize } from '../utils/map-strip-size.js';
 import { confirm } from './confirm-dialogs.jsx';
 import { isCoarsePointer } from '../utils/pointer.js';
 import {
-  WallIcon, TemplateIcon, LightIcon, PingIcon, EraseIcon,
+  WallIcon, TemplateIcon, LightIcon, PinIcon, PingIcon, EraseIcon,
   UndoIcon, RedoIcon, TrashIcon, PersonIcon, EyeIcon, FogIcon,
   SelectIcon, PencilIcon, LineToolIcon, RectToolIcon, CircleToolIcon, RulerIcon,
 } from './icons/index.jsx';
@@ -34,6 +33,7 @@ const TOOL_ICONS = {
   measure: RulerIcon,
   wall: WallIcon,
   light: LightIcon,
+  pin: PinIcon,
   'template-circle': TemplateIcon,
 };
 
@@ -58,7 +58,7 @@ export const TOOLS = [
 const GROUP_TOOL_IDS = Object.freeze({
   [TOOL_GROUPS.NAVIGATION]: new Set(['pointer', 'measure']),
   [TOOL_GROUPS.DRAWING]:    new Set(['pencil', 'line', 'rect', 'circle']),
-  [TOOL_GROUPS.GM]:         new Set(['wall', 'light', 'template-circle']),
+  [TOOL_GROUPS.GM]:         new Set(['wall', 'light', 'pin', 'template-circle']),
 });
 
 // The GM group is the scene-setup home: walls, lights, templates,
@@ -73,46 +73,47 @@ const GROUP_LABELS = Object.freeze({
 export const GM_TOOLS = [
   ['wall', '🧱', 'Draw sight-blocking wall (W)', 'Wall tool (W)', 'Wall tool'],
   ['light', '💡', 'Place a light source (O)', 'Light tool (O)', 'Light tool'],
+  ['pin', '', 'Drop a map pin, then click the map (I)', 'Pin tool (I)', 'Pin tool'],
   ['template-circle', '🎯', 'Persistent circle template (T)', 'Template circle (T)', 'Template circle tool'],
   null,
 ];
 
-/**
- * @returns {[boolean, (v: boolean) => void]}
- */
-function useShouldShowHelp(_ui) {
-  // Help visibility is driven entirely by localStorage - dismiss
-  // flips the local state and persists the dismissal. Reads via
-  // useStorageSubscription so a dismiss in another tab is reflected
-  // here too.
-  const [hideFlag, setHideFlag] = useStorageSubscription(STORAGE_KEYS.HIDE_MAP_HELP);
-  const showHelp = hideFlag !== '1';
-  // Store '1' (hidden) or '0' (visible) - never null, so the reader
-  const setShowHelp = (v) => setHideFlag(v ? '0' : '1');
-  return [showHelp, setShowHelp];
-}
+// The template control carries both shapes on one button: clicking it
+// while a template shape is already active swaps circle <-> cone, so the
+// cone costs no second toolbar button.
+const TEMPLATE_SHAPES = Object.freeze({
+  'template-circle': {
+    next: 'template-cone',
+    tooltip: 'Circle template (T) - click again for a cone',
+    aria: 'Template tool, circle (T)',
+    name: 'Template tool, circle',
+  },
+  'template-cone': {
+    next: 'template-circle',
+    tooltip: 'Cone template (K) - click again for a circle',
+    aria: 'Template tool, cone (K)',
+    name: 'Template tool, cone',
+  },
+});
 
-function MapHelp({ onDismiss }) {
-  return h('section', { class: 'map-help', 'aria-label': 'Map controls help' }, [
-    h('div', { class: 'map-help__title' }, 'Map controls'),
-    h('p', { class: 'map-help__copy' }, 'Use the pointer tool to select tokens, drag to move, scroll to zoom, and hold Space while dragging to pan.'),
-    h('p', { class: 'map-help__copy' }, [
-      'Keyboard support is partial: focus the map, press ',
-      h('kbd', null, 'M'),
-      ' on a selected token for movement mode, use the arrow keys to move, and press ',
-      h('kbd', null, 'Escape'),
-      ' to cancel.',
-    ]),
-    h('button', {
-      class: 'dbt dbt--sm map-help__dismiss', type: 'button',
-      'aria-label': 'Dismiss map controls help', onClick: onDismiss,
-    }, 'Dismiss'),
-  ]);
+function templateButtonProps(activeTool) {
+  const active = TEMPLATE_SHAPES[activeTool];
+  const shown = active ?? TEMPLATE_SHAPES['template-circle'];
+  return {
+    dataTool: active ? active.next : 'template-circle',
+    tooltip: shown.tooltip,
+    aria: shown.aria,
+    name: shown.name,
+    isActive: !!active,
+  };
 }
 
 function DrawToolbar({ ui }) {
   const [activeTool, setActiveTool] = useState('pointer');
   const [collapsed, setCollapsed] = useState(false);
+  // Undo / redo / clear are recovery actions, not tools: one overflow
+  // holds all three instead of three permanent toolbar buttons.
+  const [overflowOpen, setOverflowOpen] = useState(false);
   const onTool = (e) => {
     const btn = e.target.closest('[data-tool]');
     if (!btn) return;
@@ -129,14 +130,18 @@ function DrawToolbar({ ui }) {
   // Navigation (drawing/wall work belongs to prep, not the middle of a turn).
   const isCombat = phase === UI_MODES.COMBAT && !prepActive;
   const userGroup = activeToolGroupSignal.value;
-  // Combat locks the toolbar to Navigation regardless of user pick -
-  // wall/template/drawing work belongs to prep, not the middle of a turn.
-  const activeGroup = isCombat ? TOOL_GROUPS.NAVIGATION : userGroup;
-  const groupTabs = isGM
+  // The Scene group is GM authoring, so it rides the Prep axis; a GM not
+  // in prep sees the same two groups a player does.
+  const groupTabs = isGM && prepActive
     ? [TOOL_GROUPS.NAVIGATION, TOOL_GROUPS.DRAWING, TOOL_GROUPS.GM]
     : [TOOL_GROUPS.NAVIGATION, TOOL_GROUPS.DRAWING];
+  // Combat locks the toolbar to Navigation regardless of user pick -
+  // wall/template/drawing work belongs to prep, not the middle of a turn.
+  // So does a group that is no longer offered, e.g. Scene when prep ends.
+  const groupOffered = groupTabs.some((g) => g === userGroup);
+  const activeGroup = isCombat || !groupOffered ? TOOL_GROUPS.NAVIGATION : userGroup;
   // Build the full tool list once, then filter to the active group.
-  const allTools = isGM
+  const allTools = isGM && prepActive
     ? [...TOOLS, ...GM_TOOLS.map((t) => (t === null ? null : { tuple: t, kind: 'gm' }))]
     : TOOLS;
   const tools = allTools.filter((t) => {
@@ -174,14 +179,18 @@ function DrawToolbar({ ui }) {
         const tuple = Array.isArray(t) ? t : t.tuple;
         const kind = Array.isArray(t) ? null : t.kind;
         const Icon = TOOL_ICONS[tuple[0]];
+        const tpl = tuple[0] === 'template-circle' ? templateButtonProps(activeTool) : null;
         return h('button', {
           key: tuple[0] || `tool-${i}`,
-          class: `dtb-btn${tuple[0] === activeTool ? ' dtb-btn--active' : ''}`,
-          'data-tool': tuple[0], 'data-tooltip': tuple[2], 'aria-label': tuple[3], title: tuple[2],
+          class: `dtb-btn${(tpl ? tpl.isActive : tuple[0] === activeTool) ? ' dtb-btn--active' : ''}`,
+          'data-tool': tpl ? tpl.dataTool : tuple[0],
+          'data-tooltip': tpl ? tpl.tooltip : tuple[2],
+          'aria-label': tpl ? tpl.aria : tuple[3],
+          title: tpl ? tpl.tooltip : tuple[2],
           ...(kind ? { 'data-tool-kind': kind } : {}),
         }, [
           h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, Icon ? h(Icon, {}) : tuple[1]),
-          h('span', { class: 'sr-only' }, tuple[4]),
+          h('span', { class: 'sr-only' }, tpl ? tpl.name : tuple[4]),
         ]);
       }),
       h('button', {
@@ -231,25 +240,35 @@ function DrawToolbar({ ui }) {
       ]),
       h('div', { class: 'dtb-sep', role: 'separator' }),
       h('button', {
-        class: 'dtb-btn', 'data-action': 'undo-drawing',
-        'aria-label': 'Undo last drawing stroke', title: 'Undo last stroke (Ctrl+Z)',
-        onClick: (e) => { e.stopPropagation(); ui.undoDrawing?.(); },
-      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(UndoIcon, {})), h('span', { class: 'sr-only' }, 'Undo')]),
-      h('button', {
-        class: 'dtb-btn', 'data-action': 'redo-drawing',
-        'aria-label': 'Redo drawing stroke', title: 'Redo stroke (Ctrl+Y)',
-        onClick: (e) => { e.stopPropagation(); ui.redoDrawing?.(); },
-      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(RedoIcon, {})), h('span', { class: 'sr-only' }, 'Redo')]),
-      h('button', {
-        class: 'dtb-btn dtb-btn--danger', id: 'clear-drawings',
-        'aria-label': 'Clear all drawings', title: 'Clear all drawings',
-        onClick: (e) => {
-          e.stopPropagation();
-          confirm('This deletes every drawing on the map, for everyone. This can\'t be undone.',
-            () => ui.clearDrawings?.(),
-            { title: 'Clear drawings', confirmText: 'Clear all', confirmClass: 'dbt--danger', id: 'confirm-clear-drawings' });
-        },
-      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(TrashIcon, {})), h('span', { class: 'sr-only' }, 'Clear')]),
+        class: `dtb-btn${overflowOpen ? ' dtb-btn--active' : ''}`,
+        'data-map-overflow': true,
+        'aria-label': 'Undo, redo and clear drawings',
+        'aria-expanded': String(overflowOpen),
+        title: 'Undo, redo, clear',
+        onClick: (e) => { e.stopPropagation(); setOverflowOpen((v) => !v); },
+      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, '⋯'), h('span', { class: 'sr-only' }, 'More actions')]),
+      ...(overflowOpen ? [
+        h('button', {
+          class: 'dtb-btn', 'data-action': 'undo-drawing',
+          'aria-label': 'Undo last drawing stroke', title: 'Undo last stroke (Ctrl+Z)',
+          onClick: (e) => { e.stopPropagation(); ui.undoDrawing?.(); },
+        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(UndoIcon, {})), h('span', { class: 'sr-only' }, 'Undo')]),
+        h('button', {
+          class: 'dtb-btn', 'data-action': 'redo-drawing',
+          'aria-label': 'Redo drawing stroke', title: 'Redo stroke (Ctrl+Y)',
+          onClick: (e) => { e.stopPropagation(); ui.redoDrawing?.(); },
+        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(RedoIcon, {})), h('span', { class: 'sr-only' }, 'Redo')]),
+        h('button', {
+          class: 'dtb-btn dtb-btn--danger', id: 'clear-drawings',
+          'aria-label': 'Clear all drawings', title: 'Clear all drawings',
+          onClick: (e) => {
+            e.stopPropagation();
+            confirm('This deletes every drawing on the map, for everyone. This can\'t be undone.',
+              () => ui.clearDrawings?.(),
+              { title: 'Clear drawings', confirmText: 'Clear all', confirmClass: 'dbt--danger', id: 'confirm-clear-drawings' });
+          },
+        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(TrashIcon, {})), h('span', { class: 'sr-only' }, 'Clear')]),
+      ] : []),
     ]),
   ]);
 }
@@ -262,7 +281,7 @@ function MapEmptyPlaceholder({ ui }) {
     h('p', { class: 'editorial-body map-empty__copy' },
       isGM
         ? 'Open the maps panel to create or select a battle map. Players see the same room state as soon as you switch.'
-        : 'Waiting for the GM to load a map. Other surfaces - Notes, Pages, the scene forum - are usable while you wait.'),
+        : 'Waiting for the GM to load a map. The Journal and Scenes are usable while you wait.'),
     isGM && h('button', {
       class: 'dbt btn-primary',
       onClick: () => ui.openMapsPanel?.(),
@@ -277,9 +296,6 @@ const DEFAULT_STRIP_HEIGHT = 360;
 const COLLAPSED_CHROME_HEIGHT = 32;
 
 export function MapStrip({ ui }) {
-  const [showHelp, setShowHelp] = useShouldShowHelp(ui);
-  const onDismiss = () => { ui.dismissMapHelp?.(); setShowHelp(false); };
-
   // Subscribing here keeps the empty-state in sync with map changes
   // (GM picks a different map, room sync delivers a fresh activeMapId).
   const activeMapId = activeMapIdSignal.value;
@@ -372,7 +388,6 @@ export function MapStrip({ ui }) {
       title: collapsed ? 'Expand map strip' : 'Collapse map strip',
       onClick: onToggleCollapse,
     }, collapsed ? '▾' : '▴'),
-    showHelp && hasMap ? h(MapHelp, { key: 'help', onDismiss }) : null,
     !hasMap ? h(MapEmptyPlaceholder, { key: 'empty', ui }) : null,
     showTokenHint && h('div', { key: 'token-hint', class: 'map-hint', role: 'status' },
       isCoarsePointer()

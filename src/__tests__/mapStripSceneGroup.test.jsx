@@ -1,7 +1,8 @@
 /**
  * The toolbar's GM group is the Scene group: one labeled home for the
  * scene-prep tools (walls, lights, templates) plus the add-token and
- * fog area actions, so none of them hide behind right-click only.
+ * fog area actions, so none of them hide behind right-click only. It
+ * rides the Prep axis, so these tests run with prep active.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, h } from 'preact';
@@ -31,7 +32,7 @@ describe('map toolbar Scene group', () => {
   let host;
   beforeEach(() => {
     tablePhaseSignal.value = UI_MODES.NARRATIVE;
-    gmPrepActiveSignal.value = false;
+    gmPrepActiveSignal.value = true;
     activeToolGroupSignal.value = TOOL_GROUPS.GM;
     host = document.createElement('div');
     document.body.appendChild(host);
@@ -40,6 +41,7 @@ describe('map toolbar Scene group', () => {
     render(null, host);
     host.remove();
     activeToolGroupSignal.value = TOOL_GROUPS.NAVIGATION;
+    gmPrepActiveSignal.value = false;
   });
 
   it('labels the GM group tab "Scene"', () => {

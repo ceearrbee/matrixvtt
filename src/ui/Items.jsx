@@ -19,6 +19,8 @@ import { TabToolbar, SrdButton } from './TabToolbar.jsx';
 import { classifyItems } from './items/classify.js';
 import { SaveToLibraryButton } from './library/SaveToLibraryButton.jsx';
 import { LIBRARY_KIND } from '../utils/constants.js';
+import { EmptyState } from './EmptyState.jsx';
+import { NoCharacterSelected } from './NoCharacterSelected.jsx';
 
 /**
  * Item-card body sink. The `html` arg is built by `renderItemCardSections`
@@ -161,7 +163,11 @@ function GMItemsView({ ui }) {
       h(SrdButton, { ui, kind: 'item' }),
     ]),
     matches.length === 0
-      ? h('div', { class: 'empty-state' }, 'No items in this view.')
+      ? h(EmptyState, {
+          title: 'No items in this view',
+          body: 'Nothing matches the current filter. Clear it, or add an item to the campaign.',
+          cta: { label: 'Add an item', onClick: () => ui.showItemForm(null) },
+        })
       : matches.map(([id, item]) =>
           h(ItemCard, {
             key: id,
@@ -183,9 +189,7 @@ export function Items({ ui }) {
   if (ui.state.isGM()) return h(GMItemsView, { ui });
 
   const character = ui.state.getCurrentCharacter();
-  if (!character) {
-    return h('div', { class: 'empty-state' }, 'No character selected');
-  }
+  if (!character) return h(NoCharacterSelected, { ui });
 
   const canEdit = ui.state.canEditEntity(character);
   const itemsWithIds = (character.inventory_ids ?? [])
@@ -208,13 +212,11 @@ export function Items({ ui }) {
         )
     ),
     itemsWithIds.length === 0
-      ? h(
-          'div',
-          { class: 'empty-state' },
-          canEdit
-            ? 'No items in this inventory. Use + Add Item to create one.'
-            : 'No items in this inventory.'
-        )
+      ? h(EmptyState, {
+          title: 'Nothing in this inventory',
+          body: `${character.name} is carrying nothing yet.`,
+          cta: canEdit ? { label: 'Add an item', onClick: () => ui.showItemForm(null) } : null,
+        })
       : itemsWithIds.map(({ id, item }) => h(ItemCard, { key: id, ui, item, itemId: id, canEdit })),
   ]);
 }

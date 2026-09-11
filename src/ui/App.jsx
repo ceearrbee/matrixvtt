@@ -5,13 +5,10 @@ import { settingsSignal, initiativeSignal } from '../state/signals.js';
 import { tablePhaseSignal, gmPrepActiveSignal, openIconRailDrawerSignal, mobilePaneSignal, debugModeSignal, layoutModeSignal } from '../state/ui-signals.js';
 import { Header } from './Header.jsx';
 import { DiceBar } from './DiceBar.jsx';
-import { SuggestedModeBanner } from './SuggestedModeBanner.jsx';
 import { InitiativeBar } from './InitiativeBar.jsx';
 import { MapStrip } from './MapStrip.jsx';
 import { LogContainer } from './LogContainer.jsx';
-import { IconRail } from './IconRail.jsx';
 import { LeftIndex } from './LeftIndex.jsx';
-import { CombatInitiativeStrip } from './CombatInitiativeStrip.jsx';
 import { initStripIn, railFor } from './mode-registry.js';
 import { MobileTabBar } from './MobileTabBar.jsx';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts.js';
@@ -19,6 +16,7 @@ import { DebugBar } from './sync/DebugBar.jsx';
 import { FloatingDocs } from './FloatingDoc.jsx';
 import { LegacyChatPopups } from './LegacyChatPopups.jsx';
 import { SyncProgress } from './sync/SyncProgress.jsx';
+import { NextSteps } from './NextSteps.jsx';
 
 export function App({ ui }) {
   useKeyboardShortcuts(ui);
@@ -94,7 +92,6 @@ export function App({ ui }) {
 
   return h('div', { class: 'vt-root', 'data-shell': 'conversation' }, [
     debugModeSignal.value ? h(DebugBar, { ui, key: 'dbg' }) : null,
-    h(SuggestedModeBanner, { ui, key: 'mode-banner' }),
     h(Header, {
       ui, key: 'hdr',
       channelsOpen, sheetOpen,
@@ -112,25 +109,23 @@ export function App({ ui }) {
       'data-mobile-pane': mobilePane,
       'data-icon-rail-open': iconRailDrawer || null,
     }, [
-      // Left index: the always-expanded multi-section index on desktop, and
-      // the slim one-drawer IconRail on mobile. CSS shows exactly one for
-      // the current viewport.
+      // One left-navigation mount. LeftIndex picks its own variant: the
+      // always-expanded accordion, or the slim one-drawer rail on a
+      // phone or under the icon layout preference.
       h('aside', {
         class: 'shell__channels', key: 'channels',
         id: 'shell-channels-drawer',
-      }, [
-        h(LeftIndex, { ui, key: 'left-index' }),
-        h(IconRail, { ui, key: 'icon-rail' }),
-      ]),
+      }, h(LeftIndex, { ui, key: 'left-index' })),
       h('section', { class: 'shell__chat', key: 'chat' }, [
+        // First-run checklist above the map, not inside it: the
+        // initiative tracker overlays the map's top edge.
+        h(NextSteps, { ui, key: 'next-steps' }),
         // Map region - the "page". The initiative strip overlays the top of
         // the map in Combat; other phases use the older InitiativeBar. The
         // map is resizable via its own drag handle.
         h('div', { class: 'almanac-map', key: 'map-region' }, [
           h(MapStrip, { ui, key: 'map' }),
-          initStripIn(phase)
-            ? h(CombatInitiativeStrip, { ui, key: 'init-strip' })
-            : h(InitiativeBar, { ui, key: 'init' }),
+          h(InitiativeBar, { ui, compact: initStripIn(phase), key: 'init' }),
         ]),
         // Chronicle - the chat/system feed with the composer docked at the
         // bottom. Mounted in every phase so conversation is always reachable.

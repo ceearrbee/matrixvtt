@@ -166,8 +166,10 @@ export function InitiativeEntry({
             onClick: (e) => { e.stopPropagation(); ui.adjustTokenHP?.(entry.token_id, delta); },
             onPointerDown: (e) => e.stopPropagation(),
           }, `${delta > 0 ? '+' : ''}${delta}`))),
-        !isCompact && isGM && !isCurrent && h('button', { class: 'ie__set-turn', 'data-set-turn': true, 'data-index': index, 'aria-label': `Jump to ${entry.name}'s turn`, onClick: (e) => { e.stopPropagation(); ui.setTurn(index); }, onPointerDown: (e) => e.stopPropagation() }, h(PlayIcon, {})),
-        !isCompact && isGM && h('button', { class: 'ie__remove', 'aria-label': 'Remove from initiative', onClick: (e) => { e.stopPropagation(); ui.removeFromInitiative(entry.token_id); }, onPointerDown: (e) => e.stopPropagation() }, '×'),
+        !isCompact && isGM && !isCurrent && h('button', { class: 'ie__set-turn', 'data-set-turn': true, 'data-index': index, 'aria-label': `Jump to ${entry.name}'s turn`,
+        title: `Jump to ${entry.name}'s turn`, onClick: (e) => { e.stopPropagation(); ui.setTurn(index); }, onPointerDown: (e) => e.stopPropagation() }, h(PlayIcon, {})),
+        !isCompact && isGM && h('button', { class: 'ie__remove', 'aria-label': 'Remove from initiative',
+        title: 'Remove from initiative', onClick: (e) => { e.stopPropagation(); ui.removeFromInitiative(entry.token_id); }, onPointerDown: (e) => e.stopPropagation() }, '×'),
         // Chevron toggle: inactive rows collapse to name + HP by
         // default; click reveals the rest (AC, conditions, HP nudgers,
         // etc.). Active rows hide the chevron since they always show

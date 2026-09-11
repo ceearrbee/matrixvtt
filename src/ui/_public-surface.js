@@ -27,9 +27,6 @@ export const PUBLIC_SURFACE = {
     'setupResizeHandlers',
     'updateMapPanel',
     'restoreTheme',
-    'toggleTheme',
-    'dismissMapHelp',
-    'shouldShowMapHelp',
   ],
 
   // Map controls (extracted to map-controls-wiring).
@@ -52,7 +49,7 @@ export const PUBLIC_SURFACE = {
     'showTokenForm', 'showCharacterWizard',
     'showSpellForm', 'showItemForm', 'showEditItemForm',
     'showHandoutForm', 'showHandoutModal', 'showTableForm',
-    'showFirstTimeSetup', 'showPlayerWelcome',
+    'showFirstTimeSetup',
     'duplicateToken',
     'showCharacterPreview', 'showNPCPreview', 'showItemPreview', 'showSpellPreview', 'previewToken',
     'castSpell', 'consumeItem',

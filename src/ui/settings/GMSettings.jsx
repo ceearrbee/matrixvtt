@@ -12,13 +12,14 @@ import { openRulesetValidator } from '../RulesetValidator.jsx';
 import { SaveToLibraryButton } from '../library/SaveToLibraryButton.jsx';
 import { rulesetFacts } from '../library/preview-facts.js';
 import { RulesetDetail } from './RulesetDetail.jsx';
+import { HelpIcon } from '../HelpIcon.jsx';
 import { LIBRARY_KIND } from '../../utils/constants.js';
 
 export function CampaignSettings({ ui, refs }) {
   return h('div', { class: 'settings-section' }, [
     h('h3', { class: 'settings-section__title' }, 'Campaign'),
     h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label', for: 'settings-name' }, ['Session Name ', h('span', { 'aria-hidden': 'true' }, '*')]),
+      h('label', { class: 'form-label', for: 'settings-name' }, ['Name ', h('span', { 'aria-hidden': 'true' }, '*')]),
       h('input', { type: 'text', class: 'form-input', id: 'settings-name', value: ui.state.settings.name, required: true, 'aria-required': 'true', ref: refs.name }),
     ]),
     h('div', { class: 'form-group' }, [
@@ -56,12 +57,12 @@ export function CampaignSettings({ ui, refs }) {
           'Import Campaign JSON',
           h('input', {
             type: 'file', accept: '.json', style: 'display: none;',
-            onChange: (e) => { const f = e.target.files?.[0]; if (f) { refs.overlay.current?.remove?.(); ui.importCampaign(f); } },
+            onChange: (e) => { const f = e.target.files?.[0]; if (f) { refs.close?.(); ui.importCampaign(f); } },
           }),
         ]),
       ]),
       h('small', { class: 'settings-hint' },
-        'Port your entire session (maps, tokens, characters, settings) to another room or save a point-in-time backup.'),
+        'Port your entire campaign (maps, tokens, characters, settings) to another room or save a point-in-time backup.'),
     ]),
   ]);
 }
@@ -90,7 +91,7 @@ export function RulesetSettings({ ui, ops, refs }) {
   const hasSpells = Array.isArray(preset.spell_schools) && preset.spell_schools.length > 0;
 
   return h('div', { class: 'settings-section' }, [
-    h('h3', { class: 'settings-section__title' }, 'Ruleset'),
+    h('h3', { class: 'settings-section__title' }, ['Ruleset', h(HelpIcon, { term: 'ruleset' })]),
     // The batched Save reads refs.system; the browser drives it.
     h('input', { type: 'hidden', id: 'settings-system', ref: refs.system, value: selected }),
     h('div', { class: 'ruleset-browser' }, [
@@ -135,7 +136,7 @@ export function RulesetSettings({ ui, ops, refs }) {
           'Import Ruleset',
           h('input', {
             type: 'file', accept: '.json,.vttruleset.json', style: 'display: none;',
-            onChange: (e) => { const f = e.target.files?.[0]; if (f) { refs.overlay.current?.remove?.(); ops.importRuleset(f); } },
+            onChange: (e) => { const f = e.target.files?.[0]; if (f) { refs.close?.(); ops.importRuleset(f); } },
           }),
         ]),
         h('button', { type: 'button', class: 'dbt dbt--sm', title: 'Check a ruleset JSON against the spec', onClick: () => openRulesetValidator() }, 'Validate'),

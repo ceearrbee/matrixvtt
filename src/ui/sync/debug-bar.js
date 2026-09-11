@@ -56,7 +56,7 @@ export function clearDebugStorage(ui) {
     }
   }
   toRemove.forEach((k) => localStorage.removeItem(k));
-  ui._toast(`Cleared ${toRemove.length} local keys. Reloading...`, 'info');
+  ui._toast('Cleared this browser\'s saved MatrixVTT settings. Reloading…', 'info');
   setTimeout(() => window.location.reload(), 1000);
 }
 

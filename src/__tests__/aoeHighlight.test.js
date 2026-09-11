@@ -93,7 +93,7 @@ describe('renderAoEHighlight', () => {
       ['behind', { map_id: 'map-a', x: 100, y: 200 }],  // behind origin
     ]);
     const mr = makeMr({
-      tool: 'cone', isDrawing: true,
+      tool: 'template-cone', isDrawing: true,
       drawStart:   { x: 200, y: 200 },
       drawCurrent: { x: 320, y: 200 },  // points right, length = 120px
       tokens,

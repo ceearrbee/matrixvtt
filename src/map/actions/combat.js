@@ -3,7 +3,7 @@
  */
 
 import { h } from 'preact';
-import { useState, useRef, useLayoutEffect } from 'preact/hooks';
+import { useState, useRef } from 'preact/hooks';
 import { Modal } from '../../ui/Modal.jsx';
 import { openModal } from '../../ui/modal-host.js';
 import { VTT_EVENTS, EVENT_TYPES } from '../../utils/constants.js';
@@ -188,66 +188,79 @@ export async function applyHealing(mr, tokenId, amount) {
   });
 }
 
+/**
+ * Conditions are a filterable list, not a fifteen-row grid of
+ * checkbox-plus-number. Fourteen of the fifteen rounds inputs were
+ * permanently disabled; a row's rounds field now appears when that row
+ * is ticked, which is the only time it can be used.
+ */
 function ConditionDialog({ mr, tokenId, token, onClose }) {
-  const current = token.conditions || [];
   const priorDurations = token.condition_durations || {};
-  const rootRef = useRef(null);
+  const [selected, setSelected] = useState(() => new Set(token.conditions || []));
+  const [durations, setDurations] = useState(() => {
+    const out = {};
+    for (const [cond, d] of Object.entries(priorDurations)) {
+      if (d?.duration_rounds) out[cond] = String(d.duration_rounds);
+    }
+    return out;
+  });
+  const [filter, setFilter] = useState('');
 
-  // Enable/disable each row's duration input as its checkbox toggles -
-  // wired imperatively (synchronously) to match the legacy behavior.
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    const cbs = Array.from(root.querySelectorAll('.cond-check'));
-    const onChange = (cb) => () => {
-      const dur = root.querySelector(`.cond-duration[data-condition="${cb.value}"]`);
-      if (!dur) return;
-      dur.disabled = !cb.checked;
-      if (cb.checked) dur.focus();
-    };
-    const handlers = cbs.map((cb) => { const fn = onChange(cb); cb.addEventListener('change', fn); return [cb, fn]; });
-    return () => handlers.forEach(([cb, fn]) => cb.removeEventListener('change', fn));
-  }, []);
+  const needle = filter.trim().toLowerCase();
+  // A condition the token already has stays listed whatever the filter
+  // says, so a filter can never hide something that is in effect.
+  const shown = CONDITIONS.filter((c) => !needle || c.toLowerCase().includes(needle) || selected.has(c));
+
+  const toggle = (cond) => (e) => {
+    const next = new Set(selected);
+    if (e.currentTarget.checked) next.add(cond);
+    else next.delete(cond);
+    setSelected(next);
+  };
 
   const save = async () => {
-    const root = rootRef.current;
-    const selected = Array.from(root.querySelectorAll('.cond-check:checked')).map((i) => i.value);
-    const durations = {};
+    const out = {};
     for (const cond of selected) {
-      const el = root.querySelector(`.cond-duration[data-condition="${cond}"]`);
-      const rounds = parseInt(el?.value ?? '', 10);
-      if (Number.isFinite(rounds) && rounds > 0) durations[cond] = { duration_rounds: rounds };
+      const rounds = parseInt(durations[cond] ?? '', 10);
+      if (Number.isFinite(rounds) && rounds > 0) out[cond] = { duration_rounds: rounds };
     }
     onClose();
     await updateTokenSafe(
       mr, tokenId,
-      { ...token, conditions: selected, condition_durations: durations },
+      { ...token, conditions: [...selected], condition_durations: out },
       'Failed to update conditions',
     );
   };
 
-  return h('div', { ref: rootRef }, [
+  return h('div', null, [
     h('p', { class: 'form-help', style: 'margin-top:0;' },
       "Tick a condition to apply it. Rounds is optional - leave blank for an effect you'll clear manually."),
-    h('div', { class: 'cond-grid', role: 'group', 'aria-label': 'Conditions and durations' }, [
-      h('div', { class: 'cond-grid__header' }, 'Condition'),
-      h('div', { class: 'cond-grid__header', style: 'text-align:right;' }, 'Rounds'),
-      ...CONDITIONS.flatMap((c) => {
-        const isChecked = current.includes(c);
-        const dur = priorDurations[c]?.duration_rounds ?? '';
-        return [
-          h('label', { class: 'cond-grid__label', for: `cond-chk-${c}`, key: `l-${c}` }, [
-            h('input', { type: 'checkbox', id: `cond-chk-${c}`, class: 'cond-check', value: c, defaultChecked: isChecked }),
-            h('span', null, c),
-          ]),
+    h('label', { class: 'sr-only', for: 'cond-filter' }, 'Filter conditions'),
+    h('input', {
+      type: 'search', id: 'cond-filter', class: 'form-input',
+      placeholder: 'Filter conditions…', autocomplete: 'off',
+      value: filter,
+      onInput: (e) => setFilter(e.currentTarget.value),
+    }),
+    h('div', { class: 'cond-list', role: 'group', 'aria-label': 'Conditions and durations' },
+      shown.map((c) => h('div', { class: 'cond-list__row', key: c }, [
+        h('label', { class: 'cond-grid__label', for: `cond-chk-${c}` }, [
           h('input', {
-            type: 'number', id: `cond-dur-${c}`, key: `d-${c}`, class: 'cond-duration form-input cond-grid__duration',
-            'data-condition': c, min: '0', step: '1', placeholder: '-', defaultValue: dur,
-            'aria-label': `${c} rounds until expiry`, disabled: !isChecked,
-            title: 'Rounds until auto-expiry. Blank = never expires (clear manually).',
+            type: 'checkbox', id: `cond-chk-${c}`, class: 'cond-check', value: c,
+            checked: selected.has(c), onChange: toggle(c),
           }),
-        ];
-      }),
-    ]),
+          h('span', null, c),
+        ]),
+        selected.has(c) && h('input', {
+          type: 'number', id: `cond-dur-${c}`, class: 'cond-duration form-input cond-grid__duration',
+          'data-condition': c, min: '0', step: '1', placeholder: 'rounds',
+          value: durations[c] ?? '',
+          'aria-label': `${c} rounds until expiry`,
+          title: 'Rounds until auto-expiry. Blank = never expires (clear manually).',
+          onInput: (e) => setDurations({ ...durations, [c]: e.currentTarget.value }),
+        }),
+      ]))),
+    shown.length === 0 && h('p', { class: 'form-help' }, `No condition matches "${filter}".`),
     h('div', { class: 'form-actions' }, [
       h('button', { class: 'dbt', 'data-modal-close': true }, 'Cancel'),
       h('button', { class: 'dbt btn-primary', id: 'cond-apply-btn', onClick: save }, 'Save Conditions'),

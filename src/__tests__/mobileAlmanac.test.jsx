@@ -15,11 +15,11 @@ vi.mock('../ui/DiceBar.jsx', () => ({ DiceBar: () => h('div', { 'data-stub': 'di
 vi.mock('../ui/RightCompanion.jsx', () => ({ RightCompanion: () => h('div', { class: 'right-companion' }) }));
 vi.mock('../ui/LeftIndex.jsx', () => ({ LeftIndex: () => h('div', { class: 'left-index' }) }));
 vi.mock('../ui/IconRail.jsx', () => ({ IconRail: () => h('div', { class: 'icon-rail-host' }) }));
-vi.mock('../ui/SuggestedModeBanner.jsx', () => ({ SuggestedModeBanner: () => null }));
 vi.mock('../ui/MapStrip.jsx', () => ({ MapStrip: () => h('div', { 'data-stub': 'map' }) }));
 vi.mock('../ui/LogContainer.jsx', () => ({ LogContainer: () => h('div', { 'data-stub': 'log' }) }));
-vi.mock('../ui/CombatInitiativeStrip.jsx', () => ({ CombatInitiativeStrip: () => h('div', { class: 'combat-init-strip' }) }));
-vi.mock('../ui/InitiativeBar.jsx', () => ({ InitiativeBar: () => h('div', { class: 'initiative-panel' }) }));
+vi.mock('../ui/InitiativeBar.jsx', () => ({
+  InitiativeBar: ({ compact }) => h('div', { class: compact ? 'combat-init-strip' : 'initiative-panel' }),
+}));
 vi.mock('../ui/MobileTabBar.jsx', () => ({ MobileTabBar: () => h('div', { 'data-stub': 'mobile-tabs' }) }));
 vi.mock('../ui/sync/DebugBar.jsx', () => ({ DebugBar: () => h('div', { 'data-stub': 'debug' }) }));
 vi.mock('../ui/FloatingDoc.jsx', () => ({ FloatingDocs: () => h('div', { 'data-stub': 'docs' }) }));
@@ -53,11 +53,12 @@ describe('Almanac mobile reconciliation', () => {
   });
   afterEach(() => { render(null, host); host.remove(); });
 
-  it('mounts both LeftIndex and IconRail in the channels column', () => {
+  it('mounts exactly one left-navigation variant in the channels column', () => {
     render(h(App, { ui: makeUi() }), host);
     const channels = host.querySelector('.shell__channels');
-    expect(channels.querySelector('.left-index')).not.toBeNull();
-    expect(channels.querySelector('.icon-rail-host')).not.toBeNull();
+    const variants = ['.left-index', '.icon-rail-host']
+      .filter((sel) => channels.querySelector(sel));
+    expect(variants).toHaveLength(1);
   });
 
   it('mounts the unified RightCompanion in the sheet column', () => {

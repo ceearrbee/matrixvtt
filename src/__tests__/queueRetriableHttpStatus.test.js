@@ -42,14 +42,14 @@ describe('queue._isRetriable - recognises matrix-js-sdk httpStatus', () => {
     const send = vi.fn().mockRejectedValueOnce(matrixError(429));
     const sm = mkSm({ sendImpl: send });
     // No throw expected - the queue absorbs the rate limit.
-    await sendStateEvent(sm, EVENT_TYPES.UI_MODE, '', { mode: 'combat' });
+    await sendStateEvent(sm, EVENT_TYPES.INITIATIVE, '', { active: false, round: 0, current_index: 0, order: [] });
     expect(send).toHaveBeenCalledTimes(1);
   });
 
   it('500 from MatrixError parks the write in the queue (no throw)', async () => {
     const send = vi.fn().mockRejectedValueOnce(matrixError(503));
     const sm = mkSm({ sendImpl: send });
-    await sendStateEvent(sm, EVENT_TYPES.UI_MODE, '', { mode: 'combat' });
+    await sendStateEvent(sm, EVENT_TYPES.INITIATIVE, '', { active: false, round: 0, current_index: 0, order: [] });
     expect(send).toHaveBeenCalledTimes(1);
   });
 
@@ -57,7 +57,7 @@ describe('queue._isRetriable - recognises matrix-js-sdk httpStatus', () => {
     const send = vi.fn().mockRejectedValue(matrixError(403, 'Forbidden'));
     const sm = mkSm({ sendImpl: send });
     await expect(
-      sendStateEvent(sm, EVENT_TYPES.UI_MODE, '', { mode: 'combat' }),
+      sendStateEvent(sm, EVENT_TYPES.INITIATIVE, '', { active: false, round: 0, current_index: 0, order: [] }),
     ).rejects.toThrow();
   });
 
@@ -69,7 +69,7 @@ describe('queue._isRetriable - recognises matrix-js-sdk httpStatus', () => {
     err.status = 429;
     const send = vi.fn().mockRejectedValueOnce(err);
     const sm = mkSm({ sendImpl: send });
-    await sendStateEvent(sm, EVENT_TYPES.UI_MODE, '', { mode: 'combat' });
+    await sendStateEvent(sm, EVENT_TYPES.INITIATIVE, '', { active: false, round: 0, current_index: 0, order: [] });
     expect(send).toHaveBeenCalledTimes(1);
   });
 });

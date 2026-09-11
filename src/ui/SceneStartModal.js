@@ -15,6 +15,7 @@ import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { startScene } from './scene-mode.js';
 import { bindVisualEditorToggle } from './visual-editor-toggle.js';
+import { EditorModeToggle } from './EditorModeToggle.jsx';
 
 function SceneStartForm({ ui, onClose }) {
   const rootRef = useRef(null);
@@ -50,12 +51,7 @@ function SceneStartForm({ ui, onClose }) {
       h('input', { id: 'scene-title', type: 'text', class: 'form-input', required: true, 'aria-required': 'true', placeholder: 'e.g. The Drowned Chapel', defaultValue: '' }),
     ]),
     h('div', { class: 'form-group' }, [
-      h('div', { class: 'editor-mode-toggle', role: 'tablist', 'aria-label': 'Editor mode' }, [
-        h('label', { for: 'scene-opening' }, 'Opening post (optional)'),
-        h('span', { style: 'flex:1' }),
-        h('button', { type: 'button', class: 'chip chip--active', 'data-editor-mode': 'markdown', 'aria-pressed': 'true' }, 'Markdown'),
-        h('button', { type: 'button', class: 'chip', 'data-editor-mode': 'visual', 'aria-pressed': 'false' }, 'Visual'),
-      ]),
+      h(EditorModeToggle, { label: 'Opening post (optional)', for: 'scene-opening' }),
       h('textarea', { id: 'scene-opening', class: 'form-input', rows: '6', style: 'resize:vertical;width:100%;font-family:inherit;', placeholder: 'Set the stage. Players can reply to this thread.' }),
     ]),
     h('div', { class: 'form-actions' }, [

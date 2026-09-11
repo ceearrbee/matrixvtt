@@ -21,10 +21,18 @@ test.describe('settings modal content', () => {
     await expect(dialog.getByRole('button', { name: /save/i }).first()).toBeVisible();
   });
 
-  test('Delete Session button is present for GM (destructive action)', async ({ page }) => {
+  test('Delete campaign sits behind the Advanced disclosure in About', async ({ page }) => {
     await openSettings(page);
     const dialog = page.locator('[role="dialog"][aria-labelledby="settings-modal-title"]');
-    await expect(dialog.getByRole('button', { name: /delete session/i })).toBeVisible();
+    // Not in the footer that renders on every tab, including Appearance.
+    await expect(dialog.locator('.form-actions').getByRole('button', { name: /delete campaign/i }))
+      .toHaveCount(0);
+
+    await page.getByRole('tab', { name: /about/i }).click();
+    const advanced = dialog.locator('[data-settings-advanced]');
+    await expect(advanced).toBeVisible();
+    await advanced.locator('summary').click();
+    await expect(advanced.getByRole('button', { name: /delete campaign/i })).toBeVisible();
   });
 });
 

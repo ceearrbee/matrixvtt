@@ -40,8 +40,8 @@ describe('GM panels consume a narrow GM ops capability', () => {
       toggleFog: vi.fn(), revealAllFog: vi.fn(), hideAllFog: vi.fn(),
     };
     render(h(FogPanel, { ui: makeStubUI(), gm }), host);
-    // Default fog mode is HIDDEN, so the "🌫 Fog On" label renders.
-    findButtonByText(host, '🌫 Fog On').click();
+    // Default fog mode is HIDDEN, so the "Fog on" label renders.
+    findButtonByText(host, 'Fog on').click();
     expect(gm.toggleFog).toHaveBeenCalledTimes(1);
   });
 

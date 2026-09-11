@@ -23,7 +23,7 @@ import { DamageLogPanel } from './gm/panels/DamageLogPanel.jsx';
 import { AddEntitiesPanel } from './gm/panels/AddEntitiesPanel.jsx';
 import {
   DiceIcon, PlusIcon, CombatIcon, FogIcon, EnvironmentIcon,
-  PeopleIcon, ImportExportIcon, DamageIcon,
+  CONCEPT_ICONS, ImportExportIcon, DamageIcon,
 } from './icons/index.jsx';
 
 const SUBNAV = [
@@ -32,7 +32,7 @@ const SUBNAV = [
   { id: 'combat', label: 'Combat', Icon: CombatIcon, Component: CombatPanel },
   { id: 'fog', label: 'Fog', Icon: FogIcon, Component: FogPanel },
   { id: 'env', label: 'Environment', Icon: EnvironmentIcon, Component: EnvironmentPanel },
-  { id: 'templates', label: 'Templates', Icon: PeopleIcon, Component: TemplatesPanel },
+  { id: 'templates', label: 'NPC templates', Icon: CONCEPT_ICONS.npc, Component: TemplatesPanel },
   { id: 'io', label: 'Import/Export', Icon: ImportExportIcon, Component: ImportExportPanel },
   { id: 'damage', label: 'Damage Log', Icon: DamageIcon, Component: DamageLogPanel },
 ];

@@ -1,9 +1,9 @@
 /**
  * User-scoped localStorage tests.
  *
- * Two users sharing a browser must not leak macros or tour-completion
- * state. Legacy unscoped keys migrate into the current user's scope on
- * first read (one-shot).
+ * Two users sharing a browser must not leak per-user state such as
+ * tour completion. Legacy unscoped keys migrate into the current
+ * user's scope on first read (one-shot).
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
@@ -15,7 +15,7 @@ import { STORAGE_KEYS } from '../utils/constants.js';
 
 const A = '@alice:s';
 const B = '@bob:s';
-const KEY = STORAGE_KEYS.DICE_MACROS;
+const KEY = STORAGE_KEYS.TUTORIAL_COMPLETED;
 
 describe('user-scoped storage', () => {
   beforeEach(() => { localStorage.clear(); });

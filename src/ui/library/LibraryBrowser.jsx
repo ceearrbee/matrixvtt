@@ -65,7 +65,7 @@ export function LibraryBrowser({ ui, sources }) {
 
   const insert = async (entry) => {
     const config = LIBRARY_KINDS[entry.kind];
-    if (!config) { ui._toast?.(`Unsupported entry type: ${entry.kind}`, 'error'); return; }
+    if (!config) { ui._toast?.(`"${entry.name}" can't be added to this campaign - your version of MatrixVTT doesn't handle it.`, 'error'); return; }
     const ok = await config.insert(ui, entry);
     if (ok) ui._toast?.(`${entry.name} added to the campaign`, 'success');
   };

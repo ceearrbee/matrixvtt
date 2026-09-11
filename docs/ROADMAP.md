@@ -44,7 +44,7 @@ This document structures the technical implementation phases and development con
 - **5M** weather/time environment tint (`src/utils/environmentTint.js`).
 - **1E** superseded: entity state moved to Yjs CRDTs (`src/state/YjsManager.js`), whose state vectors provide the causal ordering that linear version identifiers were meant to add.
 - **2.7-2.8** GM/player power-level split over legacy and Yjs event types (`src/widget/capabilities.js`).
-- **3B** `executeAttack` automation through the damage audit path (`src/ui/execute-attack.js`).
+- **3B** attack automation through the damage audit path (`resolveAttack` in `src/ui/attack-modal.js` into `applyDamage` in `src/map/actions/combat.js`).
 - **4E** indexed compendium search (`src/content/compendium/search-index.js`).
 - **4G** coin value and weight aggregation from ruleset currency tables (`src/engine/currency.js`).
 - **5L** map transition wikilinks via `switchMap` (`src/ui/maps/wikilink.js`).

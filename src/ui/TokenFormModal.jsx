@@ -7,9 +7,10 @@
  * out of attribute context.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
 import { useRef, useState } from 'preact/hooks';
-import { trapFocusIn } from '../utils/ui-helpers.js';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 import { DISPOSITIONS, ENTITY_TYPES } from '../utils/constants.js';
 import { TOKEN_COLORS, TOKEN_SWATCHES } from '../utils/ui-constants.js';
 import { PortraitUploader } from './token-form/PortraitUploader.jsx';
@@ -20,7 +21,7 @@ import { rowKey } from '../utils/row-key.js';
 import { rulesetTracksHP, rulesetHasFormField } from './entity-form/system-fields.js';
 
 
-function Modal({ ui, token, onClose }) {
+function TokenForm({ ui, token, onClose }) {
   const isEdit = !!token;
   const systemConfig = ui.state.settings?.systemConfig;
   const showHP = rulesetTracksHP(systemConfig);
@@ -129,25 +130,14 @@ function Modal({ ui, token, onClose }) {
     onClick: () => setColor(c),
   });
 
-  return h('div', {
-    class: 'modal-overlay',
+  return h(Modal, {
     id: 'token-form-modal',
-    onClick: (e) => { if (e.target === e.currentTarget) onClose(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') onClose(); },
+    title: isEdit ? 'Edit Token' : 'Add Token',
+    maxWidth: '500px',
+    autoFocusSelector: '#token-name',
+    onClose,
   },
-    h('div', {
-      class: 'modal-content',
-      role: 'dialog',
-      'aria-modal': 'true',
-      'aria-labelledby': 'token-form-title',
-      style: 'max-width: 500px;',
-    }, [
-      h('div', { class: 'modal-header' }, [
-        h('h2', { id: 'token-form-title' }, isEdit ? 'Edit Token' : 'Add Token'),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: onClose }, '✕'),
-      ]),
-      h('div', { class: 'modal-body' },
-        h('form', { id: 'token-form', ref: formRef, onSubmit }, [
+    h('form', { id: 'token-form', ref: formRef, onSubmit }, [
           h('div', { class: 'form-group' }, [
             h('label', { class: 'form-label', for: 'token-name' }, ['Token Name ', h('span', { 'aria-hidden': 'true' }, '*')]),
             h('input', {
@@ -229,31 +219,12 @@ function Modal({ ui, token, onClose }) {
           h(VariantListEditor, { variants, addVariant, removeVariant, updateVariant, applyVariant }),
           h('div', { class: 'form-actions' }, [
             h('button', { type: 'button', class: 'dbt', onClick: onClose }, 'Cancel'),
-            h('button', { type: 'submit', class: 'dbt btn-primary' }, isEdit ? 'Save Token' : 'Add Token'),
-          ]),
-        ])),
-    ]));
+      h('button', { type: 'submit', class: 'dbt btn-primary' }, isEdit ? 'Save Token' : 'Add Token'),
+    ]),
+  ]));
 }
 
 export function showTokenFormModal(ui, tokenId = null) {
-  const trigger = /** @type {HTMLElement|null} */ (document.activeElement);
   const token = tokenId ? ui.state.tokens.get(tokenId) : null;
-
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-
-  const close = () => {
-    render(null, host);
-    host.remove();
-    trigger?.focus?.();
-  };
-
-  render(h(Modal, { ui, token, onClose: close }), host);
-
-  // Focus + focus-trap the first interactive element.
-  const modal = /** @type {HTMLElement} */ (host.querySelector('.modal-overlay'));
-  if (modal) {
-    trapFocusIn(modal);
-    /** @type {HTMLElement|null} */ (modal.querySelector('input, select, button'))?.focus();
-  }
+  openModal((close) => h(TokenForm, { ui, token, onClose: close }));
 }

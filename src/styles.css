@@ -797,16 +797,6 @@ input {
 .notification-log__item--error .notification-log__level { color: var(--color-text-danger); }
 .notification-log__item--warn .notification-log__level { color: var(--color-text-warning); }
 
-/* Desktop: the index is the channels surface; the IconRail is hidden
-   (it returns as the mobile "journal" pane). */
-.shell__channels > .icon-rail-host { display: none; }
-
-/* Icon layout mode (per-user opt-in): on desktop, swap the text index for
-   the slim icon rail. Mobile always uses the icon rail regardless (see the
-   ≤768px block), so these desktop-scoped overrides don't affect phones. */
-.shell[data-layout="icon"] > .shell__channels > .icon-rail-host { display: flex; }
-.shell[data-layout="icon"] .left-index { display: none; }
-
 /* Icon mode: right-rail tabs show a glyph beside the label so they read
    clearly (bare icons were ambiguous). */
 .shell[data-layout="icon"] .ctab {
@@ -1354,56 +1344,6 @@ input {
   max-width: 320px;
   line-height: 1.5;
   margin: 0;
-}
-
-.map-help {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  max-width: min(360px, calc(100% - 16px));
-  padding: var(--space-lg) var(--space-xl);
-  background: var(--color-background-secondary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--elev-1);
-  z-index: var(--z-map);
-  backdrop-filter: blur(8px);
-}
-
-/* The initiative overlays pin to the same top edge; drop the help
-   panel below them while combat is running so neither is obscured. */
-.almanac-map:has(> .combat-init-strip, > .initiative-panel, > .initiative-bar) .map-help {
-  top: 132px;
-}
-
-.map-help__title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-sm);
-}
-
-.map-help__copy {
-  font-size: var(--font-size-xs);
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-
-.map-help__copy + .map-help__copy {
-  margin-top: var(--space-sm);
-}
-
-.map-help kbd {
-  font: inherit;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-secondary);
-  border-radius: 3px;
-  padding: 0 var(--space-xs);
-  background: var(--color-background-secondary);
-}
-
-.map-help__dismiss {
-  margin-top: var(--space-lg);
 }
 
 /* ==================== DRAWING TOOLBAR ==================== */
@@ -4120,10 +4060,72 @@ input {
   padding: var(--space-xl);
 }
 .wizard-actions .btn-primary { flex: 2; }
-.wizard-footnote {
-  margin-top: var(--space-lg);
+.wizard-summary {
+  margin: 0 0 var(--space-xl);
+}
+.wizard-imports {
+  font-size: var(--font-size-sm);
+}
+.wizard-imports > summary {
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+.form-hint {
+  margin: var(--space-xs) 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
+}
+.create-room-system-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+/* ── Next-steps checklist ───────────────────────────────────────── */
+/* One row: a title, a chip per step, a dismiss link. It wraps only when
+   the column is too narrow to hold them. */
+.next-steps {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+}
+.next-steps__title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.next-steps__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+.next-steps__mark { color: var(--color-text-success); }
+.next-steps__chip[data-done="true"] {
+  color: var(--color-text-tertiary);
+}
+.next-steps__chip[data-done="true"] .next-steps__label {
+  text-decoration: line-through;
+}
+/* Push the dismiss link to the far end of the row. */
+.next-steps__dismiss { margin-left: auto; }
+
+/* Initiative tracker at rest: one button, floated over the map's top
+   right corner rather than a full-width band across it. */
+.initiative-idle {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  z-index: var(--z-hud);
 }
 
 /* ── Welcome / waiting modals ───────────────────────────────────── */
@@ -5448,6 +5450,10 @@ button.item-card__tag--holder:hover {
   display: flex;
   flex-direction: column;
 }
+.icon-rail__section-cta {
+  align-self: flex-start;
+  margin: var(--space-xs) var(--space-sm);
+}
 .icon-rail__section-head {
   display: flex;
   align-items: center;
@@ -5930,10 +5936,6 @@ button.item-card__tag--holder:hover {
   .shell[data-mobile-pane="journal"] .shell__channels { display: block; }
   .shell[data-mobile-pane="panel"] .shell__sheet { display: block; }
 
-  /* Mobile keeps the one-drawer IconRail (it fits a phone); the desktop
-     always-expanded LeftIndex is hidden. */
-  .left-index { display: none; }
-  .shell__channels > .icon-rail-host { display: flex; }
   .shell[data-mobile-pane="panel"] .shell__chat,
   .shell[data-mobile-pane="journal"] .shell__chat { display: none; }
 
@@ -6705,6 +6707,23 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-primary);
   border-color: var(--color-primary);
 }
+
+/* Same term, spelled out: a text link rather than the "?" bubble, for
+   places where the reader needs to be told the document exists. */
+.help-link--inline {
+  width: auto;
+  height: auto;
+  margin-left: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--color-primary);
+  font-weight: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
 /* Keep the visible outline for keyboard users; the border recolour alone
    is too subtle to satisfy WCAG 2.4.7. */
 .help-link:focus-visible {
@@ -6754,16 +6773,13 @@ button.item-card__tag--holder:hover {
 
 
 /* ── Icon picker ────────────────────────────────────────────────── */
-.icon-picker { padding: 0; overflow: hidden; }
-.icon-picker__header {
+.icon-picker {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: 1px solid var(--color-border-secondary);
-  gap: var(--space-md);
+  flex-direction: column;
+  height: 70vh;
+  margin: calc(-1 * var(--space-lg));
+  overflow: hidden;
 }
-.icon-picker__header-actions { display: flex; gap: var(--space-sm); }
 .icon-picker__controls {
   display: flex;
   flex-direction: column;

@@ -31,7 +31,7 @@ describe('editorial typography rhythm', () => {
     // Empty activityLog → empty state branch.
     const ui = { activityLog: [], state: { widgetManager: { roomId: '!r:s', userId: '@u:s' } }, widgetManager: { userId: '@u:s' } };
     render(h(ScenesForum, { ui }), host);
-    expect(host.querySelector('.eyebrow')?.textContent).toMatch(/forum/i);
+    expect(host.querySelector('.eyebrow')?.textContent).toMatch(/scenes/i);
     expect(host.querySelector('.editorial-heading')?.textContent).toMatch(/no scenes yet/i);
     expect(host.querySelector('.editorial-body')).not.toBeNull();
   });

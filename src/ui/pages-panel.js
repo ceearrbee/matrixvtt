@@ -10,6 +10,8 @@ import { renderMarkdown } from '../utils/renderMarkdown.js';
 import { PAGE_KINDS, PAGE_VISIBILITY } from '../utils/constants.js';
 import { allocateEntityId } from '../utils/stable-id.js';
 import { bindVisualEditorToggle } from './visual-editor-toggle.js';
+import { bindModalSubmit } from '../utils/forms.js';
+import { EditorModeToggle } from './EditorModeToggle.jsx';
 
 function PageForm({ ui, id, existing, myId, onClose }) {
   const isEdit = !!existing;
@@ -39,28 +41,30 @@ function PageForm({ ui, id, existing, myId, onClose }) {
     };
   }, []);
 
-  const submit = async () => {
-    // Sync any pending visual-editor content back into the textarea
-    // before reading. The textarea is the canonical source of truth.
-    toggleRef.current?.flush();
-    const root = rootRef.current;
-    const title = root.querySelector('#page-title').value.trim();
-    if (!title) { ui._toast('Title is required', 'error'); return; }
-    const kind = root.querySelector('#page-kind').value;
-    const visibility = root.querySelector('#page-visibility').value;
-    const body = root.querySelector('#page-body').value;
-    const now = Date.now();
-    const page = {
-      id, kind, title, body, visibility,
-      author: existing?.author ?? myId,
-      thread_root_event_id: existing?.thread_root_event_id ?? null,
-      created_at: existing?.created_at ?? now,
-      updated_at: now,
-      last_editor: myId,
-    };
-    await ui.state.updatePage(id, page);
-    onClose();
-  };
+  const submit = bindModalSubmit({
+    root: () => rootRef.current,
+    fields: {
+      title: 'page-title', kind: 'page-kind',
+      visibility: 'page-visibility', body: 'page-body',
+    },
+    required: { title: 'Title' },
+    // The textarea is the canonical source of truth, so sync any
+    // pending visual-editor content back into it before reading.
+    flush: () => toggleRef.current?.flush(),
+    toast: (msg, kind) => ui._toast(msg, kind),
+    persist: async ({ title, kind, visibility, body }) => {
+      const now = Date.now();
+      await ui.state.updatePage(id, {
+        id, kind, title: title.trim(), body, visibility,
+        author: existing?.author ?? myId,
+        thread_root_event_id: existing?.thread_root_event_id ?? null,
+        created_at: existing?.created_at ?? now,
+        updated_at: now,
+        last_editor: myId,
+      });
+    },
+    onClose,
+  });
 
   const visibility = existing?.visibility ?? PAGE_VISIBILITY.PRIVATE;
   return h('div', { ref: rootRef }, [
@@ -86,12 +90,7 @@ function PageForm({ ui, id, existing, myId, onClose }) {
       ]),
     ]),
     h('div', { class: 'form-group' },
-      h('div', { class: 'editor-mode-toggle', role: 'tablist', 'aria-label': 'Editor mode' }, [
-        h('label', { for: 'page-body' }, 'Body'),
-        h('span', { style: 'flex:1' }),
-        h('button', { type: 'button', class: 'chip chip--active', 'data-editor-mode': 'markdown', 'aria-pressed': 'true' }, 'Markdown'),
-        h('button', { type: 'button', class: 'chip', 'data-editor-mode': 'visual', 'aria-pressed': 'false' }, 'Visual'),
-      ])),
+      h(EditorModeToggle, { label: 'Body', for: 'page-body' })),
     h('div', { class: 'form-group page-editor-split', 'data-editor-host': true }, [
       h('div', null,
         h('textarea', { id: 'page-body', class: 'form-input', rows: '14', style: 'resize:vertical;width:100%;', defaultValue: existing?.body ?? '' })),

@@ -24,8 +24,11 @@ import {
   fireAdvantageRoll,
   fireDisadvantageRoll,
   fireFormulaRoll,
+  currentDiceFormula,
+  currentDiceModifier,
 } from './dice-helpers.js';
 import { resolveAttack } from './attack-modal.js';
+import { saveDiceMacro } from './dice-macros.js';
 
 export function attachCombatMethods(ui) {
   // Turn / initiative controls
@@ -51,11 +54,15 @@ export function attachCombatMethods(ui) {
   ui.rollNPCAction = (id, idx) => rollNPCActionFn(ui, id, idx);
 
   // Dice - quick-roll surface on the dice toolbar
-  ui.rollDice = (d) => fireRoll(ui, d.substring(1), 0);
-  ui.rollWithAdvantage = () => fireAdvantageRoll(ui, 0);
-  ui.rollWithDisadvantage = () => fireDisadvantageRoll(ui, 0);
-  ui.saveCurrentFormula = () =>
-    ui._toast('Saving custom dice macros isn\'t implemented yet', 'info');
+  ui.rollDice = (d) => handleDiceRollFn(ui, d);
+  ui.rollWithAdvantage = () => fireAdvantageRoll(ui, currentDiceModifier());
+  ui.rollWithDisadvantage = () => fireDisadvantageRoll(ui, currentDiceModifier());
+  ui.saveCurrentFormula = () => {
+    const formula = currentDiceFormula();
+    if (!formula) { ui._toast('Pick a die first, then save it as a macro.', 'info'); return; }
+    saveDiceMacro(ui.widgetManager?.userId, formula);
+    ui._toast(`Saved ${formula} to your macros.`, 'success');
+  };
   ui.rollMacro = (f) => { if (f) fireFormulaRoll(ui, f); };
 
   ui._getRollFormula = (type) => getRollFormula(ui, type);

@@ -57,8 +57,8 @@ describe('SrdButton', () => {
 
   it('accepts a custom label', () => {
     mockAvailable.mockReturnValue(true);
-    const { container } = render(h(SrdButton, { ui, kind: 'monster', label: '📖 Add from SRD' }));
-    expect(container.querySelector('[data-compendium-open="monster"]').textContent).toBe('📖 Add from SRD');
+    const { container } = render(h(SrdButton, { ui, kind: 'monster', label: 'Add from SRD' }));
+    expect(container.querySelector('[data-compendium-open="monster"]').textContent).toBe('Add from SRD');
   });
 
   it('condenses to an icon under the icon layout mode, keeping the accessible name', async () => {
@@ -66,9 +66,11 @@ describe('SrdButton', () => {
     const { layoutModeSignal } = await import('../state/ui-signals.js');
     const { LAYOUT_MODES } = await import('../utils/constants.js');
     layoutModeSignal.value = LAYOUT_MODES.ICON;
-    const { container } = render(h(SrdButton, { ui, kind: 'item', label: '📖 SRD' }));
+    const { container } = render(h(SrdButton, { ui, kind: 'item', label: 'SRD' }));
     const btn = container.querySelector('[data-compendium-open="item"]');
-    expect(btn.textContent).toBe('📖');
+    // Icon mode drops the word and keeps the glyph, which is now an SVG.
+    expect(btn.textContent).toBe('');
+    expect(btn.querySelector('svg')).not.toBeNull();
     expect(btn.getAttribute('aria-label')).toMatch(/items/i);
     layoutModeSignal.value = LAYOUT_MODES.TEXT;
   });

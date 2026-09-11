@@ -109,7 +109,7 @@ function InviteBody({ ui, close }) {
 
   return h('div', { class: 'invite-modal' }, [
     h('p', { class: 'editorial-body' },
-      'Send this link to your players. It opens MatrixVTT, where they sign in or create a free account, and drops them into this session.'),
+      'Send this link to your players. It opens MatrixVTT, where they sign in or create a free account, and drops them into this campaign.'),
 
     links === null
       ? h('p', { class: 'room-empty' }, 'Building the invite link…')

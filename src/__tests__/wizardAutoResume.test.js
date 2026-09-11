@@ -7,12 +7,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('../ui/App.jsx', () => ({ mountApp: vi.fn() }));
-// The welcome branch auto-starts the driver.js tour, whose async DOM
-// teardown collides with happy-dom body resets between tests.
-vi.mock('../ui/onboarding-tour.js', () => ({ maybeAutoStartTour: vi.fn() }));
 
 import { renderUI } from '../ui/render-policy.js';
-import { maybeAutoStartTour } from '../ui/onboarding-tour.js';
 
 function makeUi({ map = null, force = false, tokens = 0 } = {}) {
   document.body.innerHTML = '<div id="app"></div>';
@@ -32,7 +28,6 @@ function makeUi({ map = null, force = false, tokens = 0 } = {}) {
     _syncDisplayName: vi.fn(),
     setupEventHandlers: vi.fn(),
     showFirstTimeSetup: vi.fn(),
-    showPlayerWelcome: vi.fn(),
     isTutorialCompleted: () => true,
     startTutorial: vi.fn(),
   };
@@ -50,7 +45,6 @@ describe('renderUI wizard gate', () => {
     renderUI(ui);
     await flushRAF();
     expect(ui.showFirstTimeSetup).toHaveBeenCalled();
-    expect(ui.showPlayerWelcome).not.toHaveBeenCalled();
   });
 
   it('skips the wizard when entities exist, even if _forceWizard is set', async () => {
@@ -58,7 +52,6 @@ describe('renderUI wizard gate', () => {
     renderUI(ui);
     await flushRAF();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
   it('still shows the wizard when _forceWizard is set and the room is empty', async () => {
@@ -73,6 +66,5 @@ describe('renderUI wizard gate', () => {
     renderUI(ui);
     await flushRAF();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 });

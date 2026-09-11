@@ -122,14 +122,20 @@ export function buildTemplate(mr, start, end) {
   if (!start || !end) return null;
   const cellPx = mr.state.map?.cell_px || 40;
   const dx = end.x - start.x, dy = end.y - start.y;
-  const radiusCells = Math.max(1, Math.round(Math.hypot(dx, dy) / cellPx));
-  return {
+  const dragCells = Math.max(1, Math.round(Math.hypot(dx, dy) / cellPx));
+  const common = {
     id: 'tpl-' + Date.now(),
-    shape: 'circle',
+    map_id: mr.state.map?.id ?? null,
     origin: { col: Math.round(start.x / cellPx), row: Math.round(start.y / cellPx) },
-    radius: radiusCells,
     color: mr.drawColor || TOKEN_COLORS.AREA_HIDE,
     creator_id: mr.state?.widgetManager?.userId ?? null,
   };
+  if (mr.activeTool === 'template-cone') {
+    return {
+      ...common, shape: 'cone', length: dragCells,
+      rotation: Math.round((Math.atan2(dy, dx) * 180) / Math.PI),
+    };
+  }
+  return { ...common, shape: 'circle', radius: dragCells };
 }
 

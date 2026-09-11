@@ -21,15 +21,8 @@ describe('Theme: nondescript', () => {
     expect(src).toMatch(/VALID_THEMES\s*=\s*\[[^\]]*['"]nondescript['"]/);
   });
 
-  it('is in the toggle cycle (theme.js)', () => {
-    const src = read('../ui/theme.js');
-    expect(src).toMatch(/nondescript/);
-  });
-
-  it('is in the global-menu toggle cycle and labels', () => {
-    const src = read('../ui/global-menu-items.js');
-    expect(src).toMatch(/THEME_NEXT[^=]*=[^;]*nondescript/);
-    expect(src).toMatch(/THEME_LABELS[^=]*=[^;]*nondescript/);
+  it('is chosen from the labelled select, the app\'s one theme control', () => {
+    expect(read('../ui/global-menu-items.js')).not.toMatch(/THEME_NEXT|THEME_LABELS/);
   });
 
   it('is a selectable <option> in the accessibility panel', () => {

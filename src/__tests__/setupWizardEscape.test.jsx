@@ -59,28 +59,31 @@ describe('SetupWizard escape hatch', () => {
     leaves.cleanup();
     expect(leaves.events).toHaveLength(0);
     expect(ui._forceWizard).toBe(false);
-    expect(document.querySelector('[data-vtt-setup-wizard-host]')).toBeNull();
+    expect(document.querySelector('#setup-wizard')).toBeNull();
   });
 
-  it('ESC closes safely instead of dispatching LEAVE_ROOM', () => {
+  it('ESC closes safely instead of dispatching LEAVE_ROOM', async () => {
     const ui = makeUi();
     const leaves = collectLeaves();
     renderSetupWizard(ui);
+    // The shared Modal binds its capture-phase Escape listener in an
+    // effect, so let the mount effects flush first.
+    await new Promise((r) => setTimeout(r, 20));
 
-    fireEvent.keyDown(document.querySelector('.modal-overlay'), { key: 'Escape' });
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
     leaves.cleanup();
     expect(leaves.events).toHaveLength(0);
     expect(ui._forceWizard).toBe(false);
-    expect(document.querySelector('[data-vtt-setup-wizard-host]')).toBeNull();
+    expect(document.querySelector('#setup-wizard')).toBeNull();
   });
 
-  it('keeps the explicit ← Back (leave) button standalone-only', () => {
-    renderSetupWizard(makeUi({ isAppClient: false }));
-    expect(document.querySelector('[data-wizard-back]')).toBeNull();
-    closeSetupWizard();
-
-    renderSetupWizard(makeUi({ isAppClient: true }));
-    expect(document.querySelector('[data-wizard-back]')).not.toBeNull();
+  it('offers the same single safe exit in both modes, and no leave-the-room button', () => {
+    for (const isAppClient of [false, true]) {
+      renderSetupWizard(makeUi({ isAppClient }));
+      expect(document.querySelector('[data-wizard-back]'), String(isAppClient)).toBeNull();
+      expect(document.querySelector('[data-wizard-open-room]'), String(isAppClient)).not.toBeNull();
+      closeSetupWizard();
+    }
   });
 });

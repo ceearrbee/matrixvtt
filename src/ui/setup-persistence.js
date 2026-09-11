@@ -95,7 +95,7 @@ export async function saveInitialState(ui, onProgress) {
 
   if (!map) {
     logger.error('UI', 'saveInitialState: map is null at start - aborting save');
-    ui._toast('Session could not be saved: map state is missing. Reload and try again.', 'error');
+    ui._toast('Campaign could not be saved: the map is missing. Reload and try again.', 'error');
     return;
   }
 
@@ -132,7 +132,7 @@ export async function saveInitialState(ui, onProgress) {
   } catch (error) {
     // Visible error is essential: otherwise the GM sees the VTT working
     // but no one else can discover or join (settings never stored).
-    const msg = `Session could not be saved to Matrix: ${error.message}. ` +
+    const msg = `Campaign could not be saved to Matrix: ${error.message}. ` +
       'Other clients will not be able to join. ' +
       'Make sure you have permission to send events in this room.';
     ui._toast(msg, 'error');

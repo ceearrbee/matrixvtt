@@ -55,10 +55,11 @@ Everything below syncs live to every player in the room:
 - **Dice**: the dice bar rolls with one click, and rolls post to the room chat. Each ruleset brings its own dice (d20, dice pools, Fate dice, exploding dice).
 - **Compendium**: in a D&D 5e campaign, the SRD buttons on the Spells, Items, and NPC tabs search the compendium and add entries straight into the campaign.
 - **Handouts and journals**: share images, notes, and wiki-linked pages with the table.
+- **Travel pins**: drop a pin on each side of a doorway and set one to travel to the other. Moving the party through it switches everyone to that map and puts their tokens on the arrival pin.
 
 ## Getting help in the app
 
-- The guided tour starts automatically on your first campaign and can be replayed any time from the menu in the lower left.
+- Press `Ctrl+K` (`Cmd+K` on a Mac) to search everything in the campaign and run any command by name. It works from the chat box, so it is always one keystroke away.
 - Press `?` for the keyboard shortcut reference.
 - Theme, high contrast, and reduced motion options live in the accessibility settings.
 

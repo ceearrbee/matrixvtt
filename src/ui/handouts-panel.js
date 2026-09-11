@@ -4,7 +4,7 @@
 
 import { h } from 'preact';
 import { useRef, useLayoutEffect } from 'preact/hooks';
-import { FormReader } from '../utils/ui-helpers.js';
+import { bindModalSubmit } from '../utils/forms.js';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { confirm } from './confirm-dialogs.jsx';
@@ -13,6 +13,7 @@ import { saveChildEntity } from './child-entity-crud.js';
 import { allocateEntityId } from '../utils/stable-id.js';
 import { showIconPicker } from './icon-picker/IconPickerModal.jsx';
 import { bindVisualEditorToggle } from './visual-editor-toggle.js';
+import { EditorModeToggle } from './EditorModeToggle.jsx';
 
 function HandoutForm({ ui, editId, existing, onClose }) {
   const isEdit = !!existing;
@@ -34,23 +35,27 @@ function HandoutForm({ ui, editId, existing, onClose }) {
     },
   });
 
-  const submit = async () => {
-    toggleRef.current?.flush();
-    const data = new FormReader(rootRef.current).collect({
+  const submit = bindModalSubmit({
+    root: () => rootRef.current,
+    fields: {
       title: 'handout-title',
       content: 'handout-content',
       image_url: 'handout-image',
       visible_to_players: { id: 'handout-visible', type: 'bool' },
-    });
-    if (!data.title) { ui._toast('Title is required', 'error'); return; }
-    const id = editId ?? await allocateEntityId('handout', ui.state.handouts);
-    const handout = isEdit ? { ...existing, ...data } : { ...data, created_at: Date.now() };
-    const ok = await saveChildEntity(ui, {
-      eventType: EVENT_TYPES.HANDOUT,
-      id, entity: handout, noun: 'handout', verb: isEdit ? 'update' : 'create',
-    });
-    if (ok !== false) onClose();
-  };
+    },
+    required: { title: 'Title' },
+    flush: () => toggleRef.current?.flush(),
+    toast: (msg, kind) => ui._toast(msg, kind),
+    persist: async (data) => {
+      const id = editId ?? await allocateEntityId('handout', ui.state.handouts);
+      const handout = isEdit ? { ...existing, ...data } : { ...data, created_at: Date.now() };
+      return saveChildEntity(ui, {
+        eventType: EVENT_TYPES.HANDOUT,
+        id, entity: handout, noun: 'handout', verb: isEdit ? 'update' : 'create',
+      });
+    },
+    onClose,
+  });
 
   return h('div', { ref: rootRef }, [
     h('div', { class: 'form-group' }, [
@@ -58,12 +63,7 @@ function HandoutForm({ ui, editId, existing, onClose }) {
       h('input', { id: 'handout-title', type: 'text', class: 'form-input', placeholder: "e.g. The Mayor's Letter", required: true, 'aria-required': 'true', defaultValue: existing?.title ?? '', title: 'The name of the handout' }),
     ]),
     h('div', { class: 'form-group' }, [
-      h('div', { class: 'editor-mode-toggle', role: 'tablist', 'aria-label': 'Editor mode' }, [
-        h('label', { for: 'handout-content' }, 'Content'),
-        h('span', { style: 'flex:1' }),
-        h('button', { type: 'button', class: 'chip chip--active', 'data-editor-mode': 'markdown', 'aria-pressed': 'true' }, 'Markdown'),
-        h('button', { type: 'button', class: 'chip', 'data-editor-mode': 'visual', 'aria-pressed': 'false' }, 'Visual'),
-      ]),
+      h(EditorModeToggle, { label: 'Content', for: 'handout-content' }),
       h('textarea', { id: 'handout-content', class: 'form-input', rows: '5', placeholder: 'Read-aloud text…', style: 'resize:vertical;width:100%;', title: 'The detailed markdown text of the handout', defaultValue: existing?.content ?? '' }),
     ]),
     h('div', { class: 'form-group' }, [

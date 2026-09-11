@@ -1,6 +1,7 @@
 /**
- * Persistent circle-template tool: builds a com.vtt.template entity
- * from click origin + drag radius, GM-only, eraseable via the erase tool.
+ * Persistent template tool: builds a com.vtt.template entity from click
+ * origin + drag, GM-only, eraseable via the erase tool. One control,
+ * two shapes - circle (T) and cone (K).
  */
 
 import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
@@ -29,7 +30,35 @@ beforeAll(() => {
 });
 
 describe('buildTemplate', () => {
-  const mr = { state: { map: { cell_px: 40 }, widgetManager: { userId: '@gm:x' } }, drawColor: '#abcdef' };
+  const mr = {
+    activeTool: 'template-circle',
+    state: { map: { id: 'map1', cell_px: 40 }, widgetManager: { userId: '@gm:x' } },
+    drawColor: '#abcdef',
+  };
+
+  it('stamps map_id so the templates layer, which filters on it, can render the template', () => {
+    const t = buildTemplate(mr, { x: 80, y: 80 }, { x: 200, y: 80 });
+    expect(t.map_id).toBe('map1');
+  });
+
+  it('returns a cone with length and rotation when the cone shape is active', () => {
+    const cone = buildTemplate(
+      { ...mr, activeTool: 'template-cone' },
+      { x: 80, y: 80 }, { x: 200, y: 80 },
+    );
+    expect(cone.shape).toBe('cone');
+    expect(cone.length).toBe(3);
+    expect(cone.rotation).toBe(0);
+    expect(cone.radius).toBeUndefined();
+  });
+
+  it('points the cone at the drag direction', () => {
+    const cone = buildTemplate(
+      { ...mr, activeTool: 'template-cone' },
+      { x: 80, y: 80 }, { x: 80, y: 200 },
+    );
+    expect(cone.rotation).toBe(90);
+  });
 
   it('returns a circle template with origin in cells and radius in cells', () => {
     const t = buildTemplate(mr, { x: 80, y: 80 }, { x: 200, y: 80 });
@@ -68,7 +97,7 @@ function makeRig({ activeTool, isGM = true, templates = [], walls = [], drawings
       drawings,
       walls: wallMap,
       templates: tplMap,
-      map: { cell_px: 40 },
+      map: { id: 'map1', cell_px: 40 },
       widgetManager: { userId: '@gm:x' },
       isGM: () => isGM,
       addTemplate: vi.fn().mockResolvedValue(undefined),
@@ -95,6 +124,16 @@ describe('template-circle finalize path', () => {
     rig.stage._fire('mouseup', { evt: { button: 0, clientX: 200, clientY: 80 } });
     await Promise.resolve(); await Promise.resolve();
     expect(rig.mr.state.addTemplate).toHaveBeenCalledTimes(1);
+    expect(rig.mr.state.addDrawing).not.toHaveBeenCalled();
+  });
+
+  it('routes through state.addTemplate when activeTool is template-cone', async () => {
+    rig = makeRig({ activeTool: 'template-cone' });
+    rig.stage._fire('mousedown', { evt: { button: 0, clientX: 80, clientY: 80 }, target: rig.stage });
+    rig.stage._fire('mouseup', { evt: { button: 0, clientX: 200, clientY: 80 } });
+    await Promise.resolve(); await Promise.resolve();
+    expect(rig.mr.state.addTemplate).toHaveBeenCalledTimes(1);
+    expect(rig.mr.state.addTemplate.mock.calls[0][0].shape).toBe('cone');
     expect(rig.mr.state.addDrawing).not.toHaveBeenCalled();
   });
 

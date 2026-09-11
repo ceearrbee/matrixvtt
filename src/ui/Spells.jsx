@@ -18,6 +18,8 @@ import {
 } from './spells-ruleset.js';
 import { SaveToLibraryButton } from './library/SaveToLibraryButton.jsx';
 import { LIBRARY_KIND } from '../utils/constants.js';
+import { EmptyState } from './EmptyState.jsx';
+import { NoCharacterSelected } from './NoCharacterSelected.jsx';
 
 function SpellSlotRow({ ui, lvl, slots, canEdit }) {
   const { total = 0, used = 0 } = slots;
@@ -140,9 +142,7 @@ export function Spells({ ui }) {
   spellsSignal.value; charactersSignal.value;
   selectedCharacterIdSignal.value; selectedTokenSignal.value;
   const character = ui.state.getCurrentCharacter();
-  if (!character) {
-    return h('div', { class: 'empty-state' }, 'No character selected');
-  }
+  if (!character) return h(NoCharacterSelected, { ui });
 
   const canEdit = ui.state.canEditEntity(character);
   // Player-only sheet actions: expending slots, preparing spells, taking
@@ -170,8 +170,11 @@ export function Spells({ ui }) {
     ]),
     hasSpellSystem && h(SpellSlots, { ui, spellSlots, canEdit: canPlayerEdit }),
     spells.length === 0
-      ? h('div', { class: 'empty-state' },
-          canEdit ? 'No spells in this spellbook. Use + Add Spell to create one.' : 'No spells in this spellbook.')
+      ? h(EmptyState, {
+          title: 'The spellbook is empty',
+          body: `${character.name} knows no spells yet.`,
+          cta: canEdit ? { label: 'Add a spell', onClick: () => ui.showSpellForm(null) } : null,
+        })
       : h(GroupedSpells, { ui, character, concentratingId, canEdit, canPrepare: canPlayerEdit }),
   ]);
 }

@@ -35,7 +35,7 @@ describe('DiscoveryScreen - empty-state copy', () => {
   it('New Session explains that creating a room makes you the GM', () => {
     const root = document.createElement('div');
     render(h(DiscoveryScreen, { app: makeApp() }), root);
-    expect(root.textContent).toMatch(/creating a room makes you the gm/i);
+    expect(root.textContent).toMatch(/creating a campaign makes you its gm/i);
     expect(root.textContent).toMatch(/invite link you share/i);
   });
 });

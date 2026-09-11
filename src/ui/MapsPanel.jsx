@@ -6,9 +6,11 @@
  * used by tests via gm-wiring.js.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import { FormReader, trapFocusIn } from '../utils/ui-helpers.js';
+import { FormReader } from '../utils/ui-helpers.js';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 import { confirm, confirmAsync } from './confirm-dialogs.jsx';
 import { resizeImageBlob } from '../utils/image-resize.js';
 import { mapsSignal, activeMapIdSignal } from '../state/signals.js';
@@ -18,7 +20,7 @@ import { MapFormPanel } from './MapForm.jsx';
 const DEFAULT_MAX_MAP_DIM = 2048;
 const DEFAULT_RESIZE_QUALITY = 0.9;
 
-function MapsPanelModal({ ui, initialSelectedId, onClose, trigger }) {
+function MapsPanelModal({ ui, initialSelectedId, onClose }) {
   // Subscribe to map collection + active-map changes so the list and
   // active highlight update without the prior `tick` re-render hack.
   mapsSignal.value; activeMapIdSignal.value;
@@ -30,7 +32,7 @@ function MapsPanelModal({ ui, initialSelectedId, onClose, trigger }) {
   const isNewMode = selectedId === '__new__';
   const selectedMap = isNewMode ? null : (selectedId ? ui.state.maps.get(selectedId) : null);
 
-  const close = () => { onClose(); trigger?.focus(); };
+  const close = onClose;
 
   const openMap = async (id) => {
     if (id !== activeId) {
@@ -55,16 +57,13 @@ function MapsPanelModal({ ui, initialSelectedId, onClose, trigger }) {
     });
   };
 
-  return h('div', {
-    class: 'modal-content', role: 'dialog', 'aria-modal': 'true',
-    'aria-labelledby': 'maps-panel-title', style: 'max-width:1200px;width:90vw;',
-  }, [
-    h('div', { class: 'modal-header' }, [
-      h('h2', { id: 'maps-panel-title' }, 'Map Management'),
-      h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: close }, '✕'),
-    ]),
-    h('div', { class: 'modal-body', style: 'padding:0;' },
-      h('div', { style: 'display:flex;min-height:500px;' }, [
+  return h(Modal, {
+    id: 'maps-panel-modal',
+    title: 'Map Management',
+    maxWidth: '1200px',
+    onClose: close,
+  },
+    h('div', { style: 'display:flex;min-height:500px;' }, [
         h(MapsList, {
           ui, maps, selectedId, activeId, isGM,
           onSelect: setSelectedId, onOpen: openMap, onDuplicate: duplicate, onDelete: del,
@@ -74,26 +73,15 @@ function MapsPanelModal({ ui, initialSelectedId, onClose, trigger }) {
           h(MapFormPanel, {
             ui, selectedMap, isNewMode, selectedId,
             onSaved: () => { close(); ui.updateMapPanel(); },
-            submit: submitMapForm,
-          })),
-      ])),
-  ]);
+          submit: submitMapForm,
+        })),
+    ]));
 }
 
 export function openMapsPanel(ui, selectedMapId = null) {
-  // Clean up any stale overlay (e.g. from a prior render that errored mid-way)
-  // so subsequent clicks aren't silently swallowed by the guard. This is a
-  // Preact-rendered custom overlay (not a ModalFactory modal).
-  // eslint-disable-next-line vtt/no-direct-modal-remove
-  document.getElementById('maps-panel-modal')?.remove();
-  const trigger = document.activeElement;
-  const overlay = document.createElement('div');
-  overlay.id = 'maps-panel-modal';
-  overlay.className = 'modal-overlay';
-  document.body.appendChild(overlay);
-  const onClose = () => overlay.remove();
-  render(h(MapsPanelModal, { ui, initialSelectedId: selectedMapId, onClose, trigger }), overlay);
-  trapFocusIn(overlay);
+  // openModal is single-instance per overlay id, so a stale panel left
+  // by a render that errored mid-way closes through its own disposer.
+  openModal((close) => h(MapsPanelModal, { ui, initialSelectedId: selectedMapId, onClose: close }));
 }
 
 export async function submitMapForm(ui, modal, selectedId) {

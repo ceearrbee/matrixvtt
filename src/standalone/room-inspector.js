@@ -138,7 +138,7 @@ function _wireUpgradeButton(app, resultsEl, report) {
       const newRoomId = await app.auth.client.upgradeRoom(report.roomId);
       resultsEl.insertAdjacentHTML('afterbegin', `
         <div style="padding: var(--space-md); margin-bottom: var(--space-md); background: color-mix(in srgb, var(--color-text-success) 12%, transparent); border: 1px solid var(--color-text-success); border-radius: var(--border-radius-sm); color: var(--color-text-success); font-size: var(--font-size-sm);">
-          ✅ <strong>Room upgraded.</strong> New room: <code>${escapeHtml(newRoomId)}</code>. Joining members will be migrated by their clients automatically. Paste the new room ID into "New Session" to enter it.
+          ✅ <strong>Room upgraded.</strong> New room: <code>${escapeHtml(newRoomId)}</code>. Joining members will be migrated by their clients automatically. Paste the new room ID into the join field to enter it.
         </div>
       `);
       btn.remove();
@@ -165,7 +165,7 @@ function _formatReport(r) {
   );
   const statusBanner = impactfulLive === 0
     ? `<div style="padding: var(--space-md); margin-bottom: var(--space-md); background: color-mix(in srgb, var(--color-text-success) 12%, transparent); border: 1px solid var(--color-text-success); border-radius: var(--border-radius-sm); color: var(--color-text-success); font-size: var(--font-size-sm);">
-         ✅ <strong>Room is effectively clean.</strong> No live VTT state from this client's perspective.${totalGhost ? ` (${totalGhost} tombstoned events remain on the server but do not affect sessions.)` : ''}
+         ✅ <strong>Room is effectively clean.</strong> No live VTT state from this client's perspective.${totalGhost ? ` (${totalGhost} tombstoned events remain on the server but do not affect campaigns.)` : ''}
        </div>`
     : `<div style="padding: var(--space-md); margin-bottom: var(--space-md); background: color-mix(in srgb, var(--color-text-warning) 12%, transparent); border: 1px solid var(--color-text-warning); border-radius: var(--border-radius-sm); color: var(--color-text-warning); font-size: var(--font-size-sm);">
          ⚠ <strong>Room has ${impactfulLive} live VTT event${impactfulLive === 1 ? '' : 's'}.</strong> Rejoining will load this state into your client.

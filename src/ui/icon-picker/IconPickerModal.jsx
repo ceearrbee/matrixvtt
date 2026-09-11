@@ -9,14 +9,15 @@
  * what entity it's selecting for.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import {
   builtinIconUrl,
   loadIconManifest,
   searchIcons,
 } from '../../utils/builtin-icons.js';
-import { trapFocusIn } from '../../utils/ui-helpers.js';
+import { Modal } from '../Modal.jsx';
+import { openModal } from '../modal-host.js';
 import { themeSignal } from '../../state/ui-signals.js';
 
 const PAGE_SIZE = 240;
@@ -79,36 +80,25 @@ function Picker({ initialTheme, onSelect, onClose }) {
 
   const totalCount = manifest?.icons?.length ?? 0;
 
-  return h('div', {
-    class: 'modal-overlay',
+  return h(Modal, {
     id: 'icon-picker-modal',
-    role: 'dialog',
-    'aria-modal': 'true',
-    'aria-labelledby': 'icon-picker-title',
-    onClick: (e) => { if (e.target === e.currentTarget) onClose(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') onClose(); },
+    title: 'Pick an icon',
+    maxWidth: '900px',
+    autoFocusSelector: '#icon-picker-search',
+    onClose,
   },
-    h('div', { class: 'modal-content icon-picker', style: 'max-width:900px;width:90vw;height:80vh;display:flex;flex-direction:column;' }, [
-      h('div', { class: 'icon-picker__header' }, [
-        h('h2', { id: 'icon-picker-title', class: 'modal-title' }, 'Pick an icon'),
-        h('div', { class: 'icon-picker__header-actions' }, [
-          h('button', {
-            type: 'button',
-            class: 'dbt dbt--sm',
-            role: 'switch',
-            'aria-checked': String(theme === 'light'),
-            'aria-label': `Switch to ${theme === 'dark' ? 'light' : 'dark'} icons`,
-            onClick: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
-          }, theme === 'dark' ? 'Dark icons' : 'Light icons'),
-          h('button', {
-            type: 'button',
-            class: 'dbt dbt--sm modal-close',
-            'aria-label': 'Close',
-            onClick: onClose,
-          }, '×'),
-        ]),
-      ]),
+    h('div', { class: 'icon-picker' }, [
+      // The dark/light switch sits with the search + category filters
+      // rather than in the header, which Modal owns.
       h('div', { class: 'icon-picker__controls' }, [
+        h('button', {
+          type: 'button',
+          class: 'dbt dbt--sm',
+          role: 'switch',
+          'aria-checked': String(theme === 'light'),
+          'aria-label': `Switch to ${theme === 'dark' ? 'light' : 'dark'} icons`,
+          onClick: () => setTheme(theme === 'dark' ? 'light' : 'dark'),
+        }, theme === 'dark' ? 'Dark icons' : 'Light icons'),
         h('label', { class: 'sr-only', for: 'icon-picker-search' },
           `Search ${totalCount} icons`),
         h('input', {
@@ -188,11 +178,10 @@ function Picker({ initialTheme, onSelect, onClose }) {
         h('div', { class: 'icon-picker__attribution' }, [
           'Icons from ',
           h('a', { href: 'https://game-icons.net', target: '_blank', rel: 'noopener' }, 'game-icons.net'),
-          ' - CC-BY 3.0',
-        ]),
+        ' - CC-BY 3.0',
       ]),
     ]),
-  );
+  ]));
 }
 
 /**
@@ -204,24 +193,6 @@ function Picker({ initialTheme, onSelect, onClose }) {
  */
 export function showIconPicker(opts = {}) {
   const { theme, onSelect } = opts;
-  const trigger = /** @type {HTMLElement|null} */ (document.activeElement);
-  const host = document.createElement('div');
-  document.body.appendChild(host);
-
-  const close = () => {
-    render(null, host);
-    host.remove();
-    trigger?.focus?.();
-  };
-
   const initialTheme = theme || readPreferredTheme();
-  render(h(Picker, { initialTheme, onSelect, onClose: close }), host);
-
-  const overlay = /** @type {HTMLElement} */ (host.querySelector('.modal-overlay'));
-  if (overlay) {
-    trapFocusIn(overlay);
-    /** @type {HTMLElement|null} */ (overlay.querySelector('input[type="search"]'))?.focus();
-  }
-
-  return close;
+  return openModal((close) => h(Picker, { initialTheme, onSelect, onClose: close }));
 }

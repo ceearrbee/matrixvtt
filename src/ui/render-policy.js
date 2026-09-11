@@ -2,11 +2,11 @@
  * render-policy.js - initial render decision tree.
  * Mounts the Preact app, initialises the map renderer, wires
  * one-time global listeners, and decides whether to show the
- * setup wizard, player welcome, or onboarding tour on first render.
+ * setup wizard on first render. Everything else a new user needs
+ * is the shell's own NextSteps checklist, which renders itself.
  */
 
 import { mountApp } from './App.jsx';
-import { maybeAutoStartTour } from './onboarding-tour.js';
 import { _countResidualEntities } from './setup-tombstone.js';
 import { probeRoomSnapshotState } from '../utils/room-snapshot-probe.js';
 import { decideFirstRender } from './first-render-decision.js';
@@ -70,9 +70,6 @@ export function renderUI(ui) {
       if (showWizard) {
         ui.showFirstTimeSetup();
       } else {
-        // Tour first, welcome after: both are focus-stealing overlays
-        // and firing together stacks them on first entry.
-        maybeAutoStartTour({ ui, onAfterTour: () => ui.showPlayerWelcome?.() });
         // Mark this (user, room) as visited so subsequent reloads
         // bypass the wizard decision entirely.
         stampRoomVisited(userId, roomId);

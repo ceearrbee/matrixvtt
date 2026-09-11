@@ -8,14 +8,13 @@ import {
 import {
   saveInitialState, verifyInitialSave, countInitialSaveSteps,
 } from '../setup-persistence.js';
-import { maybeAutoStartTour } from '../onboarding-tour.js';
+import { STORAGE_KEYS } from '../../utils/constants.js';
 
 /**
  * @typedef {Object} WizardChoice
  * @property {'blank'} kind
  * @property {string} [campaignName]
  * @property {string} [gameSystem]
- * @property {{ live_token_drag: boolean, enable_chat_announcements: boolean }} [performance]
  * @property {{campaign?: File, ruleset?: File, characters?: File, npcs?: File}} [imports]
  */
 
@@ -28,7 +27,7 @@ export async function runSetupFlow(ui, /** @type {WizardChoice} */ choice, onDon
     await _applyImports(ui, choice.imports ?? {});
 
     await runWithProgress([
-      { title: 'Clearing previous session', total: stale.length,
+      { title: 'Clearing previous campaign', total: stale.length,
         run: (onProgress) => tombstoneStaleEvents(ui, stale, onProgress) },
       { title: 'Saving campaign', total: countInitialSaveSteps(ui),
         run: (onProgress) => saveInitialState(ui, onProgress) },
@@ -63,8 +62,8 @@ export async function runSetupFlow(ui, /** @type {WizardChoice} */ choice, onDon
           onProgress(1, published ? 'snapshot saved' : 'failed');
           if (!published) {
             throw new Error(
-              "Couldn't save the campaign snapshot to the server: your room isn't " +
-              'persisted yet (often a homeserver rate limit). Wait a few seconds and retry.',
+              "The campaign didn't finish saving. This is usually the homeserver " +
+              'asking us to slow down. Wait a few seconds, then press Create campaign again.',
             );
           }
         } },
@@ -81,14 +80,11 @@ export async function runSetupFlow(ui, /** @type {WizardChoice} */ choice, onDon
   ui.updateMapPanel();
   bumpLogVersion();
 
-  // Tell the user the wizard finished. Without this, the progress
-  // modal disappears and they're left staring at the map with no
-  // confirmation of who they are or what just happened. initBlankCampaign
-  // populates settings.name, so the toast can read the campaign name back.
-  const campaignName = ui.state?.settings?.name || 'Your campaign';
-  ui._toast?.(`${campaignName} ready. You are the GM.`, 'success');
-
-  maybeAutoStartTour({ ui });
+  // The shell's NextSteps checklist is the confirmation the GM sees
+  // here: it names what is left to do and carries the invite link,
+  // where the old toast said "you are the GM" and then vanished. Clear
+  // any earlier dismissal so a fresh campaign gets the list back.
+  try { localStorage.removeItem(STORAGE_KEYS.HIDE_NEXT_STEPS); } catch { /* storage blocked */ }
 }
 
 async function _applyImports(ui, files) {

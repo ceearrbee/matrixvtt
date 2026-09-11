@@ -3,6 +3,7 @@
  */
 
 import { DEFAULTS } from '../utils/constants.js';
+import { DEFAULT_RULESET_SLUG } from './rulesets.js';
 
 function settingsRecord(sm, name, system) {
   const creatorUserId = sm.widgetManager.userId;
@@ -23,7 +24,7 @@ function settingsRecord(sm, name, system) {
   };
 }
 
-export function initBlankCampaign(sm, campaignName = 'New Campaign', gameSystem = 'dnd5e') {
+export function initBlankCampaign(sm, campaignName = 'New Campaign', gameSystem = DEFAULT_RULESET_SLUG) {
   sm._clearAllState({ clearYjs: true });
   const mapId = crypto.randomUUID();
   // One Y.Doc transaction so the bridge / transport / verify all see

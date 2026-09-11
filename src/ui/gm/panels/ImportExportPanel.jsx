@@ -1,5 +1,4 @@
 import { h } from 'preact';
-import { restartOnboardingTour } from '../../onboarding-tour.js';
 
 /** @param {{ ui: any, gm?: any }} props */
 export function ImportExportPanel(props) {
@@ -47,19 +46,5 @@ export function ImportExportPanel(props) {
         '💾 Export State'
       ),
     ]),
-    h(
-      'div',
-      { class: 'button-group' },
-      h(
-        'button',
-        {
-          class: 'dbt',
-          'aria-label': 'Replay the onboarding tour',
-          title: 'Replay tour',
-          onClick: () => restartOnboardingTour(ui),
-        },
-        '🎯 Replay Tour'
-      )
-    ),
   ]);
 }

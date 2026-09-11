@@ -2,7 +2,7 @@
  * LegacyChatPopups.jsx - popup host inside the legacy App.jsx.
  *
  * The chat-first shell rebuild produced a handful of reusable popup
- * bodies (ModePopup / OOCPanel / BrowsePanel) and a FloatingPopup
+ * bodies (OOCPanel / BrowsePanel / NotificationLog) and a FloatingPopup
  * primitive that handles ESC + outside-click close, focus trap, and
  * pin chrome. The pivot is to mount those primitives directly inside
  * the existing legacy shell rather than via a parallel root.
@@ -22,7 +22,6 @@
 import { h } from 'preact';
 import { popupsSignal, closePopup } from '../state/popup-signals.js';
 import { FloatingPopup } from './popups/FloatingPopup.jsx';
-import { ModePopup } from './ModePopup.jsx';
 import { OOCPanel } from './OOCPanel.jsx';
 import { BrowsePanel } from './BrowsePanel.jsx';
 import { NotificationLog } from './NotificationLog.jsx';
@@ -34,11 +33,6 @@ import { GlobalMenu } from './GlobalMenu.jsx';
  * its body for a given `ui`.
  */
 const POPUPS = {
-  mode: {
-    title: 'Mode',
-    size: 'default',
-    render: (/* _ui */) => h(ModePopup, {}),
-  },
   ooc: {
     title: 'OOC',
     size: 'default',

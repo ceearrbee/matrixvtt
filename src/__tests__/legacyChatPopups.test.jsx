@@ -1,7 +1,7 @@
 /**
  * LegacyChatPopups - popup host mounted inside the legacy App.jsx.
  *
- * Drives ModePopup / OOCPanel / BrowsePanel via popupsSignal.open
+ * Drives OOCPanel / BrowsePanel via popupsSignal.open
  * without the panel-registry indirection the deprecated chat-shell
  * scaffolding used. Each Header chip toggles its name; this host
  * mounts the matching FloatingPopup.
@@ -37,14 +37,6 @@ describe('LegacyChatPopups', () => {
     expect(document.body.querySelector('[data-floating-popup]')).toBeNull();
   });
 
-  it('opens the Mode popup when "mode" is in popupsSignal.open', () => {
-    openPopup('mode');
-    render(h(LegacyChatPopups, { ui: makeUi() }));
-    const pop = document.body.querySelector('[data-floating-popup="mode"]');
-    expect(pop).not.toBeNull();
-    // ModePopup body - radios for say/describe/ooc.
-    expect(document.body.querySelector('[data-mode-radio="say"]')).not.toBeNull();
-  });
 
   it('opens the OOC popup when "ooc" is in popupsSignal.open', () => {
     openPopup('ooc');
@@ -63,10 +55,10 @@ describe('LegacyChatPopups', () => {
   });
 
   it('opens multiple popups simultaneously', () => {
-    openPopup('mode');
+    openPopup('browse');
     openPopup('ooc');
     render(h(LegacyChatPopups, { ui: makeUi() }));
-    expect(document.body.querySelector('[data-floating-popup="mode"]')).not.toBeNull();
+    expect(document.body.querySelector('[data-floating-popup="browse"]')).not.toBeNull();
     expect(document.body.querySelector('[data-floating-popup="ooc"]')).not.toBeNull();
   });
 
@@ -77,7 +69,7 @@ describe('LegacyChatPopups', () => {
   });
 
   it('ESC on a popup closes only that popup', () => {
-    openPopup('mode');
+    openPopup('browse');
     openPopup('ooc');
     render(h(LegacyChatPopups, { ui: makeUi() }));
     fireEvent.keyDown(document, { key: 'Escape' });

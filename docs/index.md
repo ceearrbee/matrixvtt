@@ -31,6 +31,8 @@ features:
 
 ## Documentation Index
 
+- **[GM Quickstart](/guide/gm-quickstart)**: Your first campaign, from an empty room to a live table.
+- **[Live Playtest](/guide/live-playtest)**: Running a real session end to end.
 - **[File Formats](/formats/campaign)**: Schemas for campaign archives, custom rulesets, character, and NPC markdown.
 - **[Architecture](/ARCHITECTURE)**: Application structure and state flow.
 - **[Data Model](/DATA-MODEL-SPEC)**: Entity shape reference.

@@ -9,7 +9,9 @@ import { useState, useRef, useEffect } from 'preact/hooks';
 import { normalizeHomeserver } from './auth.js';
 import { loginRetryAfterMs } from './auth-errors.js';
 import { RegisterPanel } from './RegisterPanel.jsx';
+import { probeRegistrationSupport } from './registration-flow.js';
 import { FEEDBACK_MATRIX, matrixUrl } from '../utils/feedback-contacts.js';
+import { ELEMENT_REGISTER_URL } from './register-links.js';
 
 export function AuthScreen({ app, onLogin, externalError = '', invited = false }) {
   const [error, setError] = useState('');
@@ -17,6 +19,7 @@ export function AuthScreen({ app, onLogin, externalError = '', invited = false }
   const [ssoVisible, setSsoVisible] = useState(false);
   const [passwordDisabled, setPasswordDisabled] = useState(false);
   const [probeFailed, setProbeFailed] = useState(false);
+  const [registerSupport, setRegisterSupport] = useState('unknown');
   const [retrySeconds, setRetrySeconds] = useState(0);
   const [showRegister, setShowRegister] = useState(false);
   const [registerHs, setRegisterHs] = useState('https://matrix.org');
@@ -39,12 +42,14 @@ export function AuthScreen({ app, onLogin, externalError = '', invited = false }
       setSsoVisible(hasSSO);
       setPasswordDisabled(!hasPassword);
       setProbeFailed(false);
+      setRegisterSupport(await probeRegistrationSupport(app.MatrixClient, resolved));
     } catch {
       // Soft failure: never lock the password form, never hide a
       // previously discovered SSO button - only this probe blipped.
       app.resolvedHs = null;
       setPasswordDisabled(false);
       setProbeFailed(true);
+      setRegisterSupport('unknown');
     }
   };
 
@@ -137,12 +142,14 @@ export function AuthScreen({ app, onLogin, externalError = '', invited = false }
     });
   }
 
+  const registerUnsupported = registerSupport === 'unsupported';
+
   return h('div', { class: 'auth-card' }, [
     invited && h('div', { id: 'invite-banner', class: 'auth-hint auth-hint--invite', role: 'status' }, [
-      h('strong', null, 'You have been invited to a MatrixVTT session.'),
+      h('strong', null, 'You have been invited to a MatrixVTT campaign.'),
       ' Sign in below, or create a free account, and you will land in the game.',
     ]),
-    h('h2', { class: 'auth-heading' }, invited ? 'Sign in to join the session' : 'Sign in to your homeserver'),
+    h('h2', { class: 'auth-heading' }, invited ? 'Sign in to join the campaign' : 'Sign in to your homeserver'),
     h('p', { class: 'auth-intro' },
       'Standalone mode connects directly to your Matrix account from this browser.'),
     h('p', { class: 'auth-beta-notice' }, [
@@ -156,9 +163,17 @@ export function AuthScreen({ app, onLogin, externalError = '', invited = false }
       h('input', {
         id: 'hs-url', class: 'form-input', type: 'url',
         defaultValue: 'https://matrix.org', required: true,
-        autocomplete: 'url', 'aria-describedby': 'hs-help',
+        autocomplete: 'url',
+        'aria-describedby': registerUnsupported ? 'hs-help register-unsupported-hint' : 'hs-help',
         ref: hsUrlRef, onChange: updateLoginFlows
       }),
+      registerUnsupported && h('div', {
+        id: 'register-unsupported-hint', class: 'auth-hint', role: 'status',
+      }, [
+        'This server cannot create an account from here: it requires a verification step (CAPTCHA) this app cannot run. Sign up at ',
+        h('a', { href: ELEMENT_REGISTER_URL, target: '_blank', rel: 'noopener noreferrer' }, 'element.io →'),
+        ' and then sign in above, or point this field at a homeserver that allows open registration.',
+      ]),
       probeFailed && h('div', { id: 'probe-failed-hint', class: 'auth-hint', role: 'status' }, [
         'Couldn\'t check this server\'s sign-in methods. ',
         h('button', { type: 'button', class: 'auth-hint__retry', onClick: updateLoginFlows }, 'Retry'),

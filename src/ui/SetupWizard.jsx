@@ -5,17 +5,18 @@
  * user's choice and passes it in.
  */
 
-import { h, render, Fragment } from 'preact';
+import { h, Fragment } from 'preact';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
 import { useRef, useState } from 'preact/hooks';
 import { MODAL_WIDTHS } from '../utils/ui-constants.js';
-import { VTT_EVENTS } from '../utils/constants.js';
 import { confirmTyped } from './confirm-dialogs.jsx';
 import { _countResidualEntities } from './setup-tombstone.js';
 import { runSetupFlow } from './setup/save-flow.js';
-import { maybeAutoStartTour } from './onboarding-tour.js';
 import { HelpIcon } from './HelpIcon.jsx';
 import { stampRoomVisited } from '../utils/room-visited.js';
 import { docsHref } from '../utils/docs-link.js';
+import { describeRulesetContent, DEFAULT_RULESET_SLUG } from '../state/rulesets.js';
 
 const MODAL_ID = 'setup-wizard';
 
@@ -33,20 +34,31 @@ function ResidualBanner({ residualCount, onResume }) {
     h('div', { class: 'wizard-banner' }, [
       h('strong', null, 'Existing VTT data found:'),
       ` this room already has ${residualCount} entities. Click `,
-      h('em', null, 'Resume existing session'),
+      h('em', null, 'Resume this campaign'),
       ' below to keep them, or pick ',
       h('em', null, 'Blank Campaign'),
       ' to erase and start fresh.',
+      h(HelpIcon, { term: 'tombstone', label: 'How deletion works on Matrix' }),
     ]),
     h('button', {
       type: 'button', class: 'dbt wizard-resume-btn',
       onClick: onResume,
-    }, `Resume existing session: keep all ${residualCount} entities`),
+    }, `Resume this campaign: keep all ${residualCount} entities`),
   ]);
 }
 
-function BlankOptions({ presets, refs }) {
-  return h('div', { class: 'wizard-options' }, [
+// Room creation already collected the name and the system on the
+// standalone create form. Read them back instead of asking twice.
+function CampaignSummary({ presets, pending }) {
+  const systemName = presets[pending.system]?.meta?.name ?? pending.system;
+  return h('p', { class: 'wizard-summary editorial-body' }, [
+    h('strong', null, pending.name),
+    ` · ${systemName}`,
+  ]);
+}
+
+function CampaignFields({ presets, refs, system, onSystemChange }) {
+  return h(Fragment, null, [
     h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label', for: 'campaign-name' }, 'Campaign Name'),
       h('input', {
@@ -60,33 +72,36 @@ function BlankOptions({ presets, refs }) {
         'Game System',
         h(HelpIcon, { term: 'ruleset' }),
       ]),
-      h('select', { class: 'form-select', id: 'campaign-system', ref: refs.system },
-        Object.entries(presets).map(([key, preset]) =>
-          h('option', { value: key, selected: key === 'dnd5e' },
-            preset.meta?.name ?? preset.name ?? key))),
+      h('select', {
+        class: 'form-select', id: 'campaign-system', ref: refs.system,
+        value: system,
+        onChange: (e) => onSystemChange(e.target.value),
+      }, Object.entries(presets).map(([key, preset]) =>
+        h('option', { key, value: key }, preset.meta?.name ?? preset.name ?? key))),
+      h('p', { id: 'campaign-system-note', class: 'form-hint' },
+        describeRulesetContent(system, presets[system])),
     ]),
-    h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label' }, 'API & Performance'),
-      h('div', { class: 'wizard-box' }, [
-        h('label', { class: 'form-check-row' }, [
-          h('input', { type: 'checkbox', id: 'setup-perf-drag', ref: refs.perfDrag, checked: true }),
-          h('span', null, 'Sync token position while dragging'),
-        ]),
-        h('label', { class: 'form-check-row' }, [
-          h('input', { type: 'checkbox', id: 'setup-perf-announcements', ref: refs.perfAnnouncements, checked: true }),
-          h('span', null, 'Enable automatic chat announcements'),
-        ]),
-      ]),
+  ]);
+}
+
+function ImportDisclosure({ refs }) {
+  return h('details', { class: 'wizard-imports' }, [
+    h('summary', null, 'Import existing content'),
+    h('div', { class: 'wizard-box wizard-box--imports' }, [
+      ImportRow({ label: 'Full campaign archive', hint: '.json, overrides all other options', slug: 'campaign', refKey: refs.campaignFile, accept: '.json,application/json' }),
+      ImportRow({ label: 'Custom ruleset', hint: '.vttruleset.json, overrides the game system', slug: 'ruleset', refKey: refs.rulesetFile, accept: '.json,.vttruleset.json' }),
+      ImportRow({ label: 'Characters', hint: '.md exported from MatrixVTT', slug: 'characters', refKey: refs.charsFile, accept: '.md,.markdown,.txt' }),
+      ImportRow({ label: 'NPCs', hint: '.md exported from MatrixVTT', slug: 'npcs', refKey: refs.npcsFile, accept: '.md,.markdown,.txt' }),
     ]),
-    h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label' }, 'Optional: Import existing content'),
-      h('div', { class: 'wizard-box wizard-box--imports' }, [
-        ImportRow({ label: 'Full campaign archive', hint: '.json, overrides all other options', slug: 'campaign', refKey: refs.campaignFile, accept: '.json,application/json' }),
-        ImportRow({ label: 'Custom ruleset', hint: '.vttruleset.json, overrides Game System above', slug: 'ruleset', refKey: refs.rulesetFile, accept: '.json,.vttruleset.json' }),
-        ImportRow({ label: 'Characters', hint: '.md exported from MatrixVTT', slug: 'characters', refKey: refs.charsFile, accept: '.md,.markdown,.txt' }),
-        ImportRow({ label: 'NPCs', hint: '.md exported from MatrixVTT', slug: 'npcs', refKey: refs.npcsFile, accept: '.md,.markdown,.txt' }),
-      ]),
-    ]),
+  ]);
+}
+
+function BlankOptions({ presets, refs, pending, system, onSystemChange }) {
+  return h('div', { class: 'wizard-options' }, [
+    pending
+      ? h(CampaignSummary, { presets, pending })
+      : h(CampaignFields, { presets, refs, system, onSystemChange }),
+    h(ImportDisclosure, { refs }),
   ]);
 }
 
@@ -105,12 +120,13 @@ function ImportRow({ label, hint, slug, refKey, accept }) {
 
 function SetupWizardBody({ ui, close }) {
   const [busy, setBusy] = useState(false);
+  const pending = ui._pendingCampaign ?? null;
+  const [system, setSystem] = useState(pending?.system ?? DEFAULT_RULESET_SLUG);
   const residualCount = _countResidualEntities(ui);
   const presets = ui.state.constructor.getGameSystemPresets();
 
   const refs = {
-    name: useRef(null), system: useRef(null),
-    perfDrag: useRef(null), perfAnnouncements: useRef(null),
+    name: useRef(null),
     campaignFile: useRef(null), rulesetFile: useRef(null),
     charsFile: useRef(null), npcsFile: useRef(null),
   };
@@ -122,15 +138,6 @@ function SetupWizardBody({ ui, close }) {
     // forceWizard cleared here so subsequent render() won't reopen the wizard.
     ui._forceWizard = false;
     close();
-    maybeAutoStartTour({ ui, onAfterTour: () => ui.showPlayerWelcome?.() });
-  };
-
-  // Explicit leave - back to the discovery screen. Standalone-only;
-  // never wired to ESC/backdrop (leaving the room is too destructive
-  // for an accidental keypress).
-  const onBack = () => {
-    close();
-    window.dispatchEvent(new CustomEvent(VTT_EVENTS.LEAVE_ROOM));
   };
 
   const onConfirm = async () => {
@@ -141,7 +148,7 @@ function SetupWizardBody({ ui, close }) {
         const message = `This room has ${residualCount} live entit${residualCount === 1 ? 'y' : 'ies'} ` +
           `(tokens, characters, items, spells, drawings, walls, templates, pins, pages, lights, maps, …). ` +
           `Loading this campaign will permanently remove ALL of them. ` +
-          `If you'd rather keep the existing data, Cancel and choose "Resume existing session".`;
+          `If you'd rather keep the existing data, Cancel and choose "Resume this campaign".`;
         confirmTyped(
           message,
           'DELETE',
@@ -156,12 +163,8 @@ function SetupWizardBody({ ui, close }) {
     /** @type {import('./setup/save-flow.js').WizardChoice} */
     const choice = {
       kind: 'blank',
-      campaignName: refs.name.current?.value || 'New Campaign',
-      gameSystem: refs.system.current?.value,
-      performance: {
-        live_token_drag: !!refs.perfDrag.current?.checked,
-        enable_chat_announcements: !!refs.perfAnnouncements.current?.checked,
-      },
+      campaignName: pending?.name || refs.name.current?.value || 'New Campaign',
+      gameSystem: system,
       imports: {
         campaign: refs.campaignFile.current?.files?.[0],
         ruleset: refs.rulesetFile.current?.files?.[0],
@@ -177,86 +180,67 @@ function SetupWizardBody({ ui, close }) {
     }
   };
 
-  return h('div', {
-    class: 'modal-overlay',
+  return h(Modal, {
     id: MODAL_ID,
-    tabIndex: -1,
-    onClick: (e) => { if (e.target === e.currentTarget) onResume(); },
-    onKeyDown: (e) => { if (e.key === 'Escape') onResume(); },
-  },
-    h('div', {
-      class: 'modal-content', role: 'dialog', 'aria-modal': 'true',
-      'aria-labelledby': 'setup-wizard-title',
-      style: `max-width: ${MODAL_WIDTHS.LARGE};`,
-    }, [
-      h('div', { class: 'modal-header' }, [
-        h('span', { class: 'eyebrow wizard-eyebrow' }, '01 - Start'),
-        h('h2', { id: 'setup-wizard-title', class: 'editorial-heading editorial-heading--lg' }, 'MatrixVTT'),
-      ]),
-      h('div', { class: 'modal-body' }, [
-        h(ResidualBanner, { residualCount, onResume }),
-        h('p', { class: 'editorial-body wizard-intro' },
-          'Open a blank campaign: an empty map, no entities, ready to build from scratch. Everything here is reversible - you can wipe and reseed at any time.'),
-        h(BlankOptions, { presets, refs }),
-        h('div', { class: 'form-actions wizard-actions' }, [
-          ui.widgetManager?.isAppClient && h('button', {
-            type: 'button', class: 'dbt',
-            'data-wizard-back': '',
-            onClick: onBack,
-            disabled: busy,
-          }, '← Back'),
-          h('button', {
-            type: 'button', class: 'dbt',
-            'data-wizard-open-room': '',
-            title: 'Opens the room as-is; this setup screen comes back next visit until a campaign is created.',
-            onClick: onResume,
-            disabled: busy,
-          }, 'Skip setup for now'),
-          h('button', {
-            type: 'button', class: 'dbt btn-primary',
-            onClick: onConfirm,
-            disabled: busy,
-          }, 'Create Blank Campaign'),
-        ]),
-        h('p', {
-          class: 'wizard-footnote',
-        }, 'Skipping opens the room as-is; this setup screen comes back next visit until a campaign is created.'),
-      ]),
-    ]));
+    title: 'Create your campaign',
+    eyebrow: 'MatrixVTT',
+    maxWidth: MODAL_WIDTHS.LARGE,
+    // Dismissing is "open the room as-is", never "leave the room".
+    onClose: onResume,
+  }, [
+    h(ResidualBanner, { residualCount, onResume }),
+    h('p', { class: 'editorial-body wizard-intro' }, [
+      'An empty map and no entities, ready to build from scratch. Everything here is reversible - you can wipe and reseed at any time. ',
+      h('a', {
+        class: 'help-link help-link--inline',
+        href: docsHref('guide/gm-quickstart'),
+        target: '_blank', rel: 'noopener',
+      }, 'Read the GM quickstart'),
+    ]),
+    h(BlankOptions, { presets, refs, pending, system, onSystemChange: setSystem }),
+    h('div', { class: 'form-actions wizard-actions' }, [
+      h('button', {
+        type: 'button', class: 'standalone-link-btn',
+        'data-wizard-open-room': '',
+        onClick: onResume,
+        disabled: busy,
+      }, 'Skip for now - opens the room as-is, and this screen returns next visit'),
+      h('button', {
+        type: 'button', class: 'dbt btn-primary',
+        onClick: onConfirm,
+        disabled: busy,
+      }, 'Create campaign'),
+    ]),
+  ]);
 }
 
-// Module-level host reference so `closeSetupWizard()` can tear down a
-// mounted wizard from outside this module (e.g. SESSION_RESET in
-// lifecycle-init.js) without round-tripping through `getElementById`.
-let _wizardHost = null;
+// Module-level disposer so `closeSetupWizard()` can tear down a mounted
+// wizard from outside this module (e.g. SESSION_RESET in
+// lifecycle-init.js).
+let _disposeWizard = null;
 
 export function renderSetupWizard(ui) {
   // Defensive: if a previous wizard mount somehow survived, unmount it
-  // before opening a new one. Keeps `_wizardHost` single-instance.
+  // before opening a new one.
   closeSetupWizard();
 
-  const host = document.createElement('div');
-  host.setAttribute('data-vtt-setup-wizard-host', '');
-  document.body.appendChild(host);
-  _wizardHost = host;
-
-  // Stamp the room as visited the moment the wizard exits - any
-  // exit path counts: Resume existing session, Blank campaign, or
-  // explicit Cancel. Without this, reloading the page on a freshly-
-  // wizard'd room would refire the wizard every time because the
-  const close = () => {
-    try {
-      stampRoomVisited(ui.widgetManager?.userId, ui.widgetManager?.roomId);
-    } catch { /* localStorage unavailable; safe to no-op */ }
-    closeSetupWizard();
-  };
-  render(h(SetupWizardBody, { ui, close }), host);
+  _disposeWizard = openModal((dispose) => {
+    // Stamp the room as visited the moment the wizard exits - any exit
+    // path counts. Without this, reloading the page on a freshly
+    // wizard'd room would refire the wizard every time.
+    const close = () => {
+      try {
+        stampRoomVisited(ui.widgetManager?.userId, ui.widgetManager?.roomId);
+      } catch { /* localStorage unavailable; safe to no-op */ }
+      dispose();
+      _disposeWizard = null;
+    };
+    return h(SetupWizardBody, { ui, close });
+  });
 }
 
 export function closeSetupWizard() {
-  if (!_wizardHost) return;
-  const host = _wizardHost;
-  _wizardHost = null;
-  render(null, host);
-  host.remove();
+  const dispose = _disposeWizard;
+  _disposeWizard = null;
+  dispose?.();
 }

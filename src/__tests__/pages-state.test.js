@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { EVENT_TYPES, PAGE_KINDS, PAGE_VISIBILITY, TABS } from '../utils/constants.js';
+import { EVENT_TYPES, PAGE_KINDS, PAGE_VISIBILITY } from '../utils/constants.js';
 import { YjsManager } from '../state/YjsManager.js';
 import { StateManager } from '../state/StateManager.js';
 
@@ -16,9 +16,6 @@ describe('Pages constants', () => {
     expect(PAGE_VISIBILITY).toEqual({
       PRIVATE: 'private', GM: 'gm', PLAYERS: 'players',
     });
-  });
-  it('declares TABS.PAGES', () => {
-    expect(TABS.PAGES).toBe('pages');
   });
 });
 

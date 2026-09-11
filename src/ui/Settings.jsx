@@ -10,21 +10,22 @@
  * preferences applied immediately (localStorage), not room state.
  */
 
-import { h, render } from 'preact';
+import { h } from 'preact';
+import { Modal } from './Modal.jsx';
+import { openModal } from './modal-host.js';
+import { MODAL_WIDTHS } from '../utils/ui-constants.js';
 import { useRef, useState } from 'preact/hooks';
 import { VTT_EVENTS, LAYOUT_MODES } from '../utils/constants.js';
 import { CombatAutomationPanel } from './CombatAutomationPanel.jsx';
 import { AccessibilityPanel } from './AccessibilityPanel.jsx';
 import { ApiStatus } from './sync/ApiStatus.jsx';
 import { createSettingsOps } from './capabilities/settings-ops.js';
-import { restartOnboardingTour } from './onboarding-tour.js';
 import { CampaignSettings, RulesetSettings } from './settings/GMSettings.jsx';
-import { SettingsActions } from './settings/SettingsActions.jsx';
+import { SettingsActions, SettingsAdvanced } from './settings/SettingsActions.jsx';
 import { layoutModeSignal } from '../state/ui-signals.js';
 import { yjsDocDiagnostics, formatBytes } from '../state/yjs-diagnostics.js';
 import { setLayoutMode } from './ui-mode.js';
 
-const closeModal = (overlay) => overlay.remove();
 
 function LayoutModeControl({ ui }) {
   const current = layoutModeSignal.value;
@@ -64,13 +65,6 @@ function PlayerSettings({ ui, refs }) {
       ]),
       h('small', { class: 'settings-hint' }, 'Which of your actions post a line to the shared chat.'),
     ]),
-    h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label' }, 'Onboarding'),
-      h('button', {
-        type: 'button', class: 'dbt dbt--sm',
-        onClick: () => { refs.overlay.current?.remove?.(); restartOnboardingTour(ui); },
-      }, 'Restart tour'),
-    ]),
   ]);
 }
 
@@ -82,7 +76,7 @@ function AppearanceSettings({ ui }) {
   ]);
 }
 
-function AboutSection({ ui, isGM }) {
+function AboutSection({ ui, isGM, ops, onClose }) {
   const docDiag = yjsDocDiagnostics(ui.state?.yjs?.doc);
   return h('div', { class: 'settings-section' }, [
     h('h3', { class: 'settings-section__title' }, 'About'),
@@ -93,13 +87,22 @@ function AboutSection({ ui, isGM }) {
         : h('div', { class: 'settings-readonly' }, 'No GMs assigned'),
     ]),
     h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label' }, 'Session ID'),
+      h('label', { class: 'form-label' }, 'Room ID'),
       h('code', { id: 'settings-room-id', class: 'settings-room-id', title: 'Click to select' }, ui.widgetManager.roomId || ''),
-      h('small', { class: 'settings-hint' }, 'Share this ID with players so they can join the session.'),
+      h('small', { class: 'settings-hint' }, 'The Matrix room that stores this campaign. Share it with players who already run a Matrix client.'),
     ]),
     h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label' }, 'Sync Status'),
       h('div', { id: 'api-status-content', class: 'settings-readonly' }, h(ApiStatus, { ui })),
+    ]),
+    h('div', { class: 'form-group' }, [
+      h('label', { class: 'form-label' }, 'Debug bar'),
+      h('button', {
+        type: 'button', class: 'dbt dbt--sm', id: 'toggle-debug-bar',
+        onClick: () => ui.toggleDebugMode?.(),
+      }, 'Toggle debug bar'),
+      h('small', { class: 'settings-hint' },
+        'Shows live sync, queue and Yjs counters across the bottom of the shell. Ctrl+Shift+D does the same.'),
     ]),
     h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label' }, 'Collaboration doc'),
@@ -121,13 +124,16 @@ function AboutSection({ ui, isGM }) {
         h('a', { href: `${import.meta.env.BASE_URL}icons/LICENSE.txt`, target: '_blank', rel: 'noopener' }, 'Full credits.'),
       ]),
     ]),
+    h(SettingsAdvanced, { ui, ops, isGM, onClose }),
   ]);
 }
 
-function SettingsModal({ ui, ops, overlayRef, initialSection = null }) {
+function SettingsModal({ ui, ops, onClose, initialSection = null }) {
   const isGM = ui.state.isGM();
   const refs = {
-    overlay: overlayRef,
+    // GMSettings' import rows close the modal before handing the file
+    // off, so the progress modal isn't stacked behind this one.
+    close: onClose,
     name: useRef(null), system: useRef(null), grid: useRef(null), gridType: useRef(null), gms: useRef(null),
     narrativeMode: useRef(null),
     annDamage: useRef(null), annCombat: useRef(null), annMap: useRef(null),
@@ -138,7 +144,7 @@ function SettingsModal({ ui, ops, overlayRef, initialSection = null }) {
     isGM && { key: 'ruleset', label: 'Ruleset', Body: () => h(RulesetSettings, { ui, ops, refs }) },
     { key: 'player', label: 'Player', Body: () => h(PlayerSettings, { ui, refs }) },
     { key: 'appearance', label: 'Appearance', Body: () => h(AppearanceSettings, { ui }) },
-    { key: 'about', label: 'About', Body: () => h(AboutSection, { ui, isGM }) },
+    { key: 'about', label: 'About', Body: () => h(AboutSection, { ui, isGM, ops, onClose }) },
   ].filter(Boolean);
 
   const [active, setActive] = useState(
@@ -171,22 +177,20 @@ function SettingsModal({ ui, ops, overlayRef, initialSection = null }) {
           mapChanges: refs.annMap.current.checked,
         },
       });
-      closeModal(overlayRef.current);
+      onClose();
     } catch (err) {
       window.dispatchEvent(new CustomEvent(VTT_EVENTS.ERROR, { detail: { message: 'Failed to save settings', error: err } }));
     }
   };
 
-  return h('div', {
-    class: 'modal-content settings-modal', role: 'dialog', 'aria-modal': 'true',
-    'aria-labelledby': 'settings-modal-title',
-  }, [
-    h('div', { class: 'modal-header' }, [
-      h('h2', { id: 'settings-modal-title' }, 'Settings'),
-      h('button', { class: 'modal-close', 'aria-label': 'Close', onClick: () => closeModal(overlayRef.current) }, '✕'),
-    ]),
-    h('div', { class: 'modal-body' },
-      h('form', { id: 'settings-form', onSubmit }, [
+  return h(Modal, {
+    id: 'settings-modal',
+    title: 'Settings',
+    contentClass: 'settings-modal',
+    maxWidth: MODAL_WIDTHS.LARGE,
+    onClose,
+  },
+    h('form', { id: 'settings-form', onSubmit }, [
         h('div', { class: 'settings-layout' }, [
           h('div', { class: 'settings-rail', role: 'tablist', 'aria-label': 'Settings sections' },
             sections.map((s) => h('button', {
@@ -207,23 +211,10 @@ function SettingsModal({ ui, ops, overlayRef, initialSection = null }) {
               hidden: active !== s.key,
             }, h(s.Body, null)))),
         ]),
-        h(SettingsActions, { ui, ops, isGM, overlayRef, closeModal }),
-      ])),
-  ]);
+      h(SettingsActions, { onClose }),
+    ]));
 }
 
 export function openSettingsModal(ui, ops = createSettingsOps(ui), { initialSection = null } = {}) {
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  document.body.appendChild(overlay);
-  const overlayRef = { current: overlay };
-  render(h(SettingsModal, { ui, ops, overlayRef, initialSection }), overlay);
-
-  const onEscape = (e) => {
-    if (e.key !== 'Escape') return;
-    if (!overlay.isConnected) return;
-    closeModal(overlay);
-    document.removeEventListener('keydown', onEscape, { capture: true });
-  };
-  document.addEventListener('keydown', onEscape, { capture: true });
+  openModal((close) => h(SettingsModal, { ui, ops, onClose: close, initialSection }));
 }

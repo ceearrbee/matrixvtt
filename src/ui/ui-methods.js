@@ -45,7 +45,6 @@ import {
 } from './tab-navigation.js';
 import {
   restoreTheme as restoreThemeFn,
-  toggleTheme as toggleThemeFn,
 } from './theme.js';
 import {
   collectSpellSlots,
@@ -111,9 +110,6 @@ export function attachUIMethods(ui) {
   ui._stopTurnTimer = () => stopTurnTimer(ui);
 
   ui.restoreTheme = () => restoreThemeFn();
-  ui.toggleTheme = () => toggleThemeFn(ui);
-  ui.shouldShowMapHelp = () => localStorage.getItem(STORAGE_KEYS.HIDE_MAP_HELP) !== '1';
-  ui.dismissMapHelp = () => { localStorage.setItem(STORAGE_KEYS.HIDE_MAP_HELP, '1'); ui.render(); };
 
   Object.defineProperty(ui, '_debugMode', {
     configurable: true,

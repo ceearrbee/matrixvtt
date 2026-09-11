@@ -164,6 +164,12 @@ export function validatePin(content) {
   if (content.gm_only !== undefined && typeof content.gm_only !== 'boolean') {
     failValidation('Pin gm_only must be boolean');
   }
+  // A door names the pin it leads to; the arrival pin already knows
+  // its own map, so a pin never stores a map id it could outlive.
+  if (content.target_pin_id !== undefined && content.target_pin_id !== null
+      && typeof content.target_pin_id !== 'string') {
+    failValidation('Pin target_pin_id must be a string');
+  }
   return true;
 }
 

@@ -1,8 +1,13 @@
 /**
  * A player who opens an `app.html?join=...` invite link has to get
  * through sign-in or account creation before the join can run, so the
- * target is parked in sessionStorage and consumed once the shell has an
+ * target is parked in localStorage and consumed once the shell has an
  * authenticated client.
+ *
+ * localStorage rather than sessionStorage: creating a Matrix account on
+ * matrix.org means a detour to element.io in another tab, and a
+ * session-scoped park died there. The short expiry bounds the cost of
+ * the wider scope - an invite nobody used stops applying the next day.
  */
 
 import { STORAGE_KEYS } from '../utils/constants.js';
@@ -11,6 +16,8 @@ import { confirmAndEnterRoom } from './discovery/room-preview.js';
 
 const KEY = STORAGE_KEYS.PENDING_INVITE;
 
+export const PENDING_INVITE_TTL_MS = 24 * 60 * 60 * 1000;
+
 function normalize(target, via) {
   const parsed = parseRoomTarget(target);
   if (parsed.ok === false) return null;
@@ -18,31 +25,45 @@ function normalize(target, via) {
   return { target: parsed.target, via: parsed.via.length ? parsed.via : hints };
 }
 
+/**
+ * @returns {{invite: {target: string, via: string[]} | null, error: string}}
+ */
 export function readInviteFromUrl(location) {
   const params = new URLSearchParams(location?.search || '');
   const join = params.get('join');
-  return join ? normalize(join, params.getAll('via')) : null;
+  if (!join) return { invite: null, error: '' };
+  const invite = normalize(join, params.getAll('via'));
+  if (invite) return { invite, error: '' };
+  return {
+    invite: null,
+    error: `That invite link points at "${join}", which isn't a Matrix room ID (!room:server), alias (#room:server) or matrix.to link. Ask whoever sent it for a fresh link.`,
+  };
 }
 
-export function savePendingInvite(invite, storage = window.sessionStorage) {
+export function savePendingInvite(invite, storage = window.localStorage) {
   try {
-    storage.setItem(KEY, JSON.stringify(invite));
+    storage.setItem(KEY, JSON.stringify({ ...invite, ts: Date.now() }));
   } catch {
     // Private browsing can refuse storage; the player can still paste
     // the link into the join field.
   }
 }
 
-export function loadPendingInvite(storage = window.sessionStorage) {
+export function loadPendingInvite(storage = window.localStorage) {
   try {
     const stored = JSON.parse(storage.getItem(KEY) || 'null');
-    return stored ? normalize(stored.target, stored.via) : null;
+    if (!stored) return null;
+    if (typeof stored.ts === 'number' && Date.now() - stored.ts > PENDING_INVITE_TTL_MS) {
+      clearPendingInvite(storage);
+      return null;
+    }
+    return normalize(stored.target, stored.via);
   } catch {
     return null;
   }
 }
 
-export function clearPendingInvite(storage = window.sessionStorage) {
+export function clearPendingInvite(storage = window.localStorage) {
   try {
     storage.removeItem(KEY);
   } catch {

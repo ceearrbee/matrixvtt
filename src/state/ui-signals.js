@@ -218,19 +218,6 @@ export const mobilePaneSignal = signal(
 );
 
 /**
- * Last suggested mode broadcast by the GM via the `m.vtt.mode` Matrix
- * state event. `null` means no outstanding suggestion. When set AND
- * different from `tablePhaseSignal.value`, `SuggestedModeBanner` renders a
- * non-blocking "GM suggests X - Follow / Stay" banner. Dismissing
- * Follow calls `setPhase`; dismissing Stay clears this signal.
- *
- * Echo-suppressed: a GM's own broadcast is filtered by sender in the
- * syncer-apply path, so the GM does not get banner-spammed by their
- * own selection.
- */
-export const suggestedModeSignal = signal(/** @type {string | null} */ (null));
-
-/**
  * Session-only flag: has the user manually picked a sheet tab this
  * session? When false, switching UI mode retargets `activeTabSignal`
  * to the mode's default (narrative → Notes, gm-prep → NPC). The first
@@ -270,3 +257,8 @@ export const activeToolGroupSignal = signal('navigation');
 // GM/player power-level split failed during setup. Holds the intended
 // gm id list so the GM panel can retry; null = healthy.
 export const plSplitFailedSignal = signal(/** @type {string[] | null} */ (null));
+
+// Saved dice formulas for the logged-in user, mirrored from
+// localStorage so the composer's macro list repaints when one is
+// saved. See src/ui/dice-macros.js.
+export const diceMacrosSignal = signal(/** @type {string[]} */ ([]));

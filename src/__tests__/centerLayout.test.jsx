@@ -15,11 +15,11 @@ vi.mock('../ui/DiceBar.jsx', () => ({ DiceBar: () => h('div', { 'data-stub': 'di
 vi.mock('../ui/RightCompanion.jsx', () => ({ RightCompanion: () => h('div', { 'data-stub': 'companion' }) }));
 vi.mock('../ui/LeftIndex.jsx', () => ({ LeftIndex: () => h('div', { 'data-stub': 'left-index' }) }));
 vi.mock('../ui/IconRail.jsx', () => ({ IconRail: () => h('div', { 'data-stub': 'icon-rail' }) }));
-vi.mock('../ui/SuggestedModeBanner.jsx', () => ({ SuggestedModeBanner: () => null }));
 vi.mock('../ui/MapStrip.jsx', () => ({ MapStrip: () => h('div', { 'data-stub': 'map' }) }));
 vi.mock('../ui/LogContainer.jsx', () => ({ LogContainer: () => h('div', { 'data-stub': 'log' }) }));
-vi.mock('../ui/CombatInitiativeStrip.jsx', () => ({ CombatInitiativeStrip: () => h('div', { class: 'combat-init-strip' }) }));
-vi.mock('../ui/InitiativeBar.jsx', () => ({ InitiativeBar: () => h('div', { class: 'initiative-panel' }) }));
+vi.mock('../ui/InitiativeBar.jsx', () => ({
+  InitiativeBar: ({ compact }) => h('div', { class: compact ? 'combat-init-strip' : 'initiative-panel' }),
+}));
 vi.mock('../ui/MobileTabBar.jsx', () => ({ MobileTabBar: () => h('div', { 'data-stub': 'mobile-tabs' }) }));
 vi.mock('../ui/sync/DebugBar.jsx', () => ({ DebugBar: () => h('div', { 'data-stub': 'debug' }) }));
 vi.mock('../ui/FloatingDoc.jsx', () => ({ FloatingDocs: () => h('div', { 'data-stub': 'docs' }) }));

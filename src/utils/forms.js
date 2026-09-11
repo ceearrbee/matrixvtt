@@ -151,3 +151,37 @@ function readField(form, type, ids) {
 }
 
 
+
+/**
+ * The read → validate → persist → close flow every modal form repeats
+ * (duplication audit F8). Returns the submit handler.
+ *
+ * `flush` lets a visual-editor toggle sync its content back into the
+ * textarea before the read; `required` maps a field key to the label
+ * used in the "X is required" message; `persist` returning `false`
+ * keeps the modal open so the user can fix whatever failed.
+ *
+ * @param {object} opts
+ * @param {() => Element} opts.root         the form's container, read lazily
+ * @param {object} opts.fields              FormReader.collect() spec
+ * @param {Record<string, string>} [opts.required]
+ * @param {() => void} [opts.flush]
+ * @param {(values: any) => any} opts.persist
+ * @param {() => void} opts.onClose
+ * @param {(msg: string, kind: string) => void} opts.toast
+ */
+export function bindModalSubmit({
+  root, fields, required = {}, flush, persist, onClose, toast,
+}) {
+  return async () => {
+    flush?.();
+    const values = new FormReader(root()).collect(fields);
+    for (const [key, label] of Object.entries(required)) {
+      if (String(values[key] ?? '').trim()) continue;
+      toast(`${label} is required`, 'error');
+      return;
+    }
+    if (await persist(values) === false) return;
+    onClose();
+  };
+}

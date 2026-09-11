@@ -47,7 +47,7 @@ export function createOverlaysLayer(stage, mr) {
 export function paintAoEHighlight(ctx, mr) {
   const { isActive, start, current } = mr.drawing || {};
   if (!isActive || !start || !current) return;
-  if (mr.activeTool !== 'circle' && mr.activeTool !== 'cone') return;
+  if (mr.activeTool !== 'circle' && mr.activeTool !== 'template-cone') return;
 
   const cellPx = mr.state?.map?.cell_px ?? 40;
   const { x: sx, y: sy } = start;

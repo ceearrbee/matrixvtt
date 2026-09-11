@@ -20,10 +20,6 @@ vi.mock('../ui/App.jsx', () => {
 vi.mock('../ui/setup-tombstone.js', () => ({
   _countResidualEntities: () => 0,
 }));
-// The welcome branch auto-starts the driver.js tour, whose async DOM
-// teardown collides with happy-dom body resets between tests.
-vi.mock('../ui/onboarding-tour.js', () => ({ maybeAutoStartTour: vi.fn() }));
-import { maybeAutoStartTour } from '../ui/onboarding-tour.js';
 
 beforeEach(async () => {
   vi.resetModules();
@@ -48,7 +44,6 @@ function makeUi({ snapshotEvents = [], forceWizard = false, mapValue = null,
     _welcomeShown: false,
     _forceWizard: forceWizard,
     showFirstTimeSetup: vi.fn(),
-    showPlayerWelcome: vi.fn(),
     isTutorialCompleted: () => true,
     startTutorial: vi.fn(),
   };
@@ -91,7 +86,6 @@ describe('renderUI - persistent wizard suppression', () => {
     renderUI(ui);
     await tick();
     expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
-    expect(maybeAutoStartTour).toHaveBeenCalled();
   });
 
   it('stamp + probe error (unknown) keeps wizard suppressed - no self-heal on network blip', async () => {
@@ -111,7 +105,6 @@ describe('renderUI - persistent wizard suppression', () => {
       _welcomeShown: false,
       _forceWizard: false,
       showFirstTimeSetup: vi.fn(),
-      showPlayerWelcome: vi.fn(),
       isTutorialCompleted: () => true,
       startTutorial: vi.fn(),
     };
@@ -224,7 +217,6 @@ describe('renderUI - persistent wizard suppression', () => {
       _welcomeShown: false,
       _forceWizard: false,
       showFirstTimeSetup: vi.fn(),
-      showPlayerWelcome: vi.fn(),
       isTutorialCompleted: () => true,
       startTutorial: vi.fn(),
     };

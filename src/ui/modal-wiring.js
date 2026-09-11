@@ -18,7 +18,6 @@ import { openDoc as openDocFn } from './FloatingDoc.jsx';
 import { showTableForm as showTableFormFn } from './tables/TableFormModal.jsx';
 import {
   showFirstTimeSetup as showFirstTimeSetupFn,
-  showPlayerWelcome as showPlayerWelcomeFn,
 } from './first-time-setup.js';
 import {
   // Aliased for clarity at the call site: the underlying AttackModal.jsx
@@ -66,7 +65,6 @@ export function attachModalMethods(ui) {
 
   // First-time / welcome
   ui.showFirstTimeSetup = (opts) => showFirstTimeSetupFn(ui, opts);
-  ui.showPlayerWelcome = () => showPlayerWelcomeFn(ui);
 
   // Attack flow - underscore-prefixed because they're internal to the
   // combat pipeline, not user-facing UI surface.

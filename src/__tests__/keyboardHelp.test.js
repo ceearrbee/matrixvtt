@@ -44,6 +44,20 @@ describe('showKeyboardHelp', () => {
     expect(document.body.innerHTML.toLowerCase()).toMatch(/undo/);
   });
 
+  it('lists the cone template key, which was registered but documented nowhere', () => {
+    showKeyboardHelp();
+    const keys = [...document.querySelectorAll('kbd')].map((k) => k.textContent);
+    expect(keys).toContain('K');
+    expect(document.body.textContent.toLowerCase()).toMatch(/cone/);
+  });
+
+  it('teaches arrow keys as the way into token movement, not the retired M', () => {
+    showKeyboardHelp();
+    const text = document.body.textContent;
+    expect(text.toLowerCase()).toMatch(/arrow keys/);
+    expect(text).not.toMatch(/movement mode/i);
+  });
+
   it('modal includes a close button', () => {
     showKeyboardHelp();
     const close = document.querySelector('[data-modal-close], button[aria-label*="lose"]');

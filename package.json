@@ -104,7 +104,6 @@
     "@testing-library/preact": "^3.2.4",
     "@toast-ui/editor": "^3.2.2",
     "dompurify": "3.4.3",
-    "driver.js": "^1.4.0",
     "focus-trap": "^8.1.0",
     "fuse.js": "^7.3.0",
     "idb-keyval": "^6.2.2",

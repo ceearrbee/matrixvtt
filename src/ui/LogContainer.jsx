@@ -10,7 +10,8 @@
  *                   the chronological log)
  *
  * The internal live/scenes sub-tabs the previous incarnation owned
- * have been retired - channel selection lives in the rail now.
+ * have been retired - channel selection lives in the rail now, so this
+ * surface carries no tab roles of its own.
  */
 
 import { h } from 'preact';
@@ -24,6 +25,6 @@ export function LogContainer({ ui }) {
   const isScene = typeof channel === 'string' && channel.startsWith(CHANNEL_KEYS.SCENE_PREFIX);
   const Content = isScene ? ScenesForum : LogPanel;
   return h('div', { class: 'log-container', 'data-channel': channel },
-    h('div', { class: 'log-container__content', role: 'tabpanel' },
+    h('div', { class: 'log-container__content' },
       h(Content, { ui, key: isScene ? 'scenes' : 'live' })));
 }

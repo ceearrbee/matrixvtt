@@ -41,7 +41,7 @@ export function appJoinLink(target, via = [], linkOptions = {}) {
 }
 
 export function buildShareMessage({ roomName, playerLink }) {
-  const name = roomName ? `"${roomName}"` : 'a MatrixVTT session';
+  const name = roomName ? `"${roomName}"` : 'a MatrixVTT campaign';
   return `Join my MatrixVTT game ${name}: ${playerLink}\n`
     + 'Sign in with a Matrix account, or create a free one on the way in.';
 }

@@ -37,6 +37,6 @@ describe('ErrorBoundary', () => {
   it('shows Reload + Reset buttons inside the recovery card', () => {
     render(h(ErrorBoundary, null, h(ThrowingChild)));
     expect(screen.getByRole('button', { name: /^reload$/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /reset session/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /sign out and reload/i })).toBeTruthy();
   });
 });

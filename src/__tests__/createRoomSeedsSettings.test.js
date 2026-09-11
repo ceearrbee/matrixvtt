@@ -25,15 +25,22 @@ function makeApp({ createRoomReturns = '!new:m.org' } = {}) {
   input.value = 'My Campaign';
   const btn = document.createElement('button');
   btn.id = 'create-room-btn';
-  document.body.appendChild(input);
-  document.body.appendChild(btn);
+  const system = document.createElement('select');
+  system.id = 'create-room-system';
+  for (const slug of ['dnd5e', 'fate']) {
+    const opt = document.createElement('option');
+    opt.value = slug;
+    system.appendChild(opt);
+  }
+  system.value = 'fate';
+  document.body.append(input, btn, system);
   return /** @type {any} */ ({
     doc: document,
     auth: { client },
     enterRoom: vi.fn().mockResolvedValue(undefined),
     setError: vi.fn(),
     appLog: { add: vi.fn() },
-    matrixVTTClient: null,
+    matrixVTTClient: {},
     showScreen: vi.fn(),
   });
 }
@@ -54,6 +61,20 @@ describe('handleCreateRoom - seeds com.vtt.settings', () => {
     // The room's display name is preserved so the discovery card
     // and the setup wizard can show it.
     expect(content.name).toBe('My Campaign');
+    expect(content.system).toBe('fate');
+  });
+
+  it('hands the name and system to the VTT client so the wizard stops asking twice', async () => {
+    const app = makeApp();
+    await handleCreateRoom(app);
+    expect(app.matrixVTTClient.pendingCampaign).toEqual({ name: 'My Campaign', system: 'fate' });
+  });
+
+  it('falls back to the default system when the picker is absent', async () => {
+    const app = makeApp();
+    document.getElementById('create-room-system').remove();
+    await handleCreateRoom(app);
+    expect(app.matrixVTTClient.pendingCampaign.system).toBe('dnd5e');
   });
 
   it('still calls enterRoom even when the seed fails', async () => {

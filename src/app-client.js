@@ -80,6 +80,10 @@ export class MatrixVTTClient {
     this.chat.init();
 
     this.ui = createUI(this.state, this.clientManager, this.chat);
+    // Name + system the GM chose on the create-room form, so the setup
+    // wizard confirms the choice instead of collecting it a second time.
+    this.ui._pendingCampaign = this.pendingCampaign ?? null;
+    this.pendingCampaign = null;
     // forceWizard is passed by enterRoom when the user wasn't a member of
     // the room according to /joined_rooms. That signal alone is unreliable
     // (the response can be stale on network flakes and the wizard opening

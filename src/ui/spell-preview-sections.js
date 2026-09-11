@@ -44,7 +44,7 @@ function sectionSpellDamageRoll({ spell }) {
   return `<button type="button" class="dbt dbt--sm spell-preview__action"
     data-spell-action="damage" data-spell-id="${esc(String(spell?.id ?? ''))}"
     data-damage="${esc(String(spell.damage))}"
-    aria-label="Roll ${esc(String(spell.damage))} damage">🎲 Damage ${esc(String(spell.damage))}${dtype}</button>`;
+    aria-label="Roll ${esc(String(spell.damage))} damage">Damage ${esc(String(spell.damage))}${dtype}</button>`;
 }
 
 function sectionSpellSaveRoll({ spell }) {

@@ -1,10 +1,11 @@
 /**
  * Header.jsx - top-of-shell banner with three zones:
  *   __left   session title + combat subtitle + mobile channels-drawer toggle
- *   __right  live controls: presence, GM/Prep, chat-tool chips, sync, leave
+ *   __right  live controls: presence, Prep, sync, leave. The authoring
+ *            entries (GM tools, Create new) ride the Prep axis.
  *
- * Global utilities (Settings / Theme / Tour / Maps / Feedback / ...) live in
- * the consolidated lower-left menu (GlobalMenu), not here.
+ * Global utilities (Settings / Maps / Feedback / ...) live in the
+ * consolidated lower-left menu (GlobalMenu), not here.
  *
  * The table phase (narrative/combat) is not a header control - combat is
  * auto-driven by initiative and layers tools over the always-present
@@ -30,8 +31,11 @@ import {
 } from '../state/signals.js';
 import { openGMPanelModal } from './GMTab.jsx';
 import { openSettingsModal } from './Settings.jsx';
-import { LeaveIcon, MicIcon, KickIcon, BanIcon, PlusIcon, StarIcon, MenuIcon, DotIcon, RefreshIcon, PanelIcon } from './icons/index.jsx';
+import { LeaveIcon, MicIcon, KickIcon, BanIcon, PlusIcon, StarIcon, MenuIcon, DotIcon, RefreshIcon, PanelIcon, WrenchIcon } from './icons/index.jsx';
 import { openNewMenu } from './NewEntityMenu.jsx';
+import { setGmPrep } from './ui-mode.js';
+import { HelpIcon } from './HelpIcon.jsx';
+import { HELP_TERMS } from './help-terms.js';
 
 function PresenceBadge({ ui, isGM }) {
   const [open, setOpen] = useState(false);
@@ -106,7 +110,8 @@ export function Header({
   // (sync, Rooms); their title tooltip + aria-label carry the name.
   const iconMode = layoutModeSignal.value === LAYOUT_MODES.ICON;
   const isGM = !!ui?.state?.isGM?.();
-  const sheetToggleLabel = labelFor(phase, isGM, gmPrepActiveSignal.value).label;
+  const prepActive = gmPrepActiveSignal.value;
+  const sheetToggleLabel = labelFor(phase, isGM, prepActive).label;
   const { name } = ui.state.settings;
   const { active, round, current_index, order } = ui.state.initiative;
 
@@ -138,16 +143,29 @@ export function Header({
     ]),
     h('div', { class: 'vtt-header__right' }, [
       h(PresenceBadge, { ui, isGM }),
-      // GM tools stay in the primary tier (one-click for GMs); the
-      // secondary utilities collapse behind the ⋯ overflow.
       isGM && h('button', {
+        type: 'button',
+        class: `dbt${prepActive ? ' dbt--active' : ''}`,
+        id: 'gm-prep-btn',
+        title: `${HELP_TERMS.prep.short} Alt+P.`,
+        'aria-label': 'Toggle the GM prep workspace',
+        'aria-pressed': String(prepActive),
+        onClick: () => setGmPrep(ui.widgetManager?.userId, ui.widgetManager?.roomId, !prepActive),
+      }, [
+        h(WrenchIcon, {}),
+        !iconMode && h('span', { class: 'dbt__label' }, ' Prep'),
+      ]),
+      isGM && prepActive && h(HelpIcon, { term: 'prep', label: 'What the prep workspace is' }),
+      // Authoring entries are disclosed on intent: they appear with the
+      // prep workspace rather than sitting in the header all session.
+      isGM && prepActive && h('button', {
         type: 'button',
         class: 'dbt',
         id: 'gm-controls-btn',
         title: 'GM tools', 'aria-label': 'Open GM tools',
         onClick: () => openGMPanelModal(ui),
       }, 'GM'),
-      isGM && h('button', {
+      isGM && prepActive && h('button', {
         type: 'button',
         class: 'dbt',
         id: 'new-entity-btn',

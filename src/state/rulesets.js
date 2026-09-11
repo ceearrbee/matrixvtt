@@ -22,6 +22,32 @@ import wod from '../content/rulesets/wod.json' with { type: 'json' };
 import opend6 from '../content/rulesets/opend6.json' with { type: 'json' };
 import risus from '../content/rulesets/risus.json' with { type: 'json' };
 import savageWorlds from '../content/rulesets/savage-worlds.json' with { type: 'json' };
+import { hasCompendium } from '../content/compendium/index.js';
+
+// The ruleset a new campaign gets when nobody picks one. Declared here
+// so the picker, the room-creation fallback and initBlankCampaign all
+// read the same slug.
+export const DEFAULT_RULESET_SLUG = 'dnd5e';
+
+/**
+ * One line for the system picker: what content the ruleset actually
+ * ships, so a GM learns it before committing rather than after. Read
+ * from the ruleset file and the compendium registry, so a newly added
+ * ruleset gets a correct line without touching the picker.
+ */
+export function describeRulesetContent(slug, preset) {
+  const parts = [];
+  if (hasCompendium(slug)) parts.push('a browsable compendium of spells, monsters and items');
+  if (preset?.classes?.length) parts.push('classes');
+  if (preset?.skills?.length) parts.push('skills');
+  if (preset?.conditions?.length) parts.push('conditions');
+  if (parts.length === 0) {
+    return 'Dice mechanics and sheet layouts only - this system has no open content licence, so bring your own material.';
+  }
+  const last = parts.pop();
+  const list = parts.length ? `${parts.join(', ')} and ${last}` : last;
+  return `Ships ${list}. You add your own content on top.`;
+}
 
 export function getGameSystemPresets() {
   return {

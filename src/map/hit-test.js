@@ -44,6 +44,22 @@ export function templateAt({ templates, x, y, cellPx }) {
   return null;
 }
 
+/**
+ * A light is a lamp, not the pool it casts: hit-testing against
+ * `radius_px` would swallow every click in the lit area and make the
+ * erase tool unusable near one. Half a cell around the source is the
+ * marker the renderer draws.
+ */
+export function lightAt({ lights, x, y, cellPx }) {
+  if (!lights) return null;
+  const threshold = (cellPx || 40) / 2;
+  for (const l of lights.values()) {
+    if (!l) continue;
+    if (Math.hypot(x - l.x, y - l.y) <= threshold) return l;
+  }
+  return null;
+}
+
 export function pinAt({ pins, x, y, cellPx, isGM = false, threshold = 12 }) {
   if (!pins) return null;
   const t2 = threshold * threshold;

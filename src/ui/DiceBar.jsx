@@ -9,9 +9,10 @@
  */
 
 import { h } from 'preact';
+import { HelpIcon } from './HelpIcon.jsx';
 import { useRef, useState, useEffect } from 'preact/hooks';
 import {
-  logVersionSignal, speakAsSignal, replyContextSignal, secretRollSignal,
+  logVersionSignal, speakAsSignal, replyContextSignal,
   chatModeSignal, chatToneSignal, activeSceneSignal,
 } from '../state/ui-signals.js';
 import { tokensSignal, charactersSignal, initiativeSignal } from '../state/signals.js';
@@ -22,16 +23,11 @@ import { useIsMobile } from './useIsMobile.js';
 import { leaveScene } from './scene-mode.js';
 import { showSceneStartModal } from './SceneStartModal.js';
 import { openLongPostModal } from './LongPostModal.js';
-import { SceneIcon, LongPostIcon, PersonIcon, GearIcon, WhisperIcon, StarIcon, PlayIcon } from './icons/index.jsx';
+import { SceneIcon, LongPostIcon, PersonIcon, GearIcon, PlayIcon } from './icons/index.jsx';
 import { readDraft, writeDraft, autoGrow } from './chat-composer-helpers.js';
-
-const DICE = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
-
-const CHAT_MODES = [
-  { id: 'say', label: 'Say', title: 'Speak as your character' },
-  { id: 'describe', label: 'Describe', title: 'Narrate an action in the third person' },
-  { id: 'ooc', label: 'OOC', title: 'Speak as yourself, out of character' },
-];
+import {
+  DiceButtons, ModifierRow, ExtraRolls, ChatModePills,
+} from './composer/dice-controls.jsx';
 
 /**
  * Dice-result sink. `ui._latestDiceResult` is built by
@@ -81,9 +77,6 @@ export function DiceBar({ ui }) {
     return () => ro.disconnect();
   }, [isMobile]);
   const isGM = ui.state.isGM();
-  const rolls = ui.state.settings?.systemConfig?.rolls ?? {};
-  const hasAdv = !!rolls.advantage;
-  const hasDis = !!rolls.disadvantage;
 
   const roomId = ui.state.widgetManager?.roomId || null;
   const sendChat = () => {
@@ -157,17 +150,8 @@ export function DiceBar({ ui }) {
       title: diceStripOpen ? 'Hide dice toolbar' : 'Show dice toolbar',
       onClick: () => setDiceStripOpen((v) => !v),
     }, diceStripOpen ? 'Dice ▴' : 'Dice ▾'),
-    ...(diceStripOpen ? DICE : []).map(d => h('button', {
-      key: d,
-      class: `dbt${selected === d ? ' dbt--active' : ''}`,
-      'data-dice': d,
-      'aria-label': `Roll ${d}`,
-      title: `Roll ${d}`,
-      onClick: () => { setSelected(d); ui.rollDice(d); },
-    }, d)),
-    diceStripOpen && h('label', { for: 'dice-modifier', class: 'dice-bar__mod-label', title: 'Dice modifier' }, 'mod'),
-    diceStripOpen && h('input', { type: 'number', id: 'dice-modifier', class: 'dice-bar__mod-input', value: 0, 'aria-label': 'Dice modifier', title: 'Dice modifier' }),
-    diceStripOpen && h('button', { class: 'dbt', id: 'roll-dice', style: 'font-weight:500', 'aria-label': 'Roll selected die with modifier', title: 'Roll dice', onClick: () => ui.rollDice(selected) }, 'Roll'),
+    ...(diceStripOpen ? DiceButtons({ ui, selected, onSelect: setSelected }) : []),
+    ...(diceStripOpen ? ModifierRow({ ui, selected }) : []),
     diceStripOpen && h('button', {
       class: `dbt${extrasOpen ? ' dbt--active' : ''}`,
       'data-dice-more': true,
@@ -176,25 +160,7 @@ export function DiceBar({ ui }) {
       title: 'More dice tools',
       onClick: () => setExtrasOpen((v) => !v),
     }, extrasOpen ? '▴' : '▾'),
-    diceStripOpen && extrasOpen && hasAdv && h('button', { class: 'dbt', id: 'adv-roll-btn', title: 'Roll with advantage', 'aria-label': 'Roll with advantage', onClick: () => ui.rollWithAdvantage() }, 'Adv'),
-    diceStripOpen && extrasOpen && hasDis && h('button', { class: 'dbt', id: 'dis-roll-btn', title: 'Roll with disadvantage', 'aria-label': 'Roll with disadvantage', onClick: () => ui.rollWithDisadvantage() }, 'Dis'),
-    diceStripOpen && extrasOpen && h('button', {
-      class: `dbt${secretRollSignal.value ? ' dbt--active' : ''}`,
-      id: 'secret-roll-btn',
-      title: 'Roll privately (result hidden from chat)',
-      'aria-label': 'Roll privately (result hidden from chat)',
-      'aria-pressed': String(secretRollSignal.value),
-      onClick: () => ui.toggleSecretRoll(),
-    }, h(WhisperIcon, {})),
-    diceStripOpen && extrasOpen && h('button', { class: 'dbt', id: 'save-formula-btn', title: 'Save current formula as a macro', 'aria-label': 'Save dice formula as macro', onClick: () => ui.saveCurrentFormula() }, h(StarIcon, {})),
-    diceStripOpen && extrasOpen && h('select', {
-      id: 'dice-macros-select',
-      class: 'dice-bar__macros',
-      'aria-label': 'Saved dice macros',
-      title: 'Saved macros',
-      style: 'max-width:100px',
-      onChange: (e) => ui.rollMacro(e.target.value),
-    }, h('option', { value: '' }, 'Macros…')),
+    ...(diceStripOpen && extrasOpen ? ExtraRolls({ ui }) : []),
     h(DiceResult, { html: ui._latestDiceResult || '' }),
     ui.widgetManager?.isAppClient && h(ChatCluster, {
       ui, isGM, chatRef, onChatKey, onChatInput, sendChat,
@@ -210,26 +176,6 @@ export function DiceBar({ ui }) {
       onClose: () => setActionsOpen(false),
     }),
   ]);
-}
-
-function ChatModePills() {
-  const mode = chatModeSignal.value;
-  return h('div', { class: 'dice-bar__chat-mode', role: 'radiogroup', 'aria-label': 'Speaking mode' },
-    CHAT_MODES.map((m) => h('button', {
-      key: m.id,
-      type: 'button',
-      class: `dbt dbt--sm${mode === m.id ? ' dbt--active' : ''}`,
-      role: 'radio',
-      'aria-checked': String(mode === m.id),
-      'data-chat-mode': m.id,
-      title: m.title,
-      // preventDefault on mousedown keeps focus in the textarea so the
-      // pill doesn't unmount on blur before the click event fires
-      // (showChipStack is gated by composerFocused).
-      onMouseDown: (e) => { e.preventDefault(); },
-      onClick: () => { chatModeSignal.value = m.id; },
-    }, m.label)),
-  );
 }
 
 function TonePill() {
@@ -311,6 +257,7 @@ function ChatCluster({ ui, isGM, chatRef, onChatKey, onChatInput, sendChat, extr
         type: 'button',
         onClick: () => { replyContextSignal.value = null; },
         'aria-label': 'Clear reply context',
+      title: 'Clear reply context',
       }, '×'),
     ]),
     showChipStack && h(ChatModePills, {}),
@@ -335,6 +282,8 @@ function ChatCluster({ ui, isGM, chatRef, onChatKey, onChatInput, sendChat, extr
       h('span', { class: 'persona-chip__icon', 'aria-hidden': 'true' }, h(PersonIcon, {})),
       h('span', { class: 'persona-chip__label' }, personaLabel),
     ]),
+    mode !== 'ooc' && personas.length > 0
+      && h(HelpIcon, { key: 'persona-help', term: 'persona', label: 'What speaking as someone else does' }),
     mode !== 'ooc' && personas.length > 0 && h('select', {
       id: 'speak-as-select',
       class: `dice-bar__speak-as${personaPickerOpen ? '' : ' dice-bar__speak-as--collapsed'}`,
@@ -371,7 +320,7 @@ function ChatCluster({ ui, isGM, chatRef, onChatKey, onChatInput, sendChat, extr
           ? 'Describe… (Shift+Enter for newline · markdown supported)'
           : mode === 'ooc'
             ? 'Out-of-character message… (Shift+Enter for newline · markdown supported)'
-            : 'Send message… (Shift+Enter for newline · markdown supported · /w @user to whisper)',
+            : 'Send message… (Ctrl+K to search or run a command · /w @user to whisper)',
       autocomplete: 'off',
       'aria-label': 'Chat message input',
       title: 'Chat message input. Enter to send, Shift+Enter for newline.',

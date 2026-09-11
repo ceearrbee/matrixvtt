@@ -18,6 +18,7 @@ import { getHPPercentage } from '../utils/ui-helpers.js';
 import { FOG_MODES } from '../utils/ui-constants.js';
 import { initiativeSignal, tokensSignal } from '../state/signals.js';
 import { InitiativeEntry } from './InitiativeEntry.jsx';
+import { CombatInitiativeStrip } from './CombatInitiativeStrip.jsx';
 import { HelpIcon } from './HelpIcon.jsx';
 import { StartCombatIcon, EndCombatIcon } from './icons/index.jsx';
 
@@ -27,9 +28,14 @@ const DEFAULT_ACTION_ECONOMY = [
   { key: 'reaction_used', label: 'R', title: 'Reaction' },
 ];
 
-export function InitiativeBar({ ui }) {
+export function InitiativeBar({ ui, compact = false }) {
   // Auto-subscribe to initiative + token state.
   initiativeSignal.value; tokensSignal.value;
+
+  // Combat gets the slim ribbon beneath the map; every other phase gets
+  // the full tracker. One mount either way - App used to swap two
+  // components reading the same signals.
+  if (compact) return h(CombatInitiativeStrip, { ui });
 
   const { order = [], current_index, active, round } = ui.state.initiative;
   const isGM = ui.state.isGM();
@@ -44,26 +50,18 @@ export function InitiativeBar({ ui }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
+  // At rest the tracker is one button, not a titled band announcing
+  // that nothing is happening - that band cost the map ~90px to say so.
   if (!active) {
     if (!isGM) return null;
-    return h('aside', {
-      class: 'initiative-panel initiative-panel--inactive',
-      role: 'complementary',
-      'aria-label': 'Initiative tracker (no combat)',
-    }, [
-      h('div', { class: 'resize-handle resize-handle--init', 'data-resize': 'init', 'aria-hidden': 'true' }),
-      h('div', { class: 'initiative-panel__header' }, 'Combat'),
-      h('div', { style: 'padding: 8px;' }, [
-        h('div', { class: 'entity-subtitle', style: 'margin-bottom: 8px; font-style: italic;' }, 'No combat in progress'),
-        h('button', {
-          class: 'dbt btn-primary',
-          style: 'width: 100%;',
-          'aria-label': 'Start combat and roll initiative',
-          title: 'Roll initiative for all tokens',
-          onClick: () => ui.rollInitiative(),
-        }, [h(StartCombatIcon, {}), ' Start Combat']),
-      ]),
-    ]);
+    return h('div', { class: 'initiative-idle' },
+      h('button', {
+        class: 'dbt dbt--sm',
+        'aria-label': 'Start combat and roll initiative',
+        title: 'Roll initiative for all tokens',
+        onClick: () => ui.rollInitiative(),
+      }, [h(StartCombatIcon, {}), ' Start combat']),
+    );
   }
 
   const actionEconomy = ui.state.settings?.systemConfig?.action_economy ?? DEFAULT_ACTION_ECONOMY;
@@ -113,7 +111,7 @@ export function InitiativeBar({ ui }) {
         onClick: () => ui.endCombat(),
       }, h(EndCombatIcon, {})),
     ]),
-    active && order.length > 0 && h('div', { class: 'initiative-round' }, `⚔ Round ${round || 1}`),
+    active && order.length > 0 && h('div', { class: 'initiative-round' }, `Round ${round || 1}`),
     h(DndContext, {
       sensors,
       collisionDetection: closestCenter,

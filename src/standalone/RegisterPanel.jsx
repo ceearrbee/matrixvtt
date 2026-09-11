@@ -14,8 +14,7 @@ import { describeAuthError } from './auth-errors.js';
 import {
   beginFlow, nextStage, applyUiaUpdate, termsPolicies, authDictFor,
 } from './registration-flow.js';
-
-const ELEMENT_REGISTER_URL = 'https://app.element.io/#/register';
+import { ELEMENT_REGISTER_URL } from './register-links.js';
 
 function makeClientSecret() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();

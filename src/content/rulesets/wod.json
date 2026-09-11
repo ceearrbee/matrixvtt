@@ -48,35 +48,120 @@
 
   "character_sheet": {
     "sections": [
-      { "kind": "resource_track", "id": "bashing",    "label": "Bashing",    "current_field": "bashing_current",    "max_field": "bashing_max" },
-      { "kind": "resource_track", "id": "lethal",     "label": "Lethal",     "current_field": "lethal_current",     "max_field": "lethal_max" },
-      { "kind": "resource_track", "id": "aggravated", "label": "Aggravated", "current_field": "aggravated_current", "max_field": "aggravated_max" },
-      { "kind": "attributes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "conditions"
+      },
+      {
+        "kind": "notes",
+        "collapsed": true
+      }
     ]
   },
 
   "character_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "bashing",    "label": "Bashing",    "current_field": "bashing_current",    "max_field": "bashing_max" },
-      { "kind": "resource_track", "id": "lethal",     "label": "Lethal",     "current_field": "lethal_current",     "max_field": "lethal_max" },
-      { "kind": "resource_track", "id": "aggravated", "label": "Aggravated", "current_field": "aggravated_current", "max_field": "aggravated_max" },
-      { "kind": "attributes" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 
   "npc_preview": {
     "sections": [
-      { "kind": "resource_track", "id": "bashing",    "label": "Bashing",    "current_field": "bashing_current",    "max_field": "bashing_max" },
-      { "kind": "resource_track", "id": "lethal",     "label": "Lethal",     "current_field": "lethal_current",     "max_field": "lethal_max" },
-      { "kind": "resource_track", "id": "aggravated", "label": "Aggravated", "current_field": "aggravated_current", "max_field": "aggravated_max" },
-      { "kind": "attributes" },
-      { "kind": "defenses" },
-      { "kind": "conditions" },
-      { "kind": "notes" }
+      {
+        "kind": "resource_track",
+        "id": "bashing",
+        "label": "Bashing",
+        "current_field": "bashing_current",
+        "max_field": "bashing_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "lethal",
+        "label": "Lethal",
+        "current_field": "lethal_current",
+        "max_field": "lethal_max"
+      },
+      {
+        "kind": "resource_track",
+        "id": "aggravated",
+        "label": "Aggravated",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      },
+      {
+        "kind": "attributes"
+      },
+      {
+        "kind": "defenses"
+      },
+      {
+        "kind": "conditions"
+      }
     ]
   },
 

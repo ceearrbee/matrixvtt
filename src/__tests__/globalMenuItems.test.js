@@ -10,16 +10,19 @@ import { VTT_EVENTS } from '../utils/constants.js';
 const ui = { openSettings() {}, toggleTheme() {}, openMapsPanel() {} };
 
 describe('buildGlobalMenuItems', () => {
-  it('always includes Notifications, Settings, Theme, Tour, Shortcuts, Feedback, Debug', () => {
+  it('always includes Notifications, Settings, Shortcuts, Feedback', () => {
     const keys = buildGlobalMenuItems(ui, { isGM: false, canLeave: false }).map((i) => i.key);
     expect(keys).toEqual(
-      expect.arrayContaining(['notifications', 'settings', 'theme', 'tour', 'keys', 'feedback', 'debug']),
+      expect.arrayContaining(['notifications', 'settings', 'keys', 'feedback']),
     );
+    for (const gone of ['tour', 'theme', 'debug', 'chatHelpers']) {
+      expect(keys, gone).not.toContain(gone);
+    }
   });
 
-  it('carries the folded chat-tool popups: browse log, OOC panel, chat helpers', () => {
+  it('carries the folded chat-tool popups: browse log and the OOC panel', () => {
     const keys = buildGlobalMenuItems(ui, { isGM: false, canLeave: false }).map((i) => i.key);
-    expect(keys).toEqual(expect.arrayContaining(['browse', 'ooc', 'chatHelpers']));
+    expect(keys).toEqual(expect.arrayContaining(['browse', 'ooc']));
   });
 
   it('includes a Documentation link that opens the docs site under the deploy base', () => {
@@ -79,15 +82,4 @@ describe('buildGlobalMenuItems', () => {
     }
   });
 
-  it('debug toggles via ui.toggleDebugMode - _debugMode is getter-only', () => {
-    const toggleDebugMode = vi.fn();
-    const uiWithGetter = { ...ui, toggleDebugMode };
-    // Mirror the real ui controller: assigning _debugMode throws.
-    Object.defineProperty(uiWithGetter, '_debugMode', { get: () => false });
-
-    const debug = buildGlobalMenuItems(uiWithGetter, { isGM: false, canLeave: false })
-      .find((i) => i.key === 'debug');
-    expect(() => debug.action()).not.toThrow();
-    expect(toggleDebugMode).toHaveBeenCalledOnce();
-  });
 });

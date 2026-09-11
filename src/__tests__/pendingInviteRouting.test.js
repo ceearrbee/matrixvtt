@@ -15,20 +15,21 @@ vi.mock('../standalone/discovery/room-preview.js', () => ({
 function appWith(search) {
   const history = { replaceState: vi.fn() };
   const location = { search, pathname: '/matrixvtt/app.html' };
+  const container = document.createElement('div');
   const app = new StandaloneApp({
     doc: document,
     win: window,
-    container: document.createElement('div'),
+    container,
     history: /** @type {any} */ (history),
     location: /** @type {any} */ (location),
   });
   app.showScreen = vi.fn();
-  return { app, history };
+  return { app, history, container };
 }
 
 describe('bootstrap parks a ?join= invite', () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
     vi.mocked(confirmAndEnterRoom).mockClear();
   });
 
@@ -39,17 +40,19 @@ describe('bootstrap parks a ?join= invite', () => {
     expect(history.replaceState).toHaveBeenCalledWith({}, '', '/matrixvtt/app.html');
   });
 
-  it('leaves a junk target alone', async () => {
-    const { app, history } = appWith('?join=nonsense');
+  it('parks nothing for a junk target and says why on the login screen', async () => {
+    const { app, history, container } = appWith('?join=nonsense');
     await app.bootstrap();
+    await new Promise((r) => setTimeout(r, 0));
     expect(loadPendingInvite()).toBeNull();
     expect(history.replaceState).not.toHaveBeenCalled();
+    expect(container.textContent).toContain('nonsense');
   });
 });
 
 describe('consumePendingInvite', () => {
   beforeEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
     vi.mocked(confirmAndEnterRoom).mockClear();
   });
 

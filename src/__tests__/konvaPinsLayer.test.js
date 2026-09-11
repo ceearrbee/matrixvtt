@@ -39,12 +39,13 @@ function makeStage() {
   return new Konva.Stage({ container, width: 400, height: 300 });
 }
 
-function makeMr(isGM = true) {
+function makeMr(isGM = true, pins = new Map()) {
   return {
     zoom: 1,
     state: {
       isGM: () => isGM,
       map: { cell_px: 40 },
+      pins,
     },
   };
 }
@@ -104,5 +105,37 @@ describe('createPinsLayer - per-map scoping (Phase 1)', () => {
     ]);
     expect(groups.size).toBe(1);
     expect(groups.has('p1')).toBe(true);
+  });
+});
+
+describe('createPinsLayer - travel pins wear a ring', () => {
+  let stage, dispose, groups;
+  const door = { id: 'p1', map_id: 'map-a', col: 1, row: 1, label: 'Cave mouth', target_pin_id: 'p2' };
+  const arrival = { id: 'p2', map_id: 'map-b', col: 2, row: 2, label: 'Gatehouse' };
+  const pins = () => new Map([['p1', door], ['p2', arrival]]);
+
+  beforeEach(() => {
+    pinsSignal.value = new Map();
+    activeMapIdSignal.value = 'map-a';
+    stage = makeStage();
+    ({ groups, dispose } = createPinsLayer(stage, makeMr(true, pins())));
+  });
+
+  afterEach(() => {
+    dispose?.();
+    stage.destroy();
+    stage.container()?.remove();
+    pinsSignal.value = new Map();
+    activeMapIdSignal.value = null;
+  });
+
+  it('rings a pin that leads to another map', () => {
+    pinsSignal.value = pins();
+    expect(groups.get('p1').findOne('.travel-ring')).toBeTruthy();
+  });
+
+  it('leaves a plain annotation unringed', () => {
+    pinsSignal.value = new Map([['p3', { id: 'p3', map_id: 'map-a', col: 4, row: 4, label: 'Campfire' }]]);
+    expect(groups.get('p3').findOne('.travel-ring')).toBeFalsy();
   });
 });

@@ -129,6 +129,6 @@ export function CombatTab({ ui }) {
       class: 'btn-primary',
       style: 'width:100%;margin-top:8px',
       onClick: () => ui.nextTurn(),
-    }, '▶ End Turn'),
+    }, 'End Turn'),
   ]);
 }

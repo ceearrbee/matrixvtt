@@ -15,6 +15,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { h } from 'preact';
 import { render } from '@testing-library/preact';
 import { useKeyboardShortcuts } from '../ui/useKeyboardShortcuts.js';
+import { gmPrepActiveSignal } from '../state/ui-signals.js';
 
 // Minimal Preact host that runs the hook with a given `ui` controller.
 function HookHost({ ui }) {
@@ -38,6 +39,7 @@ function makeUi({ isGM = true } = {}) {
     undoDrawing: () => { if (isGM) return undoSpy(); },
     redoDrawing: () => { if (isGM) return redoSpy(); },
     toggleDebugMode: vi.fn(),
+    widgetManager: { userId: '@me:m', roomId: '!r:m' },
   };
 }
 
@@ -71,6 +73,36 @@ describe('global keyboard shortcuts', () => {
   it('letter t (template) requires GM', () => {
     dispatch({ key: 't', code: 'KeyT' });
     expect(ui.mapRenderer.setTool).toHaveBeenCalledWith('template-circle');
+  });
+
+  it('letter k selects the cone template, the shape the tool letter had no home for', () => {
+    dispatch({ key: 'k', code: 'KeyK' });
+    expect(ui.mapRenderer.setTool).toHaveBeenCalledWith('template-cone');
+  });
+
+  it('letter k is gated by GM role like the other template tools', () => {
+    unmount();
+    ui = makeUi({ isGM: false });
+    ({ unmount } = render(h(HookHost, { ui })));
+    dispatch({ key: 'k', code: 'KeyK' });
+    expect(ui.mapRenderer.setTool).not.toHaveBeenCalled();
+  });
+
+  it('Alt+P toggles the GM prep workspace', () => {
+    gmPrepActiveSignal.value = false;
+    dispatch({ key: 'p', code: 'KeyP', altKey: true });
+    expect(gmPrepActiveSignal.value).toBe(true);
+    dispatch({ key: 'p', code: 'KeyP', altKey: true });
+    expect(gmPrepActiveSignal.value).toBe(false);
+  });
+
+  it('Alt+P does nothing for a player', () => {
+    unmount();
+    ui = makeUi({ isGM: false });
+    ({ unmount } = render(h(HookHost, { ui })));
+    gmPrepActiveSignal.value = false;
+    dispatch({ key: 'p', code: 'KeyP', altKey: true });
+    expect(gmPrepActiveSignal.value).toBe(false);
   });
 
   it('Cmd+Z runs undo even while a text input is focused', () => {

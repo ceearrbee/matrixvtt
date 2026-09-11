@@ -48,6 +48,6 @@ describe('DebugBar component safety', () => {
       return element.tagName.toLowerCase() === 'span' && content.includes('Map:');
     })).toBeTruthy();
     expect(screen.getByText('<svg/onload=1>')).toBeTruthy();
-    expect(document.querySelector('svg')).toBeNull();
+    expect(document.querySelector('svg[onload]')).toBeNull();
   });
 });

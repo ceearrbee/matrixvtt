@@ -29,6 +29,8 @@ vi.mock('../ui/dice-helpers.js', () => ({
   fireAdvantageRoll: vi.fn(),
   fireDisadvantageRoll: vi.fn(),
   fireFormulaRoll: vi.fn(),
+  currentDiceFormula: vi.fn(() => ''),
+  currentDiceModifier: vi.fn(() => 0),
 }));
 vi.mock('../ui/attack-modal.js', () => ({ resolveAttack: vi.fn() }));
 
@@ -36,6 +38,7 @@ import { attachCombatMethods } from '../ui/combat-wiring.js';
 import * as combat from '../ui/combat-manager.js';
 import * as dice from '../ui/dice-helpers.js';
 import * as attack from '../ui/attack-modal.js';
+import { readDiceMacros } from '../ui/dice-macros.js';
 
 function makeUI() { return { _toast: vi.fn() }; }
 
@@ -107,15 +110,19 @@ describe('attachCombatMethods(ui)', () => {
   });
 
   it('rollDice, rollWithAdvantage, rollWithDisadvantage use internal helpers', () => {
+    vi.mocked(dice.currentDiceModifier).mockReturnValue(2);
     const ui = makeUI(); attachCombatMethods(ui);
     ui.rollDice('d20');
     ui.rollWithAdvantage();
     ui.rollWithDisadvantage();
     ui.rollInitiativeDie(4);
-    expect(dice.fireRoll).toHaveBeenCalledWith(ui, '20', 0);
-    expect(dice.fireAdvantageRoll).toHaveBeenCalledWith(ui, 0);
-    expect(dice.fireDisadvantageRoll).toHaveBeenCalledWith(ui, 0);
+    // The quick-roll faces route through handleDiceRoll, the one path
+    // that reads the composer's mod field.
+    expect(dice.handleDiceRoll).toHaveBeenCalledWith(ui, 'd20');
+    expect(dice.fireAdvantageRoll).toHaveBeenCalledWith(ui, 2);
+    expect(dice.fireDisadvantageRoll).toHaveBeenCalledWith(ui, 2);
     expect(dice.fireRoll).toHaveBeenCalledWith(ui, 20, 4, 'Initiative');
+    vi.mocked(dice.currentDiceModifier).mockReturnValue(0);
   });
 
   it('rollMacro forwards only when formula present', () => {
@@ -126,9 +133,19 @@ describe('attachCombatMethods(ui)', () => {
     expect(dice.fireFormulaRoll).toHaveBeenCalledWith(ui, '2d6');
   });
 
-  it('saveCurrentFormula shows an info toast', () => {
+  it('saveCurrentFormula asks for a die when none is picked', () => {
     const ui = makeUI(); attachCombatMethods(ui);
     ui.saveCurrentFormula();
-    expect(ui._toast).toHaveBeenCalledWith(expect.any(String), 'info');
+    expect(ui._toast).toHaveBeenCalledWith(expect.stringMatching(/pick a die/i), 'info');
+  });
+
+  it('saveCurrentFormula stores the composer\'s formula when a die is picked', () => {
+    localStorage.clear();
+    vi.mocked(dice.currentDiceFormula).mockReturnValue('1d20+2');
+    const ui = makeUI(); ui.widgetManager = { userId: '@bo:hs' };
+    attachCombatMethods(ui);
+    ui.saveCurrentFormula();
+    expect(readDiceMacros('@bo:hs')).toEqual(['1d20+2']);
+    vi.mocked(dice.currentDiceFormula).mockReturnValue('');
   });
 });

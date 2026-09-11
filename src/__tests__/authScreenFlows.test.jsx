@@ -155,7 +155,7 @@ describe('invite banner', () => {
     const el = mount(makeApp(), { invited: true });
     await flush();
     expect(el.querySelector('#invite-banner')).not.toBeNull();
-    expect(el.textContent).toMatch(/invited to a MatrixVTT session/i);
+    expect(el.textContent).toMatch(/invited to a MatrixVTT campaign/i);
     expect(el.querySelector('#show-register-btn')).not.toBeNull();
   });
 

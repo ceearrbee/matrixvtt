@@ -329,7 +329,55 @@ export const PlayIcon = () => h(Svg, {}, [
   h('path', { d: 'M5 3.5 12 8l-7 4.5z' }),
 ]);
 
+export const CheckIcon = () => h(Svg, {}, [
+  h('path', { d: 'M3.5 8.5l3 3 6-7' }),
+]);
+
 export const CopyIcon = () => h(Svg, {}, [
   h('rect', { x: 5.5, y: 5.5, width: 8, height: 8 }),
   h('path', { d: 'M10.5 5.5v-3h-8v8h3' }),
 ]);
+
+// A horned silhouette: an NPC or monster, distinct from the plain
+// PersonIcon that means a player character.
+export const MonsterIcon = () => h(Svg, {}, [
+  h('path', { d: 'M 3 6 Q 3 3 5 3.5 L 5.5 5' }),
+  h('path', { d: 'M 13 6 Q 13 3 11 3.5 L 10.5 5' }),
+  h('path', { d: 'M 4.5 7 Q 4.5 4.5 8 4.5 Q 11.5 4.5 11.5 7 L 11.5 9.5 Q 11.5 13 8 13 Q 4.5 13 4.5 9.5 Z' }),
+  h('circle', { cx: 6.5, cy: 8, r: 0.7, fill: 'currentColor', stroke: 'none' }),
+  h('circle', { cx: 9.5, cy: 8, r: 0.7, fill: 'currentColor', stroke: 'none' }),
+]);
+
+// A sparked point: casting, distinct from the BookIcon that means
+// written prose (journal, pages).
+export const SpellIcon = () => h(Svg, {}, [
+  h('path', { d: 'M 8 2 L 9.2 6 L 13 7 L 9.2 8 L 8 12 L 6.8 8 L 3 7 L 6.8 6 Z' }),
+  h('path', { d: 'M 12 11 L 12.6 12.4 L 14 13 L 12.6 13.6 L 12 15 L 11.4 13.6 L 10 13 L 11.4 12.4 Z' }),
+]);
+
+// A rising bar step: a trained skill, distinct from the WrenchIcon
+// that means the GM prep workspace.
+export const SkillIcon = () => h(Svg, {}, [
+  h('line', { x1: 3.5, y1: 12.5, x2: 3.5, y2: 9.5 }),
+  h('line', { x1: 8, y1: 12.5, x2: 8, y2: 6.5 }),
+  h('line', { x1: 12.5, y1: 12.5, x2: 12.5, y2: 3.5 }),
+]);
+
+/**
+ * One icon per concept.
+ *
+ * These seven glyphs used to collide: the create menu and the
+ * companion tabs disagreed about whether the single-person or the
+ * group glyph meant "NPC", and the wrench meant both the prep
+ * workspace and Skills. Picking from one map makes a collision a
+ * duplicate value here rather than a drift between two files.
+ */
+export const CONCEPT_ICONS = Object.freeze({
+  character: PersonIcon,
+  npc: MonsterIcon,
+  party: PeopleIcon,
+  journal: BookIcon,
+  spell: SpellIcon,
+  skill: SkillIcon,
+  prep: WrenchIcon,
+});

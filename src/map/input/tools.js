@@ -5,7 +5,7 @@
  * builders) lives in `./strokes.js` and is re-exported from here so
  * existing import paths keep working without touching every caller.
  */
-import { tokenAt, wallAt, templateAt, pinAt, strokeHitTest } from '../hit-test.js';
+import { tokenAt, wallAt, templateAt, pinAt, lightAt, strokeHitTest } from '../hit-test.js';
 import { getTokenRadius } from '../token-geometry.js';
 import { pendingPlacementSignal } from '../../state/signals.js';
 import { spawnItemToken } from '../../ui/tables/loot-actions.js';
@@ -254,6 +254,7 @@ export function setupTools(mr) {
 function _startToolAction(mr, x, y) {
   if (mr.activeTool === 'erase') return _eraseAt(mr, x, y);
   if (mr.activeTool === 'light') return placeLightAt(mr, x, y);
+  if (mr.activeTool === 'pin') return placePinAt(mr, x, y);
   if (mr.activeTool === 'measure') {
     mr._measureStart = { x, y }; mr._measureEnd = { x, y };
     strokeBegin({ x, y });
@@ -261,6 +262,13 @@ function _startToolAction(mr, x, y) {
   }
   if (mr.activeTool === 'wall' && _toggleDoorAt(mr, x, y)) return;
   strokeBegin({ x, y }, { track: mr.activeTool === 'pencil' });
+}
+
+export function placePinAt(mr, x, y) {
+  if (!mr.state?.isGM?.()) return;
+  const px = mr.state.map?.cell_px || 40;
+  const { col, row } = clampToMap(mr.state.map, x / px, y / px);
+  mr.showPinForm?.(col, row);
 }
 
 export async function placeLightAt(mr, x, y) {
@@ -286,7 +294,7 @@ async function _finalizeToolAction(mr) {
       const wall = buildWall(mr, start, current);
       if (wall) await mr.state.addWall(wall).catch(showErrorNotification);
     }
-  } else if (mr.activeTool === 'template-circle') {
+  } else if (mr.activeTool === 'template-circle' || mr.activeTool === 'template-cone') {
     if (mr.state?.isGM?.()) {
       const tpl = buildTemplate(mr, start, current);
       if (tpl) await mr.state.addTemplate(tpl).catch(showErrorNotification);
@@ -302,14 +310,13 @@ async function _finalizeToolAction(mr) {
 
 async function _eraseAt(mr, x, y) {
   if (!mr.state?.isGM?.()) return;
+  const cellPx = mr.state.map?.cell_px || 40;
   const hit = mr.state.drawings.find((s) => strokeHitTest(s, x, y));
   if (hit) return mr.state.removeDrawing(hit.id);
-  if (!mr.state?.isGM?.()) return;
   const wallHit = wallAt({ walls: mr.state.walls, x, y });
   if (wallHit) return mr.state.removeWall(wallHit.id);
-  const tplHit = templateAt({
-    templates: mr.state.templates, x, y,
-    cellPx: mr.state.map?.cell_px || 40,
-  });
+  const tplHit = templateAt({ templates: mr.state.templates, x, y, cellPx });
   if (tplHit) return mr.state.removeTemplate(tplHit.id);
+  const lightHit = lightAt({ lights: mr.state.lights, x, y, cellPx });
+  if (lightHit) return mr.state.removeLight(lightHit.id);
 }

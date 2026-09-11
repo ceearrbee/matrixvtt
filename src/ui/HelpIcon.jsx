@@ -2,6 +2,7 @@ import { h } from 'preact';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { HELP_TERMS } from './help-terms.js';
+import { docsHref } from '../utils/docs-link.js';
 
 export function HelpIcon({ term, label = '' }) {
   const entry = HELP_TERMS[term];
@@ -13,13 +14,13 @@ export function HelpIcon({ term, label = '' }) {
     openModal((close) =>
       h(Modal, {
         id: `help-modal-${term}`,
-        title: `About: ${term.charAt(0).toUpperCase()}${term.slice(1)}`,
+        title: entry.title,
         maxWidth: '480px',
         onClose: close,
       }, [
         h('p', null, entry.long),
-        entry.docHref && h('p', null,
-          h('a', { href: entry.docHref, target: '_blank', rel: 'noopener' }, 'More in the docs')),
+        entry.docPath && h('p', null,
+          h('a', { href: docsHref(entry.docPath), target: '_blank', rel: 'noopener' }, 'More in the docs')),
         h('div', { class: 'form-actions' },
           h('button', { type: 'button', class: 'dbt', 'data-modal-close': true }, 'Close')),
       ]),

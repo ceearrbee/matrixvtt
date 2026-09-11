@@ -70,17 +70,17 @@ export function setupKeyboard(mr) {
       return;
     }
 
-    if ((e.key === 'm' || e.key === 'M') && mr.selectedToken) {
-      const t = mr.state.tokens.get(mr.selectedToken);
-      mr._moveMode = true;
-      mr._moveOrigin = t ? { col: t.col ?? 0, row: t.row ?? 0 } : null;
-      announce(`Movement mode on for ${tokenName(mr, mr.selectedToken)}. Arrow keys to move, Enter to commit, Escape to cancel.`);
-      mr.render?.();
-      return;
-    }
-
-    if (mr._moveMode && ARROW_DELTAS[e.key] && mr.selectedToken) {
+    // The first arrow press arms the move so Escape has an origin to roll
+    // back to. M is not the entry point - the measure tool owns that letter
+    // at the document level, and both handlers used to fire on one press.
+    if (ARROW_DELTAS[e.key] && mr.selectedToken) {
       e.preventDefault();
+      if (!mr._moveMode) {
+        const t = mr.state.tokens.get(mr.selectedToken);
+        mr._moveMode = true;
+        mr._moveOrigin = t ? { col: t.col ?? 0, row: t.row ?? 0 } : null;
+        announce(`Moving ${tokenName(mr, mr.selectedToken)}. Arrow keys to move, Enter to commit, Escape to cancel.`);
+      }
       const { dx, dy } = ARROW_DELTAS[e.key];
       const step = e.shiftKey ? 5 : 1;
       moveTokenBy(mr, mr.selectedToken, dx * step, dy * step);

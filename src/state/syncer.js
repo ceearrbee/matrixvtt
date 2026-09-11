@@ -5,37 +5,15 @@
  * current state and `subscribeToStateEvents` wires the live subscriptions.
  */
 
-import { EVENT_TYPES, isUiMode } from '../utils/constants.js';
+import { EVENT_TYPES } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
 import { clearAllCollections } from './syncer-load.js';
 import { loadLatestSnapshot } from './yjsSnapshot.js';
-import { suggestedModeSignal } from './ui-signals.js';
 
 // VTT entity state lives in Yjs. The syncer's only remaining job for
 // VTT data is loading the authoritative SNAPSHOT on join. The handlers
 // below cover membership and POWER_LEVELS, which stay on Matrix LWW
 // because the homeserver owns them.
-
-/**
- * Apply an incoming `m.vtt.ui_mode` Matrix state event.
- *
- * Echo suppression: the local user's own broadcast is dropped so the
- * GM who flipped the mode doesn't get banner-spammed by their own pick.
- * An empty content (`{}`) is a tombstone that clears the suggestion.
- * Anything else is validated against the canonical mode list before
- * being written into `suggestedModeSignal`.
- */
-export function handleUiModeStateEvent(sm, event) {
-  const sender = event?.sender;
-  const localUserId = sm?.widgetManager?.userId;
-  if (sender && localUserId && sender === localUserId) return;
-  const content = event?.content;
-  const isTombstone = !content || (typeof content === 'object' && Object.keys(content).length === 0);
-  if (isTombstone) { suggestedModeSignal.value = null; return; }
-  const mode = content?.mode;
-  if (!isUiMode(mode)) return;
-  suggestedModeSignal.value = mode;
-}
 
 export function handleStateEvent(sm, event) {
   const { type, content } = event;
@@ -106,11 +84,6 @@ export function subscribeToStateEvents(sm) {
     'state:org.matrix.msc3401.call.member',
     api.observeStateEvents('org.matrix.msc3401.call.member'),
     (event) => handleCallMemberEvent(sm, event),
-  );
-  sm.subscriptionManager.subscribe(
-    `state:${EVENT_TYPES.UI_MODE}`,
-    api.observeStateEvents(EVENT_TYPES.UI_MODE),
-    (event) => handleUiModeStateEvent(sm, event),
   );
 }
 
