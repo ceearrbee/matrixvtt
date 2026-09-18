@@ -4,14 +4,14 @@
  */
 import { h } from 'preact';
 import { tablesSignal } from '../../../state/signals.js';
-import { DiceIcon } from '../../icons/index.jsx';
+import { DiceIcon, EditIcon, TrashIcon } from '../../icons/index.jsx';
 
 function TableRow({ ui, id, table, isGM }) {
   const count = table.entries?.length ?? 0;
   const countLabel = `${count} ${count === 1 ? 'entry' : 'entries'}`;
   return h(
     'div',
-    { class: 'table-row row-xs row--center', style: 'gap:6px;margin-bottom:var(--space-xs);' },
+    { class: 'table-row row-xs row--center', style: 'gap:var(--space-sm);margin-bottom:var(--space-xs);' },
     [
       h('div', { class: 'table-row__meta', style: 'flex:1;min-width:0;' }, [
         h(
@@ -45,7 +45,7 @@ function TableRow({ ui, id, table, isGM }) {
             title: 'Edit table',
             onClick: () => ui.showTableForm(id),
           },
-          '✏️'
+          h(EditIcon, {})
         ),
       isGM &&
         h(
@@ -58,7 +58,7 @@ function TableRow({ ui, id, table, isGM }) {
             title: 'Delete table',
             onClick: () => ui.deleteTable(id),
           },
-          '🗑'
+          h(TrashIcon, {})
         ),
     ]
   );
@@ -71,13 +71,13 @@ export function TablesPanel(props) {
   const isGM = ui.state.isGM();
   const tables = Array.from(ui.state.tables.entries());
 
-  return h('div', { class: 'gm-panel gm-panel--tables', style: 'padding:12px;' }, [
+  return h('div', { class: 'gm-panel gm-panel--tables', style: 'padding:var(--space-xl);' }, [
     isGM &&
       h(
         'button',
         {
           class: 'dbt dbt--sm btn-primary',
-          style: 'width:100%;margin-bottom:10px;',
+          style: 'width:100%;margin-bottom:var(--space-lg);',
           'aria-label': 'Add new rollable table',
           title: 'New table',
           onClick: () => ui.showTableForm(),
@@ -87,7 +87,7 @@ export function TablesPanel(props) {
     tables.length === 0
       ? h(
           'div',
-          { class: 'muted-small', style: 'text-align:center;margin-top:20px;' },
+          { class: 'muted-small', style: 'text-align:center;margin-top:var(--space-3xl);' },
           'No tables yet'
         )
       : h(

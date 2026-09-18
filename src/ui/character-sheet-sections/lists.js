@@ -9,6 +9,7 @@ import { h, Fragment } from 'preact';
 import { renderMarkdown } from '../../utils/renderMarkdown.js';
 import { calcSkillBonus, proficiencyBonusFor } from '../skill-bonus.js';
 import { resolveGroup } from '../play-actions/sources.js';
+import { computeCurrencyTotals } from '../../engine/currency.js';
 
 /**
  * `skill_list` - reads `ruleset.skills[]` for the canonical list,
@@ -70,6 +71,10 @@ export function SkillList({ ui, character, config }) {
  * `currency` - one editable input per ruleset-declared denomination
  * (`ruleset.currency.denominations[]`).
  */
+function formatCoin(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+
 export function Currency({ ui, character, config }) {
   const denoms = ui?.state?.settings?.systemConfig?.currency?.denominations;
   const list = Array.isArray(denoms) ? denoms : [];
@@ -94,12 +99,19 @@ export function Currency({ ui, character, config }) {
     });
   };
 
+  const totals = computeCurrencyTotals(current, { denominations: list });
+  const base = list.find((d) => Number(d.value_in_base) === 1) ?? list[0];
+
   return h('section', {
     class: 'narrative-section',
     role: 'group',
     'aria-label': config?.label ?? 'Currency',
   }, [
     h('div', { class: 'section-header' }, config?.label ?? 'Currency'),
+    totals && h('div', { class: 'currency-totals' }, [
+      h('span', null, `${formatCoin(totals.totalValueInBase)} ${base?.key ?? ''}`.trim()),
+      h('span', { class: 'currency-totals__weight' }, `${formatCoin(totals.totalWeight)} weight`),
+    ]),
     h('div', { class: 'narrative-slots' }, list.map((d) => h('div', {
       key: d.key,
       class: 'narrative-slots__row',

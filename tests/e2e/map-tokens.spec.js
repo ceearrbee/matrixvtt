@@ -5,7 +5,7 @@
  * broadcasts the move as a com.matrixvtt.yjs.update timeline event
  * through the fake client.
  */
-import { test, expect, waitForVttReady } from './fixtures/logged-in.js';
+import { test, expect, waitForVttReady, openMapPane } from './fixtures/logged-in.js';
 
 /**
  * Select a token through the renderer's public selection API. Konva
@@ -30,6 +30,7 @@ async function selectToken(page, tokenId) {
 test.describe('map and tokens', () => {
   test('seeded map renders a visible Konva canvas', async ({ page }) => {
     await waitForVttReady(page);
+    await openMapPane(page);
     await expect(page.locator('#map-canvas canvas').first()).toBeVisible();
     // The empty-map placeholder must not show when a map is seeded.
     await expect(page.locator('.map-empty')).toHaveCount(0);

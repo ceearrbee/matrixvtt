@@ -8,17 +8,18 @@
 
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import { FormReader } from '../utils/ui-helpers.js';
+import * as v from 'valibot';
+import { FormReader, applyFieldErrors } from '../utils/ui-helpers.js';
+import { intRange } from '../utils/form-schemas.js';
+import { MAP_BOUNDS } from '../utils/schemas/world.js';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
-import { confirm, confirmAsync } from './confirm-dialogs.jsx';
-import { resizeImageBlob } from '../utils/image-resize.js';
+import { confirm } from './confirm-dialogs.jsx';
 import { mapsSignal, activeMapIdSignal } from '../state/signals.js';
 import { MapsList } from './MapsList.jsx';
 import { MapFormPanel } from './MapForm.jsx';
+import { uploadMapImage } from './maps/upload-map-image.js';
 
-const DEFAULT_MAX_MAP_DIM = 2048;
-const DEFAULT_RESIZE_QUALITY = 0.9;
 
 function MapsPanelModal({ ui, initialSelectedId, onClose }) {
   // Subscribe to map collection + active-map changes so the list and
@@ -84,6 +85,31 @@ export function openMapsPanel(ui, selectedMapId = null) {
   openModal((close) => h(MapsPanelModal, { ui, initialSelectedId: selectedMapId, onClose: close }));
 }
 
+const MAP_FIELDS = Object.freeze({
+  name: 'map-name',
+  width_cells: { id: 'map-width', type: 'int' },
+  height_cells: { id: 'map-height', type: 'int' },
+  cell_px: { id: 'map-cell-px', type: 'int' },
+  grid_type: { id: 'map-grid-type' },
+  env_tint: { id: 'map-env-tint' },
+});
+
+/**
+ * A map's size is required and bounded, and the bounds are the room
+ * schema's own so the two cannot drift. A cleared Width used to arrive
+ * as getInt's 0 and be written as a map zero cells across, because the
+ * writer does not validate on the way out - `validateMap` is only wired
+ * to incoming events.
+ */
+export function mapFormSchema() {
+  const { cells, cellPx } = MAP_BOUNDS;
+  return v.object({
+    width_cells: intRange('Map width', cells.min, cells.max, { required: true }),
+    height_cells: intRange('Map height', cells.min, cells.max, { required: true }),
+    cell_px: intRange('Cell size', cellPx.min, cellPx.max, { required: true }),
+  });
+}
+
 export async function submitMapForm(ui, modal, selectedId) {
   const $ = (sel) => modal.querySelector(sel);
   const form = new FormReader(modal);
@@ -96,21 +122,18 @@ export async function submitMapForm(ui, modal, selectedId) {
     gm_only: fs.querySelector('.layer-gm-only')?.checked,
   })).filter(l => l.image_url);
 
-  const data = form.collect({
-    name: 'map-name',
-    width_cells: { id: 'map-width', type: 'int' },
-    height_cells: { id: 'map-height', type: 'int' },
-    cell_px: { id: 'map-cell-px', type: 'int' },
-    grid_type: { id: 'map-grid-type' },
-    env_tint:  { id: 'map-env-tint' },
-  });
+  const { values: data, errors } = form.validate(MAP_FIELDS, mapFormSchema());
+  if (Object.keys(errors).length > 0) {
+    applyFieldErrors(modal, errors, MAP_FIELDS);
+    return false;
+  }
 
   let imageUrl = $('#map-url')?.value || null;
   if ($('#map-source-type')?.value === 'upload') {
     const file = $('#map-upload')?.files?.[0];
     if (file) {
       try {
-        imageUrl = await _uploadMapImage(ui, file);
+        imageUrl = await uploadMapImage(ui, file);
         if (!imageUrl) return false;
       } catch (err) {
         ui._toast('Upload failed: ' + err.message, 'error');
@@ -127,75 +150,3 @@ export async function submitMapForm(ui, modal, selectedId) {
   } catch (err) { ui._toast('Save failed: ' + err.message, 'error'); return false; }
 }
 
-/**
- * Upload a map image with three layers of robustness:
- *  1. Pre-shrink to `max_map_dim` (default 2048 px on the longer
- *     edge) so the request fits the homeserver's per-upload cap.
- *  2. If the homeserver still 413s with `M_TOO_LARGE`, ask the GM
- *     whether to retry at half the previous max-dim and re-attempt.
- *  3. On second failure, suggest the URL field as an external
- *     image-host fallback.
- *
- * Returns the resulting `mxc://` URL on success, or `null` if the
- * GM declined the retry / a fatal error was already toasted.
- */
-async function _uploadMapImage(ui, file) {
-  const settings = ui.state?.settings ?? {};
-  const initialMax = Number(settings.max_map_dim) > 0
-    ? Number(settings.max_map_dim)
-    : DEFAULT_MAX_MAP_DIM;
-  return _resizeAndUpload(ui, file, initialMax, /* retried */ false);
-}
-
-async function _resizeAndUpload(ui, file, maxDim, retried) {
-  let resized;
-  try {
-    resized = await resizeImageBlob(file, maxDim, DEFAULT_RESIZE_QUALITY);
-  } catch (err) {
-    // Resize failure → fall back to raw upload; the user still gets
-    // a chance even if the encoder choked on a weird format.
-    ui._toast?.(`Couldn't resize image, uploading as-is: ${err.message}`, 'info');
-    resized = file;
-  }
-  try {
-    return await ui.widgetManager.uploadMedia(resized);
-  } catch (err) {
-    if (retried || !_isTooLarge(err)) throw err;
-    return _retryAtSmallerCap(ui, file, maxDim);
-  }
-}
-
-function _isTooLarge(err) {
-  if (!err) return false;
-  return err.errcode === 'M_TOO_LARGE'
-      || err.status === 413
-      || err.httpStatus === 413
-      || /too large|413/i.test(err.message || '');
-}
-
-function _retryAtSmallerCap(ui, file, prevMax) {
-  return new Promise((resolve) => {
-    const next = Math.max(512, Math.round(prevMax / 2));
-    confirmAsync(
-      `Image still too large for this homeserver after resizing to ${prevMax} px. ` +
-      `Retry at ${next} px?`,
-      async () => {
-        const url = await _resizeAndUpload(ui, file, next, /* retried */ true);
-        resolve(url);
-      },
-      {
-        title: 'Image too large', confirmText: `Retry @ ${next}px`, busyText: 'Retrying…',
-        // If the user dismisses without retrying, the caller would otherwise
-        // hang waiting on this promise - resolve null so it falls back to the
-        // external-URL path.
-        onCancel: () => {
-          ui._toast?.(
-            'Map upload cancelled. You can paste an external image URL instead - see the URL field above.',
-            'info',
-          );
-          resolve(null);
-        },
-      },
-    );
-  });
-}

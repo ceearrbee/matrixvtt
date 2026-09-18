@@ -10,11 +10,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fireEvent } from '@testing-library/preact';
 import { showConditionDialog } from '../map/actions/combat.js';
+import dnd5e from '../content/rulesets/dnd5e.json';
 
 function makeMr(token = { id: 'tok-1', name: 'Goblin', conditions: [], condition_durations: {} }) {
   const updateToken = vi.fn().mockResolvedValue(true);
   return /** @type {any} */ ({
-    state: { tokens: new Map([[token.id, token]]), updateToken },
+    state: {
+      tokens: new Map([[token.id, token]]), updateToken,
+      settings: { systemConfig: { conditions: dnd5e.conditions } },
+    },
     token,
     updateToken,
   });

@@ -11,6 +11,10 @@ import { VTTError, ErrorType } from '../utils/errorHandling.js';
 import { EVENT_TYPES, STORAGE_KEYS, VTT_EVENTS } from '../utils/constants.js';
 import { canSendEventType } from './reader.js';
 import { stripSystemConfigForWrite } from './settings-marshal.js';
+import {
+  pendingStorage, pendingKey, withinPendingCap, PENDING_MAX_BYTES,
+} from './pending-storage.js';
+import { logger } from '../utils/logger.js';
 
 const MAX_EVENT_BYTES = 63000;
 const DRAIN_DELAY_MS = 2000;
@@ -210,24 +214,46 @@ export function awaitQueueDrain(sm, timeoutMs = 15000) {
   });
 }
 
+function _queueKey(sm) {
+  return pendingKey(STORAGE_KEYS.RETRY_QUEUE, {
+    userId: sm.widgetManager?.userId,
+    roomId: sm.widgetManager?.roomId,
+  });
+}
+
 export function flushQueueToStorage(sm) {
+  const store = pendingStorage();
+  if (!store) return;
   const entries = Array.from(sm._retryQueue.entries()).map(([cacheKey, item]) => ({
     ...item,
     cacheKey,
   }));
-  sessionStorage.setItem(STORAGE_KEYS.RETRY_QUEUE, JSON.stringify(entries));
+  const serialized = JSON.stringify(entries);
+  if (!withinPendingCap(serialized)) {
+    logger.warn('queue', `pending writes exceed ${PENDING_MAX_BYTES} bytes; not persisted`);
+    return;
+  }
+  try {
+    store.setItem(_queueKey(sm), serialized);
+  } catch (e) {
+    logger.warn('queue', 'could not persist pending writes:', e.message);
+  }
 }
 
 export function restoreQueueFromStorage(sm) {
+  const store = pendingStorage();
+  if (!store) return;
+  const key = _queueKey(sm);
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEYS.RETRY_QUEUE);
+    const raw = store.getItem(key);
     if (raw) {
       JSON.parse(raw).forEach((i) => sm._retryQueue.set(i.cacheKey, i));
       if (sm._retryQueue.size > 0) scheduleDrain(sm);
     }
-    sessionStorage.removeItem(STORAGE_KEYS.RETRY_QUEUE);
+    store.removeItem(key);
   } catch (_e) {
-    // sessionStorage may be unavailable in some test environments.
+    // Storage can be unavailable or hold unparseable leftovers; a lost
+    // restore is recoverable, a thrown startup is not.
   }
 }
 

@@ -35,7 +35,7 @@ function Ownership({ ui, character, isGM, myUserId }) {
       h('div', { class: 'entity-subtitle' }, claimed),
     ]);
   }
-  return h('div', { style: 'margin-top: 12px;' },
+  return h('div', { style: 'margin-top: var(--space-xl);' },
     h('button', {
       class: 'dbt btn-primary', style: 'width: 100%;',
       'aria-label': 'Claim this character', title: 'Claim character to take ownership',
@@ -95,7 +95,7 @@ export function CharacterSheet({ ui }) {
           onClick: () => ui.placeSheetOnMap(character.id, ENTITY_TYPES.PC),
         }, [h(MapsIcon, {}), ' Place']),
         canEdit && h(SaveToLibraryButton, {
-          ui, kind: LIBRARY_KIND.CHARACTER, entity: character, compact: false, label: '📥 Library',
+          ui, kind: LIBRARY_KIND.CHARACTER, entity: character, compact: false, label: 'Library',
         }),
       ],
     }),

@@ -2,7 +2,7 @@
  * keyboard-help.js - Keyboard shortcut reference panel.
  *
  * Call showKeyboardHelp() to open a modal listing all keyboard shortcuts.
- * Press ? (outside an input field) to trigger it from event-handlers.js.
+ * Press ? (outside an input field) to trigger it from useKeyboardShortcuts.
  */
 
 import { h } from 'preact';
@@ -49,6 +49,9 @@ const GLOBAL_ROWS = [
   { key: 'Ctrl+K',     desc: 'Search the campaign or run a command, from anywhere including the chat box' },
   { key: '/',          desc: 'The same palette, when you are not typing in a field' },
   { key: '?',          desc: 'Show this keyboard shortcut help' },
+  { key: 'F',          desc: 'Focus mode: hide both side rails, and show them again' },
+  { key: 'Esc',        desc: 'Close the open drawer' },
+  { key: '← →',        desc: 'Move between the companion tabs, once one has focus' },
 ];
 
 const SHORTCUTS = [...MAP_TOOL_ROWS, ...TEMPLATE_SHAPE_ROWS, ...TOKEN_MOVEMENT_ROWS, ...GLOBAL_ROWS];
@@ -73,16 +76,16 @@ export function showKeyboardHelp() {
     }, [
       h('table', { style: 'border-collapse:collapse;width:100%;font-size:0.875rem;' },
         SHORTCUTS.map(({ key, desc }) => h('tr', null, [
-          h('td', { style: 'padding:4px 12px 4px 0;white-space:nowrap;' },
-            h('kbd', { style: 'font-family:var(--font-mono);background:var(--color-background-secondary);border:1px solid var(--color-border-primary);border-radius:var(--border-radius-lg);padding:2px 6px;' }, key)),
-          h('td', { style: 'padding:4px 0;' }, desc),
+          h('td', { style: 'padding:var(--space-xs) var(--space-xl) var(--space-xs) 0;white-space:nowrap;' },
+            h('kbd', { style: 'font-family:var(--font-mono);background:var(--color-background-secondary);border:1px solid var(--color-border-primary);border-radius:var(--border-radius-lg);padding:var(--space-2xs) var(--space-sm);' }, key)),
+          h('td', { style: 'padding:var(--space-xs) 0;' }, desc),
         ]))),
-      h('h3', { style: 'margin:16px 0 8px;font-size:var(--font-size-sm);' }, 'Chat commands'),
+      h('h3', { style: 'margin:var(--space-2xl) 0 var(--space-md);font-size:var(--font-size-sm);' }, 'Chat commands'),
       h('table', { style: 'border-collapse:collapse;width:100%;font-size:0.875rem;' },
         COMMAND_ROWS.map(({ key, desc }) => h('tr', null, [
-          h('td', { style: 'padding:4px 12px 4px 0;white-space:nowrap;' },
-            h('kbd', { style: 'font-family:var(--font-mono);background:var(--color-background-secondary);border:1px solid var(--color-border-primary);border-radius:var(--border-radius-lg);padding:2px 6px;' }, key)),
-          h('td', { style: 'padding:4px 0;' }, desc),
+          h('td', { style: 'padding:var(--space-xs) var(--space-xl) var(--space-xs) 0;white-space:nowrap;' },
+            h('kbd', { style: 'font-family:var(--font-mono);background:var(--color-background-secondary);border:1px solid var(--color-border-primary);border-radius:var(--border-radius-lg);padding:var(--space-2xs) var(--space-sm);' }, key)),
+          h('td', { style: 'padding:var(--space-xs) 0;' }, desc),
         ]))),
       h('div', { class: 'form-actions', style: 'display:flex;justify-content:flex-end;' },
         h('button', { class: 'dbt btn-primary', 'data-modal-close': true }, 'Close')),

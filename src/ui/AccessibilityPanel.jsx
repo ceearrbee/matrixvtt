@@ -27,7 +27,7 @@ export function AccessibilityPanel() {
       h('input', { type: 'checkbox', id: 'acc-reduced-motion', checked: settings.reduced_motion, onChange: () => toggle('reduced_motion') }),
       ' Reduced motion',
     ]),
-    h('label', { class: 'form-label', for: 'acc-theme', title: 'Pick a theme; Auto follows your OS setting', style: 'margin-top:8px;' }, 'Theme'),
+    h('label', { class: 'form-label', for: 'acc-theme', title: 'Pick a theme; Auto follows your OS setting', style: 'margin-top:var(--space-md);' }, 'Theme'),
     h('select', { id: 'acc-theme', class: 'form-select', 'aria-label': 'Theme', value: settings.theme, onChange: onThemeChange }, [
       h('option', { value: 'auto' }, 'Auto (follow system)'),
       h('option', { value: 'dark' }, 'Dark'),

@@ -355,7 +355,7 @@
     "carry_capacity": {
       "$": "*",
       "args": [
-        "@str",
+        "@str.score",
         15
       ]
     },
@@ -388,11 +388,17 @@
       ]
     },
     "carried_weight": {
-      "$": "sum_items",
+      "$": "+",
       "args": [
-        "weight",
-        null,
-        "quantity"
+        {
+          "$": "sum_items",
+          "args": [
+            "weight",
+            null,
+            "quantity"
+          ]
+        },
+        "@coins.weight"
       ]
     }
   },
@@ -564,6 +570,10 @@
           {
             "label": "Spell DC",
             "formula": "spell_save_dc"
+          },
+          {
+            "label": "Spell Atk",
+            "formula": "spell_attack_bonus"
           }
         ]
       },
@@ -584,6 +594,24 @@
         "kind": "currency",
         "label": "Coinage",
         "collapsed": true
+      },
+      {
+        "kind": "stat_grid",
+        "label": "Load and Wealth",
+        "stats": [
+          {
+            "label": "Load",
+            "formula": "carried_weight"
+          },
+          {
+            "label": "Capacity",
+            "formula": "carry_capacity"
+          },
+          {
+            "label": "Goods (gp)",
+            "formula": "gold_total"
+          }
+        ]
       },
       {
         "kind": "personality",
@@ -1319,92 +1347,98 @@
     {
       "key": "blinded",
       "label": "Blinded",
-      "icon": "👁️",
+      "abbr": "Bl",
       "description": "Can't see; attacks at disadvantage; attacks against it have advantage."
     },
     {
       "key": "charmed",
       "label": "Charmed",
-      "icon": "💕",
-      "description": "Can't attack charmer; charmer has advantage on social ability checks."
+      "abbr": "Ch",
+      "description": "Can't attack the charmer; the charmer has advantage on social checks."
     },
     {
       "key": "deafened",
       "label": "Deafened",
-      "icon": "🔇",
-      "description": "Can't hear; auto-fails checks requiring hearing."
+      "abbr": "Df",
+      "description": "Can't hear; automatically fails checks requiring hearing."
     },
     {
       "key": "exhaustion",
       "label": "Exhaustion",
-      "icon": "😫",
-      "description": "Tiered (1–6) debuff affecting ability checks, speed, attacks, saves, and HP max."
+      "abbr": "Ex",
+      "description": "Cumulative levels of penalty, from disadvantage through death."
     },
     {
       "key": "frightened",
       "label": "Frightened",
-      "icon": "😨",
-      "description": "Disadvantage on checks while source is visible; can't move toward source."
+      "abbr": "Fr",
+      "description": "Disadvantage while the source is in sight; cannot move closer."
     },
     {
       "key": "grappled",
       "label": "Grappled",
-      "icon": "🤝",
-      "description": "Speed 0; ends when grappler is incapacitated or moved out of reach."
+      "abbr": "Gr",
+      "description": "Speed becomes 0."
     },
     {
       "key": "incapacitated",
       "label": "Incapacitated",
-      "icon": "🌀",
+      "abbr": "In",
       "description": "Can't take actions or reactions."
     },
     {
       "key": "invisible",
       "label": "Invisible",
-      "icon": "👻",
-      "description": "Impossible to see; attacks against it at disadvantage; its attacks at advantage."
+      "abbr": "Iv",
+      "description": "Unseen; attacks have advantage, attacks against it have disadvantage."
     },
     {
       "key": "paralyzed",
       "label": "Paralyzed",
-      "icon": "🔒",
-      "description": "Incapacitated; fails STR/DEX saves; melee hits auto-crit."
+      "abbr": "Pa",
+      "description": "Incapacitated, cannot move or speak; hits within 5 feet are critical."
     },
     {
       "key": "petrified",
       "label": "Petrified",
-      "icon": "🗿",
-      "description": "Transformed to stone; incapacitated; resistant to all damage."
+      "abbr": "Pe",
+      "description": "Transformed to stone; incapacitated and unaware."
     },
     {
       "key": "poisoned",
       "label": "Poisoned",
-      "icon": "☠️",
+      "abbr": "Po",
       "description": "Disadvantage on attack rolls and ability checks."
     },
     {
       "key": "prone",
       "label": "Prone",
-      "icon": "⬇️",
-      "description": "On the ground; melee attacks against it have advantage; ranged have disadvantage."
+      "abbr": "Pr",
+      "description": "Movement costs double; melee attackers have advantage."
     },
     {
       "key": "restrained",
       "label": "Restrained",
-      "icon": "🔗",
-      "description": "Speed 0; attacks at disadvantage; attacks against it at advantage; disadvantage on DEX saves."
+      "abbr": "Re",
+      "description": "Speed 0; disadvantage on attacks and Dexterity saves."
     },
     {
       "key": "stunned",
       "label": "Stunned",
-      "icon": "💫",
-      "description": "Incapacitated; fails STR/DEX saves; attacks against it at advantage."
+      "abbr": "St",
+      "description": "Incapacitated, cannot move, fails Strength and Dexterity saves."
     },
     {
       "key": "unconscious",
       "label": "Unconscious",
-      "icon": "💤",
-      "description": "Incapacitated; drops everything; prone; fails STR/DEX saves; melee hits auto-crit."
+      "abbr": "Un",
+      "description": "Incapacitated, prone and unaware; hits within 5 feet are critical."
+    },
+    {
+      "key": "concentration",
+      "label": "Concentrating",
+      "abbr": "Cn",
+      "description": "Maintaining a spell; damage forces a saving throw."
     }
   ],
   "saves": [

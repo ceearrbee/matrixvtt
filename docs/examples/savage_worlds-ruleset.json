@@ -93,7 +93,23 @@
   "character_sheet": {
     "sections": [
       {
-        "kind": "attributes"
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "wounds"
@@ -102,7 +118,8 @@
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -116,9 +133,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -135,9 +149,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -178,5 +189,67 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "shaken",
+      "label": "Shaken",
+      "abbr": "Sh",
+      "description": "Can only move or attempt to unshake until recovered."
+    },
+    {
+      "key": "distracted",
+      "label": "Distracted",
+      "abbr": "Ds",
+      "description": "Penalty to all trait rolls until the end of the next turn."
+    },
+    {
+      "key": "vulnerable",
+      "label": "Vulnerable",
+      "abbr": "Vu",
+      "description": "Attacks against this character are made at a bonus."
+    },
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "abbr": "St",
+      "description": "Falls prone, distracted and vulnerable; must recover."
+    },
+    {
+      "key": "entangled",
+      "label": "Entangled",
+      "abbr": "En",
+      "description": "Movement restricted until broken free."
+    },
+    {
+      "key": "bound",
+      "label": "Bound",
+      "abbr": "Bo",
+      "description": "Completely restrained; cannot act physically."
+    },
+    {
+      "key": "fatigued",
+      "label": "Fatigued",
+      "abbr": "Fa",
+      "description": "One level of penalty to trait rolls."
+    },
+    {
+      "key": "exhausted",
+      "label": "Exhausted",
+      "abbr": "Ex",
+      "description": "Two levels of fatigue; the next level incapacitates."
+    },
+    {
+      "key": "wounded",
+      "label": "Wounded",
+      "abbr": "Wo",
+      "description": "Carrying one or more wounds, each a penalty to trait rolls."
+    },
+    {
+      "key": "incapacitated",
+      "label": "Incapacitated",
+      "abbr": "In",
+      "description": "Out of the fight; rolling on the injury table."
+    }
+  ]
 }

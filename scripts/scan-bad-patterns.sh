@@ -14,13 +14,30 @@ cd "$root"
 
 fail=0
 
+# grep reports "no match" as exit 1 and a real problem as 2 or more, so
+# a scan that swallows both reports clean when the tree it was pointed
+# at has been renamed out from under it.
+for required in src docs .github; do
+  if [ ! -d "$required" ]; then
+    echo "scan-bad-patterns: expected directory '$required' is missing; refusing to report clean."
+    exit 1
+  fi
+done
+
 scan() {
   local label="$1"
   local pattern="$2"
   shift 2
   # Remaining args are extra grep options (e.g., --exclude=foo).
-  local hits
-  hits=$(grep -rEn "$pattern" src/ "$@" 2>/dev/null || true)
+  local hits status
+  hits=$(grep -rEn "$pattern" src/ "$@") || status=$?
+  status=${status:-0}
+  if [ "$status" -ge 2 ]; then
+    echo "❌ $label: grep failed (exit $status); scan is not trustworthy"
+    echo
+    fail=1
+    return
+  fi
   if [ -n "$hits" ]; then
     echo "❌ $label"
     echo "$hits" | sed 's/^/   /'
@@ -75,6 +92,31 @@ emdash=$(
 if [ -n "$emdash" ]; then
   echo "❌ Em dash (house rule: never use em dashes)"
   echo "$emdash" | sed 's/^/   /'
+  echo
+  fail=1
+fi
+
+# Commit hashes in the docs that ship. The public repository is an
+# orphan branch whose history is one hand-written commit per release,
+# so no hash from this tree resolves there. CLAUDE.md, audits/ and
+# docs/superpowers/ stay behind and may cite whatever they like.
+# The root *.md glob is expanded here rather than handed to grep, so an
+# unmatched glob cannot masquerade as the grep failure below.
+shopt -s nullglob
+rootmd=(./*.md)
+shopt -u nullglob
+commitref=$(grep -rnE '`[0-9a-f]{7,40}`|[Cc]ommit +[0-9a-f]{7,40}' \
+  docs/ "${rootmd[@]}" --include='*.md' \
+  --exclude=CLAUDE.md --exclude-dir=superpowers \
+  --exclude-dir=examples --exclude-dir=.vitepress) || commitstatus=$?
+commitstatus=${commitstatus:-0}
+if [ "$commitstatus" -ge 2 ]; then
+  echo "❌ Commit hash scan: grep failed (exit $commitstatus); scan is not trustworthy"
+  echo
+  fail=1
+elif [ -n "$commitref" ]; then
+  echo "❌ Commit hash in a doc that ships (the published repo has no such commit)"
+  echo "$commitref" | sed 's/^/   /'
   echo
   fail=1
 fi

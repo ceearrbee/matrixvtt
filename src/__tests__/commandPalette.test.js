@@ -5,6 +5,7 @@
  * when picked.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act } from 'preact/test-utils';
 import { showCommandPalette } from '../ui/command-palette.js';
 
 function makeUi(overrides = {}) {
@@ -64,8 +65,10 @@ describe('command palette', () => {
     const ui = makeUi();
     showCommandPalette(ui);
     const input = document.getElementById('cp-input');
-    input.value = 'aragorn';
-    input.dispatchEvent(new Event('input'));
+    act(() => {
+      input.value = 'aragorn';
+      input.dispatchEvent(new Event('input'));
+    });
     const rows = [...document.querySelectorAll('.cp-row__name')].map((r) => r.textContent);
     expect(rows).toContain('Aragorn');
     expect(rows.every((r) => !r.includes('Goblin'))).toBe(true);
@@ -75,9 +78,11 @@ describe('command palette', () => {
     const ui = makeUi();
     showCommandPalette(ui);
     const input = document.getElementById('cp-input');
-    input.value = 'goblin';
-    input.dispatchEvent(new Event('input'));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    act(() => {
+      input.value = 'goblin';
+      input.dispatchEvent(new Event('input'));
+    });
+    act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
     expect(ui.mapRenderer.panToToken).toHaveBeenCalledWith('t1');
     expect(ui.previewToken).toHaveBeenCalledWith('t1');
     expect(document.getElementById('command-palette')).toBeNull();
@@ -87,9 +92,11 @@ describe('command palette', () => {
     const ui = makeUi();
     showCommandPalette(ui);
     const input = document.getElementById('cp-input');
-    input.value = 'goblin';
-    input.dispatchEvent(new Event('input'));
-    document.querySelector('.cp-row').click();
+    act(() => {
+      input.value = 'goblin';
+      input.dispatchEvent(new Event('input'));
+    });
+    act(() => document.querySelector('.cp-row').click());
     expect(ui.mapRenderer.panToToken).toHaveBeenCalledWith('t1');
   });
 
@@ -111,9 +118,11 @@ describe('command palette', () => {
     const ui = makeUi();
     showCommandPalette(ui);
     const input = document.getElementById('cp-input');
-    input.value = 'aragorn';
-    input.dispatchEvent(new Event('input'));
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    act(() => {
+      input.value = 'aragorn';
+      input.dispatchEvent(new Event('input'));
+    });
+    act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })));
     expect(ui.selectCharacterById).toHaveBeenCalledWith('c1');
     expect(ui.showCharacterPreview).not.toHaveBeenCalled();
   });
@@ -122,7 +131,7 @@ describe('command palette', () => {
     const ui = makeUi();
     showCommandPalette(ui);
     const input = document.getElementById('cp-input');
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true })));
     const active = document.querySelector('.cp-row--active');
     expect(active.dataset.index).toBe('1');
   });

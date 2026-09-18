@@ -13,10 +13,11 @@ import { render, fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 function mkUi({ isGM = false } = {}) {
   return {
-    state: { isGM: () => isGM, map: null },
+    state: { isGM: () => isGM, map: loadTestMap() },
     pingLocation: () => {},
     setDrawTool: () => {},
     setDrawColor: () => {},

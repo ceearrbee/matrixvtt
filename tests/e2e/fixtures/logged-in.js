@@ -181,34 +181,47 @@ const ACTORLESS_TYPES = new Set(['m.room.power_levels', 'com.vtt.settings', 'com
 export const SEED_INITIAL_STATE_NO_ACTORS = SEED_INITIAL_STATE.filter((e) => ACTORLESS_TYPES.has(e.type));
 export const SEED_YJS_SNAPSHOT_NO_ACTORS_B64 = buildYjsSnapshotBase64(SEED_INITIAL_STATE_NO_ACTORS);
 
+/**
+ * Install the fake client and the seeded session on a page. The
+ * `loggedIn` fixture does this for the spec's own `page`; call it
+ * directly for a second page in the same context (see
+ * `tests/e2e/two-browsers.spec.js`), optionally as a different user.
+ */
+export async function seedPage(page, { userId, displayName } = {}) {
+  const auth = { ...SEED_AUTH, ...(userId ? { userId } : {}), ...(displayName ? { displayName } : {}) };
+  await page.addInitScript({ path: FAKE_SCRIPT });
+  await page.addInitScript(
+    ({ auth: seedAuth, activeRoom, initialState, yjsSnapshot }) => {
+      localStorage.setItem('vtt-auth-session', JSON.stringify(seedAuth));
+      localStorage.setItem('vtt:active-room', JSON.stringify(activeRoom));
+      // Mark the tutorial as completed so it doesn't auto-start.
+      localStorage.setItem('vtt-tutorial-completed', 'true');
+      // Tell the fake what initial Matrix state to advertise (raw
+      // entity events are kept for any spec that reads them
+      // directly, plus the Yjs snapshot blob that the syncer's
+      // loadLatestSnapshot path picks up to hydrate sm.characters
+      // / sm.npcs / sm.tokens - the only entity source the runtime
+      // honours post-migration).
+      window.__VTT_E2E_CONFIG = Object.assign(window.__VTT_E2E_CONFIG || {}, {
+        initialState,
+        yjsSnapshot,
+        userId: seedAuth.userId,
+        displayName: seedAuth.displayName,
+      });
+    },
+    {
+      auth,
+      activeRoom: SEED_ACTIVE_ROOM,
+      initialState: SEED_INITIAL_STATE,
+      yjsSnapshot: SEED_YJS_SNAPSHOT_B64,
+    },
+  );
+  return { auth, activeRoom: SEED_ACTIVE_ROOM };
+}
+
 export const test = base.extend({
   loggedIn: [async ({ page }, use) => {
-    await page.addInitScript({ path: FAKE_SCRIPT });
-    await page.addInitScript(
-      ({ auth, activeRoom, initialState, yjsSnapshot }) => {
-        localStorage.setItem('vtt-auth-session', JSON.stringify(auth));
-        localStorage.setItem('vtt:active-room', JSON.stringify(activeRoom));
-        // Mark the tutorial as completed so it doesn't auto-start.
-        localStorage.setItem('vtt-tutorial-completed', 'true');
-        // Tell the fake what initial Matrix state to advertise (raw
-        // entity events are kept for any spec that reads them
-        // directly, plus the Yjs snapshot blob that the syncer's
-        // loadLatestSnapshot path picks up to hydrate sm.characters
-        // / sm.npcs / sm.tokens - the only entity source the runtime
-        // honours post-migration).
-        window.__VTT_E2E_CONFIG = Object.assign(window.__VTT_E2E_CONFIG || {}, {
-          initialState,
-          yjsSnapshot,
-        });
-      },
-      {
-        auth: SEED_AUTH,
-        activeRoom: SEED_ACTIVE_ROOM,
-        initialState: SEED_INITIAL_STATE,
-        yjsSnapshot: SEED_YJS_SNAPSHOT_B64,
-      },
-    );
-    await use({ auth: SEED_AUTH, activeRoom: SEED_ACTIVE_ROOM });
+    await use(await seedPage(page));
   }, { auto: true }],
 });
 
@@ -228,22 +241,68 @@ export async function waitForVttShell(page) {
 }
 
 /**
- * Ensure the right-side companion (sheet/combat/party tabs) is reachable.
- * In the almanac shell the right rail is always mounted and visible on
- * desktop in every phase - there's no mode button to click - so this just
- * boots the shell and waits for the rail. The `mode` arg is accepted for
- * backwards-compat with existing specs but is now a no-op.
+ * Bring one of the four phone panes on screen. The bottom tab bar is
+ * `display: none` above the 768px breakpoint, so on desktop every
+ * surface is already laid out and this is a no-op.
  */
-// eslint-disable-next-line no-unused-vars
+export async function showMobilePane(page, pane) {
+  const tab = page.locator(`[data-mobile-tab="${pane}"]`);
+  if (await tab.isVisible()) await tab.click();
+}
+
+/**
+ * Ensure the right-side companion (sheet/combat/party tabs) is reachable.
+ * On desktop the rail is always mounted and visible; on a phone it is the
+ * `panel` pane, reached through the bottom tab bar. The `mode` arg is
+ * accepted for backwards-compat with existing specs but is now a no-op.
+ */
 export async function openSheetRail(page, { mode = 'narrative' } = {}) {
   await waitForVttShell(page);
+  await showMobilePane(page, 'panel');
   await expect(page.locator('#shell-sheet-drawer')).toBeVisible({ timeout: 5_000 });
 }
 
-/** Open the Settings modal (via the lower-left global menu) and wait for the dialog. */
-export async function openSettings(page) {
+/** Bring the Konva map on screen: its own pane on a phone, always up on desktop. */
+export async function openMapPane(page) {
   await waitForVttShell(page);
-  await page.locator('.left-index__menu-btn').click();
+  await showMobilePane(page, 'map');
+}
+
+/**
+ * Open the global menu. It hangs off the accordion's foot on desktop and
+ * off the icon rail under the Journal pane on a phone; both routes end at
+ * the same menu, so specs should never reach for either button directly.
+ */
+export async function openGlobalMenu(page) {
+  await waitForVttShell(page);
+  await showMobilePane(page, 'journal');
+  const items = page.locator('[data-menu-item="settings"]');
+  if (await items.isVisible()) return;
+  const railMenu = page.locator('[data-drawer="menu"]');
+  if (await railMenu.isVisible()) await railMenu.click();
+  else await page.locator('.left-index__menu-btn').click();
+}
+
+/**
+ * Open the Journal and return the element holding it. `JournalDrawer` is
+ * the same component either way, but its container is not: an accordion
+ * section on desktop, a rail drawer under the Journal pane on a phone.
+ * Callers scope their queries to the returned locator.
+ */
+export async function openJournal(page) {
+  await waitForVttShell(page);
+  await showMobilePane(page, 'journal');
+  const section = page.locator('.left-index__section[data-section="journal"]');
+  if (await section.isVisible()) return section;
+  const drawer = page.locator('.icon-rail__drawer[aria-label="Journal"]');
+  if (!(await drawer.isVisible())) await page.locator('[data-drawer="journal"]').click();
+  await expect(drawer).toBeVisible({ timeout: 5_000 });
+  return drawer;
+}
+
+/** Open the Settings modal and wait for the dialog. */
+export async function openSettings(page) {
+  await openGlobalMenu(page);
   await page.locator('[data-menu-item="settings"]').click();
   await expect(page.locator('[role="dialog"][aria-labelledby="settings-modal-title"]')).toBeVisible();
 }

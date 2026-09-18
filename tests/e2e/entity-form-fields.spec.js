@@ -68,7 +68,8 @@ test.describe('entity form - Edit Character', () => {
     await expect(page.locator('#entity-submit-btn')).toContainText(/update/i);
   });
 
-  test('clicking outside (overlay) closes the edit modal', async ({ page }) => {
+  test('clicking outside (overlay) closes the edit modal', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'phone modals are full-screen, so there is no overlay to click');
     await openEditCharacter(page);
     // The overlay element has the click-to-close handler.
     await page.locator('#entity-form-modal').click({ position: { x: 5, y: 5 } });

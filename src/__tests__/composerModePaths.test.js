@@ -24,6 +24,7 @@ describe('speaking-mode entry points', () => {
   afterEach(cleanup);
 
   it('QuickTray keeps the roll and turn actions but not a mode toggle', () => {
+    initiativeSignal.value = { active: true, round: 1, current_index: 0, order: [{}] };
     const { container } = render(h(QuickTray, { ui: /** @type {any} */ ({}) }));
     expect(container.querySelector('[data-quick="d20"]')).not.toBeNull();
     expect(container.querySelector('[data-quick="next-turn"]')).not.toBeNull();
@@ -47,8 +48,8 @@ describe('speaking-mode entry points', () => {
 describe('composer dice controls are declared once', () => {
   it('the shared module owns the dice faces and the speaking modes', () => {
     const shared = read('src/ui/composer/dice-controls.jsx');
-    expect(shared).toMatch(/export const DICE/);
-    expect(shared).toMatch(/export const CHAT_MODES/);
+    expect(shared).toMatch(/^const DICE = /m);
+    expect(shared).toMatch(/^const CHAT_MODES = /m);
   });
 
   it('neither the strip nor the mobile popover redeclares them', () => {

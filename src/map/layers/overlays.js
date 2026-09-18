@@ -15,7 +15,7 @@
 
 import Konva from 'konva';
 import { getTokensInCircle, getTokensInCone } from '../../utils/geometry.js';
-import { TOKEN_COLORS } from '../../utils/ui-constants.js';
+import { marqueeColors } from '../token-marquee.js';
 import { measureDistanceCells } from '../../utils/hexGrid.js';
 import { activeMapIdSignal } from '../../state/signals.js';
 
@@ -88,10 +88,10 @@ function paintAreaSelection(ctx, mr) {
   const y = Math.min(mr.areaSelectionStart.y, mr.areaSelectionCurrent.y);
   const w = Math.abs(mr.areaSelectionCurrent.x - mr.areaSelectionStart.x);
   const h = Math.abs(mr.areaSelectionCurrent.y - mr.areaSelectionStart.y);
-  const isReveal = mr.areaSelectionMode === 'reveal';
-  ctx.fillStyle = isReveal ? 'rgba(74,158,255,0.2)' : 'rgba(255,107,107,0.2)';
+  const { fill, stroke } = marqueeColors(mr.areaSelectionMode);
+  ctx.fillStyle = fill;
   ctx.fillRect(x, y, w, h);
-  ctx.strokeStyle = isReveal ? TOKEN_COLORS.AREA_REVEAL : TOKEN_COLORS.AREA_HIDE;
+  ctx.strokeStyle = stroke;
   ctx.setLineDash([5, 5]);
   ctx.strokeRect(x, y, w, h);
   ctx.setLineDash([]);

@@ -5,6 +5,7 @@ import { AuthScreen } from './AuthScreen.jsx';
 import { DiscoveryScreen } from './DiscoveryScreen.jsx';
 import { saveAuthSession, loadAuthSession, saveActiveRoom, loadActiveRoom } from './sessionStore.js';
 import { ErrorBoundary } from '../ui/ErrorBoundary.jsx';
+import { clearPendingForUser } from '../state/pending-storage.js';
 import { closeAllModals } from '../utils/modal-helpers.js';
 import { getAccessibilitySettings, setAccessibilitySetting } from '../ui/settings-helpers.js';
 import { docsHref } from '../utils/docs-link.js';
@@ -181,6 +182,9 @@ export function StandaloneShell({ app }) {
   const onSignOut = async () => {
     if (auth?.client) await auth.client.logout().catch(() => {});
     app.matrixVTTClient?.destroy();
+    // Unsent work belongs to the session that made it; a signed-out
+    // account must not leave writes waiting for the next one.
+    clearPendingForUser(auth?.userId ?? null);
     saveAuthSession(null);
     saveActiveRoom(null);
     setAuth(null);

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { sendChatMessage, hasMarkdown } from '../ui/chat-send.js';
+import { sendChatMessage } from '../ui/chat-send.js';
+import { hasMarkdown } from '../utils/renderMarkdown.js';
 import {
   speakAsSignal, replyContextSignal, chatModeSignal, chatToneSignal,
   activeSceneSignal,

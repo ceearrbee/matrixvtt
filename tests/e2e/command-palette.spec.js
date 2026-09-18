@@ -44,7 +44,8 @@ test.describe('command palette', () => {
     );
   });
 
-  test('tells the user it exists, from the composer they are already looking at', async ({ page }) => {
+  test('tells the user it exists, from the composer they are already looking at', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the phone composer drops the Ctrl+K hint; there is no Ctrl key to press');
     await waitForVttReady(page);
     await expect(page.locator('#chat-input')).toHaveAttribute('placeholder', /Ctrl\+K/);
   });

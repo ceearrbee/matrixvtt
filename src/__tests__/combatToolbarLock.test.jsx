@@ -7,14 +7,23 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, h } from 'preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { tablePhaseSignal, gmPrepActiveSignal } from '../state/ui-signals.js';
+import { activeMapIdSignal, mapsSignal, tokensSignal } from '../state/signals.js';
 import { UI_MODES } from '../utils/constants.js';
 
+// The toolbar only renders once a map is loaded, so the lock note has
+// a map to be locked over.
+const MAP = { id: 'm-1', name: 'Crypt', width_cells: 20, height_cells: 20, cell_px: 40 };
+
 function makeUi() {
+  activeMapIdSignal.value = MAP.id;
+  mapsSignal.value = new Map([[MAP.id, MAP]]);
+  tokensSignal.value = new Map();
   return /** @type {any} */ ({
     state: {
       isGM: () => true,
       tokens: new Map(),
-      maps: new Map(),
+      map: MAP,
+      maps: mapsSignal.value,
       settings: { name: 'r', systemConfig: {}, gm_user_ids: ['@me:m'] },
       initiative: { active: true, round: 1, current_index: 0, order: [] },
       fog: { mode: null, revealed: [] },

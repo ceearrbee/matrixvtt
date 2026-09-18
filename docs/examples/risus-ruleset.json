@@ -114,6 +114,21 @@
   "character_sheet": {
     "sections": [
       {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
         "kind": "slot_list",
         "field": "cliches",
         "label": "Clichés",
@@ -145,7 +160,8 @@
         ]
       },
       {
-        "kind": "attributes"
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "pending_modifiers_list",
@@ -194,7 +210,8 @@
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -271,9 +288,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -321,9 +335,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -379,5 +390,31 @@
         "description": "Give up the conflict before losing your last die. You lose, but you choose how it looks."
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "wounded",
+      "label": "Wounded",
+      "abbr": "Wo",
+      "description": "Has lost dice from the cliché in play."
+    },
+    {
+      "key": "out-of-the-fight",
+      "label": "Out of the Fight",
+      "abbr": "Ou",
+      "description": "Cliché reduced to zero; out of this conflict."
+    },
+    {
+      "key": "pumped",
+      "label": "Pumped",
+      "abbr": "Pu",
+      "description": "Pumping the cliché for bonus dice, at a later cost."
+    },
+    {
+      "key": "inappropriate",
+      "label": "Inappropriate",
+      "abbr": "Ia",
+      "description": "Using a cliché the situation does not favour."
+    }
+  ]
 }

@@ -1,26 +1,9 @@
 /**
- * Fog-of-war reveal/hide ops triggered by marquee area selection or cell click.
+ * Fog-of-war reveal/hide ops, committed by a marquee sweep
+ * (`src/map/actions/marquee.js`) or a single cell click.
  */
 
 import { emitVttError as emitError } from '../../utils/errorHandling.js';
-
-/**
- * Enter marquee mode. The next mousedown on the map starts the
- * selection rectangle; mousemove updates it; mouseup commits via
- * `completeAreaSelection`. Esc cancels (handled in the keyboard
- * handler at `src/map/input/keyboard.js`).
- */
-export function startAreaSelection(mr, mode) {
-  if (!mr.state.isGM?.()) return;
-  if (mode !== 'reveal' && mode !== 'hide') return;
-  mr.areaSelectionMode = mode;
-  mr.areaSelectionStart = null;
-  mr.areaSelectionCurrent = null;
-  const c = mr.stage?.container?.() ?? mr.canvas;
-  if (c?.style) c.style.cursor = 'crosshair';
-  mr._toast?.(mode === 'reveal' ? 'Drag to reveal area' : 'Drag to hide area', 'info');
-  mr.render?.();
-}
 
 async function commitFog(mr, revealed) {
   try {
@@ -31,15 +14,14 @@ async function commitFog(mr, revealed) {
   mr.render();
 }
 
-export async function completeAreaSelection(mr) {
-  if (!mr.areaSelectionMode || !mr.areaSelectionStart || !mr.areaSelectionCurrent) return;
+export async function completeFogArea(mr, rect, reveal) {
   const map = mr.state.map;
   if (!map) return;
 
-  const x1 = Math.min(mr.areaSelectionStart.x, mr.areaSelectionCurrent.x);
-  const y1 = Math.min(mr.areaSelectionStart.y, mr.areaSelectionCurrent.y);
-  const x2 = Math.max(mr.areaSelectionStart.x, mr.areaSelectionCurrent.x);
-  const y2 = Math.max(mr.areaSelectionStart.y, mr.areaSelectionCurrent.y);
+  const x1 = Math.min(rect.x1, rect.x2);
+  const y1 = Math.min(rect.y1, rect.y2);
+  const x2 = Math.max(rect.x1, rect.x2);
+  const y2 = Math.max(rect.y1, rect.y2);
   // Clamp the drag rect into map cell space. A drag that starts past
   // the panned origin produces negative world coords and the loop
   // below would otherwise add fog cell keys like "-1,5" to the set -
@@ -52,15 +34,12 @@ export async function completeAreaSelection(mr) {
   const row1 = clampRow(y1), row2 = clampRow(y2);
 
   const revealed = new Set(mr.state.fog.revealed || []);
-  const reveal = mr.areaSelectionMode === 'reveal';
   for (let r = row1; r <= row2; r++) {
     for (let c = col1; c <= col2; c++) {
       if (reveal) revealed.add(`${c},${r}`);
       else revealed.delete(`${c},${r}`);
     }
   }
-
-  mr.areaSelectionMode = mr.areaSelectionStart = mr.areaSelectionCurrent = null;
   await commitFog(mr, revealed);
 }
 

@@ -16,6 +16,13 @@ import { act } from 'preact/test-utils';
 import { replyContextSignal } from '../state/ui-signals.js';
 import { reactionsSignal } from '../state/signals.js';
 import { LogPanel } from '../ui/LogPanel.jsx';
+
+// The row toolbar renders for the row the pointer or keyboard is on,
+// not for every row in the log - open it the way a user does.
+function openRow(host, eventId) {
+  const scope = eventId ? host.querySelector(`[data-event-id="${eventId}"]`) : host;
+  act(() => { scope.querySelector('[data-log-actions-trigger]').click(); });
+}
 import { DiceBar } from '../ui/DiceBar.jsx';
 import { sendChatMessage } from '../ui/chat-send.js';
 
@@ -67,6 +74,7 @@ describe('D4 reply-in-thread - LogPanel ↪ button sets replyContextSignal', () 
       ],
     });
     render(h(LogPanel, { ui }), host);
+    openRow(host);
 
     const btn = host.querySelector('.log-actions__reply');
     expect(btn).toBeTruthy();
@@ -88,6 +96,7 @@ describe('D4 reply-in-thread - LogPanel ↪ button sets replyContextSignal', () 
       ],
     });
     render(h(LogPanel, { ui }), host);
+    openRow(host, '$reply');
 
     const replyRow = host.querySelector('[data-event-id="$reply"]');
     const btn = replyRow.querySelector('.log-actions__reply');
@@ -107,6 +116,7 @@ describe('D4 reply-in-thread - LogPanel ↪ button sets replyContextSignal', () 
       ],
     });
     render(h(LogPanel, { ui }), host);
+    openRow(host);
 
     const btn = host.querySelector('.log-actions__reply');
     await act(async () => { btn.click(); });

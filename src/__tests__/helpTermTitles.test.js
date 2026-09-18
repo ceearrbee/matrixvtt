@@ -41,6 +41,6 @@ describe('help term titles', () => {
   it('puts the tone term on the tone picker and persona on the speak-as chip', () => {
     expect(HELP_TERMS).toHaveProperty('tone');
     expect(read('src/ui/ChatTonePicker.jsx')).toMatch(/term: 'tone'/);
-    expect(read('src/ui/DiceBar.jsx')).toMatch(/term: 'persona'/);
+    expect(read('src/ui/composer/ChatCluster.jsx')).toMatch(/term: 'persona'/);
   });
 });

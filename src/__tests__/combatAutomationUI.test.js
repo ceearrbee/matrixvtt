@@ -27,32 +27,30 @@ describe('CombatAutomationPanel', () => {
   it('renders checkboxes for automation options', () => {
     render(h(CombatAutomationPanel, { ui }));
     
-    expect(screen.getByLabelText(/Auto-advance on death/i)).toBeTruthy();
     expect(screen.getByLabelText(/Announce rounds/i)).toBeTruthy();
-    expect(screen.getByLabelText(/Auto-roll NPC initiative/i)).toBeTruthy();
+    expect(screen.getByLabelText(/Auto-reveal fog on move/i)).toBeTruthy();
   });
 
   it('reflects current settings as checked/unchecked', () => {
     localStorage.setItem(STORAGE_KEYS.COMBAT_AUTOMATION, JSON.stringify({
-      auto_advance_on_death: true,
       auto_announce_round: false,
-      auto_roll_npc_initiative: false,
+      auto_reveal_fog: true,
     }));
-    
+
     render(h(CombatAutomationPanel, { ui }));
 
-    expect(screen.getByLabelText(/Auto-advance on death/i).checked).toBe(true);
+    expect(screen.getByLabelText(/Auto-reveal fog on move/i).checked).toBe(true);
     expect(screen.getByLabelText(/Announce rounds/i).checked).toBe(false);
   });
 
   it('saves setting to localStorage when checkbox toggled', () => {
     render(h(CombatAutomationPanel, { ui }));
     
-    const checkbox = screen.getByLabelText(/Auto-advance on death/i);
+    const checkbox = screen.getByLabelText(/Auto-reveal fog on move/i);
     fireEvent.click(checkbox);
 
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMBAT_AUTOMATION) ?? '{}');
-    expect(stored.auto_advance_on_death).toBe(true);
+    expect(stored.auto_reveal_fog).toBe(false);
   });
 
   it('saves false when checkbox is unchecked', () => {

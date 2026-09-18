@@ -21,6 +21,13 @@ function makeUi(entries, widgetManager = null) {
   };
 }
 
+// The row toolbar renders for the row the pointer or keyboard is on,
+// not for every row in the log - open it the way a user does.
+function openRow(host, eventId = '$msg1') {
+  const trigger = host.querySelector(`[data-event-id="${eventId}"] [data-log-actions-trigger]`);
+  act(() => { trigger.click(); });
+}
+
 function makeWidgetManager(overrides = {}) {
   return {
     userId: '@me:m',
@@ -142,6 +149,7 @@ describe('<LogPanel> quick-react bar (C3-C4)', () => {
       makeWidgetManager(),
     );
     render(h(LogPanel, { ui }), host);
+    openRow(host);
     const buttons = host.querySelectorAll('.log-actions .log-actions__react');
     expect(buttons.length).toBe(4);
   });
@@ -162,6 +170,7 @@ describe('<LogPanel> quick-react bar (C3-C4)', () => {
       wm,
     );
     render(h(LogPanel, { ui }), host);
+    openRow(host);
 
     const thumbBtn = Array.from(host.querySelectorAll('.log-actions__react')).find(
       (b) => b.textContent === '👍',
@@ -180,6 +189,7 @@ describe('<LogPanel> quick-react bar (C3-C4)', () => {
       makeWidgetManager(),
     );
     render(h(LogPanel, { ui }), host);
+    openRow(host);
     expect(host.querySelector('.log-actions__more')).toBeTruthy();
   });
 
@@ -189,6 +199,7 @@ describe('<LogPanel> quick-react bar (C3-C4)', () => {
       makeWidgetManager(),
     );
     render(h(LogPanel, { ui }), host);
+    openRow(host);
     const plusBtn = host.querySelector('.log-actions__more');
     await act(async () => { plusBtn.click(); });
     expect(host.querySelector('.emoji-picker')).toBeTruthy();
@@ -201,6 +212,7 @@ describe('<LogPanel> quick-react bar (C3-C4)', () => {
       wm,
     );
     render(h(LogPanel, { ui }), host);
+    openRow(host);
 
     const plusBtn = host.querySelector('.log-actions__more');
     await act(async () => { plusBtn.click(); });

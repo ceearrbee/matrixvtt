@@ -6,7 +6,8 @@
  * and was unreachable from any UI surface.
  */
 import { describe, it, expect, vi } from 'vitest';
-import { startAreaSelection, completeAreaSelection, toggleSingleFogCell } from '../map/actions/fog.js';
+import { toggleSingleFogCell } from '../map/actions/fog.js';
+import { startAreaSelection, completeAreaSelection } from '../map/actions/marquee.js';
 
 function makeMr({ isGM = true } = {}) {
   return {

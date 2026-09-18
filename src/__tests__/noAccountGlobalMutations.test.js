@@ -19,6 +19,15 @@ const FORBIDDEN = [
   /\.(setAvatarUrl|setProfileInfo|setAccountData|setPresence|setPusher|setPassword|addThreePid|setIgnoredUsers)\(/,
 ];
 
+/**
+ * scan-bad-patterns.sh scans for exactly this list too. Two hand-kept
+ * copies of a security pattern drift, and the one that drifts is the
+ * one nobody is looking at, so pin them to each other.
+ */
+const SHELL_PATTERN = fs
+  .readFileSync(path.join(process.cwd(), 'scripts/scan-bad-patterns.sh'), 'utf8')
+  .match(/scan "Account-global Matrix API[^"]*" \\\n\s*'([^']+)'/)?.[1];
+
 function* walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -43,5 +52,12 @@ describe('no account-global Matrix mutations in src/', () => {
       }
     }
     expect(hits).toEqual([]);
+  });
+});
+
+describe('the shell copy of this list', () => {
+  it('scans for the same patterns this suite does', () => {
+    expect(SHELL_PATTERN).toBeTruthy();
+    expect(SHELL_PATTERN).toBe(FORBIDDEN.map((r) => r.source).join('|'));
   });
 });

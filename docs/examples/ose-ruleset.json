@@ -367,9 +367,27 @@
     "armor_class_ascending": {
       "$": "+",
       "args": [
-        10,
-        "@dex.mod",
-        "@armor_bonus"
+        {
+          "$": "if",
+          "args": [
+            "@character.ac",
+            "@character.ac",
+            {
+              "$": "+",
+              "args": [
+                10,
+                "@dex.mod"
+              ]
+            }
+          ]
+        },
+        {
+          "$": "sum_items",
+          "args": [
+            "ac_bonus",
+            "equipped"
+          ]
+        }
       ]
     }
   },
@@ -426,29 +444,51 @@
         "max_field": "hp_max"
       },
       {
-        "kind": "stat_grid",
-        "stats": [
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
           {
-            "label": "AC",
-            "field": "ac"
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
           },
           {
-            "label": "Level",
-            "field": "level"
+            "label": "Items",
+            "source": "inventory_consumables"
           }
         ]
       },
       {
-        "kind": "attributes"
+        "kind": "stat_grid",
+        "stats": [
+          {
+            "label": "AC",
+            "formula": "armor_class_ascending"
+          },
+          {
+            "label": "Level",
+            "field": "level"
+          },
+          {
+            "label": "Attack",
+            "formula": "attack_bonus_fighter"
+          }
+        ]
       },
       {
-        "kind": "saves"
+        "kind": "attributes",
+        "collapsed": true
+      },
+      {
+        "kind": "saves",
+        "collapsed": true
       },
       {
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -475,16 +515,7 @@
         ]
       },
       {
-        "kind": "attributes"
-      },
-      {
-        "kind": "saves"
-      },
-      {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -511,19 +542,10 @@
         ]
       },
       {
-        "kind": "attributes"
-      },
-      {
         "kind": "defenses"
       },
       {
-        "kind": "saves"
-      },
-      {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -555,5 +577,85 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "blinded",
+      "label": "Blinded",
+      "abbr": "Bl",
+      "description": "Cannot see; penalties to attacks and most actions."
+    },
+    {
+      "key": "charmed",
+      "label": "Charmed",
+      "abbr": "Ch",
+      "description": "Regards the caster as a trusted friend."
+    },
+    {
+      "key": "confused",
+      "label": "Confused",
+      "abbr": "Cf",
+      "description": "Acts randomly each round."
+    },
+    {
+      "key": "cursed",
+      "label": "Cursed",
+      "abbr": "Cu",
+      "description": "Under a lingering magical penalty."
+    },
+    {
+      "key": "deafened",
+      "label": "Deafened",
+      "abbr": "Df",
+      "description": "Cannot hear; surprised more easily."
+    },
+    {
+      "key": "diseased",
+      "label": "Diseased",
+      "abbr": "Di",
+      "description": "Afflicted; weakens over time without a cure."
+    },
+    {
+      "key": "feared",
+      "label": "Feared",
+      "abbr": "Fe",
+      "description": "Flees from the source of the fear."
+    },
+    {
+      "key": "held",
+      "label": "Held",
+      "abbr": "He",
+      "description": "Magically immobilised but aware."
+    },
+    {
+      "key": "paralyzed",
+      "label": "Paralyzed",
+      "abbr": "Pa",
+      "description": "Rigid and helpless; attackers hit automatically."
+    },
+    {
+      "key": "petrified",
+      "label": "Petrified",
+      "abbr": "Pe",
+      "description": "Turned to stone."
+    },
+    {
+      "key": "poisoned",
+      "label": "Poisoned",
+      "abbr": "Po",
+      "description": "Save or suffer the poison, often fatally."
+    },
+    {
+      "key": "silenced",
+      "label": "Silenced",
+      "abbr": "Si",
+      "description": "Cannot speak, so cannot cast with verbal components."
+    },
+    {
+      "key": "sleeping",
+      "label": "Sleeping",
+      "abbr": "Sl",
+      "description": "Asleep and helpless until woken."
+    }
+  ]
 }

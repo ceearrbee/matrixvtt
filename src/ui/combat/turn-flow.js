@@ -6,7 +6,7 @@
 
 import { confirm } from '../confirm-dialogs.jsx';
 import { tickConditionDurations } from '../../map/actions/combat.js';
-import { getCombatSettings } from '../settings-helpers.js';
+import { getCombatSettings } from '../../utils/combat-settings.js';
 import { resetCombatantActions } from './action-economy.js';
 import { saveInitiative } from './persistence.js';
 import { VTTError, ErrorType, showErrorNotification } from '../../utils/errorHandling.js';

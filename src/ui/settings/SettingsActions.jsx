@@ -12,7 +12,7 @@ import { confirmAsync } from '../confirm-dialogs.jsx';
 import { loadSnapshot, restoreSnapshot } from '../../utils/state-snapshot.js';
 
 export function SettingsActions({ onClose }) {
-  return h('div', { class: 'form-actions', style: 'margin-top: 24px; display: flex; gap: 8px;' }, [
+  return h('div', { class: 'form-actions', style: 'margin-top: var(--space-4xl); display: flex; gap: var(--space-md);' }, [
     h('button', { type: 'button', class: 'dbt', onClick: onClose }, 'Cancel'),
     h('button', { type: 'submit', class: 'dbt btn-primary', style: 'flex: 1;' }, 'Save Settings'),
   ]);
@@ -63,7 +63,7 @@ export function SettingsAdvanced({ ui, ops, isGM, onClose }) {
           { title: 'Restore from autosave', confirmText: 'Restore', busyText: 'Restoring…' },
         );
       },
-    }, '⏪ Restore from local autosave'),
+    }, 'Restore from local autosave'),
     isGM && h('button', {
       type: 'button', class: 'dbt',
       style: 'width: 100%; color: var(--color-text-danger); border-color: var(--color-border-danger);',

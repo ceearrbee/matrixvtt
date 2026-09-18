@@ -16,24 +16,24 @@ export function PortraitUploader({ ui, portraitUrl, setPortraitUrl, uploading, o
 
   return h('div', { class: 'form-group' }, [
     h('label', { class: 'form-label', for: 'token-image-upload' }, 'Portrait (optional)'),
-    portraitUrl && h('div', { class: 'token-portrait-preview', style: 'display:flex;align-items:center;gap:10px;margin-bottom:8px;' }, [
+    portraitUrl && h('div', { class: 'token-portrait-preview', style: 'display:flex;align-items:center;gap:var(--space-lg);margin-bottom:var(--space-md);' }, [
       h('img', {
         src: portraitUrl, alt: 'Portrait preview',
-        style: 'width:48px;height:48px;border-radius:50%;object-fit:contain;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);padding:4px;',
+        style: 'width:48px;height:48px;border-radius:50%;object-fit:contain;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);padding:var(--space-xs);',
       }),
       h('button', {
         type: 'button', class: 'dbt dbt--sm',
         onClick: () => setPortraitUrl(''),
       }, 'Remove portrait'),
     ]),
-    h('div', { style: 'display:flex;gap:6px;align-items:center;margin-bottom:6px;' }, [
+    h('div', { style: 'display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-sm);' }, [
       h('button', {
         type: 'button',
         class: 'dbt dbt--sm',
         onClick: openLibrary,
-      }, '🗃 Browse icon library'),
+      }, 'Browse icon library'),
     ]),
-    ui.widgetManager?.canUploadMedia && h('div', { style: 'display:flex;gap:6px;align-items:center;' }, [
+    ui.widgetManager?.canUploadMedia && h('div', { style: 'display:flex;gap:var(--space-sm);align-items:center;' }, [
       h('input', {
         type: 'file', accept: 'image/*', id: 'token-image-upload',
         disabled: uploading,
@@ -42,12 +42,12 @@ export function PortraitUploader({ ui, portraitUrl, setPortraitUrl, uploading, o
       }),
       uploading && h('span', { class: 'token-portrait-uploading', style: 'font-size:var(--font-size-xs);color:var(--color-text-tertiary);' }, 'Uploading…'),
     ]),
-    h('details', { style: 'margin-top:6px;', open: !ui.widgetManager?.canUploadMedia }, [
+    h('details', { style: 'margin-top:var(--space-sm);', open: !ui.widgetManager?.canUploadMedia }, [
       h('summary', { style: 'font-size:var(--font-size-xs);color:var(--color-text-tertiary);cursor:pointer;' }, 'Or paste an image URL'),
       h('input', {
         type: 'text', class: 'form-input', id: 'token-image-url',
         placeholder: 'Paste a URL or browse the library…',
-        style: 'margin-top:6px;',
+        style: 'margin-top:var(--space-sm);',
         defaultValue: '',
         onInput: (e) => setPortraitUrl(e.target.value),
       }),

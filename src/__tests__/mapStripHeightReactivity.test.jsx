@@ -1,9 +1,13 @@
 /**
- * MapStrip - height reacts to the vtt-map-strip:* localStorage
+ * MapStrip - collapse state reacts to the vtt-map-strip:* localStorage
  * subscription, including cross-tab StorageEvents.
  *
- * Pairs with mapStripSize.test.js (the helper-level tests): the writer
- * was tested but the consumer component's reactive re-render wasn't.
+ * These tests used to assert an inline `--map-strip-height` variable.
+ * No rule ever read it: the almanac lays the split out map-dominant in
+ * CSS, so the strip's height never came from the stamp. Asserting the
+ * variable is why the dead path stayed green for as long as it did.
+ * Zero is the collapsed sentinel and is the only thing the stamp
+ * decides, so that is what these assert now.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { h } from 'preact';
@@ -39,31 +43,35 @@ beforeEach(() => {
 afterEach(() => { cleanup(); });
 
 describe('MapStrip - vtt-map-strip subscription', () => {
-  it('uses the stored height as the inline --map-strip-height variable on mount', () => {
+  it('renders expanded when the stamp holds a height', () => {
     localStorage.setItem('vtt-map-strip:@u:s:!r:s', '320');
     const { container } = render(h(MapStrip, { ui: makeUi() }));
     const strip = container.querySelector('.map-strip');
     expect(strip).toBeTruthy();
-    expect(strip.getAttribute('style')).toMatch(/--map-strip-height:\s*320px/);
+    expect(strip.classList.contains('map-strip--collapsed')).toBe(false);
   });
 
-  it('falls back to the 360px default when no stamp exists', () => {
+  it('renders expanded when no stamp exists', () => {
     const { container } = render(h(MapStrip, { ui: makeUi() }));
-    const strip = container.querySelector('.map-strip');
-    expect(strip.getAttribute('style')).toMatch(/--map-strip-height:\s*360px/);
+    expect(container.querySelector('.map-strip').classList.contains('map-strip--collapsed')).toBe(false);
   });
 
-  it('collapses to the chrome height when the stamp is 0', () => {
+  it('collapses when the stamp is 0', () => {
     localStorage.setItem('vtt-map-strip:@u:s:!r:s', '0');
     const { container } = render(h(MapStrip, { ui: makeUi() }));
     const strip = container.querySelector('.map-strip');
     expect(strip).toBeTruthy();
-    // collapsed sentinel renders the 32px chrome band.
-    expect(strip.getAttribute('style')).toMatch(/--map-strip-height:\s*32px/);
     expect(strip.classList.contains('map-strip--collapsed')).toBe(true);
   });
 
-  it('the chevron toggle persists 0 when collapsing and restores the last expanded value', async () => {
+  it('carries no height variable, because no rule reads one', () => {
+    localStorage.setItem('vtt-map-strip:@u:s:!r:s', '320');
+    const { container } = render(h(MapStrip, { ui: makeUi() }));
+    expect(container.querySelector('.map-strip').getAttribute('style') ?? '')
+      .not.toContain('--map-strip-height');
+  });
+
+  it('the chevron toggle persists 0 when collapsing and a height when expanding', async () => {
     localStorage.setItem('vtt-map-strip:@u:s:!r:s', '300');
     const { container } = render(h(MapStrip, { ui: makeUi() }));
 
@@ -74,8 +82,8 @@ describe('MapStrip - vtt-map-strip subscription', () => {
     fireEvent.click(toggle);
     await waitFor(() => expect(localStorage.getItem('vtt-map-strip:@u:s:!r:s')).toBe('0'));
 
-    // Second click expands: restored to the last expanded height.
+    // Second click expands again: any non-zero value means expanded.
     fireEvent.click(toggle);
-    await waitFor(() => expect(localStorage.getItem('vtt-map-strip:@u:s:!r:s')).toBe('300'));
+    await waitFor(() => expect(localStorage.getItem('vtt-map-strip:@u:s:!r:s')).toBe('360'));
   });
 });

@@ -19,8 +19,29 @@ async function selectCharacter(page) {
   // Items belong to the selected character; click the character card
   // first so ui.state.getCurrentCharacter() returns chr-aria. The card
   // now selects straight into the sidebar sheet (no preview popup).
+  // Gate on the snapshot having hydrated: the panel re-renders as
+  // characters arrive, and a click placed before that lands on a node
+  // the next render replaces.
+  await page.waitForFunction(
+    () => (window.matrixVTTClient?.state?.characters?.size ?? 0) > 0,
+    null,
+    { timeout: 15_000 },
+  );
   await page.locator('[data-character-card="chr-aria"]').click();
   await expect(page.locator('.char-sheet[data-entity-id="chr-aria"]')).toBeVisible({ timeout: 5_000 });
+}
+
+/**
+ * Open the item form. `exact` matters: the per-character inventory
+ * toolbar is labelled "Add new item to inventory", so a loose match
+ * resolves two buttons and `.first()` picks by render order.
+ */
+async function openItemForm(page) {
+  await openSheetRail(page);
+  await selectCharacter(page);
+  await page.locator('[data-tab="items"]').click();
+  await page.getByRole('button', { name: 'Add new item', exact: true }).click();
+  await expect(page.locator('#item-form-modal')).toBeVisible({ timeout: 5_000 });
 }
 
 test.describe('items tab', () => {
@@ -47,19 +68,12 @@ test.describe('items tab', () => {
   });
 
   test('item form weapon-properties is visible by default (no type set)', async ({ page }) => {
-    await openSheetRail(page);
-    await selectCharacter(page);
-    await page.locator('[data-tab="items"]').click();
-    await page.getByRole('button', { name: /add new item/i }).first().click();
+    await openItemForm(page);
     await expect(page.locator('#item-form-modal .modal-body')).toHaveAttribute('data-weapon-shaped', '');
   });
 
   test('typing a non-weapon type hides the weapon-properties block', async ({ page }) => {
-    await openSheetRail(page);
-    await selectCharacter(page);
-    await page.locator('[data-tab="items"]').click();
-    await page.getByRole('button', { name: /add new item/i }).first().click();
-    await expect(page.locator('#item-form-modal')).toBeVisible();
+    await openItemForm(page);
     await page.locator('#item-type').fill('note');
     // The CSS rule `.modal-body:not([data-weapon-shaped]) .weapon-properties { display: none }`
     // hides the block when the attribute is absent. Locator visibility honours that.
@@ -67,10 +81,7 @@ test.describe('items tab', () => {
   });
 
   test('switching back to a weapon type re-shows the block', async ({ page }) => {
-    await openSheetRail(page);
-    await selectCharacter(page);
-    await page.locator('[data-tab="items"]').click();
-    await page.getByRole('button', { name: /add new item/i }).first().click();
+    await openItemForm(page);
     await page.locator('#item-type').fill('note');
     await expect(page.locator('#item-form-modal .weapon-properties')).toBeHidden();
     await page.locator('#item-type').fill('weapon');
@@ -78,10 +89,7 @@ test.describe('items tab', () => {
   });
 
   test('Cancel button closes the item form', async ({ page }) => {
-    await openSheetRail(page);
-    await selectCharacter(page);
-    await page.locator('[data-tab="items"]').click();
-    await page.getByRole('button', { name: /add new item/i }).first().click();
+    await openItemForm(page);
     const modal = page.locator('#item-form-modal');
     await expect(modal).toBeVisible();
     await modal.getByRole('button', { name: /cancel/i }).click();

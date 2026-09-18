@@ -11,11 +11,10 @@ import { registerStateEffects } from './state-effects.js';
 import { startSnapshotInterval } from '../utils/state-snapshot.js';
 import { startSnapshotScheduler } from '../state/snapshot-scheduler.js';
 import { wireSyncProgress, setSyncPhase } from './sync/sync-progress.js';
-import { setupEventHandlers } from './event-handlers.js';
 import { wireOfflineBanner } from './sync/offline-banner.js';
 import { syncOkSignal, queueCountSignal } from '../state/ui-signals.js';
 import {
-  hydratePhase, hydrateIconRailDrawer, hydrateLayoutMode,
+  hydratePhase, hydrateIconRailDrawer, hydrateLayoutMode, hydrateSheetPanelWidth, hydrateFocusMode,
   bindPhaseToInitiative, bindAutoTabToMode, bindAutoDrawerToMode,
   unbindPhaseFromInitiative, unbindAutoTabFromMode, unbindAutoDrawerFromMode,
 } from './ui-mode.js';
@@ -27,6 +26,10 @@ import { loadDiceMacros } from './dice-macros.js';
 import { restoreActiveScene } from './scene-mode.js';
 import { closeSetupWizard } from './SetupWizard.jsx';
 import { logger } from '../utils/logger.js';
+import { startUnreadChat } from './notify/unread-chat.js';
+import { resetTabSignal } from './notify/tab-signal.js';
+import { isMobileViewport } from './useIsMobile.js';
+import { mobilePaneSignal } from '../state/ui-signals.js';
 
 export function initUIController(ui, state, widgetManager, chat) {
   ui.state = state;
@@ -57,7 +60,6 @@ export function initUIController(ui, state, widgetManager, chat) {
   chat?.hydrateFromTimeline?.(ui);
 
   restoreActiveScene(widgetManager?.roomId);
-  setupEventHandlers(ui);
   ui._disposeStateEffects = registerStateEffects(ui);
 
   // Periodic localStorage snapshot of campaign state. Best-effort -
@@ -99,6 +101,8 @@ export function initUIController(ui, state, widgetManager, chat) {
     hydratePhase(userId, roomId, ui.state.isGM());
     hydrateIconRailDrawer(userId, roomId);
     hydrateLayoutMode(userId);
+    hydrateSheetPanelWidth(userId, roomId);
+    hydrateFocusMode(userId, roomId);
     loadDiceMacros(userId);
     bindPhaseToInitiative(userId, roomId);
     bindAutoTabToMode(ui);
@@ -239,12 +243,22 @@ function _setupChatListeners(ui) {
     }
   };
   window.addEventListener(VTT_EVENTS.CHAT_MESSAGE, ui._onChat);
+
+  // Chat counts as read when the tab is in front and, on a phone, when
+  // the Chat pane is the one showing.
+  ui._disposeUnreadChat = startUnreadChat({
+    isChatVisible: () => document.visibilityState === 'visible'
+      && (!isMobileViewport() || mobilePaneSignal.value === 'chat'),
+  });
 }
 
 export function destroyUI(ui) {
   _removeCoreListeners(ui);
   _removeSyncListeners(ui);
   window.removeEventListener(VTT_EVENTS.CHAT_MESSAGE, ui._onChat);
+  ui._disposeUnreadChat?.();
+  ui._disposeUnreadChat = null;
+  resetTabSignal();
 
   ui._disposeStateEffects?.();
   ui._disposeStateEffects = null;

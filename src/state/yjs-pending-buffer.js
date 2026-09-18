@@ -2,20 +2,15 @@
  * Holding pen for outbound Yjs updates that could not be sent (offline,
  * or rate-limited past the transport's retries). Updates are merged via
  * Y.mergeUpdates - lossless for Yjs binary updates - instead of dropped,
- * and persisted to sessionStorage so a reload mid-outage keeps the edits.
+ * and persisted so a closed tab mid-outage keeps the edits. The store
+ * is localStorage, keyed by room and user, because sessionStorage dies
+ * with the tab and losing an offline edit is silent.
  */
 
 import * as Y from 'yjs';
 import { STORAGE_KEYS } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
-
-function defaultStorage() {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
+import { pendingStorage, pendingKey } from './pending-storage.js';
 
 function uint8ToBase64(arr) {
   let binary = '';
@@ -36,11 +31,12 @@ function base64ToUint8(str) {
 export class YjsPendingBuffer {
   /**
    * @param {string} roomId
-   * @param {{storage?: {getItem: Function, setItem: Function, removeItem: Function} | null}} [opts]
+   * @param {{storage?: {getItem: Function, setItem: Function, removeItem: Function} | null,
+   *          userId?: string | null}} [opts]
    */
-  constructor(roomId, { storage } = {}) {
-    this.storageKey = `${STORAGE_KEYS.YJS_PENDING}:${roomId}`;
-    this._storage = storage !== undefined ? storage : defaultStorage();
+  constructor(roomId, { storage, userId } = {}) {
+    this.storageKey = pendingKey(STORAGE_KEYS.YJS_PENDING, { userId, roomId });
+    this._storage = storage !== undefined ? storage : pendingStorage();
     this._merged = null;
     this._count = 0;
     this._storageWarned = false;

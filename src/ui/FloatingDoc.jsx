@@ -24,7 +24,6 @@ import { renderWikilinks } from '../utils/wikilinks.js';
 import { canEditPage } from '../state/reader.js';
 import { dispatchRollWikilink } from './tables/wikilink.js';
 import { dispatchMapWikilink } from './maps/wikilink.js';
-import { markHandoutSeen } from './handouts-panel.js';
 import { ensurePageThreadRoot } from '../utils/page-comments.js';
 import { ThreadView } from './ThreadView.jsx';
 
@@ -240,7 +239,7 @@ function FloatingDoc({ ui, descriptor, index }) {
     return h('aside', {
       ref: panelRef,
       class: 'floating-doc',
-      style: `z-index:${descriptor.z}`,
+      style: `--doc-order:${index}`,
       role: 'dialog',
       'aria-label': 'Document not found',
       tabindex: -1,
@@ -281,7 +280,7 @@ function FloatingDoc({ ui, descriptor, index }) {
   return h('aside', {
     ref: panelRef,
     class: 'floating-doc',
-    style: `z-index:${descriptor.z}`,
+    style: `--doc-order:${index}`,
     role: 'dialog',
     'aria-labelledby': titleId,
     tabindex: -1,
@@ -343,32 +342,25 @@ export function FloatingDocs({ ui }) {
     }
   });
 
-  // Mark handouts seen on the side-effect tick after open so the
-  // "NEW" badge clears on next list re-render.
-  useEffect(() => {
-    for (const d of docs) if (d.kind === 'handout') markHandoutSeen(d.id);
-  }, [docs.length, docs.map((d) => d.key).join('|')]);
-
   if (!docs.length) return null;
 
+  // The host stays unstyled on purpose: every panel inside is
+  // fixed-positioned, and a positioned host with a z-index would open a
+  // stacking context that pins them all under the chrome at --z-panel.
   return h('div', { class: 'floating-docs', 'aria-live': 'polite' },
     docs.map((d, i) => h(FloatingDoc, { key: d.key, ui, descriptor: d, index: i })),
   );
 }
 
-let _zCounter = 100;
-
 export function openDoc(kind, id) {
   const key = `${kind}:${id}`;
   const list = openDocsSignal.value;
-  const existing = list.find((d) => d.key === key);
-  if (existing) {
+  if (list.some((d) => d.key === key)) {
     // Already open - just bring to front.
     bringDocToFront(key);
     return;
   }
-  _zCounter += 1;
-  openDocsSignal.value = [...list, { key, kind, id, z: _zCounter }];
+  openDocsSignal.value = [...list, { key, kind, id }];
 }
 
 export function closeDoc(key) {
@@ -383,7 +375,6 @@ export function bringDocToFront(key) {
   const list = openDocsSignal.value;
   const item = list.find((d) => d.key === key);
   if (!item) return;
-  if (item.z === _zCounter) return;
-  _zCounter += 1;
-  openDocsSignal.value = list.map((d) => d.key === key ? { ...d, z: _zCounter } : d);
+  if (list[list.length - 1] === item) return;
+  openDocsSignal.value = [...list.filter((d) => d !== item), item];
 }

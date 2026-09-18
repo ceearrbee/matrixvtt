@@ -13,17 +13,19 @@
 
 import { showInvitePlayerModal } from './InvitePlayerModal.jsx';
 import { showKeyboardHelp } from './keyboard-help.js';
+import { setFocusMode } from './ui-mode.js';
+import { focusModeSignal } from '../state/ui-signals.js';
 import { docsHref } from '../utils/docs-link.js';
 import { destinationOf, travelPinsOn, runTravel } from '../map/actions/pin-travel.js';
 
-export const COMMAND_GROUPS = Object.freeze({
+const COMMAND_GROUPS = Object.freeze({
   PLAY: 'Play',
   SCENE: 'Scene',
   CAMPAIGN: 'Campaign',
   HELP: 'Help',
 });
 
-export const TOKEN_GROUP = 'Selected token';
+const TOKEN_GROUP = 'Selected token';
 
 /**
  * Token verbs used to live only behind a right-click on the map, so
@@ -50,14 +52,22 @@ function addTokenCommands(ui, add, token) {
 
 /**
  * @param {any} ui
- * @param {{ isGM: boolean, combatActive: boolean, selectedToken?: any }} context
+ * @param {{ isGM: boolean, combatActive: boolean, selectedToken?: any, selectionSize?: number }} context
  * @returns {{id: string, group: string, label: string, run: () => void}[]}
  */
-export function buildPaletteCommands(ui, { isGM, combatActive, selectedToken = null }) {
+export function buildPaletteCommands(ui, { isGM, combatActive, selectedToken = null, selectionSize = 0 }) {
   const commands = [];
   const add = (id, group, label, run) => commands.push({ id, group, label, run });
 
   if (isGM && selectedToken) addTokenCommands(ui, add, selectedToken);
+  if (isGM && selectionSize > 1) {
+    add('group-damage', TOKEN_GROUP, `Damage the ${selectionSize} selected tokens`,
+      () => ui.mapRenderer?.showGroupDamageDialog?.('damage'));
+    add('group-heal', TOKEN_GROUP, `Heal the ${selectionSize} selected tokens`,
+      () => ui.mapRenderer?.showGroupDamageDialog?.('heal'));
+    add('group-condition', TOKEN_GROUP, `Set a condition on the ${selectionSize} selected tokens`,
+      () => ui.mapRenderer?.showGroupConditionDialog?.());
+  }
 
   if (isGM) {
     if (combatActive) add('end-combat', COMMAND_GROUPS.PLAY, 'End combat', () => ui.endCombat?.());
@@ -79,6 +89,9 @@ export function buildPaletteCommands(ui, { isGM, combatActive, selectedToken = n
     add('invite', COMMAND_GROUPS.CAMPAIGN, 'Invite players', () => showInvitePlayerModal(ui));
   }
 
+  add('focus-mode', COMMAND_GROUPS.PLAY,
+    focusModeSignal.value ? 'Show the side rails again' : 'Focus mode: hide the side rails',
+    () => setFocusMode(ui.widgetManager?.userId, ui.widgetManager?.roomId, !focusModeSignal.value));
   add('new-character', COMMAND_GROUPS.PLAY, 'Make a character', () => ui.showCharacterWizard?.());
   add('settings', COMMAND_GROUPS.CAMPAIGN, 'Open settings', () => ui.openSettings?.());
   add('shortcuts', COMMAND_GROUPS.HELP, 'Keyboard shortcuts', () => showKeyboardHelp());

@@ -70,8 +70,8 @@ export function NPCMonsterDetails({ ui, entity, isPC, isEdit }) {
 }
 
 function ActionFieldset({ action, onRemove }) {
-  return h('fieldset', { style: 'border:0.5px solid var(--color-border-tertiary);border-radius:4px;padding:8px;margin-bottom:8px;' }, [
-    h('legend', { class: 'form-label', style: 'display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;' }, [
+  return h('fieldset', { style: 'border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:var(--space-md);margin-bottom:var(--space-md);' }, [
+    h('legend', { class: 'form-label', style: 'display:flex;justify-content:space-between;align-items:center;gap:var(--space-md);width:100%;' }, [
       h('span', null, 'Action'),
       onRemove && h('button', {
         type: 'button',
@@ -82,8 +82,8 @@ function ActionFieldset({ action, onRemove }) {
       }, 'Remove'),
     ]),
     h('input', { type: 'text', class: 'form-input action-name', placeholder: 'Name', value: action.name || '' }),
-    h('input', { type: 'text', class: 'form-input action-desc', placeholder: 'Description', value: action.description || '', style: 'margin-top:8px;' }),
-    h('div', { class: 'form-row', style: 'margin-top:8px;' }, [
+    h('input', { type: 'text', class: 'form-input action-desc', placeholder: 'Description', value: action.description || '', style: 'margin-top:var(--space-md);' }),
+    h('div', { class: 'form-row', style: 'margin-top:var(--space-md);' }, [
       h('div', { class: 'form-group' }, h('input', { type: 'number', class: 'form-input action-attack', placeholder: '+Atk', value: action.attack_bonus || '' })),
       h('div', { class: 'form-group' }, h('input', { type: 'text', class: 'form-input action-damage', placeholder: 'Dmg', value: action.damage || '' })),
       h('div', { class: 'form-group' }, h('input', { type: 'text', class: 'form-input action-damage-type', placeholder: 'Type', value: action.damage_type || '' })),
@@ -108,12 +108,12 @@ export function NPCActions({ entity, isPC, isEdit }) {
       key: a._k, action: a, onRemove: () => removeAt(i),
     }))),
     h('button', {
-      type: 'button', class: 'dbt', id: 'add-action-btn', style: 'width:100%;margin-bottom:16px;',
+      type: 'button', class: 'dbt', id: 'add-action-btn', style: 'width:100%;margin-bottom:var(--space-2xl);',
       onClick: () => setActions((as) => [...as, { _k: Date.now() }]),
     }, '+ Add Action'),
     !isPC && h('div', { class: 'form-group' },
       h('label', { class: 'form-label' }, [
-        h('input', { type: 'checkbox', id: 'entity-hidden', checked: isEdit && entity.is_hidden, style: 'margin-right:4px;' }),
+        h('input', { type: 'checkbox', id: 'entity-hidden', checked: isEdit && entity.is_hidden, style: 'margin-right:var(--space-xs);' }),
         ' Hidden from players',
       ])),
   ]);

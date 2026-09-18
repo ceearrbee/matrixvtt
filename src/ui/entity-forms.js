@@ -28,16 +28,16 @@ export function renderTemplatePicker(ui) {
   if (templates.length === 0) return '';
   const opts = templates.map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join('');
   return `
-    <div class="form-group" id="template-picker" style="border-bottom: 1px solid var(--color-border); padding-bottom: 12px; margin-bottom: 12px;">
+    <div class="form-group" id="template-picker" style="border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-xl); margin-bottom: var(--space-xl);">
       <label class="form-label" for="template-select">Load from Template</label>
-      <div style="display: flex; gap: 8px; align-items: center;">
+      <div style="display: flex; gap: var(--space-md); align-items: center;">
         <select class="form-select" id="template-select" style="flex:1;">
           <option value="">- select template -</option>
           ${opts}
         </select>
         <button type="button" class="dbt dbt--sm" title="Delete selected template" id="delete-template-btn"
                 aria-label="Delete selected template"
-                style="color:var(--color-text-danger);">🗑</button>
+                style="color:var(--color-text-danger);">Delete</button>
       </div>
       <small style="font-size:11px;color:var(--color-text-tertiary);">Applying a template pre-fills the form - you can still edit any field.</small>
     </div>`;

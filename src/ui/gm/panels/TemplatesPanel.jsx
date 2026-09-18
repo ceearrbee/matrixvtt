@@ -11,7 +11,7 @@ export function TemplatesPanel(props) {
   };
   return h(
     'div',
-    { class: 'gm-panel gm-panel--templates', style: 'padding:12px;' },
+    { class: 'gm-panel gm-panel--templates', style: 'padding:var(--space-xl);' },
     h(
       'div',
       { class: 'row-sm row--wrap' },

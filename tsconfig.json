@@ -39,6 +39,7 @@
     "node_modules",
     "dist",
     "**/*.test.js",
+    "**/*.test.jsx",
     "**/*.spec.js",
     "tests/**",
     // Vendored / minified files — type-check via node_modules types instead

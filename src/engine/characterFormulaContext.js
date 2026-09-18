@@ -3,8 +3,8 @@
  * character-sheet formulas expect.
  *
  * Ruleset formulas like `passive_perception` reference `@wis.mod`,
- * `@derived.pb`, `@proficient.perception`, etc. Those aren't free -
- * callers (e.g. the stat_grid renderer) have to pre-compute them before
+ * `@derived.pb`, `@proficient.perception`, `@coins.weight`, etc. Those
+ * aren't free - callers (e.g. the stat_grid renderer) pre-compute them before
  * calling `computeDerived`. This helper owns that chore so every surface
  * that shows a derived value reads the same numbers.
  *
@@ -15,6 +15,7 @@
  */
 
 import { computeDerived } from './computeDerived.js';
+import { computeCurrencyTotals } from './currency.js';
 
 /**
  * @param {object} systemConfig - the active ruleset (ui.state.settings.systemConfig)
@@ -47,6 +48,14 @@ export function buildCharacterFormulaContext(systemConfig, character, extras = {
     proficient[skill] = true;
   }
 
+  // Coin value and weight, so an encumbrance or wealth formula can add
+  // the purse without knowing the ruleset's denominations.
+  const totals = computeCurrencyTotals(character?.currency, systemConfig?.currency);
+  const coins = {
+    value: totals?.totalValueInBase ?? 0,
+    weight: totals?.totalWeight ?? 0,
+  };
+
   return {
     character,
     level,
@@ -54,6 +63,7 @@ export function buildCharacterFormulaContext(systemConfig, character, extras = {
     derived,
     cast,
     proficient,
+    coins,
     extra_bonuses: character?.extra_bonuses ?? 0,
     ...extras,
   };

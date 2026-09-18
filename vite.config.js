@@ -3,34 +3,11 @@ import { resolve } from 'path';
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'fs';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import preact from '@preact/preset-vite';
+import { CHUNK_GROUPS } from './vite.chunks.js';
 
 const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf8'));
 
 const LOG_FILE = resolve(__dirname, 'vtt-dev.log');
-const MANUAL_CHUNKS = [
-  ['matrix-widget', ['@matrix-widget-toolkit/api', 'matrix-widget-api']],
-  ['matrix-sdk', ['matrix-js-sdk', 'matrix-events-sdk', 'oidc-client-ts', 'sdp-transform', 'loglevel', 'jwt-decode', 'base-x', 'bs58', 'unhomoglyph', '@babel/runtime']],
-  ['rxjs', ['rxjs']],
-  ['konva', ['konva']],
-  ['preact', ['preact', '@preact/signals', 'preact/hooks', 'preact/compat']],
-  ['sonner', ['sonner']],
-  ['marked', ['marked']],
-  ['fuse', ['fuse.js']],
-  ['driver', ['driver.js']],
-  ['dnd-kit', ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities']],
-  ['tinykeys', ['tinykeys']],
-  ['focus-trap', ['focus-trap']],
-  ['p-retry', ['p-retry']],
-  ['valibot', ['valibot']],
-  ['dompurify', ['dompurify']],
-  ['idb-keyval', ['idb-keyval']],
-];
-
-const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const CHUNK_GROUPS = MANUAL_CHUNKS.map(([name, packages]) => ({
-  name,
-  test: new RegExp(packages.map((p) => `/node_modules/${escapeRe(p)}/`).join('|')),
-}));
 
 // Custom plugin for remote logging from browser
 function remoteLoggingPlugin() {
@@ -110,7 +87,7 @@ function buildVersionMetaPlugin() {
 }
 
 /**
- * Dev-only: widen the CSP meta tag so the local design-preview helper at
+ * Dev-only: widen the CSP meta tag so the `/impeccable live` helper at
  * http://localhost:8400 can load its client script and be reached over
  * fetch. `apply: 'serve'` means this never runs for `vite build`, so the
  * committed HTML and the production CSP stay clean.

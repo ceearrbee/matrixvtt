@@ -110,7 +110,7 @@ describe('attachIOMethods(ui)', () => {
     const file = new Blob([JSON.stringify({ line_of_sight: [] })], { type: 'application/json' });
     file.text = async () => JSON.stringify({ line_of_sight: [] });
     await ui.importUvttFile(file);
-    expect(ui._toast).toHaveBeenCalledWith('UVTT file contained no walls or lights', 'info');
+    expect(ui._toast).toHaveBeenCalledWith('That file carried no map image, walls or lights', 'info');
     expect(ui.state.addWall).not.toHaveBeenCalled();
     expect(ui.state.addLight).not.toHaveBeenCalled();
   });

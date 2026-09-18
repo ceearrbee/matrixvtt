@@ -72,7 +72,7 @@ describe('validateFog', () => {
       revealed: []
     };
 
-    expect(() => validateFog(invalidMode)).toThrow('Fog mode must be: visible, gm_only, or hidden');
+    expect(() => validateFog(invalidMode)).toThrow('Fog mode must be: visible or hidden');
   });
 
   it('tolerates a missing revealed array and coerces to empty', () => {
@@ -568,8 +568,8 @@ describe('validateFog - boundaries', () => {
     expect(() => validateFog(null)).toThrow(VTTError);
   });
 
-  it('accepts all three valid modes', () => {
-    for (const mode of ['visible', 'gm_only', 'hidden']) {
+  it('accepts every mode the renderer implements', () => {
+    for (const mode of ['visible', 'hidden']) {
       expect(() => validateFog({ mode, revealed: [] })).not.toThrow();
     }
   });

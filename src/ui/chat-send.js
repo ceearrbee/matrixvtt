@@ -25,17 +25,8 @@ import {
 } from '../state/ui-signals.js';
 import { formatToneBody } from './chat-tones.js';
 import { prefixBodyWithPersona, formatSayLogBody, formatEmoteLogBody } from './chat-log-format.js';
-import { renderMarkdown } from '../utils/renderMarkdown.js';
+import { renderMarkdown, hasMarkdown } from '../utils/renderMarkdown.js';
 import { parseSlash } from './slash-commands.js';
-
-// Markdown is a common-enough source format that we want it on the
-// wire when present, but a vast majority of "what's your AC?" sends are
-// plain text. Detect any markdown-significant character before paying
-// the formatted_body cost (extra bytes + a renderMarkdown call).
-const MARKDOWN_HINT = /[*_`#>[\]]|\n/;
-export function hasMarkdown(body) {
-  return typeof body === 'string' && MARKDOWN_HINT.test(body);
-}
 
 /** @returns {'say'|'describe'|'ooc'} */
 function _resolveMode() {

@@ -112,10 +112,10 @@ describe('dnd5e ruleset: XP / level tables', () => {
 
 describe('dnd5e ruleset: carry_capacity formula', () => {
   it('STR 15 → 225 lbs', () => {
-    expect(evaluate(dnd5e.formulas.carry_capacity, ctx({ str: 15 }))).toBe(225);
+    expect(evaluate(dnd5e.formulas.carry_capacity, ctx({ str: { score: 15 } }))).toBe(225);
   });
   it('STR 20 → 300 lbs', () => {
-    expect(evaluate(dnd5e.formulas.carry_capacity, ctx({ str: 20 }))).toBe(300);
+    expect(evaluate(dnd5e.formulas.carry_capacity, ctx({ str: { score: 20 } }))).toBe(300);
   });
 });
 

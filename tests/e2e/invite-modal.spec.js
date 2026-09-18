@@ -3,11 +3,10 @@
  * message and the matrix.to link are one click away, and an
  * invite-only room offers the switch to join requests.
  */
-import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
+import { test, expect, openGlobalMenu } from './fixtures/logged-in.js';
 
 async function openInviteModal(page) {
-  await waitForVttShell(page);
-  await page.locator('.left-index__menu-btn').click();
+  await openGlobalMenu(page);
   await page.locator('[data-menu-item="invite"]').click();
   const modal = page.locator('#invite-player-modal');
   await expect(modal).toBeVisible();

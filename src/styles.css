@@ -51,7 +51,6 @@
   --font-body: 'Source Serif 4', ui-serif, Georgia, serif;
   --font-display: 'Bodoni Moda', ui-serif, Georgia, serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-  --init-panel-width: 160px;
   --sheet-panel-width: 280px;
 
   --font-size-xs: 0.75rem;    /* 12px */
@@ -83,8 +82,14 @@
   --z-hud:     20;
   --z-panel:  100;
   --z-dropdown: 200;
+  --z-floating-doc: 900;
   --z-floating: 999;
   --z-drawer: 1000;
+  --z-raised-shell: 1001;
+  /* --z-popup and --z-overlay share a level deliberately: a popup and
+     the skip-nav link both clear every panel and both sit under a
+     modal. They are named apart so moving one does not move the other. */
+  --z-popup: 9999;
   --z-overlay: 9999;
   --z-modal: 10000;
   --z-toast: 11000;
@@ -393,6 +398,48 @@ input {
   animation: banner-drop 0.2s ease;
 }
 
+/* A new build is ready. Bottom-centre, beside the sync-dead bar and
+   clear of the two banners that hang from the top. */
+.pwa-update-banner {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--color-background-info);
+  color: var(--color-text-info);
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-sm) var(--space-xl);
+  font-size: var(--font-size-xs);
+  z-index: var(--z-toast);
+  max-width: calc(100vw - var(--space-4xl));
+}
+
+/* Sync gave up for good. Sits at the bottom so it never fights the
+   offline and rate-limit banners, which both hang from the top. */
+.sync-dead-banner {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--color-background-danger, var(--color-background-warning));
+  color: var(--color-text-danger, var(--color-text-warning));
+  border: 0.5px solid var(--color-border-danger, var(--color-border-warning));
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-sm) var(--space-xl);
+  font-size: var(--font-size-xs);
+  z-index: var(--z-toast);
+  max-width: calc(100vw - var(--space-4xl));
+}
+
 .offline-banner {
   position: fixed;
   top: 0;
@@ -479,14 +526,13 @@ input {
   flex-direction: column;
 }
 .almanac-map > .map-strip {
-  /* The map fills the dominant region (the resize handle is retired in the
-     almanac - the split is map-dominant by design, not user-dragged). */
+  /* The map fills the dominant region: the split is map-dominant by
+     design, not user-dragged. */
   flex: 1 1 0;
   height: 100%;
   min-height: 0;
   position: relative;
 }
-.almanac-map .map-strip__resize { display: none; }
 /* Initiative overlays the top of the map (combat strip in Combat, the
    InitiativeBar otherwise) instead of consuming a row beneath it. */
 .almanac-map > .combat-init-strip,
@@ -538,7 +584,7 @@ input {
 .chronicle .log-container .log-search-input {
   flex: 1;
   font-size: var(--font-size-xs);
-  padding: 2px var(--space-sm);
+  padding: var(--space-2xs) var(--space-sm);
   background: transparent;
   border: 0;
 }
@@ -560,9 +606,6 @@ input {
 }
 /* InitiativeBar (non-combat), overlaid on the map: lay entries out in a
    row that scrolls horizontally; hide the secondary chrome. */
-.almanac-map .initiative-panel .resize-handle--init {
-  display: none;
-}
 .almanac-map .initiative-panel .initiative-panel__header {
   padding: var(--space-xs) var(--space-md);
 }
@@ -628,28 +671,9 @@ input {
   color: var(--color-text-primary);
   border-color: var(--color-border-secondary);
 }
-.map-strip__resize {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 6px;
-  cursor: ns-resize;
-  background: transparent;
-  z-index: var(--z-hud);
-  transition: background 0.15s;
-}
-.map-strip__resize:hover,
-.map-strip__resize--dragging {
-  background: var(--color-border-secondary);
-}
-@media (pointer: coarse) {
-  /* Bump the hit area on touch - 6px is too tight for a fingertip. */
-  .map-strip__resize { height: 14px; }
-}
-.map-strip--collapsed > *:not(.map-strip__collapse):not(.map-strip__resize) {
-  /* Hide everything except the chrome (collapse toggle, resize handle)
-     when the strip is collapsed to its 32px header band. */
+.map-strip--collapsed > *:not(.map-strip__collapse) {
+  /* Hide everything except the collapse toggle when the strip is
+     collapsed to its header band. */
   display: none;
 }
 .map-strip--collapsed {
@@ -691,6 +715,18 @@ input {
    drawer when one is open. Overrides the fixed widths above. */
 .shell[data-layout="icon"] { --channels-rail-width: 56px; }
 .shell[data-layout="icon"][data-icon-rail-open] { --channels-rail-width: 320px; }
+
+/* Focus mode: both rails collapse to nothing so the map and the
+   conversation have the width. The regions stay mounted, so focus,
+   scroll position and any open drawer survive leaving the mode. */
+.shell[data-focus="on"] {
+  --channels-rail-width: 0px;
+  --sheet-panel-width: 0px;
+}
+.shell[data-focus="on"] > .shell__channels,
+.shell[data-focus="on"] > .shell__sheet {
+  display: none;
+}
 
 /* InitiativeBar visibility is mount-side (App.jsx renders the slim combat
    strip in Combat, the InitiativeBar otherwise). No CSS rule needed -
@@ -863,7 +899,7 @@ input {
   padding: 0 var(--space-xs);
   background: var(--color-background-tertiary);
   color: var(--color-text-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1.4;
@@ -965,11 +1001,11 @@ input {
   font-size: 14px;
 }
 
-/* ── Drag-to-resize handles ─────────────────────────────────────────────── */
-.resize-handle {
-  grid-row: 2;
+/* ── Drag-to-resize handle on the companion's left edge ─────────────────── */
+.right-companion__resize {
   position: absolute;
   top: 0;
+  left: 0;
   width: 6px;
   height: 100%;
   cursor: col-resize;
@@ -977,12 +1013,20 @@ input {
   background: transparent;
   transition: background 0.15s;
 }
-.resize-handle:hover,
-.resize-handle--dragging {
+.right-companion__resize:hover,
+.right-companion__resize--dragging {
   background: var(--color-border-secondary);
 }
-.resize-handle--init  { right: 0; }
-.resize-handle--sheet { left:  0; }
+/* It is keyboard-operable, so it needs the same ring as everything else. */
+.right-companion__resize:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+/* A 6px target is a mouse affordance; on touch the panel is full-width
+   and there is nothing to resize against. */
+@media (pointer: coarse) {
+  .right-companion__resize { display: none; }
+}
 
 /* ==================== HEADER ==================== */
 .vtt-header {
@@ -1082,7 +1126,7 @@ input {
   background: var(--color-background-primary);
   border: 1px solid var(--color-border-primary);
   padding: var(--space-2xs) var(--space-xs);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   color: var(--color-text-warning);
 }
 
@@ -1115,7 +1159,7 @@ input {
   font-size: var(--font-size-xs);
   line-height: 1.2;
 }
-.dbt--sm { padding: 4px 8px; }
+.dbt--sm { padding: var(--space-xs) var(--space-md); }
 .dbt--compact { padding: 1px 5px; }
 
 .dbt--active {
@@ -1235,7 +1279,7 @@ input {
   border: 1px solid var(--color-border-secondary);
   background: var(--color-background-secondary);
   color: var(--color-text-primary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   cursor: pointer;
 }
 .ie__hp-adjust-btn:hover {
@@ -1286,13 +1330,13 @@ input {
 .ie__hp-bar {
   height: 8px;
   background: var(--color-background-tertiary);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   overflow: hidden;
 }
 
 .ie__hp-fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   transition: width 200ms ease, background 200ms ease;
 }
 
@@ -1386,12 +1430,12 @@ input {
   font-weight: bold;
   border-bottom: 0.5px solid var(--color-border-tertiary);
   margin-bottom: var(--space-2xs);
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
 
 .draw-toolbar--collapsed .dtb-btn--toggle {
   border-bottom: none;
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
 }
 
 .dtb-btn {
@@ -1407,7 +1451,7 @@ input {
   line-height: 1;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
@@ -1469,7 +1513,7 @@ input {
   height: 32px;
   padding: var(--space-2xs);
   border: 1px solid var(--color-border-secondary);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   background: transparent;
   cursor: pointer;
 }
@@ -1481,7 +1525,7 @@ input {
   font-size: var(--font-size-xs);
   background: var(--color-background-primary);
   border: 1px solid var(--color-border-secondary);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   color: var(--color-text-secondary);
   cursor: pointer;
 }
@@ -1500,7 +1544,7 @@ input {
   font-size: var(--font-size-xs);
   font-family: var(--font-sans);
   padding: var(--space-2xs) var(--space-md);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -1527,7 +1571,7 @@ input {
   background: var(--color-background-secondary);
   border: 0.5px solid var(--color-border-primary);
   color: var(--color-text-primary);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   backdrop-filter: blur(4px);
 }
 
@@ -1644,7 +1688,7 @@ input {
   padding: 0 var(--space-xs);
   background: var(--color-background-tertiary);
   color: var(--color-text-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
   font-weight: 700;
   line-height: 1.4;
@@ -1731,13 +1775,13 @@ input {
   gap: var(--space-xs);
   padding: var(--space-sm) var(--space-md) var(--space-md);
   border-bottom: 1px solid var(--color-border-primary);
-  margin: -8px -8px 4px;
+  margin: -8px -8px var(--space-xs);
 }
 .log-search-input {
   width: 100%;
   box-sizing: border-box;
   padding: var(--space-xs) var(--space-md);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   border: 1px solid var(--color-border-primary);
   background: var(--color-background-secondary);
   color: var(--color-text-primary);
@@ -1787,7 +1831,7 @@ input {
 
 .log-body i { font-style: italic; }
 .log-ts    { font-size: var(--font-size-xs); color: var(--color-text-tertiary); flex-shrink: 0; }
-.log-empty { padding: 20px; text-align: center; color: var(--color-text-tertiary); font-size: 12px; }
+.log-empty { padding: var(--space-3xl); text-align: center; color: var(--color-text-tertiary); font-size: 12px; }
 
 /* ── Social chat surface - Discord/Obsidian feel ──────────────────────── */
 .log-panel {
@@ -1961,6 +2005,12 @@ input {
 }
 .log-actions button:hover { background: var(--color-background-tertiary); }
 
+/* The boundary between the rendered window and the rest of the log. */
+.log-earlier {
+  align-self: center;
+  margin: var(--space-sm) 0;
+}
+
 /* Reactions stay visible - they're a permanent record of who reacted. */
 .log-reactions {
   display: flex;
@@ -1970,7 +2020,7 @@ input {
 }
 .reaction-badge {
   padding: 1px var(--space-sm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-background-tertiary);
   border: 0.5px solid var(--color-border-tertiary);
   font-size: var(--font-size-xs);
@@ -2119,10 +2169,10 @@ input {
   gap: var(--space-xs);
   justify-content: flex-end;
 }
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px; text-align: center; color: var(--color-text-tertiary); }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--space-md); padding: var(--space-4xl); text-align: center; color: var(--color-text-tertiary); }
 .empty-state__msg { margin: 0; color: var(--color-text-tertiary); }
-.section-divider { margin-top: 8px; padding-top: 16px; border-top: 0.5px solid var(--color-border-primary); }
-.form-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.section-divider { margin-top: var(--space-md); padding-top: var(--space-2xl); border-top: 0.5px solid var(--color-border-primary); }
+.form-check-row { display: flex; align-items: center; gap: var(--space-md); font-size: var(--font-size-sm); cursor: pointer; }
 
 /* Progress card - corner-docked, non-blocking bulk-operation indicator. */
 .progress-card {
@@ -2150,7 +2200,7 @@ input {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 2px var(--space-md);
+  padding: var(--space-2xs) var(--space-md);
   background: var(--color-background-secondary);
   border-bottom: 0.5px solid var(--color-border-tertiary);
   font-size: var(--font-size-xs);
@@ -2181,7 +2231,7 @@ input {
 @media (prefers-reduced-motion: reduce) {
   .sync-progress__fill--indeterminate { animation: none; width: 100%; opacity: 0.6; }
 }
-.log-load-more { width: 100%; margin-top: 8px; }
+.log-load-more { width: 100%; margin-top: var(--space-md); }
 
 /* ── Character switcher (players with multiple claimed chars) ────────────── */
 .char-switcher {
@@ -2192,7 +2242,7 @@ input {
 .char-switcher__select {
   width: 100%;
   padding: var(--space-xs) var(--space-md);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   border: 1px solid var(--color-border-primary);
   background: var(--color-background-secondary);
   color: var(--color-text-primary);
@@ -2214,7 +2264,7 @@ input {
   text-align: center;
   padding: var(--space-xs) var(--space-2xs);
   background: var(--color-background-secondary);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   border: 0.5px solid var(--color-border-tertiary);
 }
 
@@ -2315,7 +2365,7 @@ input {
   padding: var(--space-xs) var(--space-lg);
   background: var(--color-background-info, rgba(74, 144, 226, 0.12));
   border: 0.5px solid var(--color-text-info);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-xs);
   color: var(--color-text-primary);
   flex-shrink: 0;
@@ -2336,7 +2386,7 @@ input {
   cursor: pointer;
   font-size: 14px;
   padding: 0 var(--space-xs);
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
 }
 .scene-banner__leave:hover {
   background: var(--color-background-tertiary);
@@ -2521,7 +2571,7 @@ input {
   display: inline-block;
   margin-left: var(--space-sm);
   padding: var(--space-2xs) var(--space-sm);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   background: var(--color-text-info);
   color: var(--color-background-primary);
   font-size: var(--font-size-xs);
@@ -2635,7 +2685,7 @@ input {
   color: var(--color-text-info);
   background: var(--color-background-tertiary);
   padding: var(--space-2xs) var(--space-md);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -2711,7 +2761,7 @@ input {
   min-height: 28px;
   padding: var(--space-xs) var(--space-lg);
   border: 0.5px solid var(--color-border-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -2930,7 +2980,7 @@ input {
 .markdown code {
   background: var(--color-background-secondary);
   padding: var(--space-2xs) var(--space-xs);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9em;
 }
@@ -3086,13 +3136,13 @@ input {
 .hp-bar__track {
   height: 6px;
   background: var(--color-background-secondary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   overflow: hidden;
 }
 
 .hp-bar__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
 }
 
 .stats-grid {
@@ -3263,7 +3313,7 @@ input {
 .ruleset-list__badge {
   font-size: var(--font-size-xs);
   padding: 0 var(--space-sm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 0.5px solid var(--color-border-success);
   color: var(--color-text-success);
   white-space: nowrap;
@@ -3305,7 +3355,7 @@ input {
 .rs-section__head {
   cursor: pointer;
   list-style: none;
-  padding: var(--space-sm) 2px;
+  padding: var(--space-sm) var(--space-2xs);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-secondary);
@@ -3322,13 +3372,13 @@ input {
 .rs-section[open] > .rs-section__head { color: var(--color-text-primary); }
 .rs-section[open] > .rs-section__head::before { content: '▾'; }
 .rs-section__body {
-  padding: 0 2px var(--space-md) var(--space-lg);
+  padding: 0 var(--space-2xs) var(--space-md) var(--space-lg);
   font-size: var(--font-size-sm);
 }
 .rs-kv {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 2px var(--space-md);
+  gap: var(--space-2xs) var(--space-md);
   margin: 0;
 }
 .rs-kv dt { color: var(--color-text-tertiary); font-size: var(--font-size-xs); }
@@ -3338,7 +3388,7 @@ input {
 .rs-chip {
   font-size: var(--font-size-xs);
   padding: 0 var(--space-sm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-background-secondary);
   border: 0.5px solid var(--color-border-tertiary);
   color: var(--color-text-secondary);
@@ -3445,7 +3495,7 @@ input {
   align-items: center;
   gap: var(--space-sm);
   margin-bottom: 0;
-  padding: var(--space-md) 2px;
+  padding: var(--space-md) var(--space-2xs);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-secondary);
@@ -3562,6 +3612,19 @@ input {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   margin-top: var(--space-2xs);
+}
+
+/* currency totals */
+.currency-totals {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+.currency-totals__weight {
+  color: var(--color-text-tertiary);
 }
 
 /* slot_list */
@@ -3921,7 +3984,7 @@ input {
   display: inline-block;
   padding: var(--space-2xs) var(--space-md);
   border: 1px solid var(--color-border-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-background-secondary);
   color: var(--color-text-primary);
   text-decoration: none;
@@ -4116,6 +4179,13 @@ input {
 .next-steps__chip[data-done="true"] .next-steps__label {
   text-decoration: line-through;
 }
+/* Waiting on an earlier step: quieter than a live chip, but still a
+   real control - clicking it runs the step it waits for. Not dimmed
+   by color alone; the chip also loses its border emphasis. */
+.next-steps__chip[data-blocked="true"] {
+  color: var(--color-text-tertiary);
+  border-style: dashed;
+}
 /* Push the dismiss link to the far end of the row. */
 .next-steps__dismiss { margin-left: auto; }
 
@@ -4252,7 +4322,7 @@ button:focus-visible,
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-tertiary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -4443,7 +4513,7 @@ button:focus-visible,
 .save-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2px var(--space-lg);
+  gap: var(--space-2xs) var(--space-lg);
   margin-bottom: var(--space-xl);
 }
 .save-grid .skill-row {
@@ -4481,7 +4551,7 @@ button:focus-visible,
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   background: var(--color-background-tertiary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   padding: var(--space-2xs) var(--space-xs);
   flex-shrink: 0;
 }
@@ -4626,7 +4696,7 @@ button:focus-visible,
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   padding: 0 var(--space-xs);
 }
 
@@ -4686,6 +4756,11 @@ button:focus-visible,
   padding: 0;
   cursor: pointer;
   border-radius: inherit;
+}
+/* The hit layer is a hit area, not a surface: without this the global
+   button:hover fills it and it covers the card it sits on. */
+.card__hit:hover {
+  background: transparent;
 }
 .card__hit:focus-visible {
   outline: 2px solid var(--color-focus);
@@ -4750,7 +4825,7 @@ button:focus-visible,
   font-size: var(--font-size-xs);
   line-height: 1.6;
   padding: 0 var(--space-sm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-background-secondary);
   color: var(--color-text-tertiary);
   border: 0.5px solid var(--color-border-tertiary);
@@ -5024,7 +5099,7 @@ button.item-card__tag--holder:hover {
 /* contenteditable initiative roll */
 .ie__init[contenteditable="true"] {
   outline: 1px solid var(--color-text-info);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   padding: 0 var(--space-2xs);
   min-width: 14px;
   cursor: text;
@@ -5205,12 +5280,12 @@ button.item-card__tag--holder:hover {
 .party-roster__hpbar {
   height: 4px;
   background: var(--color-background-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   overflow: hidden;
 }
 .party-roster__hpbar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   transition: width 200ms ease-out;
 }
 .party-roster__stats {
@@ -5555,13 +5630,13 @@ button.item-card__tag--holder:hover {
   grid-column: 1 / -1;
   height: 3px;
   background: var(--color-background-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   overflow: hidden;
   margin-top: var(--space-2xs);
 }
 .combat-init-strip__hpbar-fill {
   height: 100%;
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
 }
 .combat-init-strip__end-turn {
   flex-shrink: 0;
@@ -5993,7 +6068,25 @@ button.item-card__tag--holder:hover {
   .mobile-tab-bar__tab--active {
     color: var(--md-primary, var(--color-text-info));
   }
-  .mobile-tab-bar__icon { font-size: 18px; line-height: 1; }
+  .mobile-tab-bar__icon { font-size: 18px; line-height: 1; position: relative; }
+
+  /* Count sits on the icon, and the tab's accessible name carries the
+     same number, so the badge is never the only way to read it. */
+  .mobile-tab-bar__badge {
+    position: absolute;
+    top: calc(-1 * var(--space-xs));
+    left: var(--space-sm);
+    min-width: var(--space-2xl);
+    padding: 0 var(--space-2xs);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-background-info);
+    border: 0.5px solid var(--color-border-info);
+    color: var(--color-text-info);
+    font-family: var(--font-headline);
+    font-size: var(--font-size-xs);
+    line-height: var(--space-2xl);
+    text-align: center;
+  }
 
   /* When sheet is in drawer form the desktop border styling no longer
      applies - keep the scroll cap so long character lists don't push
@@ -6149,11 +6242,9 @@ button.item-card__tag--holder:hover {
      pane's unified control vocabulary (34–44px touch targets, no
      awkward stretched layouts when a region renders as a full pane). */
 
-  /* IconRail as a full Journal pane: hide the 44px side rail (it was the
-     desktop rail's navigation column) and let the drawer fill the pane.
-     The bottom tab bar already provides pane navigation. */
-  .shell[data-mobile-pane="journal"] .icon-rail-host .icon-rail { display: none; }
-  .shell[data-mobile-pane="journal"] .icon-rail-host .icon-rail__drawer { flex: 1 1 100%; }
+  /* The rail stays: the bottom tab bar navigates panes but has no Menu
+     tab, so this column carries the only route to the global menu. */
+  .shell[data-mobile-pane="journal"] .icon-rail-host .icon-rail__drawer { flex: 1 1 auto; }
 
   /* Map zoom buttons: drop the "Zoom" word; the aria-label still carries
      "Zoom in" / "Zoom out", and a glyph-only button fits the 44×44 target
@@ -6248,7 +6339,7 @@ button.item-card__tag--holder:hover {
   font-size: var(--font-size-xs);
   line-height: 1.6;
   padding: 0 var(--space-sm);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-background-secondary);
   color: var(--color-text-tertiary);
   border: 0.5px solid var(--color-border-tertiary);
@@ -6427,14 +6518,9 @@ button.item-card__tag--holder:hover {
 }
 
 /* ==================== FLOATING DOCS (pop-up handouts + pages) ==================== */
-.floating-docs {
-  /* The host element is invisible; each .floating-doc inside it is
-     fixed-positioned so the host's box doesn't matter. */
-  position: relative;
-  z-index: 0;
-}
 .floating-doc {
   position: fixed;
+  z-index: calc(var(--z-floating-doc) + var(--doc-order, 0));
   width: min(440px, calc(100vw - 24px));
   max-height: calc(100vh - 80px);
   display: flex;
@@ -6479,7 +6565,7 @@ button.item-card__tag--holder:hover {
   font-size: 18px;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -6734,7 +6820,7 @@ button.item-card__tag--holder:hover {
 }
 
 /* ==================== LAYOUT UTILITIES ==================== */
-/* Replace hardcoded inline styles like `display:flex;gap:8px` with
+/* Replace hardcoded inline styles like `display:flex;gap:var(--space-md)` with
    these utility classes so the spacing scale stays consistent. */
 
 .stack       { display: flex; flex-direction: column; }
@@ -6992,7 +7078,7 @@ button.item-card__tag--holder:hover {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   padding: 0 var(--space-xs);
   line-height: 1.5;
 }
@@ -7006,7 +7092,7 @@ button.item-card__tag--holder:hover {
   flex: 1;
   min-width: 0;
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   padding: var(--space-xl);
   overflow-y: auto;
   display: flex;
@@ -7049,7 +7135,7 @@ button.item-card__tag--holder:hover {
   width: 48px;
   height: 48px;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   border: 0.5px solid var(--color-border-primary);
 }
 .library-preview__name {
@@ -7067,7 +7153,7 @@ button.item-card__tag--holder:hover {
 }
 .library-preview__badge {
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   padding: 0 var(--space-xs);
 }
 .library-preview__facts {
@@ -7089,7 +7175,7 @@ button.item-card__tag--holder:hover {
   max-height: 240px;
   object-fit: contain;
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   margin-bottom: var(--space-lg);
 }
 .library-preview__notes {
@@ -7127,7 +7213,7 @@ button.item-card__tag--holder:hover {
   padding: var(--space-2xs) var(--space-sm);
   background: var(--color-background-secondary);
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   text-align: center;
@@ -7147,7 +7233,7 @@ button.item-card__tag--holder:hover {
   padding: var(--space-2xs) var(--space-sm);
   background: var(--color-background-secondary);
   border: 0.5px solid var(--color-border-primary);
-  border-radius: 3px;
+  border-radius: var(--border-radius-md);
   z-index: var(--z-hud);
 }
 .token-action-bar__name {
@@ -7203,4 +7289,18 @@ button.item-card__tag--holder:hover {
 }
 .invite-modal .form-actions {
   margin-top: 0;
+}
+
+/* Group condition rows: name on the left, Add and Clear on the right. */
+.cond-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.cond-list__actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }

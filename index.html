@@ -36,6 +36,11 @@
   <noscript>
     <link rel="stylesheet" href="%BASE_URL%fonts/serif-display.css">
   </noscript>
+  <!-- The widget is normally iframed, where this is inert. It matters
+       when a stray path renders this page top-level without hitting the
+       redirect: mobile Chrome would otherwise paint a white bar above a
+       dark page. No manifest here; app.html is the installable surface. -->
+  <meta name="theme-color" content="#16191f">
   <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>

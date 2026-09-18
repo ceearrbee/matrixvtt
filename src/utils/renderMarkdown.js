@@ -35,3 +35,17 @@ function _escapeHtml(s) {
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
 }
+
+// Markdown is a common-enough source format that we want it on the
+// wire when present, but a vast majority of "what's your AC?" sends are
+// plain text. Detect any markdown-significant character before paying
+// the formatted_body cost (extra bytes + a renderMarkdown call).
+const MARKDOWN_HINT = /[*_`#>[\]]|\n/;
+
+/**
+ * @param {unknown} body
+ * @returns {boolean}
+ */
+export function hasMarkdown(body) {
+  return typeof body === 'string' && MARKDOWN_HINT.test(body);
+}

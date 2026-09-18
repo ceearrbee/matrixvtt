@@ -5,6 +5,12 @@
  * Each step ticks itself from state the room already carries, so the
  * list empties as the table comes together instead of needing a
  * "mark as done" the user has to maintain.
+ *
+ * A step can also be waiting on an earlier one: you cannot place a
+ * token without a map, or roll initiative without tokens. Such a step
+ * carries `blockedBy`, and the panel runs the blocking step instead of
+ * an action that could only fail. A step that is already done is never
+ * blocked - progress reads even if its prerequisite later went away.
  */
 
 export const NEXT_STEP_KEYS = Object.freeze({
@@ -50,7 +56,7 @@ function hasUnclaimedCharacter(characters) {
  * @param {Map<string, any>} room.characters
  * @param {{active?: boolean, order?: any[]}} room.initiative
  * @param {string|null} room.myUserId
- * @returns {{key: string, label: string, hint: string, done: boolean, action?: string}[]}
+ * @returns {{key: string, label: string, hint: string, done: boolean, blockedBy: string|null, action?: string}[]}
  */
 export function nextStepsFor({
   isGM, memberCount = 1, maps, tokens, characters, initiative, myUserId,
@@ -65,33 +71,54 @@ export function nextStepsFor({
         ? 'Open the party roster and take the sheet your GM prepared for you.'
         : 'Nobody has left you a sheet yet, so build one of your own.',
       done: ownsACharacter(characters, myUserId),
+      blockedBy: null,
     }];
   }
+
+  const mapDone = hasRealMap(maps);
+  const tokenDone = (tokens?.size ?? 0) > 0;
+  const combatDone = !!initiative?.active || (initiative?.order?.length ?? 0) > 0;
 
   return [
     {
       key: NEXT_STEP_KEYS.MAP,
       label: 'Add a map',
       hint: 'Upload the battle map your players will see.',
-      done: hasRealMap(maps),
+      done: mapDone,
+      blockedBy: null,
     },
     {
       key: NEXT_STEP_KEYS.INVITE,
       label: 'Invite players',
       hint: 'Copy the link that walks a player through signing in and joining.',
       done: memberCount > 1,
+      blockedBy: null,
     },
-    {
+    step({
       key: NEXT_STEP_KEYS.TOKEN,
       label: 'Add a token',
       hint: 'Put a character or monster on the map.',
-      done: (tokens?.size ?? 0) > 0,
-    },
-    {
+      done: tokenDone,
+      blockedBy: mapDone ? null : NEXT_STEP_KEYS.MAP,
+    }),
+    step({
       key: NEXT_STEP_KEYS.COMBAT,
       label: 'Start combat',
       hint: 'Roll initiative when the first fight breaks out.',
-      done: !!initiative?.active || (initiative?.order?.length ?? 0) > 0,
-    },
+      done: combatDone,
+      blockedBy: tokenDone ? null : NEXT_STEP_KEYS.TOKEN,
+    }),
   ];
+}
+
+const WAITING_HINTS = Object.freeze({
+  [NEXT_STEP_KEYS.MAP]: 'Add a map first, then put a character or monster on it.',
+  [NEXT_STEP_KEYS.TOKEN]: 'Add a token first, so there is somebody to roll for.',
+});
+
+// A done step is never blocked, so progress still reads if its
+// prerequisite later went away; a blocked one says what it waits for.
+function step({ key, label, hint, done, blockedBy }) {
+  const waiting = done ? null : blockedBy;
+  return { key, label, hint: waiting ? WAITING_HINTS[waiting] : hint, done, blockedBy: waiting };
 }

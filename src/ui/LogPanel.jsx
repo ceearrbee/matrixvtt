@@ -27,6 +27,7 @@ import {
 import { reactionsSignal } from '../state/signals.js';
 import { loadMoreHistory } from './log-panel.js';
 import { EmojiPicker } from './EmojiPicker.jsx';
+import { ReplyIcon } from './icons/index.jsx';
 import { LogControls } from './LogControls.jsx';
 import { Avatar } from './Avatar.jsx';
 import { EmptyState } from './EmptyState.jsx';
@@ -47,6 +48,13 @@ function TrustedMarkup({ class: cls, html }) {
 }
 
 const QUICK_REACTS = ['👍', '👎', '❤️', '😂'];
+
+// How many grouped items the feed renders before the "earlier entries"
+// boundary. The log itself holds up to MAX_LOG_ENTRIES (2000); rendering
+// all of them cost ~32,000 nodes and put ~12,000 hover-toolbar buttons in
+// the tab order. A window plus a boundary keeps the live conversation
+// cheap and the backlog one click away.
+export const LOG_WINDOW_SIZE = 60;
 
 async function _sendReaction(ui, targetEventId, key) {
   try {
@@ -98,6 +106,10 @@ export function LogPanel({ ui }) {
   const [pickerAnchorRect, setPickerAnchorRect] = useState(null);
   const [collapsed, setCollapsed] = useState({});
   const [expanded, setExpanded] = useState(/** @type {Record<string, boolean>} */ ({}));
+  const [windowSize, setWindowSize] = useState(LOG_WINDOW_SIZE);
+  // The row whose action toolbar is open: the one the pointer is over,
+  // or the one holding keyboard focus.
+  const [activeRow, setActiveRow] = useState(/** @type {string|null} */ (null));
 
   // Keyed on the log's version signal rather than the array, which is
   // mutated in place by ui._log(). The picker / collapse / expand state
@@ -133,18 +145,33 @@ export function LogPanel({ ui }) {
   };
   const toggleExpanded = (id) => setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
 
+  // The trigger renders for every row so a keyboard user can reach the
+  // toolbar at all, and so focus is not destroyed by the toolbar
+  // mounting underneath it. The other six buttons are the expensive
+  // part, and only the row you are on needs them.
   const renderActions = (e) => {
     if (!e.eventId || SYNTH_ENTRY_ICONS.has(e.icon)) return null;
+    const open = activeRow === e.eventId;
     return h('div', { class: 'log-actions' }, [
-      ...QUICK_REACTS.map((char) => h('button', {
+      h('button', {
+        key: 'trigger',
+        type: 'button',
+        class: 'log-actions__trigger',
+        'data-log-actions-trigger': true,
+        'aria-expanded': String(open),
+        title: 'Message actions',
+        'aria-label': 'Message actions',
+        onClick: () => setActiveRow(open ? null : e.eventId),
+      }, '⋯'),
+      ...(!open ? [] : QUICK_REACTS.map((char) => h('button', {
         key: char,
         type: 'button',
         class: 'log-actions__react',
         title: `React with ${char}`,
         'aria-label': `React with ${char}`,
         onClick: () => _sendReaction(ui, e.eventId, char),
-      }, char)),
-      h('button', {
+      }, char))),
+      open && h('button', {
         type: 'button',
         class: 'log-actions__more',
         title: 'More reactions',
@@ -157,7 +184,7 @@ export function LogPanel({ ui }) {
           }
         },
       }, '+'),
-      h('button', {
+      open && h('button', {
         type: 'button',
         class: 'log-actions__reply',
         title: 'Reply in thread',
@@ -169,7 +196,7 @@ export function LogPanel({ ui }) {
             rootPreview: (e.text || '').slice(0, 60),
           };
         },
-      }, '↪'),
+      }, h(ReplyIcon, {})),
     ]);
   };
 
@@ -196,6 +223,8 @@ export function LogPanel({ ui }) {
       class: `log-msg${isFirstInGroup ? ' log-msg--first' : ''}`,
       'data-event-id': e.eventId ?? undefined,
       key: e.eventId ?? e.ts,
+      onPointerEnter: e.eventId ? () => setActiveRow(e.eventId) : undefined,
+      onFocusIn: e.eventId ? () => setActiveRow(e.eventId) : undefined,
     }, [
       h(TrustedMarkup, { class: bodyClass, html: e.html }),
       e.long && h('button', {
@@ -332,7 +361,18 @@ export function LogPanel({ ui }) {
               ? 'Try clearing the filter or search to see the full log.'
               : 'Chat, dice rolls, and combat events will appear here as play unfolds.',
           })]
-        : items.map(renderItem),
+        // items is newest-first, so the window is the head of the list
+        // and the boundary sits below it, where older entries would be.
+        : [
+            ...items.slice(0, windowSize).map(renderItem),
+            items.length > windowSize && h('button', {
+              key: 'earlier',
+              type: 'button',
+              class: 'dbt dbt--sm log-earlier',
+              'data-log-earlier': true,
+              onClick: () => setWindowSize((n) => n + LOG_WINDOW_SIZE),
+            }, `Show ${Math.min(LOG_WINDOW_SIZE, items.length - windowSize)} earlier entries`),
+          ],
     ),
   ]);
 }

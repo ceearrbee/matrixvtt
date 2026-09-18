@@ -63,7 +63,7 @@ export function showFeedbackModal(ui) {
       ]),
       h('p', { class: 'editorial-body' },
         'For bugs, copy the diagnostics below and paste them into your message. It includes the app version and recent log (no homeserver credentials).'),
-      h('div', { class: 'form-actions', style: 'display:flex;justify-content:space-between;gap:8px;' }, [
+      h('div', { class: 'form-actions', style: 'display:flex;justify-content:space-between;gap:var(--space-md);' }, [
         h('button', { class: 'dbt', type: 'button', onClick: copyDiagnostics }, 'Copy diagnostics'),
         h('button', { class: 'dbt btn-primary', 'data-modal-close': true }, 'Close'),
       ]),

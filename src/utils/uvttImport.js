@@ -15,10 +15,55 @@
  * them and the vision mask integrates them as bright zones.
  */
 
+import { MAP_BOUNDS } from './schemas/world.js';
+
 let seq = 0;
 
-export function parseUVTT(uvtt) {
-  const scale = uvtt?.resolution?.pixels_per_grid ?? 1;
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+/**
+ * Read the grid a UVTT file declares, bounded by what a map may hold.
+ * Returns null when the file declares none.
+ */
+function readGrid(resolution, override) {
+  if (!resolution && override === undefined) return null;
+  const rawPx = Number(resolution?.pixels_per_grid);
+  const rawW = Number(resolution?.map_size?.x);
+  const rawH = Number(resolution?.map_size?.y);
+
+  const wantedPx = override !== undefined ? Number(override) : Math.round(rawPx);
+  const cellPx = clamp(
+    Number.isFinite(wantedPx) && wantedPx > 0 ? wantedPx : MAP_BOUNDS.cellPx.min,
+    MAP_BOUNDS.cellPx.min, MAP_BOUNDS.cellPx.max,
+  );
+  const widthCells = clamp(
+    Number.isFinite(rawW) && rawW > 0 ? Math.round(rawW) : MAP_BOUNDS.cells.min,
+    MAP_BOUNDS.cells.min, MAP_BOUNDS.cells.max,
+  );
+  const heightCells = clamp(
+    Number.isFinite(rawH) && rawH > 0 ? Math.round(rawH) : MAP_BOUNDS.cells.min,
+    MAP_BOUNDS.cells.min, MAP_BOUNDS.cells.max,
+  );
+
+  const clamped = (override === undefined && Math.round(rawPx) !== cellPx)
+    || (Number.isFinite(rawW) && Math.round(rawW) !== widthCells)
+    || (Number.isFinite(rawH) && Math.round(rawH) !== heightCells);
+
+  return { cellPx, widthCells, heightCells, clamped };
+}
+
+/**
+ * @param {any} uvtt parsed .dd2vtt / .uvtt JSON
+ * @param {{ cellPx?: number }} [opts] override the cell size the map will use
+ */
+export function parseUVTT(uvtt, opts = {}) {
+  const grid = readGrid(uvtt?.resolution, opts.cellPx);
+  // Wall and light coordinates are in grid units, so they scale by the
+  // cell size the map actually ends up with. Scaling by the file's raw
+  // pixels-per-grid floats them off a clamped or overridden grid.
+  const scale = grid ? grid.cellPx : (uvtt?.resolution?.pixels_per_grid ?? 1);
   const polylines = uvtt?.line_of_sight ?? [];
   const portals = uvtt?.portals ?? [];
   const lights = uvtt?.lights ?? [];
@@ -69,5 +114,6 @@ export function parseUVTT(uvtt) {
     outLights.push(out);
   }
 
-  return { walls, lights: outLights };
+  const image = typeof uvtt?.image === 'string' && uvtt.image !== '' ? uvtt.image : null;
+  return { walls, lights: outLights, image, grid };
 }

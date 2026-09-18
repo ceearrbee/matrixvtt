@@ -52,7 +52,7 @@ function SpellSlots({ ui, spellSlots, canEdit }) {
     .sort((a, b) => a - b);
   if (!levels.length) return null;
   return h('div', { style: 'display:contents' }, [
-    h('div', { class: 'section-header', style: 'margin:8px 10px 4px;' }, 'Spell Slots'),
+    h('div', { class: 'section-header', style: 'margin:var(--space-md) var(--space-lg) var(--space-xs);' }, 'Spell Slots'),
     h('div', { class: 'spell-slots-grid' },
       levels.map(lvl => h(SpellSlotRow, { key: lvl, ui, lvl, slots: spellSlots[String(lvl)] ?? {}, canEdit }))),
   ]);

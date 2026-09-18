@@ -12,11 +12,11 @@
  *   src/ui/import-export.js    - exportCampaign
  *
  * Outputs (written to docs/examples/):
- *   dnd5e-ruleset.json, pathfinder-ruleset.json, fate-ruleset.json, custom-ruleset.json
+ *   <system>-ruleset.json, one per built-in preset
  *   blank-campaign.json
  */
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readdirSync, rmSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,6 +27,12 @@ import { exportCampaign } from '../../src/state/campaign-sync.js';
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = resolve(here, '..', 'examples');
 mkdirSync(outDir, { recursive: true });
+
+// Rulesets come and go and their keys get renamed, so a generator that
+// only ever writes leaves the retired ones behind looking current.
+for (const f of readdirSync(outDir)) {
+  if (f.endsWith('-ruleset.json')) rmSync(resolve(outDir, f));
+}
 
 // ─── StateManager shim ───────────────────────────────────────────────────────
 // Only the fields touched by initBlankCampaign + exportCampaign - kept tiny

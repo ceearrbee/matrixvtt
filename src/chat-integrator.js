@@ -10,6 +10,7 @@
 
 import { VTTError, ErrorType, showErrorNotification } from './utils/errorHandling.js';
 import { logger } from './utils/logger.js';
+import { renderMarkdown, hasMarkdown } from './utils/renderMarkdown.js';
 import { STORAGE_KEYS, EVENT_TYPES } from './utils/constants.js';
 import { handleTimelineEvent } from './chat/timeline-intake.js';
 import { backfillRecentHistory } from './ui/log-panel.js';
@@ -103,8 +104,13 @@ export class ChatIntegrator {
   getCharacterNameForUser(userId)     { return getCharacterNameForUser(this, userId); }
 
   async _send(body) {
+    const content = { msgtype: 'm.text', body };
+    if (hasMarkdown(body)) {
+      content.format = 'org.matrix.custom.html';
+      content.formatted_body = renderMarkdown(body);
+    }
     try {
-      await this.state.sendRoomEvent(EVENT_TYPES.ROOM_MESSAGE, { msgtype: 'm.text', body });
+      await this.state.sendRoomEvent(EVENT_TYPES.ROOM_MESSAGE, content);
     } catch (err) {
       showErrorNotification(new VTTError(ErrorType.NETWORK, `Chat send failed: ${err.message}`, err));
     }

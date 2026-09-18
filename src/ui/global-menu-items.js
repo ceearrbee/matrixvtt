@@ -21,10 +21,11 @@ import { showKeyboardHelp } from './keyboard-help.js';
 import { showCommandPalette } from './command-palette.js';
 import { showFeedbackModal } from './feedback.js';
 import { showInvitePlayerModal } from './InvitePlayerModal.jsx';
+import { installAvailable, promptInstall } from './pwa/install.js';
 import { libraryAvailable, openLibraryBrowser } from './library/open-library.js';
 import { docsHref } from '../utils/docs-link.js';
 
-export const MENU_GROUPS = Object.freeze({
+const MENU_GROUPS = Object.freeze({
   TABLE: 'This table',
   CHAT: 'Conversation',
   HELP: 'Help',
@@ -43,6 +44,13 @@ export function buildGlobalMenuItems(ui, { isGM, canLeave }) {
       { key: 'invite', group: MENU_GROUPS.TABLE, label: 'Invite players', action: () => showInvitePlayerModal(ui) },
       { key: 'maps', group: MENU_GROUPS.TABLE, label: 'Maps manager', action: () => ui.openMapsPanel?.() },
     );
+  }
+  if (installAvailable()) {
+    items.push({
+      key: 'install', group: MENU_GROUPS.TABLE, label: 'Install as an app',
+      title: 'Keep MatrixVTT in your launcher and open it without a browser tab',
+      action: () => { void promptInstall(); },
+    });
   }
   if (libraryAvailable(ui)) {
     items.push({ key: 'library', group: MENU_GROUPS.TABLE, label: 'Content library', action: () => openLibraryBrowser(ui) });

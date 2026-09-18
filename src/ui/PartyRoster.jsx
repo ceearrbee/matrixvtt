@@ -6,7 +6,7 @@ import {
 import { Avatar } from './Avatar.jsx';
 import { KnockRequests } from './KnockRequests.jsx';
 import { EmptyState } from './EmptyState.jsx';
-import { COND_ICONS } from '../utils/conditions.js';
+import { conditionAbbr, conditionLabel } from '../state/rulesets.js';
 import { TABS } from '../utils/constants.js';
 
 function _findTokenFor(ui, entityId) {
@@ -47,6 +47,7 @@ function RosterCard({ ui, entity, isNPC = false }) {
   const speed = entity.speed ?? token?.speed;
   const init = entity.initiative_bonus ?? entity.init_mod;
   const conditions = token?.conditions || [];
+  const systemConfig = ui.state.settings?.systemConfig;
 
   const onPick = () => {
     if (isNPC) {
@@ -103,9 +104,9 @@ function RosterCard({ ui, entity, isNPC = false }) {
       conditions.slice(0, 5).map((c) => h('span', {
         key: c,
         class: 'party-roster__cond',
-        title: c,
-        'aria-label': c,
-      }, COND_ICONS[c] || c.charAt(0))),
+        title: conditionLabel(systemConfig, c),
+        'aria-label': conditionLabel(systemConfig, c),
+      }, conditionAbbr(systemConfig, c))),
     ),
   ]);
 }

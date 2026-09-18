@@ -71,6 +71,14 @@ export const speakAsSignal = signal('');
 export const selectedTokenSignal = signal(null);
 
 /**
+ * Every token the next gesture acts on. `selectedTokenSignal` holds
+ * this set's primary, so readers that only care about one token are
+ * unaffected by a group selection. Operations live in
+ * `src/map/token-selection.js`.
+ */
+export const selectedTokenIdsSignal = signal(new Set());
+
+/**
  * Whether the next dice roll is secret (GM-only result). Backs
  * `ui._secretRoll`. Toggled via the dice-bar lock button; consumed by
  * `fireRoll` / `fireFormulaRoll` in `src/ui/dice-helpers.js`.
@@ -121,14 +129,14 @@ export const replyContextSignal = signal(null);
 
 /**
  * Open floating doc panels (handouts + pages). Each entry:
- *   { key: '<kind>:<id>', kind: 'handout' | 'page', id, z }
- * Multiple may be open at once. `z` orders the stack - clicking a
- * panel bumps it to the front via `_maxZ + 1`.
+ *   { key: '<kind>:<id>', kind: 'handout' | 'page', id }
+ * Multiple may be open at once. Array order is stacking order - the
+ * last entry is the front panel, and clicking one moves it to the end.
  *
  * `ui.openDoc(kind, id)` / `ui.closeDoc(key)` / `ui.bringDocToFront(key)`
  * write; `App.jsx` reads to render the FloatingDocs host.
  */
-export const openDocsSignal = signal(/** @type {Array<{key: string, kind: 'handout'|'page', id: string, z: number}>} */ ([]));
+export const openDocsSignal = signal(/** @type {Array<{key: string, kind: 'handout'|'page', id: string}>} */ ([]));
 
 /**
  * Active "scene" the chat input is currently posting into. While set,
@@ -239,6 +247,21 @@ export const tabManuallyChosenSignal = signal(false);
  * `defaultDrawerFor` helper unless the user has manually picked.
  */
 export const openIconRailDrawerSignal = signal(/** @type {string | null} */ (null));
+
+/**
+ * Width of the right companion, in pixels. Lives here rather than in
+ * the companion because the grid track that uses it is declared on
+ * `.shell`, and a custom property set on a child cannot reach its
+ * parent's `grid-template-columns`.
+ */
+export const sheetPanelWidthSignal = signal(/** @type {number | null} */ (null));
+
+/**
+ * Focus mode: both rails collapse, leaving the header, the map, the
+ * conversation and the composer. Mirrored to `data-focus` on the shell
+ * by App.jsx; per (user, room) like the Prep flag it sits beside.
+ */
+export const focusModeSignal = signal(false);
 
 /**
  * Session-only flag mirroring `tabManuallyChosenSignal` for the rail:

@@ -7,33 +7,30 @@ import { openDocsSignal } from '../state/ui-signals.js';
 describe('FloatingDoc helpers', () => {
   beforeEach(() => { closeAllDocs(); });
 
-  it('openDoc appends a descriptor and assigns a z-index', () => {
+  it('openDoc appends a descriptor', () => {
     openDoc('handout', 'ho-1');
     expect(openDocsSignal.value).toHaveLength(1);
     const [d] = openDocsSignal.value;
     expect(d.key).toBe('handout:ho-1');
     expect(d.kind).toBe('handout');
     expect(d.id).toBe('ho-1');
-    expect(typeof d.z).toBe('number');
   });
 
-  it('opening the same key twice deduplicates and bumps z', () => {
+  it('opening the same key twice deduplicates and moves it to the top', () => {
     openDoc('page', 'pg-1');
-    const firstZ = openDocsSignal.value[0].z;
     openDoc('handout', 'ho-1');
     openDoc('page', 'pg-1'); // re-open
-    expect(openDocsSignal.value).toHaveLength(2);
-    const pageEntry = openDocsSignal.value.find((d) => d.key === 'page:pg-1');
-    expect(pageEntry.z).toBeGreaterThan(firstZ);
+    expect(openDocsSignal.value.map((d) => d.key))
+      .toEqual(['handout:ho-1', 'page:pg-1']);
   });
 
-  it('bringDocToFront raises the z above all others', () => {
+  it('bringDocToFront moves the doc to the end, which is the top of the stack', () => {
     openDoc('page', 'a');
     openDoc('page', 'b');
     openDoc('page', 'c');
     bringDocToFront('page:a');
-    const sorted = [...openDocsSignal.value].sort((a, b) => a.z - b.z);
-    expect(sorted[sorted.length - 1].key).toBe('page:a');
+    expect(openDocsSignal.value.map((d) => d.key))
+      .toEqual(['page:b', 'page:c', 'page:a']);
   });
 
   it('closeDoc removes one entry; closeAllDocs empties the array', () => {

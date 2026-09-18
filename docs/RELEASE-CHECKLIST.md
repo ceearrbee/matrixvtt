@@ -11,11 +11,12 @@ This document details the procedural validation requirements for application rel
 Execute the static validation sequence. Operations must return an exit code of 0.
 ```sh
 npm ci
-npm run check
-npm run build
-npm run size
-npm audit --audit-level=high --omit=dev
+npm run check:ci
 ```
+`check:ci` is the same gate list CI's `check` job and the deploy build
+job run, so a green run here is the merge gate and the ship gate both.
+Running the steps individually invites the fourth, weaker list this
+checklist used to carry.
 Dependency advisories returned without the `--omit=dev` directive must be documented in `docs/SECURITY-NOTES.md`.
 
 ## 2. Static Build Integrity
@@ -67,11 +68,7 @@ Execute fault-tolerance procedures within active room systems:
 ## 8. Release Artifact Generation
 Compile local validation diagnostics for incorporation into the release notes structure:
 ```sh
-npm run check
-npm run build
-npm run test:smoke
-npm run size
-npm audit --audit-level=high --omit=dev
+npm run check:ci
 npm audit --audit-level=high
 ```
 Extract metrics from associated GitHub Actions integrations:

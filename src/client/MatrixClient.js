@@ -1,10 +1,24 @@
+/**
+ * MatrixClient - the standalone app's Matrix transport. One instance
+ * per session: it owns the matrix-js-sdk client, the connection status
+ * every screen reacts to, per-event-type send throttling, and the room
+ * reads and writes the VTT makes.
+ *
+ * `src/widget/WidgetManager.js` is the same public surface over the
+ * widget API; a method added here needs its counterpart there.
+ *
+ * Pre-session work on a bare homeserver string (discovery, login,
+ * registration) lives in `./homeserver.js`; the statics at the bottom
+ * forward there, because `app.MatrixClient.X` is what the auth screens
+ * call and what the e2e fake client overrides.
+ */
 
 import * as sdk from 'matrix-js-sdk';
 import { EVENT_TYPES, VTT_EVENTS } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
 import { retryOnRateLimit } from '../utils/matrixRetry.js';
-import { isLocalHost } from '../utils/local-host.js';
 import { viaServersFor } from '../utils/matrix-ids.js';
+import * as hs from './homeserver.js';
 
 export const CLIENT_STATUS = {
   DISCONNECTED: 'disconnected',
@@ -469,99 +483,14 @@ export class MatrixClient {
     return res?.room_id ?? roomId;
   }
 
-  static _normalizeHs(server) {
-    let s = String(server || '').trim();
-    // Strip any number of leading `https://` / `http:/` prefixes. A single
-    // non-nested regex avoids the ReDoS risk of `^(https?[:/]+)+`.
-    let prev;
-    do {
-      prev = s;
-      s = s.replace(/^https?[:/]+/i, '');
-    } while (s !== prev);
-    return s.replace(/\/+$/, '');
-  }
-
-  static _getHsBase(server) {
-    const host = this._normalizeHs(server);
-    if (!host) return '';
-    // Explicit http:// survives for local development homeservers only
-    // (mirrors standalone/auth.js normalizeHomeserver).
-    const explicitHttp = /^http:\/\//i.test(String(server || '').trim());
-    const scheme = explicitHttp && isLocalHost(host) ? 'http' : 'https';
-    return `${scheme}://${host}`;
-  }
-
-  static async discoverHomeserver(server) {
-    const host = this._normalizeHs(server);
-    if (!host) return '';
-    try {
-      const result = await sdk.AutoDiscovery.findClientConfig(host);
-      const baseUrl = result?.['m.homeserver']?.base_url;
-      return baseUrl?.replace(/\/+$/, '') || this._getHsBase(server);
-    } catch {
-      return this._getHsBase(server);
-    }
-  }
-
-  static async getLoginFlows(homeserver) {
-    const base = this._getHsBase(homeserver);
-    if (!base) return [];
-    const client = sdk.createClient({ baseUrl: base });
-    const { flows } = await client.loginFlows();
-    return flows ?? [];
-  }
-
-  static getSSORedirectURL(homeserver, redirectUrl) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base });
-    return client.getSsoLoginUrl(redirectUrl);
-  }
-
-  /**
-   * One /register round of the UIA dance. A 401 with a session is the
-   * server's stage challenge, not a failure; everything else throws.
-   * @returns {Promise<{done: true, credentials: any} | {done: false, uia: any}>}
-   */
-  static async register(homeserver, body) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base });
-    try {
-      const credentials = await /** @type {any} */ (client).registerRequest(body);
-      return { done: true, credentials };
-    } catch (err) {
-      const e = /** @type {any} */ (err);
-      if (e?.httpStatus === 401 && e?.data?.session) {
-        return { done: false, uia: e.data };
-      }
-      throw err;
-    }
-  }
-
-  static async requestRegisterEmailToken(homeserver, email, clientSecret, sendAttempt) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base });
-    return /** @type {any} */ (client).requestRegisterEmailToken(email, clientSecret, sendAttempt);
-  }
-
-  static async login(homeserver, identifier, password) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base });
-    return client.login('m.login.password', {
-      identifier: { type: 'm.id.user', user: identifier },
-      password,
-    });
-  }
-
-  static async loginWithToken(homeserver, accessToken) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base, accessToken });
-    const { user_id } = await client.whoami();
-    return { access_token: accessToken, user_id };
-  }
-
-  static async loginWithSSOToken(homeserver, loginToken) {
-    const base = this._getHsBase(homeserver);
-    const client = sdk.createClient({ baseUrl: base });
-    return client.login('m.login.token', { token: loginToken });
-  }
+  static _normalizeHs(server) { return hs.normalizeHomeserver(server); }
+  static _getHsBase(server) { return hs.homeserverBaseUrl(server); }
+  static discoverHomeserver(server) { return hs.discoverHomeserver(server); }
+  static getLoginFlows(server) { return hs.getLoginFlows(server); }
+  static getSSORedirectURL(server, url) { return hs.getSSORedirectURL(server, url); }
+  static register(server, body) { return hs.register(server, body); }
+  static requestRegisterEmailToken(server, email, secret, n) { return hs.requestRegisterEmailToken(server, email, secret, n); }
+  static login(server, identifier, password) { return hs.login(server, identifier, password); }
+  static loginWithToken(server, accessToken) { return hs.loginWithToken(server, accessToken); }
+  static loginWithSSOToken(server, token) { return hs.loginWithSSOToken(server, token); }
 }

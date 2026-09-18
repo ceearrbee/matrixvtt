@@ -20,6 +20,7 @@ import { MapStrip } from '../ui/MapStrip.jsx';
 import { showTokenContextMenu, showMapContextMenu } from '../map/context-menus.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 const ui = () => /** @type {any} */ ({
   duplicateToken: vi.fn(), addTokenToInitiative: vi.fn(), removeFromInitiative: vi.fn(),
@@ -106,6 +107,7 @@ describe('the pin tool has a home in the Scene group', () => {
     const u = /** @type {any} */ ({
       state: {
         isGM: () => true, tokens: new Map(), maps: new Map(),
+        map: loadTestMap(),
         settings: { name: 'r', systemConfig: {}, gm_user_ids: ['@me:m'] },
         initiative: { active: false, round: 0, current_index: 0, order: [] },
         fog: { mode: null, revealed: [] },

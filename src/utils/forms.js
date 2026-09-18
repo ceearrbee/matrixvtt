@@ -54,11 +54,17 @@ export class FormReader {
    * `applyFieldErrors` to locate each input. `errors` is `{ [prop]: message }`
    * and only contains failing keys (empty on success). `values` matches
    * `collect`'s output (coerced, blank strings nullified) regardless of the
-   * validation outcome - blank numerics there stay `0`, the same as before.
+   * validation outcome.
    *
    * Blank numeric inputs are passed to Valibot as `undefined` (not `0`) so a
    * required numeric field fails the `v.number()` type check ("required")
-   * rather than a misleading min-bound message.
+   * rather than a misleading min-bound message. A numeric input that was
+   * typed into but cannot be read reaches Valibot as the raw text, so the
+   * type check rejects it. Either way - blank or unreadable - the entry
+   * in `values` is `null` rather than `getInt`'s 0: `values` never
+   * claims a number the validation pass did not see, and a `?? default`
+   * downstream fires the way its author meant it to. A typed 0 is still
+   * a 0.
    */
   validate(fields, schema) {
     const values = {};
@@ -67,8 +73,13 @@ export class FormReader {
       const ids = resolveIds(config);
       const type = config.type || 'text';
       const value = readField(this, type, ids);
-      values[prop] = value === '' ? null : value;
-      input[prop] = readForValidation(this, type, ids);
+      const forSchema = readForValidation(this, type, ids);
+      const numeric = type === 'int' || type === 'float';
+      // Blank (undefined) and unreadable (the raw text) both mean the
+      // field holds no number.
+      const noNumber = numeric && typeof forSchema !== 'number';
+      values[prop] = value === '' || noNumber ? null : value;
+      input[prop] = forSchema;
     }
     const result = v.safeParse(schema, input);
     const errors = {};
@@ -88,13 +99,18 @@ function resolveIds(config) {
   return [config.id];
 }
 
+// A blank number reads as untouched, so a required field fails with
+// "required" rather than a misleading min-bound message. A number that
+// was typed into but cannot be read reaches the schema as the raw text,
+// so the type check rejects it - passing `undefined` there let a typo
+// through an optional field and then persist as `getInt`'s 0.
 function readForValidation(form, type, ids) {
   if (type === 'bool') return form.getCheckbox(...ids);
   const raw = form.getField(...ids);
   if (type === 'int' || type === 'float') {
-    if (raw === '') return undefined;
-    const n = type === 'int' ? parseInt(raw, 10) : parseFloat(raw);
-    return Number.isNaN(n) ? undefined : n;
+    if (raw.trim() === '') return undefined;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : raw;
   }
   return raw;
 }

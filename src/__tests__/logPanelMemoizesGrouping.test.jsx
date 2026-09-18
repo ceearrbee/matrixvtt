@@ -64,6 +64,9 @@ describe('<LogPanel> grouping memoization', () => {
     await act(async () => { render(h(LogPanel, { ui }), host); });
     expect(buildSpy).toHaveBeenCalledTimes(1);
 
+    // Opening a row's toolbar is local state too - neither it nor the
+    // picker it reveals should re-group.
+    await act(async () => { host.querySelector('[data-log-actions-trigger]').click(); });
     const more = host.querySelector('.log-actions__more');
     expect(more).toBeTruthy();
     await act(async () => { more.click(); });

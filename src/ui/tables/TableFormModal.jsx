@@ -43,7 +43,7 @@ function EntryRow({ row, items, onPatch, onRemove, canRemove }) {
     {
       class: 'table-entry',
       style:
-        'display:grid;grid-template-columns:64px 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px;',
+        'display:grid;grid-template-columns:64px 1fr 1fr auto;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-sm);',
     },
     [
       h('input', {
@@ -143,7 +143,7 @@ function TableForm({ ui, editId, onClose }) {
           class: 'table-entries',
           'data-table-entries': true,
           style:
-            'display:grid;grid-template-columns:64px 1fr 1fr auto;gap:6px;align-items:center;font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;',
+            'display:grid;grid-template-columns:64px 1fr 1fr auto;gap:var(--space-sm);align-items:center;font-size:11px;color:var(--color-text-secondary);margin-bottom:var(--space-xs);',
         },
         ['Weight', 'Text', 'Linked item', '']
       ),
@@ -164,7 +164,7 @@ function TableForm({ ui, editId, onClose }) {
           class: 'dbt dbt--sm',
           'data-add-entry': true,
           onClick: addRow,
-          style: 'margin-top:6px;',
+          style: 'margin-top:var(--space-sm);',
         },
         '+ Add entry'
       ),

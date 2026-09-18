@@ -1,101 +1,107 @@
 # MatrixVTT Data Model Specification
 
-**Version:** 1.0
-**Scope:** Persisted Matrix room state and local browser preferences.
-**Related Specifications:** `EVENT-SCHEMA.md`, `ARCHITECTURE.md`, `MATRIX-INTEGRATION.md`, `RULESET-SPEC.md`.
+**Scope:** what MatrixVTT persists, and where.
+**Related:** `EVENT-SCHEMA.md`, `ARCHITECTURE.md`, `MATRIX-INTEGRATION.md`, `RULESET-SPEC.md`.
 
-## 1. Architecture Constraints
-MatrixVTT is a serverless client. State is stored via Matrix room state events (`com.vtt.*`). Client-local preferences are maintained in browser `localStorage`. The homeserver enforces Matrix authentication, power levels, and rate limits. Schema validation and game logic are strictly client-enforced.
+## 1. Architecture constraints
 
-## 2. Ruleset Engine
-Game mechanics are defined by external JSON files (`src/content/rulesets/*.json`) conforming to `RULESET-SPEC.md`. 
-**Context:**
-- `settings.system`: Active ruleset identifier.
-- `settings.systemConfig`: Hydrated ruleset object.
+MatrixVTT is a static browser client with no server of its own. The
+Matrix homeserver is the only enforcement point: it authenticates
+users, applies power levels, and rate-limits writes. Schema validation
+and game rules are client-enforced and therefore advisory. See
+`SECURITY-NOTES.md` for what that does and does not protect.
 
-**Engine API (`src/engine/`):**
-- `evaluate(formula, ctx)`: Computes AST formulas.
-- `computeDerived(cfg, name, ctx)`: Calculates derived statistics.
-- `lookupTable(table, key, {clamp})`: Resolves table entries.
-- `rollNotation(notation, {rng})`: Evaluates dice notation.
-- `applyHarm(model, entity, amt, kind?)`: Processes health modifications.
-- `runStateMachine(spec, state, input)`: Executes state transitions.
+## 2. Where state lives
 
-## 3. State Entities
-Entities are written as state events. Tombstoning (deletion) requires an empty object payload `{}`.
+Three stores, with different durability and different trust:
 
-### Character (`com.vtt.character`)
-Key: `id`. Represents a Player Character.
-Attributes: `id`, `type: 'pc'`, `name`, `player_user_id`, `token_id`, `species`, `class_level`, `level`, `hp_max`, `hp_current`, `ac`, `attributes`, `skills`, `inventory_ids`, `spell_ids`.
+| Store | Holds | Durability |
+|---|---|---|
+| Yjs document | every campaign entity | Matrix timeline + snapshot state events |
+| Matrix room state | membership, power levels, join rules, the library | the room itself |
+| Browser storage | per-user preferences, unsent work | the browser |
 
-### NPC (`com.vtt.npc`)
-Key: `id`. Represents a Non-Player Character.
-Extends Character. Additional attributes: `cr`, `size_category`, `creature_type`, `alignment`, `is_hidden`, `actions`.
+### 2.1 The Yjs document
 
-### Token (`com.vtt.token`)
-Key: `id`. Represents an entity on the map grid.
-Attributes: `id`, `col`, `row`, `size`, `sheet_id`, `hp_current`, `ac`, `visible`, `conditions`, `aura_radius`.
+All campaign entities live in one `Y.Doc` (`src/state/YjsManager.js`).
+It is a CRDT, so concurrent edits from several clients merge without a
+last-write-wins guard and without an app-level version field.
 
-### Initiative (`com.vtt.initiative`)
-Key: `''` (Singleton).
-Attributes: `active`, `round`, `current_index`, `order` (Array of InitiativeEntry).
-Modes (`systemConfig.initiative.mode`): `individual`, `side`, `static`.
+Seventeen keyed collections, each a `Y.Map` of `id` to entity:
+`tokens`, `characters`, `npcs`, `items`, `spells`, `handouts`,
+`tables`, `walls`, `lights`, `pins`, `templates`, `maps`, `pages`, and
+the singleton-shaped `fog`, `initiative`, `settings`, each keyed by the
+empty string. One `Y.Array`, `drawings`, because stroke history is
+append-shaped.
 
-### Item (`com.vtt.item`)
-Key: `id`.
-Attributes: `id`, `name`, `type`, `quantity`, `equipped`, `damage`, `attack_bonus`.
+Deletion removes the key. There is no empty-object tombstone in the
+document; tombstones survive only in the snapshot chunks described in
+`EVENT-SCHEMA.md`.
 
-### Spell (`com.vtt.spell`)
-Key: `id`.
-Attributes: `id`, `name`, `level`, `school`, `casting_time`, `range`, `damage`, `save_ability`, `concentration`.
+### 2.2 Matrix room state
 
-### Map (`com.vtt.map`)
-Key: `id`.
-Attributes: `id`, `width_cells`, `height_cells`, `cell_px`, `image_url`.
+Room state carries what the homeserver must enforce or a non-VTT
+client must read: `m.room.power_levels`, `m.room.member`,
+`m.room.join_rules`, `m.room.name`, the canonical alias, plus the
+chunked Yjs snapshot. The personal content library (`com.vtt.library`,
+`com.vtt.library_entry`) lives in its own room, never a campaign room.
 
-### Fog of War (`com.vtt.fog`)
-Key: `''` (Singleton).
-Attributes: `mode`, `revealed` (Array of string coordinates).
+The `com.vtt.*` entity event types still exist in
+`src/utils/constants.js`. They name validation targets and let a room
+written by an older build still load; they are not the live write
+path. No writer under `src/state/writers/` calls `sendStateEvent`, and
+`sendStateEventBoundary.test.js` holds that line with an empty
+allowlist.
 
-### Drawing (`com.vtt.drawing`)
-Key: `id`.
-Attributes: `id`, `type`, `color`, `width`, spatial parameters (`points`, `r`, `x`, `y`, `w`, `h`).
+### 2.3 Browser storage
 
-### Handout (`com.vtt.handout`)
-Key: `id`.
-Attributes: `id`, `title`, `body`, `visible_to` (Array of user IDs).
+Per-user preferences (theme, reduced motion, layout, dice macros, turn
+notifications) and unsent work (the Matrix retry queue, the Yjs pending
+buffer). Anything that outlives a logout is user-scoped through
+`src/utils/user-storage.js`; unsent work is additionally room-scoped
+through `src/state/pending-storage.js`.
 
-### Table (`com.vtt.table`)
-Key: `id`.
-Attributes: `id`, `name`, `entries` (Array of ranges and results), `dice`.
+## 3. Entity shapes
 
-### Settings (`com.vtt.settings`)
-Key: `''` (Singleton).
-Attributes: `gm_user_ids`, `name`, `system`, `grid_px`, `active_map_id`.
+Entities are plain JSON objects validated on the way in by
+`src/utils/schemas/`. The fields below are the ones other parts of the
+system depend on; each schema file is the full answer.
 
-## 4. Ephemeral Events
-Timeline events bypass state synchronization.
-- `com.vtt.ping`: Visual map marker broadcast.
-- `com.vtt.speak_as_token`: Token-attributed chat message.
-- `com.vtt.damage_event`: Audit trail log for health modification.
+- **Character / NPC:** `id`, `name`, `hp_max`, `hp_current`, `ac`,
+  `attributes`, `skills`, `inventory_ids`, `spell_ids`. A character
+  names its player with `player_user_id`; an unclaimed one is taken by
+  writing `claimed_by_user_id`.
+- **Token:** `id`, `map_id`, `sheet_id`, `col`, `row`, `size`,
+  `disposition`, `owner_user_id`, `vision_radius`,
+  `darkvision_radius`, `auras`, `trackers`, `variants`, `conditions`,
+  `condition_durations`. `map_id` is written once at creation; travel
+  pins are the only path that rewrites it.
+- **Map:** `id`, `name`, `width_cells`, `height_cells`, `cell_px`,
+  `grid_type`, `image_url` or a `layers[]` stack. Images are `mxc://`
+  URIs, so a map is only renderable to clients that can reach the
+  homeserver that holds it.
+- **Fog:** `mode` (`visible` or `hidden`) and `revealed`, an array of
+  `"col,row"` strings. One fog record per map.
+- **Handout:** `visible_to_players`, a boolean. Visibility is all
+  players or none; there is no per-player targeting.
+- **Page:** `kind` (journal, lore, fiction, prep) and `visibility`
+  (private, gm, players).
 
-## 5. Client Preferences
+## 4. Rulesets
 
-**Session Storage (`sessionStorage`):**
-- `vtt-auth-session`: Matrix access token.
-- `vtt:retry-queue`: Rate-limited state-event queue.
+Game mechanics come from JSON conforming to `RULESET-SPEC.md`.
+`settings.system` names the active ruleset and `settings.systemConfig`
+holds the hydrated object. Engine entry points live in `src/engine/`:
+`evaluate`, `computeDerived`, `lookupTable`, `rollNotation`,
+`applyHarm`, `runStateMachine`.
 
-**Local Storage (`localStorage`):**
-- `vtt-theme`: UI theme.
-- `vtt:combat-automation`: GM automation configuration.
-- `vtt:accessibility`: Client rendering overrides.
-- `vtt:audio-volume`: Local playback volume.
+## 5. Limits worth knowing
 
-## 6. Operation Constraints
-
-1. **Transaction Commit:** Local UI updates commit to Matrix solely upon interaction completion.
-2. **Boundary Validation:** Spatial coordinates must be clamped to map boundaries prior to transmission.
-3. **Queue Deduplication:** Consecutive identical entity states collapse in the transmission queue.
-4. **Optimistic Execution:** Local state mutates instantly; transactions revert on transmission failure.
-5. **Entity ID Allocation:** Positional IDs (`tok-1`, `chr-2`) are allocated sequentially via `allocateEntityIdSafe` to mitigate server state growth and collision.
-6. **Rate Limiting:** HTTP 429 responses trigger queue suspension and automatic retry. Over-limit payloads (>63 KB) abort.
+- A Matrix event is capped near 64 KB, and the signed form is larger
+  than the wire form. Snapshots are chunked and updates are held to a
+  conservative binary size; `EVENT-SCHEMA.md` carries the numbers.
+- Map images are shrunk client-side before upload and retried smaller
+  if the homeserver rejects them.
+- The Yjs document keeps its full operation history. A very long
+  campaign pays for that in snapshot size and load time; Settings then
+  About reports the current size.

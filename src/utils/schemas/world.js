@@ -19,10 +19,19 @@ const settingsSchema = v.object({
   gm_user_ids: v.array(matrixUserId),
 });
 
+/**
+ * The one place a map's dimensions are bounded. The map form imports
+ * this too, so the form and the room-state schema cannot drift.
+ */
+export const MAP_BOUNDS = Object.freeze({
+  cells: Object.freeze({ min: 1, max: 100 }),
+  cellPx: Object.freeze({ min: 10, max: 100 }),
+});
+
 const mapSchema = v.object({
-  width_cells: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
-  height_cells: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
-  cell_px: v.pipe(v.number(), v.minValue(10), v.maxValue(100)),
+  width_cells: v.pipe(v.number(), v.minValue(MAP_BOUNDS.cells.min), v.maxValue(MAP_BOUNDS.cells.max)),
+  height_cells: v.pipe(v.number(), v.minValue(MAP_BOUNDS.cells.min), v.maxValue(MAP_BOUNDS.cells.max)),
+  cell_px: v.pipe(v.number(), v.minValue(MAP_BOUNDS.cellPx.min), v.maxValue(MAP_BOUNDS.cellPx.max)),
   image_url: v.optional(v.nullable(v.string())),
 });
 
@@ -57,7 +66,7 @@ export function validateMap(content) {
 export function validateFog(content) {
   failIfNotObject(content, 'Fog');
   if (content.mode !== undefined && !FOG_MODE_VALUES.includes(content.mode)) {
-    failValidation('Fog mode must be: visible, gm_only, or hidden');
+    failValidation('Fog mode must be: visible or hidden');
   }
   // Tolerate missing / null `revealed` - older schema versions and
   // hand-authored imports sometimes omit it. Coerce to an empty array

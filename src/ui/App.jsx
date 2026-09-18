@@ -2,10 +2,15 @@
 import { h, render } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { settingsSignal, initiativeSignal } from '../state/signals.js';
-import { tablePhaseSignal, gmPrepActiveSignal, openIconRailDrawerSignal, mobilePaneSignal, debugModeSignal, layoutModeSignal } from '../state/ui-signals.js';
+import {
+  tablePhaseSignal, gmPrepActiveSignal, openIconRailDrawerSignal, mobilePaneSignal,
+  debugModeSignal, layoutModeSignal, sheetPanelWidthSignal, focusModeSignal,
+} from '../state/ui-signals.js';
+import { DEFAULT_SHEET_WIDTH } from '../utils/sheet-panel-size.js';
 import { Header } from './Header.jsx';
 import { DiceBar } from './DiceBar.jsx';
 import { InitiativeBar } from './InitiativeBar.jsx';
+import { ErrorBoundary } from './ErrorBoundary.jsx';
 import { MapStrip } from './MapStrip.jsx';
 import { LogContainer } from './LogContainer.jsx';
 import { LeftIndex } from './LeftIndex.jsx';
@@ -45,6 +50,8 @@ export function App({ ui }) {
   const isGM = ui.state.isGM();
   const iconRailDrawer = openIconRailDrawerSignal.value;
   const layoutMode = layoutModeSignal.value;
+  const sheetWidth = sheetPanelWidthSignal.value ?? DEFAULT_SHEET_WIDTH;
+  const focusMode = focusModeSignal.value;
 
   const hideInit = !ui.state.initiative?.active && !ui.state.isGM();
 
@@ -108,6 +115,8 @@ export function App({ ui }) {
       'data-layout': layoutMode,
       'data-mobile-pane': mobilePane,
       'data-icon-rail-open': iconRailDrawer || null,
+      'data-focus': focusMode ? 'on' : null,
+      style: `--sheet-panel-width: ${sheetWidth}px;`,
     }, [
       // One left-navigation mount. LeftIndex picks its own variant: the
       // always-expanded accordion, or the slim one-drawer rail on a
@@ -122,7 +131,8 @@ export function App({ ui }) {
         h(NextSteps, { ui, key: 'next-steps' }),
         // Map region - the "page". The initiative strip overlays the top of
         // the map in Combat; other phases use the older InitiativeBar. The
-        // map is resizable via its own drag handle.
+        // split is map-dominant by design; the strip collapses but does
+        // not drag.
         h('div', { class: 'almanac-map', key: 'map-region' }, [
           h(MapStrip, { ui, key: 'map' }),
           h(InitiativeBar, { ui, compact: initStripIn(phase), key: 'init' }),
@@ -167,5 +177,5 @@ export function App({ ui }) {
 }
 
 export function mountApp(container, ui) {
-  render(h(App, { ui }), container);
+  render(h(ErrorBoundary, null, h(App, { ui })), container);
 }

@@ -11,10 +11,11 @@ import { render, fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 function fakeUI({ isGM }) {
   return {
-    state: { isGM: () => isGM },
+    state: { isGM: () => isGM, map: loadTestMap() },
     setDrawTool: () => {},
     setDrawColor: () => {},
     setDrawWidth: () => {},

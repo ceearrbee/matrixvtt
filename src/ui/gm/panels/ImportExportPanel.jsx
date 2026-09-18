@@ -3,8 +3,8 @@ import { h } from 'preact';
 /** @param {{ ui: any, gm?: any }} props */
 export function ImportExportPanel(props) {
   const { ui } = props;
-  return h('div', { class: 'gm-panel gm-panel--io', style: 'padding:12px;' }, [
-    h('div', { class: 'button-group', style: 'margin-bottom:10px;' }, [
+  return h('div', { class: 'gm-panel gm-panel--io', style: 'padding:var(--space-xl);' }, [
+    h('div', { class: 'button-group', style: 'margin-bottom:var(--space-lg);' }, [
       h(
         'button',
         {
@@ -13,7 +13,7 @@ export function ImportExportPanel(props) {
           title: 'Export characters (MD)',
           onClick: () => ui.exportCharactersMarkdown(),
         },
-        '📄 Export Characters (MD)'
+        'Export Characters (MD)'
       ),
       h(
         'button',
@@ -23,7 +23,7 @@ export function ImportExportPanel(props) {
           title: 'Export NPCs (MD)',
           onClick: () => ui.exportNPCsMarkdown(),
         },
-        '📄 Export NPCs (MD)'
+        'Export NPCs (MD)'
       ),
       h(
         'button',
@@ -33,7 +33,7 @@ export function ImportExportPanel(props) {
           title: 'Import from Markdown',
           onClick: () => ui.showImportMarkdownDialog(),
         },
-        '📥 Import from Markdown'
+        'Import from Markdown'
       ),
       h(
         'button',
@@ -43,7 +43,7 @@ export function ImportExportPanel(props) {
           title: 'Export campaign',
           onClick: () => ui.exportState(),
         },
-        '💾 Export State'
+        'Export State'
       ),
     ]),
   ]);

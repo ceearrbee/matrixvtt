@@ -57,7 +57,7 @@ export function LogControls({
 
   const triggerBadge = isFiltered
     ? (FILTERS.find(([k]) => k === filter)?.[2] || '•')
-    : isSearching ? '🔍' : null;
+    : isSearching ? '•' : null;
 
   const clear = () => {
     onFilterChange('all');
@@ -109,7 +109,7 @@ export function LogControls({
           class: 'dbt dbt--sm log-controls__load',
           disabled: loading,
           onClick: () => onLoadMore?.(),
-        }, loading ? 'Loading…' : '⬆ Load older'),
+        }, loading ? 'Loading…' : 'Load older'),
         hasActive && h('button', {
           type: 'button',
           class: 'dbt dbt--sm log-controls__clear',

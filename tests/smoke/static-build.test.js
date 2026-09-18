@@ -102,6 +102,16 @@ describe('static build - GitHub Pages base path', () => {
     expect(sw).toMatch(/SHELL\s*=\s*['"]mvtt-shell-[0-9.]+/);
   });
 
+  it('the worker waits for the page instead of replacing it mid-session', () => {
+    const sw = readFileSync(resolve(DIST, 'sw.js'), 'utf8');
+    // The dev branch and the message handler both still call it, so the
+    // check is that the production install path does not.
+    expect(sw).toContain('SKIP_WAITING');
+    expect(sw).toMatch(/addEventListener\('message'/);
+    expect(sw, 'the unconditional production skipWaiting came back')
+      .not.toMatch(/addAll\(PRECACHE\)[\s\S]{0,120}skipWaiting/);
+  });
+
   it('ships a 404.html branded fallback for unknown paths', () => {
     const path = resolve(DIST, '404.html');
     expect(existsSync(path)).toBe(true);
@@ -138,6 +148,23 @@ describe('static build - GitHub Pages base path', () => {
     expect(manifest.start_url).toBe(`${BASE}app.html`);
     expect(manifest.scope).toBe(BASE);
     expect(manifest.icons[0].src).toBe(`${BASE}icon.svg`);
+  });
+
+  it('ships the raster icons the manifest promises, so no install 404s', () => {
+    const manifest = JSON.parse(readFileSync(resolve(DIST, 'manifest.json'), 'utf8'));
+    for (const icon of manifest.icons) {
+      const file = icon.src.slice(BASE.length);
+      expect(existsSync(resolve(DIST, file)), `manifest lists ${file}, which is not in dist`).toBe(true);
+    }
+  });
+
+  it('claims maskable only of an icon drawn with a safe zone', () => {
+    const manifest = JSON.parse(readFileSync(resolve(DIST, 'manifest.json'), 'utf8'));
+    const svg = manifest.icons.find((i) => i.type === 'image/svg+xml');
+    // The SVG is a rounded rect, so its corners are transparent and a
+    // maskable consumer would crop into the die.
+    expect(svg.purpose).toBe('any');
+    expect(manifest.icons.some((i) => i.purpose === 'maskable')).toBe(true);
   });
 
   it('sw.js precaches base-prefixed shell paths', () => {

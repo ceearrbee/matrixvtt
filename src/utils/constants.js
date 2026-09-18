@@ -26,6 +26,13 @@ export const STORAGE_KEYS = {
   // Cached room id of the user's personal library, user-scoped via
   // readUserScoped so it survives a different account logging in.
   LIBRARY_ROOM: 'vtt:library-room',
+  // Turn notification preferences (desktop popup, chime). Personal and
+  // user-scoped: two accounts on one browser must not inherit each
+  // other's interruptions.
+  TURN_NOTIFY: 'vtt:turn-notify',
+  // Which left-index sections the reader left open. A viewing
+  // preference, so user-scoped and deliberately not per room.
+  LEFT_INDEX_SECTIONS: 'vtt:left-index-sections',
   // Saved dice formulas. Personal, device-local, user-scoped.
   DICE_MACROS: 'vtt:dice-macros',
   // Per-user chrome layout preference (text | icon). User-scoped via
@@ -72,10 +79,11 @@ export function isLayoutMode(v) {
 // logout sweeps) can iterate without hardcoding the prefix strings.
 export const STORAGE_KEY_PREFIXES = Object.freeze({
   MAP_STRIP: 'vtt-map-strip:',
-  CHANNELS_RAIL: 'vtt-channels-rail:',
+  SHEET_PANEL: 'vtt-sheet-panel:',
   ICON_RAIL_DRAWER: 'vtt-icon-rail-drawer:',
   TOOL_GROUP: 'vtt-tool-group:',
   GM_PREP: 'vtt-gm-prep:',
+  FOCUS_MODE: 'vtt-focus-mode:',
 });
 
 // IconRail drawer identifiers - values written to per-(user, room)

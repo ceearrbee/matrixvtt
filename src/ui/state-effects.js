@@ -13,6 +13,8 @@
 
 import { effect } from '@preact/signals';
 import { logger } from '../utils/logger.js';
+import { setTurnFlag } from './notify/tab-signal.js';
+import { announceMyTurn } from './notify/announce-turn.js';
 import { esc } from '../utils/domHelpers.js';
 import {
   settingsSignal, initiativeSignal, charactersSignal,
@@ -69,6 +71,7 @@ function _initiativeEffect(ui) {
   // re-announce the same turn when the homeserver redelivers an
   // identical initiative event after a sync reconnect.
   let prev = { active: null, round: -1, idx: -1 };
+  let wasMyTurn = false;
   return effect(() => {
     initiativeSignal.value;
     if (!primed) { primed = true; return; }
@@ -85,19 +88,23 @@ function _initiativeEffect(ui) {
             ui._announce(`${cur?.name || '?'}'s turn`);
             ui._startTurnTimer();
             if (cur?.token_id) ui.mapRenderer?.panToToken(cur.token_id);
+            const mine = !!ui._isMyCombatTurn?.();
+            setTurnFlag(mine);
+            if (mine && !wasMyTurn) announceMyTurn(ui, cur?.name);
+            wasMyTurn = mine;
           }
           ui.mapRenderer?.scheduleCombatFrame();
         } else if (!init.active && prev.active) {
           ui._stopTurnTimer();
           ui.mapRenderer?.cancelCombatFrame();
+          setTurnFlag(false);
+          wasMyTurn = false;
         }
         prev = { active: init.active, round: init.round, idx: init.current_index };
       }
-      // No more auto-switch to the combat tab on turn transition. The
-      // toast from `_announceMyTurn` already surfaces "it's your turn";
-      // yanking the active tab away from whatever the user is reading
-      // is the same side-effect-in-helper pattern we removed from
-      // `ui._log`.
+      // No auto-switch to the combat tab on turn transition: yanking the
+      // active tab away from whatever the user is reading is the same
+      // side-effect-in-helper pattern removed from `ui._log`.
     } catch (err) {
       logger.error('UI', 'initiative effect failed', err);
     }

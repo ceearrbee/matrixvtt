@@ -75,6 +75,10 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node, // for `global.alert = vi.fn()` patterns in Vitest
+        // tests/setup/fail-on-console.js hangs these off globalThis so a
+        // spec can whitelist one expected console line.
+        expectConsoleError: 'readonly',
+        expectConsoleWarning: 'readonly',
       },
     },
     rules: {
@@ -87,6 +91,47 @@ export default [
       // XSS surface and the rule lights up on every fixture template.
       'vtt/no-raw-html-interpolation': 'off',
     }
+  },
+
+  // Playwright parses the first parameter's destructuring to work out
+  // which fixtures a hook needs, and rejects any other shape, so
+  // `({}, testInfo)` is the only way to take testInfo and no fixtures.
+  {
+    files: ['tests/e2e/**/*.js'],
+    rules: {
+      'no-empty-pattern': 'off',
+    },
+  },
+
+  // Build and release scripts: node, run from the repo by a developer,
+  // over paths the repo itself supplies. The security rules here guard a
+  // browser trust boundary these files are on the other side of, and
+  // nothing in scripts/ ships to users.
+  {
+    files: ['scripts/**/*.{js,mjs}', 'docs/scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+    },
+  },
+
+  // The custom rules walk ESLint's AST, where indexing a node map by a
+  // visitor key is the whole job.
+  {
+    files: ['eslint-rules/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'security/detect-object-injection': 'off',
+    },
   },
 
   // Ignore generated / dependency output and vendored bundles

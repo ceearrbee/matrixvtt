@@ -22,7 +22,6 @@ export const MODAL_WIDTHS = {
 
 export const FOG_MODES = {
   VISIBLE: 'visible',
-  GM_ONLY: 'gm_only',
   HIDDEN:  'hidden',
 };
 
@@ -35,6 +34,14 @@ export const TOKEN_COLORS = {
   NPC_DEFAULT:  '#993C1D',
   AREA_REVEAL:  '#4a9eff',
   AREA_HIDE:    '#ff6b6b',
+  AREA_SELECT:  '#5BB8E8',
+};
+
+// What a swept marquee rectangle does when it is released.
+export const MARQUEE_MODES = {
+  REVEAL: 'reveal',
+  HIDE:   'hide',
+  SELECT: 'select',
 };
 
 // Swatch palette for the TokenFormModal color picker. First two slots

@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, h } from 'preact';
+import { act } from 'preact/test-utils';
 import { LogPanel } from '../ui/LogPanel.jsx';
 import { reactionsSignal } from '../state/signals.js';
 import { logVersionSignal, replyContextSignal } from '../state/ui-signals.js';
@@ -41,6 +42,8 @@ describe('LogPanel - no 🎲 / ⚔️ quick-react buttons', () => {
   it('a chat entry with eventId renders no dice or sword quick-react button', () => {
     const log = [{ eventId: 'evt-1', icon: '💬', text: 'hi', html: 'hi', ts: '12:00' }];
     render(h(LogPanel, { ui: makeUi(log) }), host);
+    // The toolbar opens for the row you are on, so open it first.
+    act(() => { host.querySelector('[data-log-actions-trigger]').click(); });
     const buttons = [...host.querySelectorAll('.log-actions__react')].map(b => b.textContent);
     expect(buttons).not.toContain('🎲');
     expect(buttons).not.toContain('⚔️');

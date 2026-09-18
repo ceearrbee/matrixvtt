@@ -1,8 +1,8 @@
 import { h } from 'preact';
 
 export function CombatPanel({ ui, gm }) {
-  return h('div', { class: 'gm-panel gm-panel--combat', style: 'padding:12px;' }, [
-    h('div', { class: 'button-group', style: 'margin-bottom:10px;' }, [
+  return h('div', { class: 'gm-panel gm-panel--combat', style: 'padding:var(--space-xl);' }, [
+    h('div', { class: 'button-group', style: 'margin-bottom:var(--space-lg);' }, [
       h(
         'button',
         {
@@ -21,7 +21,7 @@ export function CombatPanel({ ui, gm }) {
           title: 'Previous turn',
           onClick: () => ui.prevTurn(),
         },
-        '◀ Prev'
+        'Previous turn'
       ),
       h(
         'button',

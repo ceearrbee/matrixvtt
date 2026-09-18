@@ -3,10 +3,12 @@
  */
 
 import { h } from 'preact';
+import * as v from 'valibot';
 import { esc } from '../utils/domHelpers.js';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
-import { FormReader } from '../utils/ui-helpers.js';
+import { FormReader, applyFieldErrors } from '../utils/ui-helpers.js';
+import { intRange } from '../utils/form-schemas.js';
 import { ENTITY_TYPES } from '../utils/constants.js';
 
 const text = (key, label) => ({ key, label, type: 'text' });
@@ -122,12 +124,36 @@ function _renderWizardProgress(steps, currentStep) {
   ).join('<span class="wizard-step-sep">›</span>');
 }
 
+function stepFields(step) {
+  return Object.fromEntries(step.fields.map((f) => [
+    f.key, f.type === 'int' ? { id: `wiz-${f.key}`, type: 'int' } : `wiz-${f.key}`,
+  ]));
+}
+
+/**
+ * Every numeric field the step declares, held to the bounds the step
+ * already puts on its input - the form advertised `min` and `max` and
+ * then accepted anything, including the negatives a number input still
+ * allows. A cleared field stays cleared, and
+ * `buildCharacterFromWizardData` supplies the sheet default.
+ * @param {{fields: {key: string, label: string, type: string, min?: number, max?: number}[]}} step
+ */
+export function wizardStepSchema(step) {
+  const entries = step.fields
+    .filter((f) => f.type === 'int')
+    .map((f) => [f.key, intRange(f.label, f.min, f.max)]);
+  return v.object(Object.fromEntries(entries));
+}
+
 async function _handleWizardStepSubmit(ui, body, step, formData, system, ruleset, isLast, onFinish) {
   const form = new FormReader(body);
-  const stepData = form.collect(Object.fromEntries(step.fields.map(f => [
-    f.key, f.type === 'int' ? { id: `wiz-${f.key}`, type: 'int' } : `wiz-${f.key}`,
-  ])));
-  
+  const fields = stepFields(step);
+  const { values: stepData, errors } = form.validate(fields, wizardStepSchema(step));
+  if (Object.keys(errors).length > 0) {
+    applyFieldErrors(body, errors, fields);
+    return false; // stay on this step so the number can be fixed
+  }
+
   Object.assign(formData, stepData);
 
   if (!isLast) return true; // continue to next step
@@ -178,11 +204,11 @@ export function showCharacterWizard(ui) {
     // helper definitions above.
     // eslint-disable-next-line vtt/no-raw-html-interpolation
     body.innerHTML = `
-      <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">${_renderWizardProgress(steps, currentStep)}</div>
+      <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:var(--space-2xl);display:flex;flex-wrap:wrap;gap:var(--space-xs);align-items:center;">${_renderWizardProgress(steps, currentStep)}</div>
       <h3 class="wizard-step-label">${esc(step.label)}</h3>
       <form id="wizard-step-form">
         ${_renderStepFields(step, formData)}
-        <div style="margin-top: 16px; padding: 10px; background: var(--color-background-secondary); border-radius: 4px; border: 0.5px solid var(--color-border-primary);">
+        <div style="margin-top: var(--space-2xl); padding: var(--space-lg); background: var(--color-background-secondary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-primary);">
           <p style="margin: 0; font-size: 11px; color: var(--color-text-secondary); line-height: 1.4;">
             <strong>Character Note:</strong> Characters are stored securely on your Matrix accounts server. All changes are synced in real-time.
           </p>

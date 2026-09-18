@@ -26,6 +26,10 @@ build/
 # Generated icon library (rebuilt from the .zip files by scripts/build-icons.mjs)
 public/icons/
 
+# Raster app icons (rebuilt from public/icon.svg by scripts/build-pwa-icons.mjs).
+# Not icon*.png, which would swallow the committed icon.svg's neighbours.
+public/icon-*.png
+
 # Logs
 *.log
 npm-debug.log*
@@ -37,6 +41,9 @@ npm-debug.log*
 .clone/
 .clone/
 coverage/
+.claude/
+.codex
+.antigravitycli/
 
 # VitePress
 docs/.vitepress/cache/

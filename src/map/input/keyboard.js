@@ -1,5 +1,6 @@
 
 import { moveTokenBy } from '../actions/tokens.js';
+import { moveSelectionBy } from '../actions/move-selection.js';
 
 const ARROW_DELTAS = {
   ArrowLeft:  { dx: -1, dy: 0 },
@@ -44,6 +45,11 @@ export function setupKeyboard(mr) {
     }
 
     if (e.key === 'Escape') {
+      if (!mr._moveMode && (mr.selectedTokenIds?.size ?? 0) > 0) {
+        mr.setSelectedToken(null);
+        announce('Selection cleared.');
+        mr.render?.();
+      }
       if (mr._moveMode) {
         const origin = mr._moveOrigin;
         mr._moveMode = false;
@@ -79,11 +85,20 @@ export function setupKeyboard(mr) {
         const t = mr.state.tokens.get(mr.selectedToken);
         mr._moveMode = true;
         mr._moveOrigin = t ? { col: t.col ?? 0, row: t.row ?? 0 } : null;
-        announce(`Moving ${tokenName(mr, mr.selectedToken)}. Arrow keys to move, Enter to commit, Escape to cancel.`);
+        const count = mr.selectedTokenIds?.size ?? 1;
+        const what = count > 1 ? `${count} tokens` : tokenName(mr, mr.selectedToken);
+        announce(`Moving ${what}. Arrow keys to move, Enter to commit, Escape to cancel.`);
       }
       const { dx, dy } = ARROW_DELTAS[e.key];
       const step = e.shiftKey ? 5 : 1;
-      moveTokenBy(mr, mr.selectedToken, dx * step, dy * step);
+      const selection = [...(mr.selectedTokenIds ?? [])];
+      if (selection.length > 1) {
+        moveSelectionBy(mr, selection, dx * step, dy * step).then(({ moved, blocked }) => {
+          if (blocked) announce(`${moved} moved, ${blocked} blocked.`);
+        });
+      } else {
+        moveTokenBy(mr, mr.selectedToken, dx * step, dy * step);
+      }
     }
   };
 

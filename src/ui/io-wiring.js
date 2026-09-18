@@ -26,6 +26,7 @@ import {
   syncCampaignToMatrix,
 } from './import-export.js';
 import { runWithProgress } from './progress-modal.js';
+import { importUvtt } from './maps/uvtt-import.js';
 // `exportState` lives under gm-ops because it's the GM-initiated bulk
 // serialisation action, not a pure import-export helper.
 import { exportState as exportStateFn } from './gm-ops.js';
@@ -81,31 +82,10 @@ export function attachIOMethods(ui) {
   ui.importCharacterFromMarkdown = (section) => importCharacterFromMarkdownFn(ui, section);
   ui.importNPCFromMarkdown = (section) => importNPCFromMarkdownFn(ui, section);
 
-  // UVTT wall import - non-delegating because the parser is loaded
-  // lazily and the success/failure path touches toasts + state.addWall
-  // directly. Wrapped here rather than in import-export.js so callers
-  // can see the full flow in one file.
+  // UVTT import - non-delegating because the parser is loaded lazily.
   ui.importUvttFile = async (file) => {
     try {
-      const text = await file.text();
-      const json = JSON.parse(text);
-      const { parseUVTT } = await import('../utils/uvttImport.js');
-      const { walls, lights = [] } = parseUVTT(json);
-      if (walls.length === 0 && lights.length === 0) {
-        ui._toast?.('UVTT file contained no walls or lights', 'info');
-        return;
-      }
-      const suffix = () => Math.random().toString(36).slice(2, 8);
-      for (const w of walls) {
-        await ui.state.addWall?.({ ...w, id: `${w.id}-${suffix()}` });
-      }
-      for (const l of lights) {
-        await ui.state.addLight?.({ ...l, id: `${l.id}-${suffix()}` });
-      }
-      const parts = [];
-      if (walls.length) parts.push(`${walls.length} wall segment${walls.length === 1 ? '' : 's'}`);
-      if (lights.length) parts.push(`${lights.length} light${lights.length === 1 ? '' : 's'}`);
-      ui._toast?.(`Imported ${parts.join(' and ')} from UVTT`, 'success');
+      await importUvtt(ui, file);
     } catch (err) {
       ui._toast?.(`UVTT import failed: ${err.message}`, 'error');
     }

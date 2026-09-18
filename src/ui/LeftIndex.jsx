@@ -13,12 +13,11 @@
  */
 
 import { h } from 'preact';
-import { useState } from 'preact/hooks';
+import { useStorageSubscription } from './hooks/use-storage.js';
 import { IconRail } from './IconRail.jsx';
 import { useMediaQuery } from './hooks/use-media-query.js';
 import { layoutModeSignal } from '../state/ui-signals.js';
-import { LAYOUT_MODES } from '../utils/constants.js';
-import { ICON_RAIL_DRAWERS } from '../utils/constants.js';
+import { LAYOUT_MODES, ICON_RAIL_DRAWERS, STORAGE_KEYS } from '../utils/constants.js';
 import { ScenesDrawer, JournalDrawer } from './index-sections.js';
 import { openPopup } from '../state/popup-signals.js';
 import {
@@ -51,6 +50,22 @@ function IndexSection({ section, isOpen, onToggle, ui }) {
   ]);
 }
 
+const DEFAULT_OPEN = Object.fromEntries(SECTIONS.map((s) => [s.key, s.open]));
+
+/** A stored value that will not parse should read as the default, not as closed. */
+function parseOpen(raw) {
+  if (!raw) return { ...DEFAULT_OPEN };
+  try {
+    const stored = JSON.parse(raw);
+    if (!stored || typeof stored !== 'object') return { ...DEFAULT_OPEN };
+    return { ...DEFAULT_OPEN, ...stored };
+  } catch { return { ...DEFAULT_OPEN }; }
+}
+
+function serializeOpen(value) {
+  return JSON.stringify(value ?? DEFAULT_OPEN);
+}
+
 // Matches the ≤768px block in styles.css that used to hide the
 // accordion; a phone has no room for the always-expanded form.
 const COMPACT_QUERY = '(max-width: 768px)';
@@ -61,10 +76,12 @@ export function LeftIndex({ ui }) {
   const isGM = typeof ui?.state?.isGM === 'function' ? ui.state.isGM() : false;
   const sections = SECTIONS.filter((s) => !s.gmOnly || isGM);
 
-  const [openSections, setOpenSections] = useState(() =>
-    Object.fromEntries(SECTIONS.map((s) => [s.key, s.open])));
+  const [openSections, setOpenSections] = useStorageSubscription(
+    STORAGE_KEYS.LEFT_INDEX_SECTIONS,
+    { userId: ui?.widgetManager?.userId ?? null, parse: parseOpen, serialize: serializeOpen },
+  );
   const toggle = (key) => () =>
-    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    setOpenSections({ ...openSections, [key]: !openSections[key] });
 
   if (compactViewport || iconLayout) return h(IconRail, { ui });
 

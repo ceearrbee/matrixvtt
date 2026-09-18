@@ -53,7 +53,7 @@ export function showLootActionPrompt(ui, { tableName, entryText, itemId }) {
       h('p', { class: 'muted-small' }, item
         ? ['Linked item: ', h('strong', null, item.name || itemId)]
         : 'No linked item; Award and Drop will create one from this text.'),
-      h('div', { class: 'form-actions', style: 'flex-wrap:wrap;gap:6px;' }, [
+      h('div', { class: 'form-actions', style: 'flex-wrap:wrap;gap:var(--space-sm);' }, [
         h('button', { class: 'dbt btn-primary', 'data-loot-award': true, onClick: award }, 'Award to PC…'),
         h('button', { class: 'dbt', 'data-loot-drop': true, onClick: drop }, 'Drop on map'),
         h('button', { class: 'dbt', 'data-modal-close': true }, 'Just close'),
@@ -106,7 +106,7 @@ function showAwardPCPicker(ui, itemId) {
       h('div', { style: 'max-height:320px;overflow-y:auto;' },
         characters.map(([id, c]) => h('button', {
           class: 'dbt', key: id,
-          style: 'display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:4px;',
+          style: 'display:flex;justify-content:space-between;width:100%;text-align:left;margin-bottom:var(--space-xs);',
           onClick: () => award(id),
         }, [
           h('span', null, c.name || id),

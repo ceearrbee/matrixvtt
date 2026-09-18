@@ -6,19 +6,20 @@
  */
 
 import { h } from 'preact';
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { MapCanvas } from './MapCanvas.jsx';
 import { TokenActionBar } from './TokenActionBar.jsx';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { activeMapIdSignal, tokensSignal } from '../state/signals.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
-import { clampMapStripSize, useMapStripSize } from '../utils/map-strip-size.js';
+import { useMapStripSize } from '../utils/map-strip-size.js';
 import { confirm } from './confirm-dialogs.jsx';
 import { isCoarsePointer } from '../utils/pointer.js';
 import {
   WallIcon, TemplateIcon, LightIcon, PinIcon, PingIcon, EraseIcon,
   UndoIcon, RedoIcon, TrashIcon, PersonIcon, EyeIcon, FogIcon,
   SelectIcon, PencilIcon, LineToolIcon, RectToolIcon, CircleToolIcon, RulerIcon,
+  PanelIcon,
 } from './icons/index.jsx';
 
 // Map tool ids -> editorial SVG icons. Every tool renders a stroked
@@ -41,14 +42,14 @@ const TOOL_ICONS = {
 // Exported so keyboard-help can render a Map section without duplicating the
 // shortcut strings.
 export const TOOLS = [
-  ['pointer', '↖', 'Select / Move (V)', 'Select/Move tool (V)', 'Select tool'],
+  ['pointer', '', 'Select / Move (V)', 'Select/Move tool (V)', 'Select tool'],
   null,
-  ['pencil', '✏', 'Freehand pencil (P)', 'Pencil tool (P)', 'Pencil tool'],
+  ['pencil', '', 'Freehand pencil (P)', 'Pencil tool (P)', 'Pencil tool'],
   ['line', '╱', 'Line (L)', 'Line tool (L)', 'Line tool'],
   ['rect', '▭', 'Rectangle (R)', 'Rectangle tool (R)', 'Rectangle tool'],
   ['circle', '◯', 'Circle / Aura (C)', 'Circle/Aura tool (C)', 'Circle tool'],
   null,
-  ['measure', '📏', 'Measure distance (M)', 'Measure tool (M)', 'Measure tool'],
+  ['measure', '', 'Measure distance (M)', 'Measure tool (M)', 'Measure tool'],
   null,
 ];
 
@@ -71,10 +72,10 @@ const GROUP_LABELS = Object.freeze({
 
 // GM-only tools appended after the base list when the viewer is a GM.
 export const GM_TOOLS = [
-  ['wall', '🧱', 'Draw sight-blocking wall (W)', 'Wall tool (W)', 'Wall tool'],
-  ['light', '💡', 'Place a light source (O)', 'Light tool (O)', 'Light tool'],
+  ['wall', '', 'Draw sight-blocking wall (W)', 'Wall tool (W)', 'Wall tool'],
+  ['light', '', 'Place a light source (O)', 'Light tool (O)', 'Light tool'],
   ['pin', '', 'Drop a map pin, then click the map (I)', 'Pin tool (I)', 'Pin tool'],
-  ['template-circle', '🎯', 'Persistent circle template (T)', 'Template circle (T)', 'Template circle tool'],
+  ['template-circle', '', 'Persistent circle template (T)', 'Template circle (T)', 'Template circle tool'],
   null,
 ];
 
@@ -172,7 +173,7 @@ function DrawToolbar({ ui }) {
     ),
     isCombat && h('span', { class: 'draw-toolbar__lock-note' }, 'Drawing locked during combat'),
     h('button', { class: 'dtb-btn dtb-btn--toggle', id: 'toggle-toolbar', 'aria-label': 'Toggle toolbar', title: 'Toggle toolbar', onClick: onToggle }, [
-      '↕ ', h('span', { class: 'sr-only' }, 'Toggle toolbar'),
+      h(PanelIcon, {}), h('span', { class: 'sr-only' }, 'Toggle toolbar'),
     ]),
     h('div', { class: 'draw-toolbar__content', onClick: onTool }, [
       ...tools.map((t, i) => {
@@ -280,20 +281,19 @@ function MapEmptyPlaceholder({ ui }) {
     h('h2', { class: 'editorial-heading editorial-heading--lg' }, 'No active map'),
     h('p', { class: 'editorial-body map-empty__copy' },
       isGM
-        ? 'Open the maps panel to create or select a battle map. Players see the same room state as soon as you switch.'
+        ? 'Add a battle map, or pick one you have already made. Players see the same room state as soon as you switch.'
         : 'Waiting for the GM to load a map. The Journal and Scenes are usable while you wait.'),
+    // Same words as the next-steps chip that asks for the same thing.
     isGM && h('button', {
       class: 'dbt btn-primary',
       onClick: () => ui.openMapsPanel?.(),
-    }, 'Open maps panel'),
+    }, 'Add a map'),
   ]);
 }
 
-// 360px gives portrait-oriented dungeon maps enough room to auto-fit
-// at a readable zoom on first open. The drag handle still lets users
-// resize within [80px, 60vh].
+// Any non-zero stored value means expanded. The almanac lays the split
+// out map-dominant in CSS, so this is the marker, not a height.
 const DEFAULT_STRIP_HEIGHT = 360;
-const COLLAPSED_CHROME_HEIGHT = 32;
 
 export function MapStrip({ ui }) {
   // Subscribing here keeps the empty-state in sync with map changes
@@ -311,73 +311,18 @@ export function MapStrip({ ui }) {
 
   const userId = ui?.widgetManager?.userId ?? null;
   const roomId = ui?.widgetManager?.roomId ?? null;
+  // Zero is the collapsed sentinel; any other stored value means
+  // expanded. The almanac lays the split out map-dominant by design,
+  // so there is no height to honour beyond that distinction.
   const [storedHeight, persistHeight] = useMapStripSize(userId, roomId);
-  // Transient drag height - set during pointermove so the strip
-  // resizes responsively, then committed to storage on pointerup.
-  const [dragHeight, setDragHeight] = useState(null);
-  // Remember the last non-collapsed height so the chevron toggle can
-  // restore it without re-reading the (just-cleared) storage value.
-  const lastExpandedRef = useRef(storedHeight && storedHeight > 0 ? storedHeight : DEFAULT_STRIP_HEIGHT);
-  if (storedHeight != null && storedHeight > 0) lastExpandedRef.current = storedHeight;
+  const collapsed = storedHeight === 0;
 
-  const effectiveHeight = dragHeight != null
-    ? dragHeight
-    : storedHeight != null
-      ? storedHeight
-      : DEFAULT_STRIP_HEIGHT;
-  const collapsed = effectiveHeight === 0;
-
-  const dragCleanupRef = useRef(null);
-  useEffect(() => () => {
-    if (dragCleanupRef.current) dragCleanupRef.current();
-  }, []);
-
-  const onHandlePointerDown = (e) => {
-    if (e.button !== 0) return;
-    // Defensive: a second pointerdown before the previous drag's
-    // pointerup arrived would otherwise pile up listeners.
-    if (dragCleanupRef.current) dragCleanupRef.current();
-
-    const startY = e.clientY;
-    const startHeight = effectiveHeight > 0 ? effectiveHeight : lastExpandedRef.current;
-    const target = e.currentTarget;
-    try { target.setPointerCapture?.(e.pointerId); } catch { /* not supported */ }
-    target.classList.add('map-strip__resize--dragging');
-    let lastClamped = startHeight;
-    const onMove = (ev) => {
-      const next = clampMapStripSize(startHeight + (ev.clientY - startY));
-      if (next != null) {
-        lastClamped = next;
-        setDragHeight(next);
-      }
-    };
-    const cleanup = (commit) => {
-      target.classList.remove('map-strip__resize--dragging');
-      try { target.releasePointerCapture?.(e.pointerId); } catch { /* not supported */ }
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-      dragCleanupRef.current = null;
-      setDragHeight(null);
-      if (commit) persistHeight(lastClamped);
-    };
-    const onUp = () => cleanup(true);
-    dragCleanupRef.current = () => cleanup(false);
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', onUp);
-  };
-
-  const onToggleCollapse = () => {
-    if (collapsed) persistHeight(lastExpandedRef.current);
-    else persistHeight(0);
-  };
+  const onToggleCollapse = () => persistHeight(collapsed ? DEFAULT_STRIP_HEIGHT : 0);
 
   return h('main', {
     id: 'main-content',
     class: `map-strip map-container${collapsed ? ' map-strip--collapsed' : ''}`,
     role: 'main', 'aria-label': 'Game map',
-    style: `--map-strip-height: ${collapsed ? COLLAPSED_CHROME_HEIGHT : effectiveHeight}px;`,
   }, [
     h('button', {
       key: 'collapse',
@@ -397,8 +342,12 @@ export function MapStrip({ ui }) {
     h(MapCanvas, { key: 'canvas', ui }),
     h('p', { key: 'desc', id: 'map-canvas-desc', class: 'sr-only' },
       'Drag tokens to move them. Scroll or pinch to zoom. Space+drag to pan. Press M on a selected token to enter movement mode, then arrow keys to move. Press Escape to cancel.'),
-    h(DrawToolbar, { key: 'toolbar', ui }),
-    h('div', { key: 'controls', class: 'map-controls', 'aria-label': 'Map zoom controls' }, [
+    // Tools and zoom act on a map, so they wait for one. Without this a
+    // fresh campaign's first screen stacks twelve controls - stroke
+    // colour, line width, measure, zoom - on top of the placeholder
+    // that is asking the GM to add the map they would act on.
+    hasMap && h(DrawToolbar, { key: 'toolbar', ui }),
+    hasMap && h('div', { key: 'controls', class: 'map-controls', 'aria-label': 'Map zoom controls' }, [
       h('button', { id: 'zoom-in', 'aria-label': 'Zoom in', title: 'Zoom in', onClick: () => ui.zoomIn?.() }, [
         h('span', { class: 'map-controls__word' }, 'Zoom '),
         h('span', { class: 'map-controls__glyph', 'aria-hidden': 'true' }, '+'),
@@ -409,13 +358,5 @@ export function MapStrip({ ui }) {
       ]),
     ]),
     h('div', { key: 'inspector', id: 'token-inspector', class: 'token-inspector', style: 'display: none;' }),
-    h('div', {
-      key: 'resize',
-      class: 'map-strip__resize',
-      role: 'separator',
-      'aria-orientation': 'horizontal',
-      'aria-label': 'Resize map strip',
-      onPointerDown: onHandlePointerDown,
-    }),
   ]);
 }

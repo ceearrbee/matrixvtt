@@ -98,17 +98,12 @@ describe('engine drives three systems from JSON alone', () => {
     expect(fm.stress).toEqual([false, true, false]);
   });
 
-  it('formula evaluation: 5e PB + mod vs GURPS success-check', () => {
+  it('formula evaluation: 5e spell save DC vs GURPS basic lift', () => {
     // 5e: spell_save_dc with level 5 wizard, INT 16 (mod +3), PB 3
     const dcCtx = { tables: dnd5e.tables, derived: { pb: 3 }, cast: { mod: 3 } };
     expect(evaluate(dnd5e.formulas.spell_save_dc, dcCtx)).toBe(14);
 
-    // GURPS: success check - rolled 10 against DX 12 succeeds, margin 2
-    const gurpsCtx = { target: 12, roll: { total: 10 } };
-    expect(evaluate(gurps.formulas.success, gurpsCtx)).toBe(true);
-    expect(evaluate(gurps.formulas.margin_of_success, gurpsCtx)).toBe(2);
-
     // GURPS: ST 10 → Basic Lift = 10*10/5 = 20 lbs
-    expect(evaluate(gurps.formulas.basic_lift_lbs, { st: 10 })).toBe(20);
+    expect(evaluate(gurps.formulas.basic_lift_lbs, { st: { score: 10 } })).toBe(20);
   });
 });

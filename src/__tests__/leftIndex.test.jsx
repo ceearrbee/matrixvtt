@@ -36,6 +36,9 @@ const head = (container, section) =>
   container.querySelector(`[data-section="${section}"] .left-index__section-head`);
 
 beforeEach(() => {
+  // Section open/closed now persists, so a collapse in one test would
+  // otherwise leak into the next.
+  localStorage.clear();
   settingsSignal.value = { systemConfig: {} };
   handoutsSignal.value = new Map();
   pagesSignal.value = new Map();

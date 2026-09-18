@@ -21,7 +21,7 @@
 import { effect } from '@preact/signals';
 import Konva from 'konva';
 import { tokensSignal, activeMapIdSignal, pinsSignal } from '../../state/signals.js';
-import { COND_ICONS } from '../../utils/conditions.js';
+import { conditionAbbr } from '../../state/rulesets.js';
 import { visibleTokensForViewer } from '../../utils/tokenLayer.js';
 import { HP_COLORS } from '../../utils/ui-constants.js';
 import { ENTITY_TYPES } from '../../utils/constants.js';
@@ -173,32 +173,46 @@ function tokenRadius(size, cellPx) {
 
 const AURA_SLOTS = 4;
 const AURA_DEFAULT_OPACITY = 0.18;
+const CONDITION_SLOTS = 6;
+
+// Each token group's named children, so the per-frame update path reads
+// a reference instead of searching for one. Konva resolves a `.name`
+// selector by walking the whole subtree and re-parsing the selector at
+// every node it visits, and updateGroup wants two dozen children on
+// each frame of a drag or a turn-ring pulse. The nodes keep their
+// names, so findOne still works for the paths that run rarely. Weak so
+// a destroyed group's entry goes with it.
+const partsOf = new WeakMap();
 
 function buildGroup() {
   const group = new Konva.Group();
+  const parts = { auraCircles: [], conds: [] };
+  const add = (parent, name, node) => {
+    node.name(name);
+    parent.add(node);
+    parts[name] = node;
+    return node;
+  };
+
   // Auras render behind everything else (selection ring, body, etc.),
   // so add the group FIRST. Pre-allocate AURA_SLOTS circles per the
   // same allocation-free pattern used for conditions.
-  const auras = new Konva.Group({ name: 'auras', listening: false });
+  const auraGroup = add(group, 'auras', new Konva.Group({ listening: false }));
   for (let i = 0; i < AURA_SLOTS; i++) {
-    auras.add(new Konva.Circle({
-      name: `aura-${i}`,
+    parts.auraCircles.push(add(auraGroup, `aura-${i}`, new Konva.Circle({
       visible: false, listening: false,
       strokeEnabled: false,
-    }));
+    })));
   }
-  group.add(auras);
-  // Named children so updateGroup can find+mutate each piece in place.
-  group.add(new Konva.Circle({ name: 'selRing', visible: false, listening: false }));
-  group.add(new Konva.Circle({ name: 'turnRing', visible: false, listening: false }));
-  group.add(new Konva.Circle({ name: 'body' }));
-  group.add(new Konva.Image({ name: 'sprite', visible: false, listening: false, image: undefined }));
-  group.add(new Konva.Text({ name: 'initials', listening: false, align: 'center', verticalAlign: 'middle', fill: 'white' }));
-  group.add(new Konva.Rect({ name: 'hpBg', visible: false, listening: false, fill: 'rgba(0,0,0,0.5)' }));
-  group.add(new Konva.Rect({ name: 'hpFg', visible: false, listening: false }));
-  group.add(new Konva.Text({ name: 'deathX', visible: false, listening: false, text: '✕', fill: 'rgba(226,75,74,0.8)', align: 'center', verticalAlign: 'middle' }));
-  group.add(new Konva.Shape({
-    name: 'rulesetOverlays',
+  add(group, 'selRing', new Konva.Circle({ visible: false, listening: false }));
+  add(group, 'turnRing', new Konva.Circle({ visible: false, listening: false }));
+  add(group, 'body', new Konva.Circle({}));
+  add(group, 'sprite', new Konva.Image({ visible: false, listening: false, image: undefined }));
+  add(group, 'initials', new Konva.Text({ listening: false, align: 'center', verticalAlign: 'middle', fill: 'white' }));
+  add(group, 'hpBg', new Konva.Rect({ visible: false, listening: false, fill: 'rgba(0,0,0,0.5)' }));
+  add(group, 'hpFg', new Konva.Rect({ visible: false, listening: false }));
+  add(group, 'deathX', new Konva.Text({ visible: false, listening: false, text: '✕', fill: 'rgba(226,75,74,0.8)', align: 'center', verticalAlign: 'middle' }));
+  add(group, 'rulesetOverlays', new Konva.Shape({
     listening: false,
     sceneFunc: (context, shape) => {
       const data = shape.getAttr('data');
@@ -206,7 +220,7 @@ function buildGroup() {
       renderTokenOverlays(context._context, data.token, data.overlays, data.x, data.y, data.radius);
     },
   }));
-  group.add(new Konva.Line({ name: 'facing', visible: false, listening: false, stroke: HP_COLORS.WARN, lineCap: 'round' }));
+  add(group, 'facing', new Konva.Line({ visible: false, listening: false, stroke: HP_COLORS.WARN, lineCap: 'round' }));
   // wrap: 'none' so long names ("Orc War Boss", "Lieutenant Orc") stay on a
   // single line instead of breaking into stacks that collide with adjacent
   // tokens' labels. Single-line labels may still overlap horizontally on
@@ -214,7 +228,7 @@ function buildGroup() {
   // `ellipsis: true` (with wrap:'none' + a set width) truncates an over-long
   // single name to its box with "…" instead of bleeding past it into the next
   // token - e.g. "Lieutenant Orc" → "Lieuten…" on a phone.
-  group.add(new Konva.Text({ name: 'name', listening: false, fill: 'white', align: 'center', wrap: 'none', ellipsis: true, shadowColor: 'black', shadowBlur: 4 }));
+  add(group, 'name', new Konva.Text({ listening: false, fill: 'white', align: 'center', wrap: 'none', ellipsis: true, shadowColor: 'black', shadowBlur: 4 }));
 
   // Pre-allocate 6 condition slots (matches the visible cap in
   // updateGroup's conditions ring). Each slot is a Circle (background
@@ -222,23 +236,21 @@ function buildGroup() {
   // visibility / text instead of destroyChildren-ing and reallocating
   // - 12 fewer Konva node allocations per render per token, which
   // was the headline `drag-perf` finding from the production audit.
-  const conditions = new Konva.Group({ name: 'conditions', listening: false });
-  for (let i = 0; i < 6; i++) {
-    conditions.add(new Konva.Circle({
-      name: `condDot-${i}`, visible: false, listening: false, fill: '#1a1a2e',
-    }));
-    conditions.add(new Konva.Text({
-      name: `condText-${i}`, visible: false, listening: false,
-      align: 'center', verticalAlign: 'middle',
-      fontFamily: 'sans-serif', fill: '#ff9944',
-    }));
+  const conditions = add(group, 'conditions', new Konva.Group({ listening: false }));
+  for (let i = 0; i < CONDITION_SLOTS; i++) {
+    parts.conds.push({
+      dot: add(conditions, `condDot-${i}`, new Konva.Circle({
+        visible: false, listening: false, fill: '#1a1a2e',
+      })),
+      txt: add(conditions, `condText-${i}`, new Konva.Text({
+        visible: false, listening: false,
+        align: 'center', verticalAlign: 'middle',
+        fontFamily: 'sans-serif', fill: '#ff9944',
+      })),
+    });
   }
-  group.add(conditions);
+  partsOf.set(group, parts);
   return group;
-}
-
-function findChild(group, name) {
-  return group.findOne(`.${name}`);
 }
 
 /**
@@ -261,12 +273,10 @@ function resolveAuras(token) {
 }
 
 function syncAuras(group, token, cellPx) {
-  const auras = group.findOne('.auras');
-  if (!auras) return;
   const items = resolveAuras(token);
-  const children = auras.getChildren();
-  for (let i = 0; i < children.length; i++) {
-    const circle = children[i];
+  const circles = partsOf.get(group).auraCircles;
+  for (let i = 0; i < circles.length; i++) {
+    const circle = circles[i];
     const a = items[i];
     if (!a) {
       circle.visible(false);
@@ -287,6 +297,7 @@ function updateGroup(group, token, id, mr) {
   const { x: wx, y: wy, cellPx, size } = tokenCentre(token, map, gridType);
   const radius = tokenRadius(size, cellPx);
   const zoom = mr.zoom || 1;
+  const parts = partsOf.get(group);
 
   if (!group.isDragging()) {
     group.position({ x: wx, y: wy });
@@ -298,7 +309,7 @@ function updateGroup(group, token, id, mr) {
 
   syncAuras(group, token, cellPx);
 
-  const sel = findChild(group, 'selRing');
+  const sel = parts.selRing;
   const isSelected = id === mr.selectedToken;
   sel.visible(isSelected);
   if (isSelected) {
@@ -312,7 +323,7 @@ function updateGroup(group, token, id, mr) {
   const initiative = mr.state?.initiative;
   const isTurn = !!(initiative?.active
     && initiative.order?.[initiative.current_index]?.token_id === id);
-  const turn = findChild(group, 'turnRing');
+  const turn = parts.turnRing;
   turn.visible(isTurn);
   if (isTurn) {
     turn.position({ x, y });
@@ -324,9 +335,9 @@ function updateGroup(group, token, id, mr) {
   }
 
   // Body: sprite when image loaded, else filled circle with initials.
-  const body = findChild(group, 'body');
-  const sprite = findChild(group, 'sprite');
-  const initials = findChild(group, 'initials');
+  const body = parts.body;
+  const sprite = parts.sprite;
+  const initials = parts.initials;
   const img = token.image_url ? getOrLoadImage(mr, token.image_url, `t-${id}`) : null;
   if (img?.complete && img.naturalWidth > 0) {
     sprite.visible(true);
@@ -370,10 +381,10 @@ function updateGroup(group, token, id, mr) {
   const isOwner = token.owner_user_id === mr.state?.widgetManager?.userId;
   const isGM = !!mr.state?.isGM?.();
   const showHP = isGM || isOwner || (token.type !== ENTITY_TYPES.NPC && token.show_hp !== false);
-  const rulesetOverlays = findChild(group, 'rulesetOverlays');
-  const hpBg = findChild(group, 'hpBg');
-  const hpFg = findChild(group, 'hpFg');
-  const deathX = findChild(group, 'deathX');
+  const rulesetOverlays = parts.rulesetOverlays;
+  const hpBg = parts.hpBg;
+  const hpFg = parts.hpFg;
+  const deathX = parts.deathX;
 
   if (Array.isArray(overlaysCfg) && overlaysCfg.length > 0 && showHP) {
     rulesetOverlays.visible(true);
@@ -427,7 +438,7 @@ function updateGroup(group, token, id, mr) {
   }
 
   // Facing arrow.
-  const facing = findChild(group, 'facing');
+  const facing = parts.facing;
   const end = facingArrowEnd({ x, y, radius, facing: token.facing });
   if (end) {
     facing.visible(true);
@@ -441,7 +452,7 @@ function updateGroup(group, token, id, mr) {
   // by placeTokenLabels (the post-position pass), so this per-token sync -
   // which re-runs every frame while the current-turn ring animates - does
   // NOT reset the label and fight the stacking placement.
-  const name = findChild(group, 'name');
+  const name = parts.name;
   name.text(token.name || '');
   name.fontSize(Math.max(10, 12 / zoom));
   name.fontFamily('sans-serif');
@@ -449,21 +460,21 @@ function updateGroup(group, token, id, mr) {
 
   // Conditions around perimeter - mutate the 6 pre-allocated
   // (Circle, Text) pairs from buildGroup; no destroyChildren.
+  const systemConfig = mr.state?.settings?.systemConfig;
   const conds = [
     ...(token.conditions || []),
     ...(token.exhaustion_level > 0 ? [`E${token.exhaustion_level}`] : []),
   ];
   const br = 6 / zoom;
-  for (let i = 0; i < 6; i++) {
-    const dot = findChild(group, `condDot-${i}`);
-    const txt = findChild(group, `condText-${i}`);
+  for (let i = 0; i < CONDITION_SLOTS; i++) {
+    const { dot, txt } = parts.conds[i];
     const c = conds[i];
     if (c == null) {
       dot.visible(false);
       txt.visible(false);
       continue;
     }
-    const angle = -Math.PI / 2 + (i * Math.PI * 2) / 6;
+    const angle = -Math.PI / 2 + (i * Math.PI * 2) / CONDITION_SLOTS;
     const cx = x + (radius + 2) * Math.cos(angle);
     const cy = y + (radius + 2) * Math.sin(angle);
     dot.visible(true);
@@ -473,7 +484,7 @@ function updateGroup(group, token, id, mr) {
     txt.position({ x: cx - br, y: cy - br });
     txt.width(br * 2);
     txt.height(br * 2);
-    txt.text(COND_ICONS[c] || c[0].toUpperCase());
+    txt.text(conditionAbbr(systemConfig, c));
     txt.fontSize(br * 1.2);
   }
 }
@@ -499,10 +510,9 @@ function placeAllLabels(tokenGroups, pinGroups) {
   // local on apply. Width is the measured text capped at 4× radius (the
   // `ellipsis` trim width) so the collision box matches what's drawn.
   for (const [id, group] of tokenGroups) {
-    const name = group.findOne('.name');
-    if (!name || !name.text()) continue;
-    const body = group.findOne('.body');
-    const radius = body?.radius?.() ?? 20;
+    const { name, body } = partsOf.get(group);
+    if (!name.text()) continue;
+    const radius = body.radius();
     const { x: wx, y: wy } = group.position();
     const w = Math.min(name.getTextWidth(), radius * 4);
     name.width(w);

@@ -17,11 +17,19 @@ import { h } from 'preact';
 import { render, fireEvent, cleanup } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
+import { activeMapIdSignal, mapsSignal, tokensSignal } from '../state/signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 
+// The toolbar acts on a map, and only renders when there is one, so
+// every fixture here loads one.
+const MAP = { id: 'm-1', name: 'Crypt', width_cells: 20, height_cells: 20, cell_px: 40 };
+
 function mkUi({ isGM = false } = {}) {
+  activeMapIdSignal.value = MAP.id;
+  mapsSignal.value = new Map([[MAP.id, MAP]]);
+  tokensSignal.value = new Map();
   return /** @type {any} */ ({
-    state: { isGM: () => isGM, map: null },
+    state: { isGM: () => isGM, map: MAP, maps: mapsSignal.value, tokens: new Map() },
     pingLocation: () => {},
     setDrawTool: () => {},
     setDrawColor: () => {},
@@ -48,6 +56,8 @@ afterEach(() => {
   tablePhaseSignal.value = UI_MODES.NARRATIVE;
   gmPrepActiveSignal.value = false;
   activeToolGroupSignal.value = TOOL_GROUPS.NAVIGATION;
+  activeMapIdSignal.value = null;
+  mapsSignal.value = new Map();
 });
 
 describe('MapStrip toolbar - contextual groups', () => {

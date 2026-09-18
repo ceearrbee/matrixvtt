@@ -3,7 +3,7 @@
  *
  * Two buttons mapped to existing MatrixVTT functionality:
  *   d20 → ui.rollDice('d20')
- *   ▶   → ui.nextTurn() (disabled when no combat active)
+ *   ▶   → ui.nextTurn(), present only while an order is running
  *
  * Speaking mode is NOT here: it had four entry points and the
  * composer's Say / Describe / OOC pills are the surviving one. The
@@ -35,6 +35,7 @@ afterEach(cleanup);
 
 describe('QuickTray', () => {
   it('renders the two canonical buttons', () => {
+    initiativeSignal.value = { active: true, round: 1, current_index: 0, order: [{}] };
     const { container } = render(h(QuickTray, { ui: makeUi() }));
     for (const k of ['d20', 'next-turn']) {
       expect(container.querySelector(`[data-quick="${k}"]`), `missing ${k}`).not.toBeNull();
@@ -60,15 +61,8 @@ describe('QuickTray', () => {
     expect(ui.nextTurn).toHaveBeenCalled();
   });
 
-  it('▶ next-turn is disabled when no combat is active', () => {
-    const ui = makeUi();
-    const { container } = render(h(QuickTray, { ui }));
-    const btn = container.querySelector('[data-quick="next-turn"]');
-    expect(btn.disabled).toBe(true);
-    fireEvent.click(btn);
-    expect(ui.nextTurn).not.toHaveBeenCalled();
+  it('▶ next-turn is absent when no combat is active', () => {
+    const { container } = render(h(QuickTray, { ui: makeUi() }));
+    expect(container.querySelector('[data-quick="next-turn"]')).toBeNull();
   });
-
-
-
 });

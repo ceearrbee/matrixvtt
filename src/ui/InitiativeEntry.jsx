@@ -5,7 +5,7 @@
 import { h } from 'preact';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { COND_ICONS } from '../utils/conditions.js';
+import { conditionAbbr, conditionLabel } from '../state/rulesets.js';
 import { DISPOSITIONS } from '../utils/constants.js';
 import { getHPColor, getHPZone } from '../utils/format.js';
 import { tokensSignal, charactersSignal, npcsSignal } from '../state/signals.js';
@@ -61,7 +61,10 @@ export function InitiativeEntry({
   const isCurrent = index === current_index;
   const isDefeated = (entry.hp_current ?? 1) <= 0 && (entry.hp_max ?? 0) > 0;
   const conditions = token?.conditions || [];
-  const condIcons = conditions.slice(0, 5).map(c => COND_ICONS[c] || c.charAt(0)).join(' ');
+  const systemConfig = ui.state.settings?.systemConfig;
+  const shownConds = conditions.slice(0, 5);
+  const condIcons = shownConds.map((c) => conditionAbbr(systemConfig, c)).join(' ');
+  const condNames = shownConds.map((c) => conditionLabel(systemConfig, c)).join(', ');
   const canControl = isCurrent && (isGM || myTurn);
   const myUserId = ui.state.widgetManager?.userId;
   const ownsToken = token?.owner_user_id && token.owner_user_id === myUserId;
@@ -155,7 +158,7 @@ export function InitiativeEntry({
         })),
         !isCompact && token?.ac != null && token.ac !== '' && h('span', { class: 'ie__ac' }, `AC ${token.ac}`),
         !isCompact && move && h('span', { class: 'ie__move', title: 'Movement remaining this turn', 'aria-label': `${move.remaining} of ${move.max} movement cells remaining` }, [h(RunIcon, {}), ` ${move.remaining}/${move.max}`]),
-        !isCompact && condIcons && h('span', { class: 'ie__conditions', title: conditions.join(', ') }, condIcons),
+        !isCompact && condIcons && h('span', { class: 'ie__conditions', title: condNames }, condIcons),
         !isCompact && h(TokenTrackerBadges, { trackers: token?.trackers, ariaContext: entry.name }),
         !isCompact && isGM && h('div', { class: 'ie__hp-adjust', role: 'group', 'aria-label': `Adjust ${entry.name} HP` },
           (isCurrent ? [-5, -1, 1, 5] : [-1, 1]).map((delta) => h('button', {

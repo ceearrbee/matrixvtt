@@ -15,7 +15,7 @@
 import { h } from 'preact';
 import { TABS, LAYOUT_MODES } from '../utils/constants.js';
 import { settingsSignal, initiativeSignal } from '../state/signals.js';
-import { activeTabSignal, layoutModeSignal } from '../state/ui-signals.js';
+import { activeTabSignal, layoutModeSignal, sheetPanelWidthSignal } from '../state/ui-signals.js';
 
 import { CombatTab } from './CombatTab.jsx';
 import {
@@ -27,6 +27,11 @@ import { Items } from './Items.jsx';
 import { Spells } from './Spells.jsx';
 import { Skills } from './Skills.jsx';
 import { PartyRoster } from './PartyRoster.jsx';
+import { usePanelDrag } from './hooks/use-panel-drag.js';
+import { onTablistKeyDown } from './hooks/use-roving-tabindex.js';
+import {
+  clampSheetPanelWidth, writeSheetPanelWidth, DEFAULT_SHEET_WIDTH,
+} from '../utils/sheet-panel-size.js';
 
 const TAB_COMPONENTS = {
   [TABS.COMBAT]: CombatTab,
@@ -86,8 +91,42 @@ export function RightCompanion({ ui }) {
   // mapping to the roster so an unknown stored tab never blanks the panel.
   const TabContent = TAB_COMPONENTS[tab] || PartyRoster;
 
-  return h('aside', { class: 'right-companion', role: 'complementary', 'aria-label': 'Companion' }, [
-    h('div', { class: 'ctabs', role: 'tablist', 'aria-label': 'Companion sections' }, [
+  const width = sheetPanelWidthSignal.value ?? DEFAULT_SHEET_WIDTH;
+  // The signal moves every frame so the panel tracks the pointer; only
+  // the commit reaches storage.
+  const dragHandlers = usePanelDrag({
+    axis: 'x',
+    // The handle is on the panel's left edge, so dragging left widens it.
+    invert: true,
+    startValue: () => width,
+    clamp: clampSheetPanelWidth,
+    onPreview: (next) => { if (next != null) sheetPanelWidthSignal.value = next; },
+    onCommit: (next) => {
+      sheetPanelWidthSignal.value = next;
+      writeSheetPanelWidth(ui.widgetManager?.userId, ui.widgetManager?.roomId, next);
+    },
+    dragClass: 'right-companion__resize--dragging',
+  });
+
+  return h('aside', {
+    class: 'right-companion',
+    role: 'complementary',
+    'aria-label': 'Companion',
+  }, [
+    h('div', {
+      key: 'resize',
+      class: 'right-companion__resize',
+      role: 'separator',
+      'aria-orientation': 'vertical',
+      'aria-label': 'Resize the companion panel',
+      'aria-valuenow': String(width),
+      tabindex: '0',
+      ...dragHandlers,
+    }),
+    h('div', {
+      class: 'ctabs', role: 'tablist', 'aria-label': 'Companion sections',
+      onKeyDown: onTablistKeyDown,
+    }, [
       combatActive && h(CompanionTab, {
         id: TABS.COMBAT, label: h(CombatIcon, {}), title: 'Combat tracker',
         current: tab, onClick: select(TABS.COMBAT),
@@ -107,7 +146,10 @@ export function RightCompanion({ ui }) {
       h(CompanionTab, { id: TABS.PARTY, label: lbl(CONCEPT_ICONS.party, 'Party'), title: 'Party roster', current: tab, onClick: select(TABS.PARTY) }),
       h(CompanionTab, { id: TABS.NPC, label: lbl(CONCEPT_ICONS.npc, 'NPCs'), title: 'NPC list', current: tab, onClick: select(TABS.NPC) }),
     ]),
-    inSheetFamily && h('div', { class: 'ctabs ctabs--sub', role: 'tablist', 'aria-label': 'Sheet sections' }, [
+    inSheetFamily && h('div', {
+      class: 'ctabs ctabs--sub', role: 'tablist', 'aria-label': 'Sheet sections',
+      onKeyDown: onTablistKeyDown,
+    }, [
       h(CompanionTab, { id: TABS.SHEET, label: lbl(SheetIcon, 'Sheet'), title: 'Character sheet', current: tab, onClick: select(TABS.SHEET), sub: true }),
       hasSpells && h(CompanionTab, { id: TABS.SPELLS, label: lbl(CONCEPT_ICONS.spell, 'Spells'), title: 'Spell list', current: tab, onClick: select(TABS.SPELLS), sub: true }),
       hasSkills && h(CompanionTab, { id: TABS.SKILLS, label: lbl(CONCEPT_ICONS.skill, 'Skills'), title: 'Skill list', current: tab, onClick: select(TABS.SKILLS), sub: true }),

@@ -54,7 +54,7 @@ export function OOCPanel({ ui }) {
   };
 
   return h('div', { class: 'ooc-panel', 'data-ooc-panel': '' }, [
-    h('div', { class: 'ooc-panel__header', style: 'display:flex;align-items:center;gap:4px;' },
+    h('div', { class: 'ooc-panel__header', style: 'display:flex;align-items:center;gap:var(--space-xs);' },
       [h('span', { class: 'form-label', style: 'margin:0;' }, 'Table talk'), h(HelpIcon, { term: 'ooc' })]),
     h('div', { class: 'ooc-panel__list', key: 'l', 'aria-live': 'polite' },
       entries.length === 0

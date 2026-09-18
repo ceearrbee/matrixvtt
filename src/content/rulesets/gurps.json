@@ -8,51 +8,93 @@
     "description": "3d6 roll-under against attribute or skill targets. Generic mechanics implementation only: GURPS has no open SRD, so no skills, advantages, disadvantages, or equipment ship with this file. Everything here is a mechanics-level description written for MatrixVTT.",
     "sources": []
   },
-
   "attributes": [
-    { "key": "st", "label": "Strength",     "min": 1 },
-    { "key": "dx", "label": "Dexterity",    "min": 1 },
-    { "key": "iq", "label": "Intelligence", "min": 1 },
-    { "key": "ht", "label": "Health",       "min": 1 }
+    {
+      "key": "st",
+      "label": "Strength",
+      "min": 1
+    },
+    {
+      "key": "dx",
+      "label": "Dexterity",
+      "min": 1
+    },
+    {
+      "key": "iq",
+      "label": "Intelligence",
+      "min": 1
+    },
+    {
+      "key": "ht",
+      "label": "Health",
+      "min": 1
+    }
   ],
-
   "dice": {
     "check": "3d6"
   },
-
   "rolls": {
-    "attribute":  "3d6",
-    "skill":      "3d6",
-    "save":       "3d6",
+    "attribute": "3d6",
+    "skill": "3d6",
+    "save": "3d6",
     "initiative": "3d6",
-    "attack":     "3d6"
+    "attack": "3d6"
   },
-
   "formulas": {
-    "success": {
-      "$": "lt", "args": ["@roll.total", { "$": "+", "args": ["@target", 1] }]
-    },
-    "margin_of_success": {
-      "$": "-", "args": ["@target", "@roll.total"]
-    },
     "basic_lift_lbs": {
       "$": "floor",
-      "args": [{ "$": "/", "args": [{ "$": "*", "args": ["@st", "@st"] }, 5] }]
+      "args": [
+        {
+          "$": "/",
+          "args": [
+            {
+              "$": "*",
+              "args": [
+                "@st.score",
+                "@st.score"
+              ]
+            },
+            5
+          ]
+        }
+      ]
     }
   },
-
-  "harm_model": { "type": "tracks", "tracks": ["hp", "fp"] },
-
-  "token": {
-    "overlays": [
-      { "kind": "resource_bar", "current_field": "hp_current", "max_field": "hp_max" },
-      { "kind": "resource_bar", "current_field": "fp_current", "max_field": "fp_max",
-        "thresholds": [{ "min": 0.5, "color": "#3af" }, { "min": 0, "color": "#36a" }] }
+  "harm_model": {
+    "type": "tracks",
+    "tracks": [
+      "hp",
+      "fp"
     ]
   },
-
-  "progression": { "type": "points", "pool_field": "character_points" },
-
+  "token": {
+    "overlays": [
+      {
+        "kind": "resource_bar",
+        "current_field": "hp_current",
+        "max_field": "hp_max"
+      },
+      {
+        "kind": "resource_bar",
+        "current_field": "fp_current",
+        "max_field": "fp_max",
+        "thresholds": [
+          {
+            "min": 0.5,
+            "color": "#3af"
+          },
+          {
+            "min": 0,
+            "color": "#36a"
+          }
+        ]
+      }
+    ]
+  },
+  "progression": {
+    "type": "points",
+    "pool_field": "character_points"
+  },
   "character_sheet": {
     "sections": [
       {
@@ -89,6 +131,16 @@
         "collapsed": true
       },
       {
+        "kind": "stat_grid",
+        "label": "Derived",
+        "stats": [
+          {
+            "label": "Basic Lift (lb)",
+            "formula": "basic_lift_lbs"
+          }
+        ]
+      },
+      {
         "kind": "conditions"
       },
       {
@@ -97,7 +149,6 @@
       }
     ]
   },
-
   "character_preview": {
     "sections": [
       {
@@ -122,7 +173,6 @@
       }
     ]
   },
-
   "npc_preview": {
     "sections": [
       {
@@ -150,17 +200,83 @@
       }
     ]
   },
-
   "item_preview": {
     "sections": [
-      { "kind": "description" },
-      { "kind": "attack_roll" },
-      { "kind": "damage_roll" },
-      { "kind": "use_consumable" },
-      { "kind": "stat_row", "stats": [
-        { "label": "Type",   "field": "type" },
-        { "field": "weight", "unit": "lb" }
-      ]}
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          },
+          {
+            "field": "weight",
+            "unit": "lb"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "abbr": "St",
+      "description": "Mentally or physically rattled; must recover to act."
+    },
+    {
+      "key": "reeling",
+      "label": "Reeling",
+      "abbr": "Re",
+      "description": "Below one third hit points; move and dodge are halved."
+    },
+    {
+      "key": "grappled",
+      "label": "Grappled",
+      "abbr": "Gr",
+      "description": "Held by an opponent; most actions are penalised."
+    },
+    {
+      "key": "prone",
+      "label": "Prone",
+      "abbr": "Pr",
+      "description": "On the ground; attack and defence penalties."
+    },
+    {
+      "key": "unconscious",
+      "label": "Unconscious",
+      "abbr": "Un",
+      "description": "Helpless and unaware."
+    },
+    {
+      "key": "crippled",
+      "label": "Crippled",
+      "abbr": "Cp",
+      "description": "A limb or sense is disabled."
+    },
+    {
+      "key": "afflicted",
+      "label": "Afflicted",
+      "abbr": "Af",
+      "description": "Suffering an ongoing affliction or poison."
+    },
+    {
+      "key": "shock",
+      "label": "Shock",
+      "abbr": "Sk",
+      "description": "Penalty from damage taken since the last turn."
+    }
+  ]
 }

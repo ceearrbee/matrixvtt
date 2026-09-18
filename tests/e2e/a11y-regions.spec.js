@@ -39,7 +39,8 @@ test.describe('axe: play-surface regions', () => {
     await expectClean(page, '#shell-sheet-drawer', 'right companion');
   });
 
-  test('map region and drawing toolbar', async ({ page }) => {
+  test('map region and drawing toolbar', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the drawing toolbar has no phone affordance');
     await waitForVttShell(page);
     await expect(page.locator('.draw-toolbar')).toBeVisible();
     await expectClean(page, '.map-strip, .draw-toolbar', 'map region');

@@ -65,6 +65,36 @@
     }
   }
 
+  // Cross-page relay. Two Playwright pages on one origin each build
+  // their own fake, so without this an edit in one is invisible to the
+  // other and nothing tests the product's central claim. Timeline
+  // events are what com.matrixvtt.yjs.update travels as, so those are
+  // what crosses; state events stay page-local.
+  const PAGE_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const crossPageListeners = new Set();
+  let crossPageChannel;
+
+  function crossPage() {
+    if (crossPageChannel !== undefined) return crossPageChannel;
+    try {
+      crossPageChannel = new BroadcastChannel('vtt-e2e-matrix');
+      crossPageChannel.onmessage = (ev) => {
+        // A BroadcastChannel never receives its own posts, but a page
+        // that builds two clients has two channels that would hear
+        // each other.
+        if (!ev.data || ev.data.pageId === PAGE_ID) return;
+        for (const fn of crossPageListeners) fn(ev.data);
+      };
+    } catch {
+      crossPageChannel = null;
+    }
+    return crossPageChannel;
+  }
+
+  function broadcastToOtherPages(message) {
+    crossPage()?.postMessage(Object.assign({ pageId: PAGE_ID }, message));
+  }
+
   // Everything the app sends is appended here (bounded) so specs can
   // assert on outbound traffic, e.g. that a token move produced a
   // com.matrixvtt.yjs.update timeline event.
@@ -104,6 +134,24 @@
     };
   }
 
+  // Timeline-shaped wrapper, as Room.timeline handlers expect. Unlike
+  // sdkShapedEvent this one is not state, so the adapter routes it to
+  // the Yjs transport / timeline path rather than room state.
+  function sdkShapedTimelineEvent(e) {
+    return {
+      getType: () => e.type,
+      getStateKey: () => undefined,
+      getContent: () => e.content,
+      getSender: () => e.sender,
+      getId: () => e.event_id,
+      getTs: () => e.origin_server_ts,
+      getRoomId: () => e.room_id,
+      isState: () => false,
+      isRedacted: () => false,
+      event: e,
+    };
+  }
+
   function memberStateEvent(userId, membership, extra = {}) {
     return sdkShapedEvent({
       type: 'm.room.member',
@@ -118,7 +166,9 @@
 
   function makeFakeSdk(stateEventsByRoom) {
     const emitter = new FakeSdkEventEmitter();
+    let stopRelay = null;
     const fakeRoom = {
+      get roomId() { return cfg().roomId; },
       currentState: {
         // Honour the optional type filter the way matrix-js-sdk does
         // (returns only events of that type when supplied; everything
@@ -157,12 +207,13 @@
       removeListener: emitter.off.bind(emitter),
       _emit: emitter.emit.bind(emitter),
       startClient: async () => {
+        stopRelay = relayRemoteTimelineEvents(emitter, fakeRoom);
         // matrix-js-sdk normally fires 'sync' -> 'PREPARED' once initial sync
         // completes. The MatrixClient wrapper waits for that to flip to
         // CONNECTED status.
         setTimeout(() => emitter.emit('sync', 'PREPARED'), 0);
       },
-      stopClient: async () => {},
+      stopClient: async () => { stopRelay?.(); stopRelay = null; },
       getCapabilities: async () => ({ 'm.room_versions': { default: '11', available: { 11: 'stable' } } }),
       getRoom: () => fakeRoom,
       roomState: async (roomId) => {
@@ -186,8 +237,17 @@
         return { event_id: event.event_id };
       },
       sendEvent: async (roomId, type, content) => {
+        const event = {
+          type,
+          content,
+          event_id: `$fake-room-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          origin_server_ts: Date.now(),
+          sender: cfg().userId,
+          room_id: roomId,
+        };
         recordSend({ kind: 'room', room_id: roomId, type, content });
-        return { event_id: `$fake-room-${Date.now()}` };
+        broadcastToOtherPages({ kind: 'room', event });
+        return { event_id: event.event_id };
       },
       redactEvent: async () => ({ event_id: `$fake-redact-${Date.now()}` }),
       invite: async (roomId, userId) => {
@@ -211,6 +271,16 @@
       isLoggedIn: () => true,
       getUserId: () => cfg().userId,
     };
+  }
+
+  function relayRemoteTimelineEvents(emitter, fakeRoom) {
+    const onRemote = (message) => {
+      if (message.kind !== 'room') return;
+      if (message.event.room_id !== fakeRoom.roomId) return;
+      emitter.emit('Room.timeline', sdkShapedTimelineEvent(message.event), fakeRoom, false);
+    };
+    crossPageListeners.add(onRemote);
+    return () => crossPageListeners.delete(onRemote);
   }
 
   class FakeMatrixClient {

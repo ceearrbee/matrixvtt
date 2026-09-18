@@ -77,8 +77,12 @@ describe('NextSteps panel', () => {
     expect(done[0].textContent).toMatch(/invite/i);
   });
 
+  // A map is loaded first because the token chip waits on one - see
+  // nextStepsBlockedChips for what a chip does before its turn.
   it('routes each CTA at the surface that completes it', () => {
+    mapsSignal.value = new Map([['m1', { id: 'm1', image_url: 'mxc://x/y' }]]);
     const ui = makeUi();
+    ui.state.maps = mapsSignal.value;
     const { container } = render(h(NextSteps, { ui }));
     const click = (key) => fireEvent.click(container.querySelector(`[data-step="${key}"]`));
     click('map');

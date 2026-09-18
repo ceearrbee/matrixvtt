@@ -89,19 +89,22 @@ export function EntityList({ ui, type }) {
 
   if (entries.length === 0) {
     return h('div', { class: 'entity-list entity-list--empty' }, [
-      h('div', { style: 'text-align:center;color:var(--color-text-tertiary);margin-bottom:12px;' },
+      h('div', { style: 'text-align:center;color:var(--color-text-tertiary);margin-bottom:var(--space-xl);' },
         `No ${isNPC ? 'NPCs' : 'characters'} yet`),
-      !isNPC && h('div', { style: 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;' }, [
+      // The wizard leads: it asks for the stats the active ruleset has,
+      // three steps at a time. The blank sheet is the same job without
+      // the guidance, so it stays for people who do not need it.
+      !isNPC && h('div', { style: 'display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap;' }, [
         h('button', {
-          class: 'dbt btn-primary', 'data-create-character': true,
-          onClick: () => ui.showEntityForm(ENTITY_TYPES.PC),
-        }, '+ Create Character'),
-        h('button', {
-          class: 'dbt', 'data-character-wizard': true,
+          class: 'dbt btn-primary', 'data-character-wizard': true,
           onClick: () => ui.showCharacterWizard(),
-        }, '🧙 Wizard'),
+        }, 'Create Character'),
+        h('button', {
+          class: 'dbt', 'data-create-character': true,
+          onClick: () => ui.showEntityForm(ENTITY_TYPES.PC),
+        }, 'Blank sheet'),
       ]),
-      isNPC && isGM && h('div', { style: 'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;' }, [
+      isNPC && isGM && h('div', { style: 'display:flex;gap:var(--space-md);justify-content:center;flex-wrap:wrap;' }, [
         h('button', {
           class: 'dbt btn-primary', 'data-add-npc': true,
           onClick: () => ui.showAddNPCForm(),
@@ -115,12 +118,12 @@ export function EntityList({ ui, type }) {
   return h('div', { class: `char-list${isNPC ? ' char-list--npc' : ''}` }, [
     ...sorted.map(([id, e]) => h(EntityCard, { ui, entity: e, id, type, key: id })),
     isNPC && isGM && h('button', {
-      class: 'dbt btn-primary', style: 'width:100%;margin-top:8px;', 'data-add-npc': true,
+      class: 'dbt btn-primary', style: 'width:100%;margin-top:var(--space-md);', 'data-add-npc': true,
       onClick: () => ui.showAddNPCForm(),
     }, '+ Add NPC'),
     isNPC && isGM && h(SrdButton, {
       ui, kind: 'monster', label: 'Add from SRD',
-      class: 'dbt', style: 'width:100%;margin-top:8px;',
+      class: 'dbt', style: 'width:100%;margin-top:var(--space-md);',
     }),
   ]);
 }

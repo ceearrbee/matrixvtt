@@ -11,6 +11,7 @@ export default defineConfig({
   outDir: '../dist/docs',
   cleanUrls: true,
   lang: 'en-US',
+  srcExclude: ['superpowers/**'],
   ignoreDeadLinks: true,
 
   rewrites: {

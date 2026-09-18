@@ -12,9 +12,11 @@ import {
   showDamageDialog, applyDamage, applyHealing, showConditionDialog,
   addCondition, removeCondition,
 } from './actions/combat.js';
+import { showGroupDamageDialog, showGroupConditionDialog } from './actions/group-combat.js';
+import { toggleSingleFogCell } from './actions/fog.js';
 import {
-  completeAreaSelection, toggleSingleFogCell, startAreaSelection,
-} from './actions/fog.js';
+  completeAreaSelection, startAreaSelection, beginSelectMarquee,
+} from './actions/marquee.js';
 import { showPinForm, showEditPinForm, removePin } from './actions/pins.js';
 import { showMapContextMenu, showTokenContextMenu, showPinContextMenu } from './context-menus.js';
 import { closeAllModals } from '../utils/modal-helpers.js';
@@ -44,10 +46,13 @@ export function attachMapActions(mr) {
   mr.applyDamage             = (id, a)  => applyDamage(mr, id, a);
   mr.applyHealing            = (id, a)  => applyHealing(mr, id, a);
   mr.showConditionDialog     = (id)     => showConditionDialog(mr, id);
+  mr.showGroupDamageDialog   = (t)      => showGroupDamageDialog(mr, t);
+  mr.showGroupConditionDialog = ()      => showGroupConditionDialog(mr);
   mr.addCondition            = (id, c)  => addCondition(mr, id, c);
   mr.removeCondition         = (id, c)  => removeCondition(mr, id, c);
   mr.completeAreaSelection   = ()       => completeAreaSelection(mr);
   mr.startAreaSelection      = (m)      => startAreaSelection(mr, m);
+  mr.beginSelectMarquee      = (x, y)   => beginSelectMarquee(mr, x, y);
   mr._toggleSingleFogCell    = (c, r)   => toggleSingleFogCell(mr, c, r);
   mr.showAddTokenDialog      = (c, r)   => showAddTokenDialog(mr, c, r);
   mr.closeContextMenu        = ()       => closeContextMenu();

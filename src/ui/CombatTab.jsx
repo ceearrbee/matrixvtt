@@ -26,8 +26,8 @@ function CurrentCard({ entry, token, round, myTurn }) {
   const acText = token?.ac != null ? `AC ${token.ac}` : '';
   return h('div', { class: 'combat-current-card-wrapper' }, [
     myTurn
-      ? h('div', { class: 'your-turn-banner', style: 'margin-bottom:8px' }, 'Your turn')
-      : h('div', { style: 'font-size:var(--font-size-xs);color:var(--color-text-secondary);margin-bottom:6px' }, [
+      ? h('div', { class: 'your-turn-banner', style: 'margin-bottom:var(--space-md)' }, 'Your turn')
+      : h('div', { style: 'font-size:var(--font-size-xs);color:var(--color-text-secondary);margin-bottom:var(--space-sm)' }, [
           'Current: ',
           h('strong', null, entry?.name || '-'),
         ]),
@@ -60,7 +60,7 @@ export function CombatTab({ ui }) {
   if (!active || !order?.length) {
     return h('div', {
       class: 'combat-tab-wrapper combat-tab-wrapper--empty',
-      style: 'padding:12px;color:var(--color-text-secondary);font-size:var(--font-size-xs)',
+      style: 'padding:var(--space-xl);color:var(--color-text-secondary);font-size:var(--font-size-xs)',
     }, 'Combat is not active.');
   }
 
@@ -83,13 +83,13 @@ export function CombatTab({ ui }) {
   if (!canControl) {
     return h('div', {
       class: 'combat-tab-wrapper combat-tab-wrapper--view-only',
-      style: 'padding:8px',
+      style: 'padding:var(--space-md)',
     }, h(CurrentCard, { entry, token, round, myTurn }));
   }
 
   const pairedSlots = pairedSlotSection(ruleset);
 
-  return h('div', { class: 'combat-tab-wrapper', style: 'padding:8px' }, [
+  return h('div', { class: 'combat-tab-wrapper', style: 'padding:var(--space-md)' }, [
     h(CurrentCard, { entry, token, round, myTurn }),
     economy.length > 0 && h('div', { class: 'combat-section' }, 'Action economy'),
     economy.length > 0 && h('div', { class: 'combat-economy-row' },
@@ -127,7 +127,9 @@ export function CombatTab({ ui }) {
     }),
     h('button', {
       class: 'btn-primary',
-      style: 'width:100%;margin-top:8px',
+      style: 'width:100%;margin-top:var(--space-md)',
+      'data-action': 'end-turn',
+      'aria-label': 'End turn',
       onClick: () => ui.nextTurn(),
     }, 'End Turn'),
   ]);

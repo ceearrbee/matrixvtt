@@ -4,7 +4,9 @@
  */
 
 import { h } from 'preact';
-import { FormReader } from '../../utils/ui-helpers.js';
+import * as v from 'valibot';
+import { FormReader, applyFieldErrors } from '../../utils/ui-helpers.js';
+import { intRange } from '../../utils/form-schemas.js';
 import { Modal } from '../../ui/Modal.jsx';
 import { openModal } from '../../ui/modal-host.js';
 import { confirm } from '../../ui/confirm-dialogs.jsx';
@@ -75,18 +77,39 @@ export async function clearFacing(mr, tokenId) {
   await updateTokenSafe(mr, tokenId, { ...token, facing: null }, 'Failed to clear facing');
 }
 
-function AddTokenForm({ mr, col, row, onClose }) {
+function addTokenFields(showHP, showAC) {
+  return {
+    name: 'token-name',
+    type: 'token-type',
+    ...(showHP ? { hp_max: { id: 'token-hp-max', type: 'int' } } : {}),
+    ...(showAC ? { ac: { id: 'token-ac', type: 'int' } } : {}),
+  };
+}
+
+// hp_max is copied into hp_current, so the bounds here decide what a
+// freshly placed token's health can be. A negative HP passed straight
+// through before; the number input allows one.
+function addTokenSchema(showHP, showAC) {
+  return v.object({
+    ...(showHP ? { hp_max: intRange('HP Max', 0, 9999) } : {}),
+    ...(showAC ? { ac: intRange('AC', 0, 99) } : {}),
+  });
+}
+
+export function AddTokenForm({ mr, col, row, onClose }) {
   const systemConfig = mr.state.settings?.systemConfig;
   const showHP = rulesetTracksHP(systemConfig);
   const showAC = rulesetHasFormField(systemConfig, 'ac');
   const onSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormReader(e.currentTarget).collect({
-      name: 'token-name',
-      type: 'token-type',
-      ...(showHP ? { hp_max: { id: 'token-hp-max', type: 'int' } } : {}),
-      ...(showAC ? { ac: { id: 'token-ac', type: 'int' } } : {}),
-    });
+    const form = e.currentTarget;
+    const fields = addTokenFields(showHP, showAC);
+    const { values: data, errors } = new FormReader(form)
+      .validate(fields, addTokenSchema(showHP, showAC));
+    if (Object.keys(errors).length > 0) {
+      applyFieldErrors(form, errors, fields);
+      return;
+    }
     onClose();
     const tokenId = await allocateEntityId('tok', mr.state.tokens);
     const token = {

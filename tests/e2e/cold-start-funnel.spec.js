@@ -73,7 +73,8 @@ test.describe('cold start to a playable table', () => {
     expect(steps.length, steps.join(' -> ')).toBeLessThanOrEqual(STEP_BUDGET);
   });
 
-  test('a GM not in Prep sees no scene-authoring chrome', async ({ page }) => {
+  test('a GM not in Prep sees no scene-authoring chrome', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the map tool groups have no phone affordance');
     await page.goto('app.html');
     await page.fill('#username', 'playwright');
     await page.fill('#password', 'hunter2');

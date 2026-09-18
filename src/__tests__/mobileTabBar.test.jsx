@@ -36,6 +36,26 @@ describe('MobileTabBar', () => {
     expect(mobilePaneSignal.value).toBe('map');
   });
 
+  it('gives every pane a selector that survives the label swap', () => {
+    const { container } = render(h(MobileTabBar, { ui: makeUi() }));
+    const panes = [...container.querySelectorAll('[data-mobile-tab]')].map((b) =>
+      b.getAttribute('data-mobile-tab')
+    );
+    expect(panes).toEqual(['chat', 'map', 'panel', 'journal']);
+  });
+
+  it('keeps the panel hook stable while its label changes', () => {
+    tablePhaseSignal.value = UI_MODES.COMBAT;
+    const combat = render(h(MobileTabBar, { ui: makeUi(true) }));
+    expect(combat.container.querySelector('[data-mobile-tab="panel"]')).toBeTruthy();
+    cleanup();
+
+    gmPrepActiveSignal.value = true;
+    tablePhaseSignal.value = UI_MODES.NARRATIVE;
+    const prep = render(h(MobileTabBar, { ui: makeUi(true) }));
+    expect(prep.container.querySelector('[data-mobile-tab="panel"]')).toBeTruthy();
+  });
+
   it('Panel tab label tracks the phase and prep state', () => {
     tablePhaseSignal.value = UI_MODES.COMBAT;
     const combat = render(h(MobileTabBar, { ui: makeUi(true) }));

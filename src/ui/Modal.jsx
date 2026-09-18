@@ -37,7 +37,7 @@ export function Modal({
     if (guarded && dirty && dirty()) {
       openModal((discardClose) =>
         h(Modal, { id: `${id}-discard-confirm`, title: 'Discard changes?', maxWidth: '400px', onClose: discardClose }, [
-          h('p', { style: 'margin-bottom: 20px;' }, 'You have unsaved changes. Discard them?'),
+          h('p', { style: 'margin-bottom: var(--space-3xl);' }, 'You have unsaved changes. Discard them?'),
           h('div', { class: 'form-actions' }, [
             h('button', { type: 'button', class: 'dbt', onClick: discardClose }, 'Keep editing'),
             h('button', { type: 'button', class: 'dbt dbt--danger', onClick: () => { discardClose(); close?.(); } }, 'Discard'),

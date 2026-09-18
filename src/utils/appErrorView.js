@@ -18,14 +18,14 @@ export function renderFatalError(app, message, onReload = () => window.location.
   app.querySelector('[data-reload-app]')?.addEventListener('click', onReload);
 }
 
-const WRAP_STYLE = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; padding: 20px; text-align: center;';
+const WRAP_STYLE = 'display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100dvh; padding: var(--space-3xl); text-align: center;';
 
 function _getFatalErrorHtml(message) {
   return `
     <div style="${WRAP_STYLE}">
-      <h2 style="color: var(--color-text-danger); margin-bottom: 12px;">Error</h2>
+      <h2 style="color: var(--color-text-danger); margin-bottom: var(--space-xl);">Error</h2>
       <p style="color: var(--color-text-secondary); max-width: 500px;">${esc(message)}</p>
-      <button type="button" data-reload-app style="margin-top: 20px; padding: 8px 16px;">Reload</button>
+      <button type="button" data-reload-app style="margin-top: var(--space-3xl); padding: var(--space-md) var(--space-2xl);">Reload</button>
     </div>
   `;
 }
@@ -36,10 +36,10 @@ function _getStructuredErrorHtml({ title, lines = [], hint = '' }) {
     .join('');
   return `
     <div style="${WRAP_STYLE}">
-      <h2 style="color: var(--color-text-danger); margin-bottom: 12px;">${esc(title)}</h2>
-      ${items ? `<ul style="text-align: left; margin: 12px 0; max-width: 500px; color: var(--color-text-secondary);">${items}</ul>` : ''}
+      <h2 style="color: var(--color-text-danger); margin-bottom: var(--space-xl);">${esc(title)}</h2>
+      ${items ? `<ul style="text-align: left; margin: var(--space-xl) 0; max-width: 500px; color: var(--color-text-secondary);">${items}</ul>` : ''}
       ${hint ? `<p style="color: var(--color-text-secondary); max-width: 500px;">${esc(hint)}</p>` : ''}
-      <button type="button" data-reload-app style="margin-top: 20px; padding: 8px 16px;">Reload</button>
+      <button type="button" data-reload-app style="margin-top: var(--space-3xl); padding: var(--space-md) var(--space-2xl);">Reload</button>
     </div>
   `;
 }

@@ -9,7 +9,7 @@ import { PlusIcon } from '../../icons/index.jsx';
 
 /** @param {{ ui: any, gm?: any }} props */
 export function AddEntitiesPanel({ ui }) {
-  return h('div', { class: 'gm-panel gm-panel--add', style: 'padding:12px;' },
+  return h('div', { class: 'gm-panel gm-panel--add', style: 'padding:var(--space-xl);' },
     h('button', {
       class: 'dbt btn-primary',
       'aria-label': 'Create a character, NPC, token, item, map, scene or handout',

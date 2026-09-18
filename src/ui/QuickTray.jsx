@@ -29,15 +29,17 @@ export function QuickTray({ ui }) {
       'aria-label': 'Roll d20',
       onClick: () => ui.rollDice?.('d20'),
     }, 'd20'),
-    h('button', {
+    // Absent, not disabled, outside combat - the same call the phone
+    // composer makes. A table that has never rolled initiative should
+    // not carry a dead control for the life of the campaign.
+    combatActive && h('button', {
       key: 'n',
       type: 'button',
       class: 'quick-tray__btn',
       'data-quick': 'next-turn',
-      title: combatActive ? 'Next turn' : 'No active combat',
+      title: 'Next turn',
       'aria-label': 'Next turn',
-      disabled: !combatActive,
-      onClick: () => { if (combatActive) ui.nextTurn?.(); },
+      onClick: () => ui.nextTurn?.(),
     }, h(PlayIcon, {})),
   ]);
 }

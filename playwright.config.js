@@ -8,6 +8,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // A failing spec costs its full 30s timeout, twice with the retry.
+  // Past a handful of failures the run has said what it has to say.
+  maxFailures: process.env.CI ? 10 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   timeout: 30_000,
 

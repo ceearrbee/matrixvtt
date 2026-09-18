@@ -1,7 +1,7 @@
 
 import { h, render } from 'preact';
 import { relativeDate } from './app-log.js';
-import { KickIcon } from '../ui/icons/index.jsx';
+import { KickIcon, TrashIcon } from '../ui/icons/index.jsx';
 
 function InviteCard({ invite, onAccept, onDecline }) {
   return h('div', { class: 'room-card' }, [
@@ -14,14 +14,14 @@ function InviteCard({ invite, onAccept, onDecline }) {
         h('strong', null, 'Action required'),
       ]),
     ]),
-    h('div', { style: 'display: flex; gap: 6px;' }, [
+    h('div', { style: 'display: flex; gap: var(--space-sm);' }, [
       h('button', { class: 'dbt btn-primary invite-accept', onClick: onAccept }, 'Accept'),
       h('button', {
         class: 'dbt invite-decline',
         title: 'Decline invite',
         'aria-label': 'Decline invite',
         onClick: onDecline,
-      }, h('span', { 'aria-hidden': 'true' }, '✖')),
+      }, h('span', { 'aria-hidden': 'true' }, '✕')),
     ]),
   ]);
 }
@@ -45,7 +45,7 @@ function RecentSessionCard({ session, onResume, onRemove }) {
         title: 'Remove from this browser',
         'aria-label': 'Remove from this browser',
         onClick: (e) => { e.preventDefault(); e.stopPropagation(); onRemove(); },
-      }, h('span', { 'aria-hidden': 'true' }, '🗑')),
+      }, h('span', { 'aria-hidden': 'true' }, h(TrashIcon, {}))),
     ]),
   ]);
 }
@@ -58,7 +58,7 @@ function ActiveSessionCard({ room, onJoin, onLeave }) {
       h('div', { class: 'room-name' }, campaignName),
       h('div', { class: 'room-meta' }, `${room.name} · ${system}`),
     ]),
-    h('div', { style: 'display: flex; gap: 6px;' }, [
+    h('div', { style: 'display: flex; gap: var(--space-sm);' }, [
       h('button', {
         type: 'button',
         class: 'dbt btn-primary room-join',

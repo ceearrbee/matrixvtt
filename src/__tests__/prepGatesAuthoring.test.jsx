@@ -12,12 +12,14 @@ import { MapStrip } from '../ui/MapStrip.jsx';
 import { settingsSignal, initiativeSignal, roomMembersSignal } from '../state/signals.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 function makeUi({ isGM = true } = {}) {
   return /** @type {any} */ ({
     state: {
       isGM: () => isGM,
       tokens: new Map(), maps: new Map(),
+      map: loadTestMap(),
       roomMembers: [],
       settings: { name: 'r', systemConfig: {}, gm_user_ids: isGM ? ['@me:m'] : [] },
       initiative: { active: false, round: 0, current_index: 0, order: [] },

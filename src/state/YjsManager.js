@@ -3,11 +3,12 @@
  * collaborative state (tokens, characters, items, etc., one Y.Map per
  * collection) and the snapshot publish path.
  *
- * Inbound updates arrive as Matrix timeline events. They're split into
- * 60KB chunks on the sender side (`YjsMatrixTransport`) because Matrix
- * homeservers cap per-event JSON payload near 64 KB (`max_event_size`,
- * default 65536) and Yjs binary updates routinely exceed that for
- * non-trivial rooms. This module reassembles those chunks before
+ * Inbound updates arrive as Matrix timeline events. The sender splits
+ * them (`YjsMatrixTransport`) because Matrix homeservers cap per-event
+ * JSON payload near 64 KB (`max_event_size`, default 65536) and Yjs
+ * binary updates routinely exceed that for non-trivial rooms. The
+ * chunk size lives with the sender; the signed canonical-JSON form is
+ * larger than the wire form, so it is well under the advertised cap. This module reassembles those chunks before
  * applying via `Y.applyUpdate`. Incomplete reassembly buffers age out
  * after `_CHUNKING_TIMEOUT_MS`; CRDT convergence recovers from the
  * loss on the next full snapshot or peer rebroadcast.

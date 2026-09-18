@@ -4,7 +4,7 @@
  * and GM-only chrome stays hidden.
  */
 import {
-  test, expect, waitForVttShell,
+  test, expect, waitForVttShell, showMobilePane,
   SEED_INITIAL_STATE_NO_ACTORS, SEED_YJS_SNAPSHOT_NO_ACTORS_B64,
 } from './fixtures/logged-in.js';
 
@@ -36,7 +36,7 @@ function playerConfig(page, { withCharacter = true } = {}) {
 }
 
 test.describe('player-perspective entry', () => {
-  test('the checklist asks a player for one thing; claim writes state', async ({ page }) => {
+  test('the checklist asks a player for one thing; claim writes state', async ({ page, isMobile }) => {
     await playerConfig(page);
     await waitForVttShell(page);
 
@@ -44,8 +44,12 @@ test.describe('player-perspective entry', () => {
     // paint before the Yjs snapshot hydrates the seeded character. Wait
     // for the character to land so the chip is asserted in its settled
     // state rather than mid-hydration.
+    // The PL-0 override has to have landed too: until it does, isGM is
+    // true and the checklist renders the GM branch, which fails the chip
+    // count below for a reason that has nothing to do with claiming.
     await page.waitForFunction(
-      () => (window.matrixVTTClient?.state?.characters?.size ?? 0) > 0,
+      () => (window.matrixVTTClient?.state?.characters?.size ?? 0) > 0
+        && window.matrixVTTClient?.state?.isGM?.() === false,
       null,
       { timeout: 15_000 },
     );
@@ -61,14 +65,29 @@ test.describe('player-perspective entry', () => {
     await expect(page.locator('#gm-controls-btn')).toHaveCount(0);
     await expect(page.locator('#new-entity-btn')).toHaveCount(0);
 
-    // Claim from the sidebar sheet.
-    await page.locator('[data-character-card], .char-list li, [data-entity-card]').first().click();
+    // Claim from the sidebar sheet, which is its own pane on a phone.
+    if (isMobile) await showMobilePane(page, 'panel');
+    await page.locator('[data-character-card="chr-aria"]').click();
     const claim = page.getByRole('button', { name: /claim this character/i });
     await expect(claim).toBeVisible({ timeout: 10_000 });
     const before = await page.evaluate(() => (window.__VTT_E2E_SENT_EVENTS || []).length);
     await claim.click();
+    // claimCharacter opens a confirm dialog and calls updateCharacter
+    // only from its callback, so the Claim click on its own writes
+    // nothing at all.
+    await page.locator('[data-confirm]').click();
+
+    // Assert the write, not just that some event went out: the state
+    // change is what "claim writes state" means, and the send behind it
+    // is debounced.
+    await page.waitForFunction(
+      (id) => window.matrixVTTClient?.state?.characters?.get('chr-aria')?.claimed_by_user_id === id,
+      PLAYER_ID,
+      { timeout: 15_000 },
+    );
     await expect
-      .poll(async () => page.evaluate(() => (window.__VTT_E2E_SENT_EVENTS || []).length))
+      .poll(async () => page.evaluate(() => (window.__VTT_E2E_SENT_EVENTS || []).length),
+        { timeout: 15_000 })
       .toBeGreaterThan(before);
   });
 

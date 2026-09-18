@@ -4,12 +4,7 @@
  * the menu's blind five-way cycler is gone, and so is the spotlight
  * tour it sat beside.
  */
-import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
-
-async function openGlobalMenu(page) {
-  await waitForVttShell(page);
-  await page.locator('.left-index__menu-btn').click();
-}
+import { test, expect, waitForVttShell, openGlobalMenu } from './fixtures/logged-in.js';
 
 test.describe('header controls', () => {
   test('carries no second theme control and no tour restart', async ({ page }) => {
@@ -25,7 +20,8 @@ test.describe('header controls', () => {
     expect(await groups.count()).toBeGreaterThan(1);
   });
 
-  test('sync status indicator shows a connection state', async ({ page }) => {
+  test('sync status indicator shows a connection state', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'the header sync chip is hidden in the phone layout');
     await waitForVttShell(page);
     const badge = page.locator('[data-sync-status]');
     await expect(badge).toBeVisible();

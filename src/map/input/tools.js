@@ -2,8 +2,8 @@
  * src/map/input/tools.js - Konva-stage tool input pipeline.
  *
  * Stage-event wiring + tool-mode dispatch. Pure stroke math (state,
- * builders) lives in `./strokes.js` and is re-exported from here so
- * existing import paths keep working without touching every caller.
+ * builders) lives in `./strokes.js`; the parts callers reach for
+ * through this module are re-exported at the historical path.
  */
 import { tokenAt, wallAt, templateAt, pinAt, lightAt, strokeHitTest } from '../hit-test.js';
 import { getTokenRadius } from '../token-geometry.js';
@@ -13,16 +13,10 @@ import { clampToMap } from './clamp-coords.js';
 import { showErrorNotification } from '../../utils/errorHandling.js';
 import {
   strokeBegin, strokeUpdate, strokeFinish, strokeCancel,
-  strokeIsActive, strokeStart, strokeCurrent, strokePencilPoints,
-  buildStroke, buildWall, buildTemplate, buildLight,
+  strokeIsActive, buildStroke, buildWall, buildTemplate, buildLight,
 } from './strokes.js';
 
-// Re-export the stroke API at the historical path so callers that
-export {
-  strokeBegin, strokeUpdate, strokeFinish, strokeCancel,
-  strokeIsActive, strokeStart, strokeCurrent, strokePencilPoints,
-  buildStroke, buildWall, buildTemplate, buildLight,
-};
+export { strokeCancel, strokeIsActive, buildStroke, buildWall, buildTemplate };
 
 function worldCoords(mr, e) {
   // Real Konva input keeps `stage.getPointerPosition()` in sync; in
@@ -43,6 +37,7 @@ function worldCoords(mr, e) {
 
 function onMouseDown(mr, e) {
   const ev = e.evt;
+  mr._suppressNextClick = false;
   if (ev.button === 1 || (ev.button === 0 && mr._spaceDown)) return;
   if (mr.areaSelectionMode) {
     const { x, y } = worldCoords(mr, e);
@@ -51,8 +46,19 @@ function onMouseDown(mr, e) {
     mr.render();
     return;
   }
-  if (mr.activeTool === 'pointer') return;
   const { x, y } = worldCoords(mr, e);
+  if (mr.activeTool === 'pointer') {
+    if (ev.button !== 0) return;
+    // A press on a token is the start of that token's Konva drag.
+    const hit = tokenAt({
+      tokens: mr.state.tokens, map: mr.state.map,
+      gridType: mr.state.settings?.grid_type, x, y,
+      getRadius: getTokenRadius,
+    });
+    if (hit) return;
+    mr.beginSelectMarquee?.(x, y);
+    return;
+  }
   _startToolAction(mr, x, y);
 }
 
@@ -117,6 +123,9 @@ export async function consumePendingPlacement(mr, x, y) {
 
 async function onClick(mr, e) {
   if (mr.isDragging) return;
+  // The click that follows a committed marquee drag would otherwise
+  // land on empty ground and clear what the drag just selected.
+  if (mr._suppressNextClick) { mr._suppressNextClick = false; return; }
   const { x, y } = worldCoords(mr, e);
 
   // Synchronous guard: awaiting unconditionally would defer the ping /
@@ -153,7 +162,11 @@ async function onClick(mr, e) {
     gridType: mr.state.settings?.grid_type, x, y,
     getRadius: getTokenRadius,
   });
-  mr.setSelectedToken(t ? t.id : null);
+  // Shift extends the selection so a GM can gather a group without
+  // starting over; a plain click still replaces it.
+  const extend = !!(e?.evt?.shiftKey);
+  if (extend && t) mr.toggleSelectedToken?.(t.id);
+  else mr.setSelectedToken(t ? t.id : null);
 }
 
 // Angle sanitiser for Matrix JSON - NaN / Infinity round to 0,

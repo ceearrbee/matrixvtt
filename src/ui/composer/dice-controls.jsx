@@ -14,9 +14,9 @@ import { secretRollSignal, chatModeSignal, diceMacrosSignal } from '../../state/
 import { HelpIcon } from '../HelpIcon.jsx';
 import { WhisperIcon, StarIcon } from '../icons/index.jsx';
 
-export const DICE = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+const DICE = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
 
-export const CHAT_MODES = [
+const CHAT_MODES = [
   { id: 'say', label: 'Say', title: 'Speak in character' },
   { id: 'describe', label: 'Describe', title: 'Describe an action in the third person' },
   { id: 'ooc', label: 'OOC', title: 'Speak as yourself, out of character' },

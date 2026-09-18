@@ -18,6 +18,7 @@
 import { h } from 'preact';
 import { tablePhaseSignal, gmPrepActiveSignal, mobilePaneSignal } from '../state/ui-signals.js';
 import { labelFor } from './mode-registry.js';
+import { unreadChatSignal } from './notify/unread-chat.js';
 import { ChatIcon, MapsIcon, BookIcon } from './icons/index.jsx';
 
 export function MobileTabBar({ ui }) {
@@ -26,6 +27,7 @@ export function MobileTabBar({ ui }) {
   const prep = gmPrepActiveSignal.value;
   const isGM = !!ui?.state?.isGM?.();
   const panel = labelFor(phase, isGM, prep);
+  const unread = unreadChatSignal.value;
 
   const tabs = /** @type {{ pane: 'chat'|'map'|'panel'|'journal', Icon: any, label: string }[]} */ ([
     { pane: 'chat', Icon: ChatIcon, label: 'Chat' },
@@ -40,15 +42,20 @@ export function MobileTabBar({ ui }) {
   return h('nav', { class: 'mobile-tab-bar', 'aria-label': 'Main views' },
     tabs.map((t) => {
       const isActive = active === t.pane;
+      const badge = t.pane === 'chat' && !isActive && unread > 0 ? unread : 0;
       return h('button', {
         key: t.pane,
         type: 'button',
         class: `mobile-tab-bar__tab${isActive ? ' mobile-tab-bar__tab--active' : ''}`,
+        'data-mobile-tab': t.pane,
         ...(isActive ? { 'aria-current': 'page' } : {}),
-        'aria-label': t.label,
+        'aria-label': badge ? `${t.label}, ${badge} unread` : t.label,
         onClick: () => { mobilePaneSignal.value = t.pane; },
       }, [
-        h('span', { class: 'mobile-tab-bar__icon', 'aria-hidden': 'true' }, t.Icon && h(t.Icon, {})),
+        h('span', { class: 'mobile-tab-bar__icon', 'aria-hidden': 'true' }, [
+          t.Icon && h(t.Icon, {}),
+          badge ? h('span', { class: 'mobile-tab-bar__badge' }, badge > 9 ? '9+' : String(badge)) : null,
+        ]),
         h('span', { class: 'mobile-tab-bar__label' }, t.label),
       ]);
     }),

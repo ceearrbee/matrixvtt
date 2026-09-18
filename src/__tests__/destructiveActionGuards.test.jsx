@@ -11,10 +11,11 @@ import { attachDataMethods } from '../ui/data-wiring.js';
 import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { closeAllModals } from '../utils/modal-helpers.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 function mkUi({ isGM = true } = {}) {
   return /** @type {any} */ ({
-    state: { isGM: () => isGM, map: null },
+    state: { isGM: () => isGM, map: loadTestMap() },
     pingLocation: () => {},
     setDrawTool: () => {},
     setDrawColor: () => {},

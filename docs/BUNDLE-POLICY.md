@@ -15,8 +15,8 @@ dompurify, focus-trap, valibot, rxjs, tinykeys, idb-keyval).
 
 **Eager total: ~2.75 MB raw, ~654 KB brotli over the wire.**
 
-This is deliberate, not drift. Commit `acb15c0` converted the VTT
-runtime from dynamic to static imports because mobile Firefox discards
+This is deliberate, not drift. The VTT runtime was converted from
+dynamic to static imports because mobile Firefox discards
 dynamic-import capability when it evicts a background tab: a logged-in
 player returning to the table got a dead shell that could not load the
 runtime it needed. One preload burst at first visit, service-worker

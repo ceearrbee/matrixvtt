@@ -5,6 +5,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { init, destroy } from '../lifecycle.js';
+import { pendingKey } from '../pending-storage.js';
 import { STORAGE_KEYS, EVENT_TYPES } from '../../utils/constants.js';
 
 function makeSm({ order }) {
@@ -43,13 +44,16 @@ describe('lifecycle yjs restore + pagehide flush', () => {
 
     sm._retryQueue.set('type:key1', { type: EVENT_TYPES.TOKEN, stateKey: 't1', content: { hp: 1 } });
     window.dispatchEvent(new Event('pagehide'));
-    const stored = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.RETRY_QUEUE));
+    const key = pendingKey(STORAGE_KEYS.RETRY_QUEUE, {
+      userId: sm.widgetManager?.userId, roomId: sm.widgetManager?.roomId,
+    });
+    const stored = JSON.parse(localStorage.getItem(key));
     expect(stored).toHaveLength(1);
     expect(stored[0].stateKey).toBe('t1');
 
     destroy(sm);
-    sessionStorage.removeItem(STORAGE_KEYS.RETRY_QUEUE);
+    localStorage.removeItem(key);
     window.dispatchEvent(new Event('pagehide'));
-    expect(sessionStorage.getItem(STORAGE_KEYS.RETRY_QUEUE)).toBeNull();
+    expect(localStorage.getItem(key)).toBeNull();
   });
 });

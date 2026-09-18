@@ -5,6 +5,7 @@
  */
 
 import { h } from 'preact';
+import { LibraryIcon } from '../icons/index.jsx';
 import { libraryAvailable, saveToLibrary } from './save-to-library.js';
 
 export function SaveToLibraryButton({ ui, kind, entity, ruleset = null, label = null, compact = true }) {
@@ -20,5 +21,5 @@ export function SaveToLibraryButton({ ui, kind, entity, ruleset = null, label = 
       e.stopPropagation();
       saveToLibrary(ui, kind, entity, ruleset);
     },
-  }, label ?? '📥');
+  }, label ?? h(LibraryIcon, {}));
 }

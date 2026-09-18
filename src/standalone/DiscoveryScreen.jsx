@@ -67,7 +67,7 @@ export function DiscoveryScreen({ app }) {
       'No recent campaigns yet. Open an invite link, or create one below.'),
 
     h('div', { class: 'section-heading' }, 'Active campaigns'),
-    h('div', { id: 'active-loading', class: 'discovery-loading', style: 'display:flex;align-items:center;gap:8px;' }, [
+    h('div', { id: 'active-loading', class: 'discovery-loading', style: 'display:flex;align-items:center;gap:var(--space-md);' }, [
       h('span', null, 'Loading rooms…'),
       h('button', {
         class: 'standalone-link-btn', id: 'cancel-scan-btn',
@@ -85,10 +85,10 @@ export function DiscoveryScreen({ app }) {
       id: 'other-rooms-toggle',
       type: 'button',
       class: 'standalone-link-btn',
-      style: 'display:none; margin-top:8px;',
+      style: 'display:none; margin-top:var(--space-md);',
       title: 'Show every Matrix room your account is joined to. Click any room to start a campaign there.',
     }),
-    h('div', { id: 'other-list', style: 'display:none; margin-top:8px;' }),
+    h('div', { id: 'other-list', style: 'display:none; margin-top:var(--space-md);' }),
 
     h('div', { class: 'section-heading', id: 'invites-heading', style: 'display:none' }, 'Pending Invites'),
     h('div', { id: 'invites-list' }),

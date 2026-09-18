@@ -21,7 +21,7 @@ export function DamageLogPanel(props) {
       'div',
       {
         class: 'gm-panel gm-panel--damage',
-        style: 'padding:12px;font-size:11px;color:var(--color-text-tertiary);',
+        style: 'padding:var(--space-xl);font-size:11px;color:var(--color-text-tertiary);',
       },
       'No damage recorded yet'
     );
@@ -32,7 +32,7 @@ export function DamageLogPanel(props) {
     {
       class: 'gm-panel gm-panel--damage',
       style:
-        'padding:12px;max-height:240px;overflow-y:auto;font-family:var(--font-mono, monospace);font-size:11px;line-height:1.5;',
+        'padding:var(--space-xl);max-height:240px;overflow-y:auto;font-family:var(--font-mono, monospace);font-size:11px;line-height:1.5;',
     },
     recent.map((e, i) =>
       h(

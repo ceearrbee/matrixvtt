@@ -117,13 +117,30 @@
         "max_field": "aggravated_max"
       },
       {
-        "kind": "attributes"
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -155,9 +172,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -192,9 +206,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -231,5 +242,67 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "bruised",
+      "label": "Bruised",
+      "abbr": "B",
+      "description": "First health level; no penalty."
+    },
+    {
+      "key": "hurt",
+      "label": "Hurt",
+      "abbr": "Hu",
+      "description": "Health level; minor dice penalty."
+    },
+    {
+      "key": "injured",
+      "label": "Injured",
+      "abbr": "Ij",
+      "description": "Health level; movement is impaired."
+    },
+    {
+      "key": "wounded",
+      "label": "Wounded",
+      "abbr": "Wo",
+      "description": "Health level; significant dice penalty."
+    },
+    {
+      "key": "mauled",
+      "label": "Mauled",
+      "abbr": "Ma",
+      "description": "Health level; barely able to act."
+    },
+    {
+      "key": "crippled",
+      "label": "Crippled",
+      "abbr": "Cr",
+      "description": "Health level; can only crawl."
+    },
+    {
+      "key": "incapacitated",
+      "label": "Incapacitated",
+      "abbr": "In",
+      "description": "Final health level; unconscious or dying."
+    },
+    {
+      "key": "frenzy",
+      "label": "Frenzy",
+      "abbr": "Fy",
+      "description": "Lost to rage or hunger; the beast is driving."
+    },
+    {
+      "key": "rotschreck",
+      "label": "Rotschreck",
+      "abbr": "Rt",
+      "description": "Overcome by terror and fleeing."
+    },
+    {
+      "key": "staggered",
+      "label": "Staggered",
+      "abbr": "Sg",
+      "description": "Reeling from a blow; actions are lost."
+    }
+  ]
 }

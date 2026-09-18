@@ -129,8 +129,7 @@ function _setupGlobalListeners(doc, win) {
   }, { once: true });
 
   win.addEventListener(VTT_EVENTS.SYNC_DEAD, () => {
-    const app = doc.getElementById('app');
-    if (app) showSyncDeadBanner(app, () => win.location.reload());
+    showSyncDeadBanner(doc.body, () => win.location.reload());
   }, { once: true });
 }
 

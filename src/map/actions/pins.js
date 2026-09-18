@@ -49,13 +49,13 @@ function PinForm({
   return h('form', { 'data-pin-form': true, onSubmit: submit }, [
     h('label', { class: 'form-label', for: 'pin-label-input' }, 'Label'),
     h('input', { id: 'pin-label-input', name: 'label', class: 'form-input', type: 'text', defaultValue: label, placeholder: "What's here?", autocomplete: 'off', required: true }),
-    h('label', { class: 'form-label', for: 'pin-color-input', style: 'margin-top: 12px;' }, 'Color'),
+    h('label', { class: 'form-label', for: 'pin-color-input', style: 'margin-top: var(--space-xl);' }, 'Color'),
     h('input', { id: 'pin-color-input', name: 'color', type: 'color', defaultValue: color }),
     // Only offered once there is somewhere to go. On a one-map campaign
     // the field would be a disabled control and a paragraph explaining
     // a feature the GM cannot use yet.
     ...(destinations.length ? [
-      h('label', { class: 'form-label', for: 'pin-target-input', style: 'margin-top: 12px;' }, 'Travels to'),
+      h('label', { class: 'form-label', for: 'pin-target-input', style: 'margin-top: var(--space-xl);' }, 'Travels to'),
       h('select', {
         id: 'pin-target-input', name: 'target_pin_id', class: 'form-input',
         value: targetPinId,
@@ -66,11 +66,11 @@ function PinForm({
       h('p', { class: 'form-hint' },
         'Moving the party through this pin switches everyone to that map and puts their tokens on the pin you chose.'),
     ] : []),
-    h('label', { style: 'display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: var(--font-size-sm);' }, [
+    h('label', { style: 'display: flex; align-items: center; gap: var(--space-md); margin-top: var(--space-xl); font-size: var(--font-size-sm);' }, [
       h('input', { type: 'checkbox', name: 'gm_only', defaultChecked: gmOnly }),
       'Only visible to GMs',
     ]),
-    h('div', { class: 'form-actions', style: 'margin-top: 16px;' }, [
+    h('div', { class: 'form-actions', style: 'margin-top: var(--space-2xl);' }, [
       h('button', { type: 'button', class: 'dbt', 'data-modal-close': true }, 'Cancel'),
       h('button', { type: 'submit', class: 'dbt btn-primary' }, submitLabel),
     ]),

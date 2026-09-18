@@ -24,7 +24,6 @@ export const PUBLIC_SURFACE = {
 
   render: [
     'render',
-    'setupResizeHandlers',
     'updateMapPanel',
     'restoreTheme',
   ],

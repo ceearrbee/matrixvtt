@@ -76,7 +76,7 @@ export function showSyncDeadBanner(container, onReconnect) {
   banner.className = 'sync-dead-banner';
   banner.innerHTML = `
     <span>Lost connection to Matrix updates. The sync loop has stopped.</span>
-    <button data-reconnect-btn class="dbt btn-primary" style="margin-left:12px;">Reconnect</button>
+    <button data-reconnect-btn class="dbt btn-primary">Reconnect</button>
   `;
   banner.querySelector('[data-reconnect-btn]').addEventListener('click', () => {
     if (typeof onReconnect === 'function') onReconnect();

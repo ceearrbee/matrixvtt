@@ -46,11 +46,11 @@ function ValidatorPanel() {
     e.target.value = '';
   };
 
-  return h('div', { style: 'display:flex;flex-direction:column;gap:10px;' }, [
+  return h('div', { style: 'display:flex;flex-direction:column;gap:var(--space-lg);' }, [
     h('div', { style: 'font-size:12px;color:var(--color-text-secondary);' },
       `Engine spec version: ${CURRENT_SPEC_VERSION}. Paste a ruleset JSON or upload a .vttruleset.json file.`),
 
-    h('div', { style: 'display:flex;gap:8px;align-items:center;' }, [
+    h('div', { style: 'display:flex;gap:var(--space-md);align-items:center;' }, [
       h('label', { class: 'dbt dbt--sm', style: 'cursor:pointer;margin:0;' }, [
         'Upload file',
         h('input', { type: 'file', accept: '.json,.vttruleset.json', style: 'display:none;', onChange: onFileChange }),
@@ -78,7 +78,7 @@ function ValidatorPanel() {
     }),
 
     parseError && h('div', {
-      style: 'padding:8px;background:var(--color-background-danger);color:var(--color-text-danger);border-radius:4px;',
+      style: 'padding:var(--space-md);background:var(--color-background-danger);color:var(--color-text-danger);border-radius:var(--border-radius-lg);',
     }, `JSON parse error: ${parseError}`),
 
     result && h(ResultPanel, { result }),
@@ -87,23 +87,23 @@ function ValidatorPanel() {
 
 function ResultPanel({ result }) {
   const { valid, errors, warnings } = result;
-  return h('div', { style: 'display:flex;flex-direction:column;gap:6px;' }, [
+  return h('div', { style: 'display:flex;flex-direction:column;gap:var(--space-sm);' }, [
     h('div', {
-      style: `padding:6px 10px;border-radius:4px;font-weight:600;${
+      style: `padding:var(--space-sm) var(--space-lg);border-radius:var(--border-radius-lg);font-weight:600;${
         valid
           ? 'background:var(--color-background-success);color:var(--color-text-success);'
           : 'background:var(--color-background-danger);color:var(--color-text-danger);'
       }`,
     }, valid
-      ? `✔ Valid${warnings.length ? ` (with ${warnings.length} warning${warnings.length > 1 ? 's' : ''})` : ''}`
+      ? `✓ Valid${warnings.length ? ` (with ${warnings.length} warning${warnings.length > 1 ? 's' : ''})` : ''}`
       : `✗ Invalid - ${errors.length} error${errors.length > 1 ? 's' : ''}`),
 
-    errors.length > 0 && h('ul', { style: 'margin:0;padding-left:20px;' },
+    errors.length > 0 && h('ul', { style: 'margin:0;padding-left:var(--space-3xl);' },
       errors.map((e, i) => h('li', {
         key: i, style: 'color:var(--color-text-danger);font-family:monospace;font-size:12px;',
       }, e))),
 
-    warnings.length > 0 && h('ul', { style: 'margin:0;padding-left:20px;' },
+    warnings.length > 0 && h('ul', { style: 'margin:0;padding-left:var(--space-3xl);' },
       warnings.map((w, i) => h('li', {
         key: i, style: 'color:var(--color-text-warning);font-family:monospace;font-size:12px;',
       }, w))),

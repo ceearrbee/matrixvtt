@@ -26,7 +26,9 @@ function* walk(dir) {
 // A button whose children are one bare glyph: h('button', {...}, '×').
 // Icon-component children are matched separately because they span
 // lines; this catches the single-character case the audit found.
-const GLYPH_BUTTON = /h\(\s*'button'\s*,\s*(\{[\s\S]*?\})\s*,\s*'([^a-zA-Z0-9\s]{1,2})'\s*\)/g;
+// The props blob must not contain another `h(`, or the scan walks past
+// its own button and reports a neighbour's props against this glyph.
+const GLYPH_BUTTON = /h\(\s*'button'\s*,\s*(\{(?:(?!h\()[\s\S])*?\})\s*,\s*'([^a-zA-Z0-9\s]{1,2})'\s*\)/g;
 
 describe('glyph-only controls name themselves twice', () => {
   it('every bare-glyph button carries both aria-label and title', () => {

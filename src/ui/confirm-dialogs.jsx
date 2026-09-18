@@ -13,7 +13,7 @@ import { openModal } from './modal-host.js';
 
 function ConfirmDialog({ id, title, message, confirmText, cancelText, confirmClass, confirmId, onConfirm, onClose }) {
   return h(Modal, { id, title, maxWidth: '400px', onClose }, [
-    h('p', { style: 'margin-bottom: 20px;' }, message),
+    h('p', { style: 'margin-bottom: var(--space-3xl);' }, message),
     h('div', { class: 'form-actions' }, [
       h('button', { type: 'button', class: 'dbt', 'data-cancel': true, onClick: onClose }, cancelText),
       h('button', {
@@ -40,11 +40,11 @@ function ConfirmAsyncDialog({ id, title, message, confirmText, busyText, cancelT
     }
   };
   return h(Modal, { id, title, maxWidth: '420px', onClose }, [
-    h('p', { style: 'margin-bottom: 16px;' }, message),
+    h('p', { style: 'margin-bottom: var(--space-2xl);' }, message),
     error
       ? h('div', {
           class: 'confirm-async-error', 'data-error': true, role: 'alert',
-          style: 'color:var(--color-text-danger);font-size:var(--font-size-sm);margin-bottom:12px;',
+          style: 'color:var(--color-text-danger);font-size:var(--font-size-sm);margin-bottom:var(--space-xl);',
         }, error)
       : null,
     h('div', { class: 'form-actions' }, [
@@ -61,16 +61,16 @@ function ConfirmTypedDialog({ id, title, message, phrase, confirmText, cancelTex
   const instrId = `${id}-instr`;
   const matched = value === phrase;
   return h(Modal, { id, title, maxWidth: '440px', autoFocusSelector: '[data-typed-input]', onClose }, [
-    h('p', { style: 'margin-bottom: 12px;' }, message),
+    h('p', { style: 'margin-bottom: var(--space-xl);' }, message),
     h('p', {
       id: instrId,
-      style: 'margin-bottom: 8px; color: var(--color-text-secondary); font-size: var(--font-size-sm);',
+      style: 'margin-bottom: var(--space-md); color: var(--color-text-secondary); font-size: var(--font-size-sm);',
     }, ['Type ', h('strong', null, phrase), ' to confirm.']),
     h('input', {
       type: 'text', 'data-typed-input': true, 'aria-describedby': instrId,
       'aria-label': `Type ${phrase} to confirm`,
       autocomplete: 'off', autocapitalize: 'off', spellcheck: false,
-      style: 'width: 100%; margin-bottom: 16px;',
+      style: 'width: 100%; margin-bottom: var(--space-2xl);',
       value, onInput: (e) => setValue(e.target.value),
     }),
     h('div', { class: 'form-actions' }, [

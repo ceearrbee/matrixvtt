@@ -19,16 +19,16 @@ import { PortraitField } from './entity-form/PortraitField.jsx';
 import { rulesetTracksHP, rulesetHasFormField } from './entity-form/system-fields.js';
 
 function TypeSelector({ isPC, onChange }) {
-  return h('div', { class: 'form-group', style: 'border-bottom:1px solid var(--color-border);padding-bottom:16px;margin-bottom:16px;' }, [
+  return h('div', { class: 'form-group', style: 'border-bottom:1px solid var(--color-border);padding-bottom:var(--space-2xl);margin-bottom:var(--space-2xl);' }, [
     h('label', { class: 'form-label' }, 'Entity Type'),
-    h('div', { style: 'display:flex;gap:16px;margin-top:8px;' }, [
-      h('label', { style: 'display:flex;align-items:center;cursor:pointer;' }, [
-        h('input', { type: 'radio', name: 'entity-type', value: ENTITY_TYPES.PC, checked: isPC, onChange: (e) => onChange(e.target.value), style: 'margin-right:6px;' }),
-        h('span', { style: 'font-size:13px;' }, 'Player Character'),
+    h('div', { style: 'display:flex;gap:var(--space-2xl);margin-top:var(--space-md);' }, [
+      h('label', { class: 'form-check-row' }, [
+        h('input', { type: 'radio', name: 'entity-type', value: ENTITY_TYPES.PC, checked: isPC, onChange: (e) => onChange(e.target.value) }),
+        'Player Character',
       ]),
-      h('label', { style: 'display:flex;align-items:center;cursor:pointer;' }, [
-        h('input', { type: 'radio', name: 'entity-type', value: ENTITY_TYPES.NPC, checked: !isPC, onChange: (e) => onChange(e.target.value), style: 'margin-right:6px;' }),
-        h('span', { style: 'font-size:13px;' }, 'NPC/Monster'),
+      h('label', { class: 'form-check-row' }, [
+        h('input', { type: 'radio', name: 'entity-type', value: ENTITY_TYPES.NPC, checked: !isPC, onChange: (e) => onChange(e.target.value) }),
+        'NPC/Monster',
       ]),
     ]),
   ]);

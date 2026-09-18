@@ -87,7 +87,7 @@ function PrivateNotes({ ui, character }) {
     setPrivateNote(userId, roomId, entityId, e.target.value);
   };
   return h('div', { style: 'display:contents' }, [
-    h('div', { class: 'section-header' }, '🔒 Your private notes'),
+    h('div', { class: 'section-header' }, 'Your private notes'),
     h('textarea', {
       class: 'form-input',
       style: 'width:100%; min-height: 60px; resize: vertical; font-family: var(--font-sans); font-size: var(--font-size-sm);',

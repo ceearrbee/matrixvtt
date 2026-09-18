@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches:
@@ -20,6 +23,7 @@ jobs:
   check:
     name: Lint + typecheck + test + build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
 
@@ -70,9 +74,19 @@ jobs:
         # are tracked separately in docs/SECURITY-NOTES.md.
         run: npm audit --audit-level=high --omit=dev
 
+      - name: Generated docs match their generator
+        # docs/examples/*.json is generated and committed. It drifted a
+        # month behind its source once because only deploy ran the
+        # generator, and it discarded the result.
+        run: npm run docs:verify
+
   e2e:
     name: Playwright + axe-core (Chromium / Firefox / WebKit / mobile)
     runs-on: ubuntu-latest
+    # 644 specs across four engines on a two-core runner. A green run is
+    # around 50 minutes; this is a hang catcher, not a budget. maxFailures
+    # is what keeps a failing run short.
+    timeout-minutes: 70
     needs: check
     steps:
       - uses: actions/checkout@v6
@@ -85,8 +99,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The browser bundles are ~500MB and change only when Playwright
+      # does. The system libraries they link against are not cacheable,
+      # so those are installed either way.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
 
       - name: Build
         run: npm run build
@@ -103,8 +132,9 @@ jobs:
           retention-days: 7
 
   lighthouse:
-    name: Lighthouse-CI (perf / a11y / SEO budgets)
+    name: Lighthouse-CI (a11y + SEO gates; perf advisory)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: check
     steps:
       - uses: actions/checkout@v6

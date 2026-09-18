@@ -8,44 +8,88 @@
     "description": "d10 dice pool; each die ≥ 8 is a success. Three health tracks: Bashing, Lethal, Aggravated. Generic mechanics implementation only: World of Darkness has no open SRD, so no skills, disciplines, or splats ship with this file. Everything here is a mechanics-level description written for MatrixVTT.",
     "sources": []
   },
-
   "narrative": true,
-
   "attributes": [
-    { "key": "strength",     "label": "Strength",     "min": 1, "max": 10 },
-    { "key": "dexterity",    "label": "Dexterity",    "min": 1, "max": 10 },
-    { "key": "stamina",      "label": "Stamina",      "min": 1, "max": 10 },
-    { "key": "intelligence", "label": "Intelligence", "min": 1, "max": 10 },
-    { "key": "wits",         "label": "Wits",         "min": 1, "max": 10 },
-    { "key": "resolve",      "label": "Resolve",      "min": 1, "max": 10 },
-    { "key": "presence",     "label": "Presence",     "min": 1, "max": 10 },
-    { "key": "manipulation", "label": "Manipulation", "min": 1, "max": 10 },
-    { "key": "composure",    "label": "Composure",    "min": 1, "max": 10 }
+    {
+      "key": "strength",
+      "label": "Strength",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "dexterity",
+      "label": "Dexterity",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "stamina",
+      "label": "Stamina",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "intelligence",
+      "label": "Intelligence",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "wits",
+      "label": "Wits",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "resolve",
+      "label": "Resolve",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "presence",
+      "label": "Presence",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "manipulation",
+      "label": "Manipulation",
+      "min": 1,
+      "max": 10
+    },
+    {
+      "key": "composure",
+      "label": "Composure",
+      "min": 1,
+      "max": 10
+    }
   ],
-
   "dice": {
     "check": "1d10"
   },
-
   "rolls": {
-    "attribute":  "{bonus}d10>=8",
-    "skill":      "{bonus}d10>=8",
-    "save":       "{bonus}d10>=8",
+    "attribute": "{bonus}d10>=8",
+    "skill": "{bonus}d10>=8",
+    "save": "{bonus}d10>=8",
     "initiative": "1d10+{bonus}",
-    "attack":     "{bonus}d10>=8"
+    "attack": "{bonus}d10>=8"
   },
-
   "formulas": {
     "ability_mod": "@score"
   },
-
   "harm_model": {
     "type": "tracks",
-    "tracks": ["bashing", "lethal", "aggravated"]
+    "tracks": [
+      "bashing",
+      "lethal",
+      "aggravated"
+    ]
   },
-
-  "progression": { "type": "points", "pool_field": "experience" },
-
+  "progression": {
+    "type": "points",
+    "pool_field": "experience"
+  },
   "character_sheet": {
     "sections": [
       {
@@ -97,7 +141,6 @@
       }
     ]
   },
-
   "character_preview": {
     "sections": [
       {
@@ -129,7 +172,6 @@
       }
     ]
   },
-
   "npc_preview": {
     "sections": [
       {
@@ -164,22 +206,100 @@
       }
     ]
   },
-
   "token": {
     "overlays": [
-      { "kind": "resource_bar", "current_field": "aggravated_current", "max_field": "aggravated_max" }
+      {
+        "kind": "resource_bar",
+        "current_field": "aggravated_current",
+        "max_field": "aggravated_max"
+      }
     ]
   },
-
   "item_preview": {
     "sections": [
-      { "kind": "description" },
-      { "kind": "attack_roll" },
-      { "kind": "damage_roll" },
-      { "kind": "use_consumable" },
-      { "kind": "stat_row", "stats": [
-        { "label": "Type", "field": "type" }
-      ]}
+      {
+        "kind": "description"
+      },
+      {
+        "kind": "attack_roll"
+      },
+      {
+        "kind": "damage_roll"
+      },
+      {
+        "kind": "use_consumable"
+      },
+      {
+        "kind": "stat_row",
+        "stats": [
+          {
+            "label": "Type",
+            "field": "type"
+          }
+        ]
+      }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "bruised",
+      "label": "Bruised",
+      "abbr": "B",
+      "description": "First health level; no penalty."
+    },
+    {
+      "key": "hurt",
+      "label": "Hurt",
+      "abbr": "Hu",
+      "description": "Health level; minor dice penalty."
+    },
+    {
+      "key": "injured",
+      "label": "Injured",
+      "abbr": "Ij",
+      "description": "Health level; movement is impaired."
+    },
+    {
+      "key": "wounded",
+      "label": "Wounded",
+      "abbr": "Wo",
+      "description": "Health level; significant dice penalty."
+    },
+    {
+      "key": "mauled",
+      "label": "Mauled",
+      "abbr": "Ma",
+      "description": "Health level; barely able to act."
+    },
+    {
+      "key": "crippled",
+      "label": "Crippled",
+      "abbr": "Cr",
+      "description": "Health level; can only crawl."
+    },
+    {
+      "key": "incapacitated",
+      "label": "Incapacitated",
+      "abbr": "In",
+      "description": "Final health level; unconscious or dying."
+    },
+    {
+      "key": "frenzy",
+      "label": "Frenzy",
+      "abbr": "Fy",
+      "description": "Lost to rage or hunger; the beast is driving."
+    },
+    {
+      "key": "rotschreck",
+      "label": "Rotschreck",
+      "abbr": "Rt",
+      "description": "Overcome by terror and fleeing."
+    },
+    {
+      "key": "staggered",
+      "label": "Staggered",
+      "abbr": "Sg",
+      "description": "Reeling from a blow; actions are lost."
+    }
+  ]
 }

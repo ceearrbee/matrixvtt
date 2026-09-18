@@ -40,6 +40,21 @@ function makeUi(systemConfig, { character, token, entry } = /** @type {any} */ (
   });
 }
 
+describe('CombatTab end-turn control', () => {
+  beforeEach(() => {
+    initiativeSignal.value = { active: true, round: 1, current_index: 0, order: [] };
+    tokensSignal.value = new Map();
+  });
+  afterEach(cleanup);
+
+  it('carries the same hook the map-edge strip uses', () => {
+    const { container } = render(h(CombatTab, { ui: makeUi(dnd5e) }));
+    const btn = container.querySelector('[data-action="end-turn"]');
+    expect(btn).toBeTruthy();
+    expect(btn.getAttribute('aria-label')).toBe('End turn');
+  });
+});
+
 describe('CombatTab per-ruleset behavior', () => {
   beforeEach(() => {
     initiativeSignal.value = { active: true, round: 1, current_index: 0, order: [] };

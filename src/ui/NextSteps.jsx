@@ -23,15 +23,23 @@ import { nextStepsFor, NEXT_STEP_KEYS } from './next-steps.js';
 import { showInvitePlayerModal } from './InvitePlayerModal.jsx';
 import { CheckIcon } from './icons/index.jsx';
 
-function runStep(ui, step) {
-  if (step.key === NEXT_STEP_KEYS.MAP) return ui.openMapsPanel?.();
-  if (step.key === NEXT_STEP_KEYS.INVITE) return showInvitePlayerModal(ui);
-  if (step.key === NEXT_STEP_KEYS.TOKEN) return ui.beginTokenPlacement?.();
-  if (step.key === NEXT_STEP_KEYS.COMBAT) return ui.rollInitiative?.();
+function runKey(ui, step) {
+  const key = step.key;
+  if (key === NEXT_STEP_KEYS.MAP) return ui.openMapsPanel?.();
+  if (key === NEXT_STEP_KEYS.INVITE) return showInvitePlayerModal(ui);
+  if (key === NEXT_STEP_KEYS.TOKEN) return ui.beginTokenPlacement?.();
+  if (key === NEXT_STEP_KEYS.COMBAT) return ui.rollInitiative?.();
   // Claiming happens on the sheet, so send the player to the roster to
   // pick one; creating is the wizard.
   if (step.action === 'claim') return ui.switchTab?.(TABS.PARTY);
   return ui.showCharacterWizard?.();
+}
+
+// A blocked step runs the step it is waiting on. Arming token
+// placement with no map, or rolling initiative with no tokens, are the
+// two dead ends this row used to hand a brand-new GM.
+function runStep(ui, step) {
+  return runKey(ui, step.blockedBy ? { key: step.blockedBy } : step);
 }
 
 export function NextSteps({ ui }) {
@@ -65,9 +73,14 @@ export function NextSteps({ ui }) {
       class: 'dbt dbt--sm next-steps__chip',
       'data-step': step.key,
       'data-done': String(step.done),
+      'data-blocked': String(!!step.blockedBy),
       // Done steps stay in place so progress reads, but say so rather
-      // than inviting the click again.
-      'aria-label': step.done ? `${step.label} (done)` : step.label,
+      // than inviting the click again. A blocked step says what it is
+      // waiting for, in its name as well as its tooltip, so the row
+      // reads without hovering.
+      'aria-label': step.done
+        ? `${step.label} (done)`
+        : step.blockedBy ? `${step.label} - ${step.hint}` : step.label,
       title: step.hint,
       onClick: () => runStep(ui, step),
     }, [

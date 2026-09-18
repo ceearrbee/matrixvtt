@@ -10,10 +10,13 @@ import { useEffect, useState } from 'preact/hooks';
 
 const QUERY = '(max-width: 768px)';
 
+/** One-shot read, for code outside a component that needs the same answer. */
+export function isMobileViewport() {
+  return typeof matchMedia === 'function' ? matchMedia(QUERY).matches : false;
+}
+
 export function useIsMobile() {
-  const [mobile, setMobile] = useState(
-    typeof matchMedia === 'function' ? matchMedia(QUERY).matches : false,
-  );
+  const [mobile, setMobile] = useState(isMobileViewport);
   useEffect(() => {
     if (typeof matchMedia !== 'function') return undefined;
     const mq = matchMedia(QUERY);

@@ -128,7 +128,7 @@ function promptForResolutionMode(onPick) {
     const btn = (mode, cls, text) => h('button', { type: 'button', class: cls, onClick: () => pick(mode) }, text);
     return h(Modal, { id: 'init-mode-modal', title: 'Start Combat', maxWidth: MODAL_WIDTHS.SMALL, onClose: close },
       h('div', null, [
-        h('div', { style: 'margin-bottom:16px;' }, 'How should initiative be decided?'),
+        h('div', { style: 'margin-bottom:var(--space-2xl);' }, 'How should initiative be decided?'),
         h('div', { class: 'form-actions stack-md' }, [
           btn('randomize', 'dbt btn-primary', 'Randomize all'),
           btn('players', 'dbt', 'Players roll (NPCs auto-roll)'),

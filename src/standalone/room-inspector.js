@@ -75,7 +75,7 @@ export async function inspectRoom(client, idOrAlias) {
  */
 export function renderInspectorPanel(app, container) {
   container.innerHTML = `
-    <div class="section-heading" style="margin-top: 24px;">
+    <div class="section-heading" style="margin-top: var(--space-4xl);">
       🔧 Dev: Inspect Room
     </div>
     <div class="inspector-panel" style="background: var(--color-background-secondary); border: 1px solid var(--color-border-primary); border-radius: var(--border-radius-lg); padding: var(--space-xl);">
@@ -234,7 +234,7 @@ function _rowList(counts) {
   if (entries.length === 0) return '';
   return `
     <div style="font-size: var(--font-size-xs); font-family: monospace; margin-top: var(--space-xs);">
-      ${entries.map(([t, n]) => `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${escapeHtml(t)}</span><span>${n}</span></div>`).join('')}
+      ${entries.map(([t, n]) => `<div style="display:flex;justify-content:space-between;padding:var(--space-2xs) 0;"><span>${escapeHtml(t)}</span><span>${n}</span></div>`).join('')}
     </div>
   `;
 }

@@ -11,7 +11,7 @@ import { openModal } from '../ui/modal-host.js';
 function KnockDialogBody({ idOrAlias, onDecide }) {
   const [reason, setReason] = useState('');
   return h('div', null, [
-    h('p', { style: 'margin-bottom: 12px;' },
+    h('p', { style: 'margin-bottom: var(--space-xl);' },
       `This room is private. Send a knock request to ${idOrAlias} so a member can approve your join?`),
     h('label', { for: 'knock-reason' }, 'Reason (optional)'),
     h('input', {
@@ -19,7 +19,7 @@ function KnockDialogBody({ idOrAlias, onDecide }) {
       'data-knock-reason': true, autocomplete: 'off',
       value: reason, onInput: (e) => setReason(e.target.value),
     }),
-    h('div', { class: 'form-actions', style: 'margin-top: 16px;' }, [
+    h('div', { class: 'form-actions', style: 'margin-top: var(--space-2xl);' }, [
       h('button', { type: 'button', class: 'dbt', 'data-cancel': true, onClick: () => onDecide(false, '') }, 'Cancel'),
       h('button', { type: 'button', class: 'dbt btn-primary', 'data-confirm': true, onClick: () => onDecide(true, reason) }, 'Send knock'),
     ]),

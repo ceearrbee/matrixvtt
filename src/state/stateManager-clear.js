@@ -3,9 +3,12 @@
  * module so the enumerated list of collections lives next to the
  * regression test that pins it (clearAllCollectionsRegression.test.js).
  *
- * Note: `clearAllState` MUST enumerate every entity collection on the
- * StateManager instance. Adding a new collection without listing it
- * here causes a cross-room leak.
+ * Note: `clearAllState` MUST enumerate every collection on the
+ * StateManager instance - entity maps, the transcripts beside them, the
+ * undo stacks, and the queued work that would otherwise land after the
+ * wipe. Adding a new collection without listing it here causes a
+ * cross-room leak. `clearAllCollectionsRegression.test.js` walks the
+ * instance and fails on anything left holding something.
  */
 
 import { resetSignals } from './state-init.js';
@@ -58,6 +61,17 @@ export function clearAllState(sm, opts = {}) {
   sm.drawings = [];
   sm.roomMembers = [];
   sm.activeMapId = null;
+  // The damage panel is one campaign's history, not the next one's.
+  sm.damageLog = [];
+  // Undo WRITES. Left in place, Ctrl+Z after a campaign reset pushes the
+  // previous campaign's drawings back into the room that just replaced it.
+  sm._drawingHistory = [];
+  sm._drawingFuture = [];
+  // The two paths that wipe a campaign - initBlankCampaign and the
+  // delete-campaign flow - keep this StateManager alive, so `destroy()`
+  // never runs and anything already queued would land on the far side of
+  // the wipe and re-create what was deleted.
+  clearInternalSyncState(sm);
   resetSignals();
 }
 
@@ -67,5 +81,7 @@ export function clearInternalSyncState(sm) {
   // store handles transport-level dedup; we don't keep our own set.
   sm.lastSentState.clear();
   sm._retryQueue.clear();
+  for (const timer of sm._debounceTimers.values()) clearTimeout(timer);
+  sm._debounceTimers.clear();
   if (sm._drainTimer) { clearTimeout(sm._drainTimer); sm._drainTimer = null; }
 }

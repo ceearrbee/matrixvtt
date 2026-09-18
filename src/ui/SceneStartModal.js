@@ -44,7 +44,7 @@ function SceneStartForm({ ui, onClose }) {
   };
 
   return h('div', { ref: rootRef }, [
-    h('p', { style: 'margin:0 0 10px;color:var(--color-text-secondary);font-size:13px;line-height:1.5;' },
+    h('p', { style: 'margin:0 0 var(--space-lg);color:var(--color-text-secondary);font-size:13px;line-height:1.5;' },
       'Posts a thread root that everyone in the room can reply to. Every chat you send while in-scene threads under this post. Click "Leave" on the scene banner to return to the main timeline.'),
     h('div', { class: 'form-group' }, [
       h('label', { for: 'scene-title' }, ['Title ', h('span', { 'aria-hidden': 'true' }, '*')]),

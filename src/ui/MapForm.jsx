@@ -24,7 +24,7 @@ function LayerFieldset({ layer, index, onRemove }) {
   ]);
 }
 
-export function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit }) {
+function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit }) {
   const def = {
     name: mapConfig?.name || (isNewMode ? 'New Map' : 'Untitled'),
     w: mapConfig?.width_cells || 20,
@@ -88,7 +88,7 @@ export function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit 
             title: 'Compute cell size from the image width and the column count',
             'aria-label': 'Auto-fit cell size from image dimensions',
             onClick: (e) => autoFitCellSize(e.currentTarget, ui),
-          }, '↔ Auto-fit'),
+          }, 'Auto-fit'),
         ]),
       ]),
     ]),
@@ -121,7 +121,7 @@ export function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit 
 }
 
 export function MapFormPanel({ ui, selectedMap, isNewMode, selectedId, onSaved, submit }) {
-  if (!ui.state.isGM()) return h('div', { class: 'map-form-empty' }, h('p', null, '👀 View Only'));
+  if (!ui.state.isGM()) return h('div', { class: 'map-form-empty' }, h('p', null, 'View only'));
   if (!selectedMap && !isNewMode) return h('div', { class: 'map-form-empty' }, h('p', null, 'Select a map to edit'));
   return h('div', null, [
     h('div', { class: 'map-form-header' },

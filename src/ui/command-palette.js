@@ -19,7 +19,7 @@
 
 import Fuse from 'fuse.js';
 import { h } from 'preact';
-import { useRef, useLayoutEffect } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { logger } from '../utils/logger.js';
@@ -76,7 +76,8 @@ function _commandEntries(ui) {
   const combatActive = !!ui.state?.initiative?.active;
   const selectedId = selectedTokenSignal.value;
   const selectedToken = selectedId ? ui.state?.tokens?.get(selectedId) ?? null : null;
-  return buildPaletteCommands(ui, { isGM, combatActive, selectedToken }).map((c) => ({
+  const selectionSize = ui.mapRenderer?.selectedTokenIds?.size ?? 0;
+  return buildPaletteCommands(ui, { isGM, combatActive, selectedToken, selectionSize }).map((c) => ({
     id: c.id, kind: 'command', name: c.label, content: c,
   }));
 }
@@ -127,98 +128,75 @@ function _selectResult(ui, entry) {
   }
 }
 
-function _escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
-}
-
-function _renderResults(modal, results, activeIndex) {
-  const list = modal.querySelector('#cp-results');
-  if (!list) return;
-  const live = modal.querySelector('#cp-live');
-  if (live) live.textContent = results.length === 0 ? 'No matches' : `${results.length} results`;
-  if (results.length === 0) {
-    list.innerHTML = '<div class="cp-empty">No matches</div>';
-    return;
-  }
-  list.innerHTML = results.map((r, i) => `
-    <div class="cp-row${i === activeIndex ? ' cp-row--active' : ''}" role="option"
-         data-index="${i}" aria-selected="${i === activeIndex}">
-      <span class="cp-row__kind">${_escapeHtml(TYPE_LABELS[r.item.kind] || r.item.kind)}</span>
-      <span class="cp-row__name">${_escapeHtml(r.item.name)}</span>
-    </div>`).join('');
+function PaletteRow({ result, index, active, onPick }) {
+  return h('div', {
+    class: `cp-row${active ? ' cp-row--active' : ''}`,
+    role: 'option',
+    'data-index': String(index),
+    'aria-selected': active ? 'true' : 'false',
+    onClick: () => onPick(index),
+  }, [
+    h('span', { class: 'cp-row__kind' }, TYPE_LABELS[result.item.kind] || result.item.kind),
+    h('span', { class: 'cp-row__name' }, result.item.name),
+  ]);
 }
 
 function PaletteBody({ ui, entries, onClose }) {
-  const rootRef = useRef(null);
+  const fuse = useMemo(
+    () => new Fuse(entries, { keys: ['name'], threshold: 0.4, ignoreLocation: true }),
+    [entries],
+  );
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    const fuse = new Fuse(entries, { keys: ['name'], threshold: 0.4, ignoreLocation: true });
-    let activeIndex = 0;
-    let results = entries.slice(0, MAX_RESULTS).map((item) => ({ item }));
-    _renderResults(root, results, activeIndex);
+  const results = useMemo(() => (
+    query
+      ? fuse.search(query, { limit: MAX_RESULTS })
+      : entries.slice(0, MAX_RESULTS).map((item) => ({ item }))
+  ), [fuse, entries, query]);
 
-    const input = root.querySelector('#cp-input');
-    const commit = () => {
-      const r = results[activeIndex];
-      if (!r) return;
-      onClose();
-      try { _selectResult(ui, r.item); }
-      catch (err) { logger.warn('UI', 'command-palette: select failed', err); }
-    };
-    const onInput = () => {
-      const q = input.value.trim();
-      results = q ? fuse.search(q, { limit: MAX_RESULTS }) : entries.slice(0, MAX_RESULTS).map((item) => ({ item }));
-      activeIndex = 0;
-      _renderResults(root, results, activeIndex);
-    };
-    const onKeyDown = (e) => {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        activeIndex = Math.min(results.length - 1, activeIndex + 1);
-        _renderResults(root, results, activeIndex);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        activeIndex = Math.max(0, activeIndex - 1);
-        _renderResults(root, results, activeIndex);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        commit();
-      }
-    };
-    const onResultsClick = (e) => {
-      const row = e.target.closest('[data-index]');
-      if (!row) return;
-      activeIndex = parseInt(row.dataset.index, 10);
-      commit();
-    };
-    input.addEventListener('input', onInput);
-    input.addEventListener('keydown', onKeyDown);
-    const list = root.querySelector('#cp-results');
-    list.addEventListener('click', onResultsClick);
-    return () => {
-      input.removeEventListener('input', onInput);
-      input.removeEventListener('keydown', onKeyDown);
-      list.removeEventListener('click', onResultsClick);
-    };
-  }, []);
+  const pick = (index) => {
+    const r = results[index];
+    if (!r) return;
+    onClose();
+    try { _selectResult(ui, r.item); }
+    catch (err) { logger.warn('UI', 'command-palette: select failed', err); }
+  };
 
-  return h('div', { ref: rootRef }, [
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(results.length - 1, i + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(0, i - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      pick(activeIndex);
+    }
+  };
+
+  return h('div', null, [
     h('input', {
       id: 'cp-input', type: 'text', class: 'form-input', placeholder: 'Search, or run a command…',
       'aria-label': 'Search the campaign, or run a command', autocomplete: 'off',
       'aria-controls': 'cp-results', 'aria-autocomplete': 'list',
+      onInput: (e) => { setQuery(e.target.value.trim()); setActiveIndex(0); },
+      onKeyDown,
     }),
-    h('div', { id: 'cp-live', class: 'sr-only', 'aria-live': 'polite' }),
+    h('div', { id: 'cp-live', class: 'sr-only', 'aria-live': 'polite' },
+      results.length === 0 ? 'No matches' : `${results.length} results`),
     // The list scrolls now that commands sit above the nouns, so it
     // needs its own tab stop: arrow keys are driven from the input,
     // but a keyboard user must still be able to reach and scroll it.
     h('div', {
       id: 'cp-results', role: 'listbox', 'aria-label': 'Search results',
       class: 'cp-results', tabindex: '0',
-    }),
+    }, results.length === 0
+      ? h('div', { class: 'cp-empty' }, 'No matches')
+      : results.map((result, i) => h(PaletteRow, {
+        key: result.item.id, result, index: i, active: i === activeIndex, onPick: pick,
+      }))),
   ]);
 }
 

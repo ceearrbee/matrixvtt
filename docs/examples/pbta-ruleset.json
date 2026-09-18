@@ -129,11 +129,28 @@
         "max_field": "harm_max"
       },
       {
-        "kind": "attributes"
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "skill_list",
-        "label": "Basic Moves"
+        "label": "Basic Moves",
+        "collapsed": true
       },
       {
         "kind": "tagged_list",
@@ -146,7 +163,8 @@
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -164,9 +182,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -187,9 +202,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -226,5 +238,43 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "weak",
+      "label": "Weak",
+      "abbr": "We",
+      "description": "A debility on strength and physical force."
+    },
+    {
+      "key": "shaky",
+      "label": "Shaky",
+      "abbr": "Sy",
+      "description": "A debility on steadiness and nerve."
+    },
+    {
+      "key": "sick",
+      "label": "Sick",
+      "abbr": "Sc",
+      "description": "A debility on stamina and constitution."
+    },
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "abbr": "St",
+      "description": "A debility on quick thinking and perception."
+    },
+    {
+      "key": "confused",
+      "label": "Confused",
+      "abbr": "Cf",
+      "description": "A debility on insight and judgement."
+    },
+    {
+      "key": "scarred",
+      "label": "Scarred",
+      "abbr": "Sr",
+      "description": "A debility on presence and rapport."
+    }
+  ]
 }

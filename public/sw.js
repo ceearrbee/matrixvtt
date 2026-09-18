@@ -44,11 +44,22 @@ self.addEventListener('install', event => {
     event.waitUntil(self.skipWaiting());
     return;
   }
+  // No skipWaiting here on purpose: the new worker parks in `waiting`
+  // until the page asks for it, so a deploy never replaces a build
+  // under a live session. The page prompts; SKIP_WAITING below is how
+  // it accepts.
   event.waitUntil(
     caches.open(SHELL)
       .then(cache => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting())
   );
+});
+
+// The one message this worker answers. Sent by the page to the waiting
+// worker when the player accepts the update; `clients.claim()` in
+// activate then fires controllerchange, which is the page's cue to
+// reload.
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // ── Activate: delete old caches ─────────────────────────────────────────────

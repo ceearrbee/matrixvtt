@@ -15,7 +15,6 @@ import { attachGMMethods } from './gm-wiring.js';
 import { STORAGE_KEYS } from '../utils/constants.js';
 import {
   renderUI as renderUIFn,
-  setupResizeHandlers as setupResizeHandlersFn,
   initUIController as initUIControllerFn,
   destroyUI as destroyUIFn,
   sendChatMessage as sendChatMessageFn,
@@ -63,7 +62,6 @@ import { secretRollSignal, speakAsSignal } from "../state/ui-signals.js";
 
 export function attachUIMethods(ui) {
   ui.render = () => renderUIFn(ui);
-  ui.setupResizeHandlers = () => setupResizeHandlersFn(ui);
 
   attachMapControls(ui);
   attachEventHandlers(ui);

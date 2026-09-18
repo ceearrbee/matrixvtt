@@ -9,9 +9,7 @@
 import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
 
 test.describe('dice rolls', () => {
-  test.beforeEach(({}, testInfo) => {
-    test.skip(testInfo.project.name === 'mobile', 'inline dice strip is desktop-only');
-  });
+  test.skip(({ isMobile }) => isMobile, 'inline dice strip is desktop-only');
 
   test('quick-roll d20 shows the result and posts it to chat', async ({ page }) => {
     await waitForVttShell(page);

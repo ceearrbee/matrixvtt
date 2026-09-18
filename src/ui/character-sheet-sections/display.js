@@ -101,12 +101,17 @@ export function ResourceTrack({ ui, character, config }) {
 
 export function StatGrid({ ui, character, config }) {
   const stats = config.stats ?? [];
-  return h('div', { class: 'stats-grid stats-grid--3col' },
+  const grid = h('div', { class: 'stats-grid stats-grid--3col' },
     stats.map((s, i) => h('div', { key: i, class: 'ab', title: s.label }, [
       h('div', { class: 'ab__label' }, s.label),
       h('div', { class: 'ab__value' }, resolveStatValue(ui, character, s)),
     ])),
   );
+  if (!config.label) return grid;
+  return h(Fragment, null, [
+    h('div', { class: 'section-header' }, config.label),
+    grid,
+  ]);
 }
 
 export function Attributes({ ui, character }) {

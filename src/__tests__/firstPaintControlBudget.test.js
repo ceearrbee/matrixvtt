@@ -43,8 +43,10 @@ const { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal, layoutModeS
 const { UI_MODES, TOOL_GROUPS, LAYOUT_MODES } = await import('../utils/constants.js');
 
 // A GM not in Prep, and a player: the two first-paint states the
-// budget is about. Both land on a blank campaign, the worst case.
-const CEILING = { gm: 43, player: 37 };
+// budget is about. Both land on a blank campaign, the worst case -
+// which is also the case with no map, so the drawing toolbar and the
+// zoom controls are not on screen to be counted.
+const CEILING = { gm: 30, player: 24 };
 
 function makeUi(isGM) {
   return /** @type {any} */ ({
@@ -128,6 +130,19 @@ describe('first-paint control budget', () => {
     for (const blockTag of ['p', 'ul', 'ol', 'li', 'section', 'div']) {
       expect(firstRun.querySelector(blockTag), `${blockTag} inside the first-run surface`).toBeNull();
     }
+  });
+
+  // The repo-wide emoji scan works off a list of known chrome emoji, so
+  // an emoji nobody thought to list rides along - "🧙 Wizard" sat on the
+  // empty roster for months. First paint is small enough to check
+  // exhaustively instead: whatever is on screen when someone arrives is
+  // chrome, and chrome is words and line icons.
+  it('names every first-paint control without an emoji', () => {
+    mountApp(host, makeUi(true));
+    const offenders = countControls(host)
+      .map((el) => el.textContent?.trim() ?? '')
+      .filter((text) => /\p{Extended_Pictographic}/u.test(text));
+    expect(offenders).toEqual([]);
   });
 
   it('turning Prep on is what adds the GM authoring controls', () => {

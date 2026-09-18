@@ -77,10 +77,10 @@ function SpellForm({ ui, spellId, onClose }) {
     ]),
     h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label', for: 'spell-image-url' }, 'Icon (optional)'),
-      h('div', { style: 'display:flex;gap:6px;align-items:center;' }, [
+      h('div', { style: 'display:flex;gap:var(--space-sm);align-items:center;' }, [
         isEdit && spell.image_url && h('img', { src: spell.image_url, alt: '', style: 'width:32px;height:32px;object-fit:contain;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-sm);' }),
         h('input', { type: 'text', class: 'form-input', id: 'spell-image-url', placeholder: 'Paste a URL or browse the library…', defaultValue: isEdit && spell.image_url ? spell.image_url : '', style: 'flex:1;' }),
-        h('button', { type: 'button', class: 'dbt dbt--sm', id: 'spell-pick-icon', title: 'Browse the built-in icon library', onClick: pickIcon }, '🗃 Library'),
+        h('button', { type: 'button', class: 'dbt dbt--sm', id: 'spell-pick-icon', title: 'Browse the built-in icon library', onClick: pickIcon }, 'Library'),
       ]),
     ]),
     h('div', { class: 'form-row' }, [

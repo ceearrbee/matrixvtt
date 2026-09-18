@@ -114,7 +114,7 @@ export function ScenesForum({ ui }) {
 
   const helpRow = h('div', {
     class: 'scenes-forum__help',
-    style: 'display:flex;justify-content:flex-end;padding:2px 6px 0;',
+    style: 'display:flex;justify-content:flex-end;padding:var(--space-2xs) var(--space-sm) 0;',
   }, h(HelpIcon, { term: 'scene' }));
 
   if (scenes.length === 0) {

@@ -7,6 +7,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fireEvent } from '@testing-library/preact';
 import { showConditionDialog } from '../map/actions/combat.js';
+import dnd5e from '../content/rulesets/dnd5e.json';
+
+const DND5E_CONDITIONS = dnd5e.conditions;
 
 function makeMr(token) {
   return /** @type {any} */ ({
@@ -14,7 +17,7 @@ function makeMr(token) {
       tokens: new Map([[token.id, token]]),
       updateToken: vi.fn().mockResolvedValue(undefined),
       isGM: () => true,
-      settings: { systemConfig: {} },
+      settings: { systemConfig: { conditions: DND5E_CONDITIONS } },
       characters: new Map(), spells: new Map(),
     },
     render: vi.fn(),

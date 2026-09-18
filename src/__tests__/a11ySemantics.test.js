@@ -17,7 +17,7 @@ afterEach(() => {
 
 describe('composer mode pills', () => {
   it('carry no Matrix protocol jargon in their tooltips', () => {
-    const src = read('src/ui/DiceBar.jsx');
+    const src = read('src/ui/composer/ChatCluster.jsx');
     expect(src).not.toMatch(/m\.text|m\.emote|m\.notice/);
   });
 });

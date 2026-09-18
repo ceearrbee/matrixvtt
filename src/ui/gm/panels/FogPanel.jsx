@@ -12,12 +12,12 @@ export function FogPanel(props) {
     : { mode: FOG_MODES.HIDDEN };
   const fogOn = fog.mode === FOG_MODES.HIDDEN;
 
-  return h('div', { class: 'gm-panel gm-panel--fog', style: 'padding:12px;' }, [
+  return h('div', { class: 'gm-panel gm-panel--fog', style: 'padding:var(--space-xl);' }, [
     h(
       'div',
       {
         class: 'gm-panel__header',
-        style: 'display:flex;align-items:center;gap:6px;margin-bottom:8px;',
+        style: 'display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);',
       },
       [h('h4', { style: 'margin:0;' }, 'Fog of War'), h(HelpIcon, { term: 'fog' })]
     ),

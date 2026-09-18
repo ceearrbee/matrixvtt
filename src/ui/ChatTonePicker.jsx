@@ -61,7 +61,7 @@ export function ChatTonePicker({ onClose }) {
     'aria-label': 'Pick a speaking tone',
     ref: rootRef,
   }, [
-    h('div', { class: 'tone-picker__header', style: 'display:flex;align-items:center;gap:4px;' }, [
+    h('div', { class: 'tone-picker__header', style: 'display:flex;align-items:center;gap:var(--space-xs);' }, [
       h(HelpIcon, { term: 'tone' }),
       h('input', {
         type: 'search',

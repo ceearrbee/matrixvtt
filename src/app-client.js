@@ -15,6 +15,8 @@
  */
 
 import { initRemoteLogging } from './utils/remoteLogger.js';
+import { wireServiceWorkerUpdates } from './ui/pwa/service-worker-updates.js';
+import { listenForInstallPrompt } from './ui/pwa/install.js';
 import { showSyncDeadBanner } from './ui/sync-status.js';
 import { applyAccessibilitySettings } from './ui/settings-helpers.js';
 import { logger } from './utils/logger.js';
@@ -39,10 +41,16 @@ applyAccessibilitySettings();
 
 // Show a reconnect banner when the sync loop gives up permanently
 window.addEventListener(VTT_EVENTS.SYNC_DEAD, () => {
-  const app = document.getElementById('app');
-  if (!app) return;
-  showSyncDeadBanner(app, () => window.location.reload());
+  showSyncDeadBanner(document.body, () => window.location.reload());
 }, { once: true });
+
+// Standalone only: the widget entry registers no worker, and it shares
+// this origin and scope, so wiring it in common code would pop the
+// banner inside the Element widget panel.
+wireServiceWorkerUpdates();
+// beforeinstallprompt fires once and early, so the listener goes on at
+// boot rather than when the menu opens.
+listenForInstallPrompt();
 
 export class MatrixVTTClient {
   /** @param {{ matrixClientClass?: any }} [opts] */

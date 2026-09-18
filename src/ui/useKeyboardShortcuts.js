@@ -7,8 +7,9 @@ import { tinykeys } from 'tinykeys';
 import { showKeyboardHelp } from './keyboard-help.js';
 import { showCommandPalette } from './command-palette.js';
 import { cycleTokenId, announceTokenSelection } from '../map/token-cycle.js';
-import { setGmPrep } from './ui-mode.js';
-import { gmPrepActiveSignal } from '../state/ui-signals.js';
+import { setGmPrep, setFocusMode } from './ui-mode.js';
+import { gmPrepActiveSignal, focusModeSignal } from '../state/ui-signals.js';
+import { closeOpenDrawer } from './close-drawer.js';
 
 const TOOL_MAP = {
   v: 'pointer', p: 'pencil', l: 'line', r: 'rect', c: 'circle',
@@ -77,6 +78,13 @@ export function useKeyboardShortcuts(ui) {
     });
     toolShortcuts.KeyN = cycleSelection(1);
     toolShortcuts['Shift+KeyN'] = cycleSelection(-1);
+    // Only claims the press when there was a drawer to close, so a
+    // modal's own Escape is never swallowed by the shell behind it.
+    toolShortcuts.KeyF = guarded((e) => {
+      e.preventDefault();
+      setFocusMode(ui.widgetManager?.userId, ui.widgetManager?.roomId, !focusModeSignal.value);
+    });
+    toolShortcuts.Escape = guarded(() => { closeOpenDrawer(); });
     toolShortcuts.Slash = guarded((e) => {
       e.preventDefault();
       if (e.shiftKey) showKeyboardHelp();

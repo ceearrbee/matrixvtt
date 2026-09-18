@@ -1,5 +1,8 @@
 /**
- * settings-helpers.js - Combat automation and accessibility preference management.
+ * settings-helpers.js - Accessibility preference management.
+ *
+ * Combat automation settings live in `utils/combat-settings.js`, which
+ * the state layer can import without reaching into the UI layer.
  */
 
 import { STORAGE_KEYS } from '../utils/constants.js';
@@ -16,23 +19,6 @@ function _set(key, settings) {
   try {
     localStorage.setItem(key, JSON.stringify(settings));
   } catch (e) { logger.warn('UI', `Failed to save settings to ${key}:`, e.message); }
-}
-
-const CA_KEY = STORAGE_KEYS.COMBAT_AUTOMATION;
-const CA_DEFAULTS = {
-  auto_advance_on_death:    false,
-  auto_announce_round:      true,
-  auto_roll_npc_initiative: false,
-  auto_reveal_fog:          false,
-  default_vision_radius:    30,
-};
-
-export const getCombatSettings = () => _get(CA_KEY, CA_DEFAULTS);
-
-export function setCombatSetting(key, value) {
-  const s = getCombatSettings();
-  s[key] = value;
-  _set(CA_KEY, s);
 }
 
 const ACC_KEY = STORAGE_KEYS.ACCESSIBILITY;

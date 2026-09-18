@@ -34,13 +34,16 @@ export const DEFAULT_RULESET_SLUG = 'dnd5e';
  * ships, so a GM learns it before committing rather than after. Read
  * from the ruleset file and the compendium registry, so a newly added
  * ruleset gets a correct line without touching the picker.
+ *
+ * Conditions are deliberately not counted: every ruleset declares a
+ * vocabulary, so naming it would tell the GM nothing about which
+ * system gives them material and which asks them to supply it.
  */
 export function describeRulesetContent(slug, preset) {
   const parts = [];
   if (hasCompendium(slug)) parts.push('a browsable compendium of spells, monsters and items');
   if (preset?.classes?.length) parts.push('classes');
   if (preset?.skills?.length) parts.push('skills');
-  if (preset?.conditions?.length) parts.push('conditions');
   if (parts.length === 0) {
     return 'Dice mechanics and sheet layouts only - this system has no open content licence, so bring your own material.';
   }
@@ -61,4 +64,37 @@ export function getGameSystemPresets() {
     risus,
     savage_worlds: savageWorlds,
   };
+}
+
+/**
+ * The conditions the active system recognises.
+ *
+ * Rulebook content, so it lives in the ruleset rather than in a util:
+ * Shaken belongs to Savage Worlds, health levels belong to World of
+ * Darkness, and neither should reach the other's table. A system that
+ * declares none simply offers none, and a condition typed by hand
+ * still renders from its own name.
+ *
+ * @param {any} systemConfig the hydrated active ruleset
+ * @returns {{key: string, label: string, abbr: string, description?: string}[]}
+ */
+export function getConditions(systemConfig) {
+  const declared = systemConfig?.conditions;
+  return Array.isArray(declared) ? declared : [];
+}
+
+function findCondition(systemConfig, key) {
+  return getConditions(systemConfig).find((c) => c.key === key) ?? null;
+}
+
+/** Full name, for an accessible name or a tooltip. */
+export function conditionLabel(systemConfig, key) {
+  return findCondition(systemConfig, key)?.label ?? String(key);
+}
+
+/** One or two characters, for a token pill or a dense row. */
+export function conditionAbbr(systemConfig, key) {
+  const found = findCondition(systemConfig, key);
+  if (found) return found.abbr;
+  return String(key).charAt(0).toUpperCase();
 }

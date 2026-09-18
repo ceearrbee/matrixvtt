@@ -50,20 +50,20 @@ export class ErrorBoundary extends Component {
       'div',
       {
         role: 'alert',
-        style: 'min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;font-family:var(--font-headline, system-ui);',
+        style: 'min-height:100vh;display:flex;align-items:center;justify-content:center;padding:var(--space-4xl);font-family:var(--font-headline, system-ui);',
       },
       h(
         'div',
         {
-          style: 'max-width:480px;text-align:center;background:var(--color-background-secondary,#1f2430);color:var(--color-text-primary,#fff);padding:32px;border-radius:var(--border-radius-lg, 4px);border:1px solid var(--color-border-primary,rgba(255,255,255,0.18));',
+          style: 'max-width:480px;text-align:center;background:var(--color-background-secondary,#1f2430);color:var(--color-text-primary,#fff);padding:32px;border-radius:var(--border-radius-lg, var(--border-radius-lg));border:1px solid var(--color-border-primary,rgba(255,255,255,0.18));',
         },
         [
-          h('h2', { style: 'margin:0 0 12px;' }, 'Something went wrong'),
-          h('p', { style: 'margin:0 0 16px;color:var(--color-text-secondary,rgba(200,210,230,0.7));' },
+          h('h2', { style: 'margin:0 0 var(--space-xl);' }, 'Something went wrong'),
+          h('p', { style: 'margin:0 0 var(--space-2xl);color:var(--color-text-secondary,rgba(200,210,230,0.7));' },
             'MatrixVTT hit an unexpected error and stopped rendering. Reloading usually fixes it; if not, signing out clears local data and starts fresh.'),
-          h('p', { style: 'margin:0 0 24px;font-size:12px;color:var(--color-text-tertiary,rgba(200,210,230,0.5));' },
+          h('p', { style: 'margin:0 0 var(--space-4xl);font-size:12px;color:var(--color-text-tertiary,rgba(200,210,230,0.5));' },
             `Build ${BUILD_VERSION} - error: ${this.state.error?.message || 'unknown'}`),
-          h('div', { style: 'display:flex;gap:12px;justify-content:center;' }, [
+          h('div', { style: 'display:flex;gap:var(--space-xl);justify-content:center;' }, [
             h('button', { type: 'button', class: 'dbt btn-primary', onClick: reload }, 'Reload'),
             h('button', { type: 'button', class: 'dbt', onClick: reset }, 'Sign out and reload'),
           ]),

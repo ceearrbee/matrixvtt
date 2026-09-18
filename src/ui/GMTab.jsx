@@ -49,7 +49,7 @@ function SubNavButton({ entry, active, onClick }) {
       onClick,
       style: active ? 'font-weight:600;' : '',
     },
-    [h('span', { 'aria-hidden': 'true', style: 'margin-right:4px;' }, h(entry.Icon, {})), entry.label]
+    [h('span', { 'aria-hidden': 'true', style: 'margin-right:var(--space-xs);' }, h(entry.Icon, {})), entry.label]
   );
 }
 
@@ -59,7 +59,7 @@ export function PlSplitWarning({ ui }) {
   return h('div', {
     class: 'gm-pl-warning',
     role: 'alert',
-    style: 'display:flex;align-items:center;gap:8px;padding:8px;margin:8px;' +
+    style: 'display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md);margin:var(--space-md);' +
       'background:var(--color-background-warning);border:0.5px solid var(--color-border-warning);' +
       'border-radius:var(--border-radius-sm);color:var(--color-text-warning);font-size:var(--font-size-xs);',
   }, [
@@ -91,7 +91,7 @@ export function GMTab({ ui }) {
         role: 'tablist',
         'aria-label': 'GM tool sections',
         style:
-          'display:flex;flex-wrap:wrap;gap:4px;padding:8px;border-bottom:1px solid var(--color-border-primary);',
+          'display:flex;flex-wrap:wrap;gap:var(--space-xs);padding:var(--space-md);border-bottom:1px solid var(--color-border-primary);',
       },
       SUBNAV.map(e =>
         h(SubNavButton, {

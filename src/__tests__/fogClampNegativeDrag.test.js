@@ -6,7 +6,7 @@
  * legal storage but a data quirk that downstream readers don't expect.
  */
 import { describe, it, expect, vi } from 'vitest';
-import { completeAreaSelection } from '../map/actions/fog.js';
+import { completeAreaSelection } from '../map/actions/marquee.js';
 
 function makeMr({ start, current, mode = 'reveal' }) {
   return {

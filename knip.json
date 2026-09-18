@@ -14,11 +14,7 @@
   ],
   "ignore": [
     "src/utils/no-op.js",
-    "src/ui/_public-surface.js",
-    "src/ui/first-time-setup.js",
-    "src/ui/handouts-panel.js",
-    "src/ui/MapForm.jsx",
-    "src/map/input/tools.js"
+    "src/ui/_public-surface.js"
   ],
   "ignoreDependencies": [
     "matrix-widget-api",

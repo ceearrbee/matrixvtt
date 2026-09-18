@@ -2,7 +2,7 @@
  * YjsMatrixTransport - Matrix-side of the Yjs transport boundary.
  *
  * Sends outbound Yjs binary updates as Matrix timeline events and
- * receives inbound ones for reassembly by `YjsManager`. The 60KB
+ * receives inbound ones for reassembly by `YjsManager`. The 24 KB
  * chunk size (`_MAX_CHUNK_SIZE`) sits under Matrix's per-event JSON
  * payload cap of ~64 KB - homeservers reject larger events via
  * `max_event_size` (Synapse default 65536). Yjs binary updates
@@ -60,7 +60,7 @@ export class YjsMatrixTransport {
     this._MAX_CHUNK_SIZE = 24000;
     this._sequenceCounter = 0;
 
-    this._pending = new YjsPendingBuffer(roomId);
+    this._pending = new YjsPendingBuffer(roomId, { userId: matrixClient?.userId ?? null });
     this._drainTimer = null;
     this._drainBackoffMs = DRAIN_BASE_MS;
     this._destroyed = false;

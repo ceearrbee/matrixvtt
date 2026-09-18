@@ -4,7 +4,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['tests/smoke/**/*.{test,spec}.{js,mjs,cjs}'],
-    exclude: ['node_modules/**', '.clone/**'],
+    exclude: ['node_modules/**', '.clone/**', '.claude/**'],
     globals: true,
     testTimeout: 10000
   }

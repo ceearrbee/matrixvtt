@@ -384,17 +384,35 @@
         "max_field": "body_points_max"
       },
       {
-        "kind": "attributes"
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "skill_list",
-        "label": "Skills"
+        "label": "Skills",
+        "collapsed": true
       },
       {
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -421,9 +439,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -444,9 +459,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -478,5 +490,37 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "stunned",
+      "label": "Stunned",
+      "abbr": "St",
+      "description": "Acts at a penalty until recovered."
+    },
+    {
+      "key": "wounded",
+      "label": "Wounded",
+      "abbr": "Wo",
+      "description": "First wound level; a penalty to all actions."
+    },
+    {
+      "key": "severely-wounded",
+      "label": "Severely Wounded",
+      "abbr": "SW",
+      "description": "Second wound level; a heavier penalty."
+    },
+    {
+      "key": "incapacitated",
+      "label": "Incapacitated",
+      "abbr": "In",
+      "description": "Cannot act until healed."
+    },
+    {
+      "key": "mortally-wounded",
+      "label": "Mortally Wounded",
+      "abbr": "MW",
+      "description": "Dying; unconscious and losing ground each round."
+    }
+  ]
 }

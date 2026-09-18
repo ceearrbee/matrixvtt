@@ -22,9 +22,15 @@ function fakeStorage(overrides = {}) {
 }
 
 describe('YjsPendingBuffer', () => {
-  it('keys persistence off the room id', () => {
-    const buf = new YjsPendingBuffer(roomId, { storage: fakeStorage() });
-    expect(buf.storageKey).toBe(`vtt:yjs-pending:${roomId}`);
+  it('keys persistence off the room and the user together', () => {
+    const buf = new YjsPendingBuffer(roomId, { storage: fakeStorage(), userId: '@a:hs' });
+    expect(buf.storageKey).toBe(`vtt:yjs-pending:${roomId}::@a:hs`);
+  });
+
+  it('keeps two accounts in one room apart', () => {
+    const mine = new YjsPendingBuffer(roomId, { storage: fakeStorage(), userId: '@a:hs' });
+    const theirs = new YjsPendingBuffer(roomId, { storage: fakeStorage(), userId: '@b:hs' });
+    expect(mine.storageKey).not.toBe(theirs.storageKey);
   });
 
   it('merges added updates losslessly', () => {

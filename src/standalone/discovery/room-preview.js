@@ -137,9 +137,9 @@ function buildPreviewBody(preview) {
 
   let warning = '';
   if (notFound) {
-    warning = '<p class="error visible" style="margin: 12px 0;">Room not found on this homeserver. Check the ID/alias and try again.</p>';
+    warning = '<p class="error visible" style="margin: var(--space-xl) 0;">Room not found on this homeserver. Check the ID/alias and try again.</p>';
   } else if (!accessible) {
-    warning = '<p style="margin: 12px 0; opacity: 0.85;">Private room - details are hidden until you join.</p>';
+    warning = '<p style="margin: var(--space-xl) 0; opacity: 0.85;">Private room - details are hidden until you join.</p>';
   }
 
   let campaign = '';
@@ -148,13 +148,13 @@ function buildPreviewBody(preview) {
       ? `<div>GM: ${vtt.gmIds.map(escapeHtml).join(', ')}</div>`
       : '';
     campaign = `
-      <div style="margin: 12px 0; padding: 10px; background: var(--surface, rgba(255,255,255,0.04)); border-radius: 6px;">
+      <div style="margin: var(--space-xl) 0; padding: var(--space-lg); background: var(--surface, rgba(255,255,255,0.04)); border-radius: 6px;">
         <div><strong>Campaign:</strong> ${escapeHtml(vtt.campaignName || '(unnamed)')}</div>
         <div><strong>System:</strong> ${escapeHtml(vtt.system || 'generic')}</div>
         ${gms}
       </div>`;
   } else if (accessible) {
-    campaign = '<p style="margin: 12px 0; opacity: 0.85;">No VTT campaign set up here yet - you\'ll start with the setup wizard.</p>';
+    campaign = '<p style="margin: var(--space-xl) 0; opacity: 0.85;">No VTT campaign set up here yet - you\'ll start with the setup wizard.</p>';
   }
 
   let roster = '';
@@ -166,7 +166,7 @@ function buildPreviewBody(preview) {
     lines.push(`<div><strong>NPCs (${npcs.length}):</strong> ${npcs.map((n) => escapeHtml(n.name)).join(', ')}</div>`);
   }
   if (lines.length) {
-    roster = `<div style="margin: 12px 0;">${lines.join('')}</div>`;
+    roster = `<div style="margin: var(--space-xl) 0;">${lines.join('')}</div>`;
   }
 
   const isKnock = joinRule === 'knock' || joinRule === 'knock_restricted';
@@ -178,12 +178,12 @@ function buildPreviewBody(preview) {
     : '';
 
   return `
-    <div class="room-name" style="font-size: 1.2em; margin-bottom: 4px;">${safeName}</div>
+    <div class="room-name" style="font-size: 1.2em; margin-bottom: var(--space-xs);">${safeName}</div>
     ${memberLine}
     ${warning}
     ${campaign}
     ${roster}
-    <div class="form-actions" style="margin-top: 16px;">
+    <div class="form-actions" style="margin-top: var(--space-2xl);">
       <button type="button" class="dbt" data-cancel>Cancel</button>
       ${confirmBtn}
     </div>

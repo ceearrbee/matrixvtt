@@ -33,6 +33,56 @@ test.describe('almanac shell', () => {
     await expect(page.locator('.dice-bar')).toBeVisible(); // the composer
   });
 
+  test('arrow keys move along the companion tabs', async ({ page }) => {
+    await waitForVttShell(page);
+    const strip = page.locator('.right-companion .ctabs').first();
+
+    // The strip's own selection is not the assertion: the Sheet head is
+    // a group opener that deliberately reports aria-selected=false while
+    // a sub-tab owns the selection. What arrow keys must do is move.
+    const start = strip.locator('[role="tab"][tabindex="0"]');
+    const before = await start.getAttribute('data-tab');
+    await start.focus();
+    await page.keyboard.press('ArrowRight');
+
+    const focused = strip.locator('[role="tab"]:focus');
+    await expect(focused).toHaveCount(1);
+    expect(await focused.getAttribute('data-tab')).not.toBe(before);
+  });
+
+  test('F hides both rails and shows them again', async ({ page }) => {
+    await waitForVttShell(page);
+    await expect(page.locator('.left-index')).toBeVisible();
+    await expect(page.locator('.right-companion')).toBeVisible();
+
+    // Away from the composer, which swallows plain letters by design.
+    await page.locator('.left-index').click();
+    await page.keyboard.press('f');
+    await expect(page.locator('.left-index')).toBeHidden();
+    await expect(page.locator('.right-companion')).toBeHidden();
+    await expect(page.locator('.map-strip')).toBeVisible();
+
+    await page.keyboard.press('f');
+    await expect(page.locator('.left-index')).toBeVisible();
+    await expect(page.locator('.right-companion')).toBeVisible();
+  });
+
+  test('the companion width survives a reload', async ({ page }) => {
+    await waitForVttShell(page);
+    const handle = page.locator('.right-companion__resize');
+    await expect(handle).toBeVisible();
+
+    // Keyboard rather than a synthetic drag: the same commit path, and
+    // it proves the handle is reachable without a pointer.
+    await handle.focus();
+    for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowLeft');
+    const widened = await page.locator('.shell').getAttribute('style');
+
+    await page.reload();
+    await waitForVttShell(page);
+    expect(await page.locator('.shell').getAttribute('style')).toBe(widened);
+  });
+
   test('right companion swaps body content when tabs are clicked', async ({ page }) => {
     await waitForVttShell(page);
     const companion = page.locator('.right-companion');

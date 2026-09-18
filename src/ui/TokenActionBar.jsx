@@ -7,7 +7,7 @@
  */
 
 import { h } from 'preact';
-import { selectedTokenSignal } from '../state/ui-signals.js';
+import { selectedTokenSignal, selectedTokenIdsSignal } from '../state/ui-signals.js';
 import { tokensSignal } from '../state/signals.js';
 import { buildTokenBarActions } from './token-bar-actions.js';
 
@@ -19,10 +19,17 @@ export function TokenActionBar({ ui }) {
   const isGM = ui.state?.isGM?.() === true;
   const isOwner = token.owner_user_id != null
     && token.owner_user_id === ui.widgetManager?.userId;
-  const actions = buildTokenBarActions({ isGM, isOwner, token });
+  const selectionSize = selectedTokenIdsSignal.value.size;
+  const actions = buildTokenBarActions({ isGM, isOwner, token, selectionSize });
+  if (actions.length === 0) return null;
 
-  return h('div', { class: 'token-action-bar', role: 'toolbar', 'aria-label': `Actions for ${token.name || 'token'}` }, [
-    h('span', { class: 'token-action-bar__name' }, token.name || 'Token'),
+  const label = selectionSize > 1
+    ? `Actions for ${selectionSize} selected tokens`
+    : `Actions for ${token.name || 'token'}`;
+  const name = selectionSize > 1 ? `${selectionSize} selected` : (token.name || 'Token');
+
+  return h('div', { class: 'token-action-bar', role: 'toolbar', 'aria-label': label }, [
+    h('span', { class: 'token-action-bar__name' }, name),
     ...actions.map((a) => h('button', {
       key: a.id,
       type: 'button',

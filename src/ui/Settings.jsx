@@ -18,6 +18,7 @@ import { useRef, useState } from 'preact/hooks';
 import { VTT_EVENTS, LAYOUT_MODES } from '../utils/constants.js';
 import { CombatAutomationPanel } from './CombatAutomationPanel.jsx';
 import { AccessibilityPanel } from './AccessibilityPanel.jsx';
+import { TurnNotifySettings } from './notify/TurnNotifySettings.jsx';
 import { ApiStatus } from './sync/ApiStatus.jsx';
 import { createSettingsOps } from './capabilities/settings-ops.js';
 import { CampaignSettings, RulesetSettings } from './settings/GMSettings.jsx';
@@ -65,6 +66,7 @@ function PlayerSettings({ ui, refs }) {
       ]),
       h('small', { class: 'settings-hint' }, 'Which of your actions post a line to the shared chat.'),
     ]),
+    h(TurnNotifySettings, { ui }),
   ]);
 }
 

@@ -51,6 +51,14 @@ function makeFakeSm() {
     pages:      new Map(),
     drawings:   [],
     roomMembers: [],
+    damageLog:  [],
+    _drawingHistory: [],
+    _drawingFuture:  [],
+    // clearAllState also cancels queued work now, so the double needs
+    // the collections that work lives in.
+    lastSentState:   new Map(),
+    _retryQueue:     new Map(),
+    _debounceTimers: new Map(),
     activeMapId: null,
   };
 }

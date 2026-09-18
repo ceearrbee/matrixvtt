@@ -7,7 +7,7 @@
  * Specs stay clear of the destroy / leave path that hits a Konva
  * cleanup quirk in headless Chromium.
  */
-import { test, expect, waitForVttShell, openSettings } from './fixtures/logged-in.js';
+import { test, expect, waitForVttShell, openSettings, openGlobalMenu } from './fixtures/logged-in.js';
 import AxeBuilder from '@axe-core/playwright';
 
 // Contrast is enforced: the token pairs are gated per-theme by
@@ -40,7 +40,7 @@ test.describe('VTT shell - accessibility', () => {
 
     // Settings is consolidated into the lower-left global menu; theme is
     // the labelled select inside it, not a second blind cycler here.
-    await page.locator('.left-index__menu-btn').click();
+    await openGlobalMenu(page);
     await expect(page.locator('[data-menu-item="settings"]')).toBeVisible();
     await expect(page.locator('[data-menu-item="theme"]')).toHaveCount(0);
   });

@@ -97,7 +97,6 @@ export function InitiativeBar({ ui, compact = false }) {
     role: 'complementary',
     'aria-label': 'Initiative tracker',
   }, [
-    h('div', { class: 'resize-handle resize-handle--init', 'data-resize': 'init', 'aria-hidden': 'true' }),
     h('div', { class: 'initiative-panel__header' }, [
       h('span', null, [
         'Initiative ',

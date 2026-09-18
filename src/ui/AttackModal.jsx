@@ -34,7 +34,7 @@ function SelectMode({ ui, attackerTokenId, targetTokenId, onConfirm, onClose }) 
         h('label', { class: 'form-label', for: 'attack-select' }, 'Choose Attack'),
         h('select', {
           class: 'form-select', id: 'attack-select', ref: selectRef,
-          style: 'margin-bottom:12px;', title: 'Select which of your attacks to use',
+          style: 'margin-bottom:var(--space-xl);', title: 'Select which of your attacks to use',
         }, attacks.map((a, i) => {
           const bonus = a.attack_bonus != null ? ` (${a.attack_bonus >= 0 ? '+' : ''}${a.attack_bonus})` : '';
           return h('option', { value: i }, `${a.name || 'Attack'}${bonus}`);
@@ -84,8 +84,8 @@ function ResolveMode({ ui, attackerTokenId, attackData, targetTokenId, onClose }
     maxWidth: '360px',
     onClose,
   }, [
-        h('div', { style: 'margin-bottom:12px;' }, [
-          h('div', { style: 'font-size:var(--font-size-xs);color:var(--color-text-secondary);margin-bottom:6px;' }, [
+        h('div', { style: 'margin-bottom:var(--space-xl);' }, [
+          h('div', { style: 'font-size:var(--font-size-xs);color:var(--color-text-secondary);margin-bottom:var(--space-sm);' }, [
             h('strong', null, attackerToken.name), ` · ${bonusStr} to hit`,
             attackData.damage ? ` · ${attackData.damage}${attackData.damage_type ? ` ${attackData.damage_type}` : ''}` : '',
           ]),

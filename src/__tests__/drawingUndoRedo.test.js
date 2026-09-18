@@ -4,6 +4,7 @@ import { render, cleanup, fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
 import { tablePhaseSignal, gmPrepActiveSignal } from '../state/ui-signals.js';
 import { UI_MODES } from '../utils/constants.js';
+import { loadTestMap } from './helpers/loadedMap.js';
 
 vi.mock('../map-renderer.js', () => ({
   MapRenderer: class {
@@ -19,11 +20,12 @@ afterEach(() => { cleanup(); tablePhaseSignal.value = UI_MODES.NARRATIVE; gmPrep
 
 function makeUI(extra = {}) {
   return {
-    state: { 
+    state: {
       tokens: new Map(),
       drawings: [],
-      activeMapId: null,
-      isGM: () => true 
+      map: loadTestMap(),
+      activeMapId: 'm-1',
+      isGM: () => true,
     },
     shouldShowMapHelp: () => false,
     dismissMapHelp: () => {},

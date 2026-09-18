@@ -10,7 +10,7 @@ export function EnvironmentPanel(props) {
     await ui.state.updateSettings(next).catch(showErrorNotification);
     ui.mapRenderer?.render?.();
   };
-  return h('div', { class: 'gm-panel gm-panel--env stack-sm', style: 'padding:12px;' }, [
+  return h('div', { class: 'gm-panel gm-panel--env stack-sm', style: 'padding:var(--space-xl);' }, [
     h('label', { class: 'muted-small', for: 'env-time-of-day' }, 'Time of day'),
     h(
       'select',

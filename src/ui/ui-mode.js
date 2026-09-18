@@ -23,8 +23,11 @@ import {
   openIconRailDrawerSignal,
   drawerManuallyChosenSignal,
   layoutModeSignal,
+  sheetPanelWidthSignal,
+  focusModeSignal,
 } from '../state/ui-signals.js';
 import { initiativeSignal } from '../state/signals.js';
+import { readSheetPanelWidth } from '../utils/sheet-panel-size.js';
 import { defaultTabFor, defaultDrawerFor } from './mode-registry.js';
 import { readUserScoped, writeUserScoped } from '../utils/user-storage.js';
 import {
@@ -41,6 +44,7 @@ const DRAWER_VALUES = /** @type {Set<string>} */ (new Set(Object.values(ICON_RAI
 function isDrawerKey(v) { return typeof v === 'string' && DRAWER_VALUES.has(v); }
 function drawerBaseKey(roomId) { return `${STORAGE_KEY_PREFIXES.ICON_RAIL_DRAWER}${roomId}`; }
 function prepBaseKey(roomId) { return `${STORAGE_KEY_PREFIXES.GM_PREP}${roomId}`; }
+function focusBaseKey(roomId) { return `${STORAGE_KEY_PREFIXES.FOCUS_MODE}${roomId}`; }
 
 function baseKey(roomId) {
   return `${STORAGE_KEYS.UI_MODE}:${roomId}`;
@@ -51,6 +55,30 @@ function baseKey(roomId) {
  * taste is a personal viewing choice that shouldn't change per campaign.
  * Defaults to text; invalid stored/requested values are ignored.
  */
+/**
+ * Companion width, per (user, room): how wide a sheet needs to be is a
+ * function of the campaign's system as much as the reader.
+ */
+/**
+ * Focus mode, per (user, room): whether a table wants the chrome out
+ * of the way is a property of that table, the way Prep is.
+ */
+export function hydrateFocusMode(userId, roomId) {
+  try {
+    focusModeSignal.value = readUserScoped(focusBaseKey(roomId), userId) === '1';
+  } catch { focusModeSignal.value = false; }
+}
+
+export function setFocusMode(userId, roomId, on) {
+  focusModeSignal.value = !!on;
+  try { writeUserScoped(focusBaseKey(roomId), userId, on ? '1' : '0'); }
+  catch { /* storage blocked - the signal still moved */ }
+}
+
+export function hydrateSheetPanelWidth(userId, roomId) {
+  sheetPanelWidthSignal.value = readSheetPanelWidth(userId, roomId);
+}
+
 export function hydrateLayoutMode(userId) {
   /** @type {'text' | 'icon'} */
   let mode = LAYOUT_MODES.TEXT;

@@ -19,6 +19,7 @@ import { TrackerListEditor, initialTrackers } from './token-form/TrackerListEdit
 import { AuraListEditor, initialAuras } from './token-form/AuraListEditor.jsx';
 import { rowKey } from '../utils/row-key.js';
 import { rulesetTracksHP, rulesetHasFormField } from './entity-form/system-fields.js';
+import { getCombatSettings } from '../utils/combat-settings.js';
 
 
 function TokenForm({ ui, token, onClose }) {
@@ -26,6 +27,7 @@ function TokenForm({ ui, token, onClose }) {
   const systemConfig = ui.state.settings?.systemConfig;
   const showHP = rulesetTracksHP(systemConfig);
   const showAC = rulesetHasFormField(systemConfig, 'ac');
+  const defaultSight = getCombatSettings().default_vision_radius;
   const [color, setColor] = useState(isEdit ? (token.color ?? TOKEN_SWATCHES[0]) : TOKEN_SWATCHES[0]);
   const [portraitUrl, setPortraitUrl] = useState(isEdit ? (token.image_url ?? '') : '');
   const [uploading, setUploading] = useState(false);
@@ -107,6 +109,8 @@ function TokenForm({ ui, token, onClose }) {
       auras: cleanAuras,
       trackers: cleanTrackers,
       variants: cleanVariants,
+      vision_radius: num('token-vision'),
+      darkvision_radius: num('token-darkvision'),
       // Retire the legacy single-aura fields whenever the form saves
       // so the new `auras[]` shape is the only source of truth going
       // forward. Renderer still accepts the legacy shape for any
@@ -201,10 +205,32 @@ function TokenForm({ ui, token, onClose }) {
             ]),
             h('div', { class: 'form-group' }, [
               h('label', { class: 'form-label', for: 'token-col' }, 'Position (Col, Row)'),
-              h('div', { style: 'display: flex; gap: 4px;' }, [
+              h('div', { style: 'display: flex; gap: var(--space-xs);' }, [
                 h('input', { type: 'number', class: 'form-input', id: 'token-col', min: 0, max: 20, defaultValue: isEdit ? token.col : 3 }),
                 h('input', { type: 'number', class: 'form-input', id: 'token-row', min: 0, max: 20, defaultValue: isEdit ? token.row : 3 }),
               ]),
+            ]),
+          ]),
+          h('div', { class: 'form-row' }, [
+            h('div', { class: 'form-group' }, [
+              h('label', {
+                class: 'form-label', for: 'token-vision',
+                title: 'How far this token sees in the light. Opens fog as it moves.',
+              }, 'Sight radius'),
+              h('input', {
+                type: 'number', class: 'form-input', id: 'token-vision', min: 0,
+                defaultValue: String(isEdit ? (token.vision_radius ?? 0) : defaultSight),
+              }),
+            ]),
+            h('div', { class: 'form-group' }, [
+              h('label', {
+                class: 'form-label', for: 'token-darkvision',
+                title: 'How far this token sees without light.',
+              }, 'Darkvision radius'),
+              h('input', {
+                type: 'number', class: 'form-input', id: 'token-darkvision', min: 0,
+                defaultValue: String(isEdit ? (token.darkvision_radius ?? 0) : 0),
+              }),
             ]),
           ]),
           h('div', { class: 'form-group' }, [

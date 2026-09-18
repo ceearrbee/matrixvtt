@@ -59,7 +59,7 @@
 .chat-shell > .chat-shell__footer { grid-area: footer; }
 
 .chat-shell__header {
-  padding: 10px 16px;
+  padding: var(--space-lg) var(--space-2xl);
   border-bottom: var(--chrome-hairline);
   background: var(--md-surface);
   position: sticky;
@@ -77,12 +77,12 @@
   overflow-y: auto;
   min-height: 0;
   min-width: 0;
-  padding: 12px 16px;
+  padding: var(--space-xl) var(--space-2xl);
   outline: none;
 }
 
 .chat-shell__footer {
-  padding: 10px 16px 12px;
+  padding: var(--space-lg) var(--space-2xl) var(--space-xl);
   border-top: var(--chrome-hairline);
   background: var(--md-surface);
 }
@@ -90,7 +90,7 @@
 .chat-shell__footer-inner {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-md);
 }
 
 /* ============================================================== *
@@ -100,7 +100,7 @@
 .chat-shell-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-2xl);
   flex-wrap: wrap;
 }
 
@@ -120,14 +120,14 @@
 .chat-shell-header__cluster {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .chat-shell-header__extra {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-md);
 }
 
 /* ============================================================== *
@@ -137,8 +137,8 @@
 .composer-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 14px;
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-pill);
   background: transparent;
@@ -205,7 +205,7 @@
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 6px;
+  padding: 0 var(--space-sm);
   border-radius: var(--radius-pill);
   background: var(--md-primary);
   color: var(--md-on-primary);
@@ -225,7 +225,7 @@
 
 .quick-tray {
   display: flex;
-  gap: 4px;
+  gap: var(--space-xs);
   flex-wrap: wrap;
 }
 
@@ -234,7 +234,7 @@
   align-items: center;
   justify-content: center;
   min-width: 40px;
-  padding: 6px 12px;
+  padding: var(--space-sm) var(--space-xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-pill);
   background: transparent;
@@ -273,13 +273,13 @@
 .composer {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-md);
   align-items: center;
 }
 
 .composer__chat-mode {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--space-xs);
 }
 
 .composer__tone-anchor {
@@ -288,7 +288,7 @@
 }
 
 .composer__speak-as {
-  padding: 6px 10px;
+  padding: var(--space-sm) var(--space-lg);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-md);
   background: transparent;
@@ -301,7 +301,7 @@
 .composer__input {
   flex: 1 1 240px;
   min-width: 200px;
-  padding: 8px 12px;
+  padding: var(--space-md) var(--space-xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-md);
   background: transparent;
@@ -335,7 +335,7 @@
   bottom: 88px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: var(--z-popup, 9999);
+  z-index: var(--z-popup);
   width: min(540px, 92vw);
   max-height: min(70vh, 640px);
   background: var(--md-surface);
@@ -358,8 +358,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: var(--space-xl);
+  padding: var(--space-lg) 14px;
   border-bottom: var(--chrome-hairline);
   background: var(--md-surface-variant);
   color: var(--md-on-surface-variant);
@@ -374,7 +374,7 @@
 
 .floating-popup__title-actions {
   display: inline-flex;
-  gap: 2px;
+  gap: var(--space-2xs);
   align-items: center;
 }
 
@@ -471,7 +471,7 @@
 }
 
 .dock-slot__panel {
-  padding: 10px 12px;
+  padding: var(--space-lg) var(--space-xl);
   min-width: 0;
 }
 
@@ -504,20 +504,20 @@
 .ooc-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-xl);
 }
 
 .ooc-panel__list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-xs);
   max-height: 380px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: var(--space-xs);
 }
 
 .ooc-panel__entry {
-  padding: 8px 12px;
+  padding: var(--space-md) var(--space-xl);
   border-radius: var(--radius-sm);
   background: color-mix(in oklch, var(--md-primary) 5%, transparent);
   font-size: 0.92em;
@@ -525,7 +525,7 @@
 }
 
 .ooc-panel__empty {
-  padding: 24px 16px;
+  padding: var(--space-4xl) var(--space-2xl);
   text-align: center;
   color: var(--md-on-surface-variant);
   opacity: 0.7;
@@ -534,14 +534,14 @@
 
 .ooc-panel__composer {
   display: flex;
-  gap: 6px;
+  gap: var(--space-sm);
   align-items: flex-end;
 }
 
 .ooc-panel__input {
   flex: 1;
   min-height: 38px;
-  padding: 8px 12px;
+  padding: var(--space-md) var(--space-xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-md);
   background: transparent;
@@ -558,7 +558,7 @@
 }
 
 .ooc-panel__send {
-  padding: 8px 18px;
+  padding: var(--space-md) 18px;
   border: 1px solid var(--md-primary);
   border-radius: var(--radius-pill);
   background: var(--md-primary);
@@ -579,18 +579,18 @@
 .browse-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-lg);
 }
 
 .browse-panel__tabs {
   display: flex;
-  gap: 2px;
+  gap: var(--space-2xs);
   border-bottom: var(--chrome-hairline);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-xs);
 }
 
 .browse-panel__tab {
-  padding: 8px 14px;
+  padding: var(--space-md) 14px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -616,12 +616,12 @@
 .browse-panel__view {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-md);
 }
 
 .browse-panel__input {
   width: 100%;
-  padding: 8px 12px;
+  padding: var(--space-md) var(--space-xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-md);
   background: transparent;
@@ -649,7 +649,7 @@
 }
 
 .browse-panel__result {
-  padding: 6px 10px;
+  padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-sm);
   background: color-mix(in oklch, var(--md-primary) 4%, transparent);
   font-size: 0.9em;
@@ -657,7 +657,7 @@
 }
 
 .browse-panel__empty {
-  padding: 20px;
+  padding: var(--space-3xl);
   text-align: center;
   color: var(--md-on-surface-variant);
   opacity: 0.7;
@@ -671,12 +671,12 @@
 .mode-popup {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-2xl);
 }
 
 .mode-popup__radios {
   display: flex;
-  gap: 2px;
+  gap: var(--space-2xs);
   padding: 3px;
   background: var(--md-surface-variant);
   border-radius: var(--radius-pill);
@@ -684,7 +684,7 @@
 
 .mode-popup__radio {
   flex: 1;
-  padding: 6px 12px;
+  padding: var(--space-sm) var(--space-xl);
   background: transparent;
   border: none;
   border-radius: var(--radius-pill);
@@ -709,7 +709,7 @@
 .mode-popup__section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-md);
 }
 
 .mode-popup__title {
@@ -723,7 +723,7 @@
 
 .mode-popup__row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-sm);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -731,7 +731,7 @@
 .mode-popup__input {
   flex: 1 1 140px;
   min-width: 0;
-  padding: 8px 12px;
+  padding: var(--space-md) var(--space-xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-md);
   background: transparent;
@@ -747,7 +747,7 @@
 }
 
 .mode-popup__btn {
-  padding: 8px 16px;
+  padding: var(--space-md) var(--space-2xl);
   border: 1px solid var(--md-outline);
   border-radius: var(--radius-pill);
   background: transparent;
@@ -863,7 +863,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
 }
 
 /* ============================================================== *
@@ -895,7 +895,7 @@
  * above the DiceBar rather than another button row. */
 .shell__chat > .quick-tray,
 .shell__chat .quick-tray {
-  padding: 6px 12px;
+  padding: var(--space-sm) var(--space-xl);
   background: color-mix(in oklch, var(--md-surface-variant) 50%, transparent);
   border-top: var(--chrome-hairline);
   flex-shrink: 0;
@@ -914,9 +914,9 @@
 .persona-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-xs);
   border-radius: var(--radius-pill);
-  padding: 4px 10px;
+  padding: var(--space-xs) var(--space-lg);
   font-size: 0.85em;
 }
 .persona-chip__icon { opacity: 0.7; }
@@ -943,7 +943,7 @@
   border: 1px solid var(--md-outline);
   background: transparent;
   color: var(--md-primary);
-  padding: 6px 12px;
+  padding: var(--space-sm) var(--space-xl);
   transition: background 0.15s var(--ease-standard),
               color 0.15s var(--ease-standard),
               border-color 0.15s var(--ease-standard);
@@ -964,7 +964,7 @@
   color: var(--md-error);
 }
 .vtt-header .dbt--icon-only {
-  padding: 6px 10px;
+  padding: var(--space-sm) var(--space-lg);
 }
 /* Mode selector inline buttons (desktop) follow the same vocabulary. */
 .vtt-header .mode-selector__btn {
@@ -1000,7 +1000,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--md-on-surface-variant);
-  padding: 6px 16px 4px;
+  padding: var(--space-sm) var(--space-2xl) var(--space-xs);
   border-bottom: var(--chrome-hairline);
   background: var(--md-surface);
 }
@@ -1060,8 +1060,8 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
   }
   .vtt-header__left {
     flex: 1 1 auto;
@@ -1070,7 +1070,7 @@
   .vtt-header__right {
     flex: 0 1 auto;
     margin-left: auto;
-    gap: 4px;
+    gap: var(--space-xs);
     min-width: 0;
   }
   /* The sheet/drawer toggle carries a word label ("Combat" / "Party" /
@@ -1118,7 +1118,7 @@
     min-width: 44px;
   }
   .dbt--icon-only {
-    padding: 0 10px;
+    padding: 0 var(--space-lg);
   }
 
   /* === C2. Compact the log empty state ========================== *
@@ -1128,8 +1128,8 @@
    * ("…events will" in the screenshot). Tighten padding + glyph on
    * mobile so the full message fits; the feed still scrolls if not. */
   .log-panel__feed .empty-state {
-    padding: 8px 12px;
-    gap: 2px;
+    padding: var(--space-md) var(--space-xl);
+    gap: var(--space-2xs);
   }
   .log-panel__feed .empty-state__glyph {
     font-size: 16px;
@@ -1157,7 +1157,7 @@
     font-family: inherit;
     font-size: 0.85em;
     font-weight: 500;
-    padding: 6px 12px;
+    padding: var(--space-sm) var(--space-xl);
     cursor: pointer;
   }
   /* Open state mirrors the desktop .dbt--active vocabulary: rationed
@@ -1182,9 +1182,9 @@
     background: var(--md-surface);
     border: var(--chrome-hairline);
     border-radius: var(--radius-md);
-    padding: 8px;
+    padding: var(--space-md);
     box-shadow: var(--elev-3);
-    z-index: var(--z-popup, 9999);
+    z-index: var(--z-popup);
     min-width: 220px;
   }
   .mode-selector--open .mode-selector__list .dbt {
@@ -1225,7 +1225,7 @@
    * the scrim can't cover it. */
   .shell[data-channels-open],
   .shell[data-sheet-open] {
-    z-index: 1001;
+    z-index: var(--z-raised-shell);
     position: relative;
   }
 
@@ -1246,10 +1246,10 @@
   .dice-bar {
     max-width: 100%;
     overflow: hidden;
-    gap: 4px;
-    padding: 4px 6px;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
   }
-  .dice-bar__chat-cluster { gap: 4px; }
+  .dice-bar__chat-cluster { gap: var(--space-xs); }
   .dice-bar__chat-cluster .long-post-btn { display: none; }
 
   /* Uniform control sizing inside the dice bar - overrides the 44× block
@@ -1267,11 +1267,11 @@
     min-height: 34px;
     min-width: 34px;
     height: 34px;
-    padding: 0 10px;
+    padding: 0 var(--space-lg);
     font-size: 0.85em;
-    border-radius: var(--radius-pill, 999px);
+    border-radius: var(--radius-pill, var(--radius-pill));
   }
-  .quick-tray { gap: 4px; }
+  .quick-tray { gap: var(--space-xs); }
 
   /* Mode chips (Say / Describe / OOC), the Tone pill, and the "Start
      scene" button move into the actions popover on mobile so the composer
@@ -1283,10 +1283,10 @@
     display: none;
   }
   .persona-chip__label { display: none; }
-  .dice-bar .persona-chip { padding: 0 8px; min-width: 34px; }
+  .dice-bar .persona-chip { padding: 0 var(--space-md); min-width: 34px; }
   /* The active-scene banner (when actually in a scene) is kept - it's the
      "where am I posting?" context. Stays narrow. */
-  .dice-bar .scene-banner { max-width: 28%; padding: 0 8px; gap: 4px; }
+  .dice-bar .scene-banner { max-width: 28%; padding: 0 var(--space-md); gap: var(--space-xs); }
   .dice-bar .scene-banner__title { font-size: 0.8em; }
 
   /* Chat input: the dominant element of the row. Slightly taller than the
@@ -1296,7 +1296,7 @@
     flex: 1 1 0;
     min-width: 0;
     min-height: 36px;
-    padding: 6px 10px;
+    padding: var(--space-sm) var(--space-lg);
     font-size: 0.95em;
     /* Wrap typed text downward (default textarea behaviour) rather than
        horizontal-scroll, even if a parent sets nowrap somewhere. */
@@ -1308,7 +1308,7 @@
     flex: 0 0 auto;
     min-height: 34px;
     min-width: 56px;
-    padding: 0 12px;
+    padding: 0 var(--space-xl);
   }
 
   /* ComposerActionsPopover - floating panel anchored just above the
@@ -1323,20 +1323,20 @@
     border: 1px solid var(--md-outline, var(--color-border-tertiary));
     border-radius: var(--radius-lg, 8px);
     box-shadow: var(--elev-3, 0 8px 24px rgba(0, 0, 0, 0.18));
-    padding: 10px 12px;
+    padding: var(--space-lg) var(--space-xl);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    z-index: 20;
+    gap: var(--space-lg);
+    z-index: var(--z-hud);
     max-height: 60vh;
     overflow-y: auto;
   }
   .composer-popover__section {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-sm);
     border-top: 1px dashed var(--md-surface-variant, var(--color-border-tertiary));
-    padding-top: 8px;
+    padding-top: var(--space-md);
   }
   .composer-popover__section:first-child {
     border-top: 0;
@@ -1345,7 +1345,7 @@
   .composer-popover__section--row {
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-md);
     flex-wrap: wrap;
   }
   .composer-popover__label {
@@ -1358,13 +1358,13 @@
   .composer-popover__row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-md);
     flex-wrap: wrap;
   }
   .composer-popover__dice-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
+    gap: var(--space-sm);
   }
   .composer-popover__dice-grid .dbt {
     height: 36px;
@@ -1378,11 +1378,11 @@
    * eat as much vertical space between map and composer. */
   .combat-init-strip {
     min-height: 0;
-    padding: 3px 8px;
+    padding: 3px var(--space-md);
     font-size: 0.85em;
   }
   .combat-init-strip__row {
-    padding: 2px 6px;
+    padding: var(--space-2xs) var(--space-sm);
   }
 
   /* Sheet/drawer toggle in the header is icon-only on mobile (the word
@@ -1408,9 +1408,9 @@
   }
 
   /* === I. ChatShell internal padding (inert until shell mounts) === */
-  .chat-shell__main { padding: 8px 12px; }
-  .chat-shell__header { padding: 8px 12px; }
-  .chat-shell__footer { padding: 8px 12px 10px; }
+  .chat-shell__main { padding: var(--space-md) var(--space-xl); }
+  .chat-shell__header { padding: var(--space-md) var(--space-xl); }
+  .chat-shell__footer { padding: var(--space-md) var(--space-xl) var(--space-lg); }
   .chat-shell-header__title { font-size: 1.1em; }
   .chat-shell__body { grid-template-columns: 1fr; }
   .dock-slot[data-dock-slot="left-rail"],

@@ -49,7 +49,7 @@ export function showStandaloneWarning() {
     warning.id = 'standalone-warning';
     warning.style.cssText = [
       'position: fixed', 'top: 10px', 'left: 50%', 'transform: translateX(-50%)',
-      'background: #ff9800', 'color: white', 'padding: 12px 20px', 'border-radius: 4px',
+      'background: #ff9800', 'color: white', 'padding: var(--space-xl) var(--space-3xl)', 'border-radius: var(--border-radius-lg)',
       'z-index: var(--z-modal)', 'font-weight: bold', 'box-shadow: 0 2px 8px rgba(0,0,0,0.2)',
       'max-width: 90%', 'text-align: center',
     ].join(';');

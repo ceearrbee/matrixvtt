@@ -4,7 +4,7 @@
  * behind `isGM && prepActive`, so the right was unreachable. The
  * Journal drawer, where a player actually looks, now offers it.
  */
-import { test, expect, waitForVttShell } from './fixtures/logged-in.js';
+import { test, expect, openJournal } from './fixtures/logged-in.js';
 
 const PLAYER_ID = '@guest:fake.matrix.test';
 
@@ -20,14 +20,12 @@ function asPlayer(page) {
   }, PLAYER_ID);
 }
 
-const journal = (page) => page.locator('.left-index [data-section="journal"]');
-
 test.describe('a player can write a page', () => {
   test('the Journal offers it, and it opens the page form', async ({ page }) => {
     await asPlayer(page);
-    await waitForVttShell(page);
+    const journal = await openJournal(page);
 
-    const cta = journal(page).getByRole('button', { name: /write a page/i }).first();
+    const cta = journal.getByRole('button', { name: /write a page/i }).first();
     await expect(cta).toBeVisible();
     await cta.click();
     await expect(page.locator('#page-form-modal')).toBeVisible({ timeout: 5_000 });
@@ -35,7 +33,7 @@ test.describe('a player can write a page', () => {
 
   test('the handout CTA stays with the GM', async ({ page }) => {
     await asPlayer(page);
-    await waitForVttShell(page);
-    await expect(journal(page).getByRole('button', { name: /add a handout/i })).toHaveCount(0);
+    const journal = await openJournal(page);
+    await expect(journal.getByRole('button', { name: /add a handout/i })).toHaveCount(0);
   });
 });

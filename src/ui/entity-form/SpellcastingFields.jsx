@@ -20,7 +20,7 @@ export function SpellcastingFields({ ui, entity, isPC, isEdit }) {
           ...attrs.map(a => h('option', { value: a.key, selected: isEdit && isPC && entity?.spellcasting_ability === a.key }, a.label)),
         ]),
       ])),
-    h('div', { class: 'form-row', style: 'flex-wrap:wrap;gap:6px;' },
+    h('div', { class: 'form-row', style: 'flex-wrap:wrap;gap:var(--space-sm);' },
       [1,2,3,4,5,6,7,8,9].map(lvl => {
         const total = isEdit && isPC ? (entity?.spell_slots?.[String(lvl)]?.total ?? 0) : 0;
         return h('div', { class: 'form-group', style: 'flex:0 0 auto;min-width:60px;' }, [

@@ -9,6 +9,7 @@ import { EVENT_TYPES } from '../../utils/constants.js';
 import { canMoveToken } from '../reader.js';
 import { segmentsIntersect } from '../../utils/geometry.js';
 import { revealFogAroundToken } from './world-writers.js';
+import { getCombatSettings } from '../../utils/combat-settings.js';
 
 export async function updateToken(sm, tokenId, token) {
   if (Object.keys(token).length === 0) {
@@ -56,7 +57,7 @@ export async function updateTokenPosition(sm, tokenId, col, row) {
   const bright = typeof next.vision_radius === 'number' ? next.vision_radius : 0;
   const dark = typeof next.darkvision_radius === 'number' ? next.darkvision_radius : 0;
   const sightRadius = Math.max(bright, dark);
-  if (sightRadius > 0) {
+  if (sightRadius > 0 && getCombatSettings().auto_reveal_fog) {
     revealFogAroundToken(sm, tokenId, sightRadius).catch((err) => {
       console.warn('[writer] revealFogAroundToken failed:', err?.message || err);
     });

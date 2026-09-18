@@ -26,7 +26,8 @@
         "csp-xss":                  "off",
         "errors-in-console":        "off",
         "image-aspect-ratio":       "off",
-        "tap-targets":              "off"
+
+        "target-size":              "error"
       }
     },
     "upload": {

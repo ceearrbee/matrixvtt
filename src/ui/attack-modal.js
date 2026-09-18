@@ -44,7 +44,7 @@ export async function resolveAttack(ui, attackerTokenId, targetTokenId, attackDa
         <div class="attack-result attack-result--hit">
           <div class="attack-result__roll">${isCrit ? '💥 Critical Hit!' : '🎯 Hit!'} - Rolled ${String(total)} vs ${esc(defenseLabel)} ${esc(String(targetDefense))}</div>
           <div class="attack-result__damage">Damage: <strong>${String(damageTotal)}</strong> ${esc(attackData.damage_type || '')}</div>
-          <div style="margin-top:8px;">
+          <div style="margin-top:var(--space-md);">
             <button class="btn-primary" id="apply-damage-btn" style="width:100%;" data-damage="${String(damageTotal)}">Apply ${String(damageTotal)} damage to ${esc(target.name)}</button>
           </div>
         </div>`;

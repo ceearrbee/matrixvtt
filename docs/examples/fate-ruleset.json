@@ -165,15 +165,6 @@
     "initiative": "4dF+{bonus}",
     "attack": "4dF+{bonus}"
   },
-  "formulas": {
-    "check_total": {
-      "$": "+",
-      "args": [
-        "@roll.total",
-        "@approach"
-      ]
-    }
-  },
   "harm_model": {
     "type": "stress",
     "boxes": [
@@ -199,6 +190,21 @@
   "character_sheet": {
     "sections": [
       {
+        "kind": "play_actions",
+        "label": "Actions",
+        "groups": [
+          {
+            "label": "Actions",
+            "source": "character_actions",
+            "filter": "attack"
+          },
+          {
+            "label": "Items",
+            "source": "inventory_consumables"
+          }
+        ]
+      },
+      {
         "kind": "tagged_list",
         "field": "aspects",
         "label": "Aspects",
@@ -220,11 +226,13 @@
         "label": "Pending bonuses"
       },
       {
-        "kind": "attributes"
+        "kind": "attributes",
+        "collapsed": true
       },
       {
         "kind": "skill_list",
-        "label": "Skills"
+        "label": "Skills",
+        "collapsed": true
       },
       {
         "kind": "tagged_list",
@@ -294,7 +302,8 @@
         "kind": "conditions"
       },
       {
-        "kind": "notes"
+        "kind": "notes",
+        "collapsed": true
       }
     ]
   },
@@ -313,9 +322,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -334,9 +340,6 @@
       },
       {
         "kind": "conditions"
-      },
-      {
-        "kind": "notes"
       }
     ]
   },
@@ -368,5 +371,43 @@
         ]
       }
     ]
-  }
+  },
+  "conditions": [
+    {
+      "key": "mild-consequence",
+      "label": "Mild Consequence",
+      "abbr": "M1",
+      "description": "A lasting aspect taken to avoid being taken out."
+    },
+    {
+      "key": "moderate-consequence",
+      "label": "Moderate Consequence",
+      "abbr": "M2",
+      "description": "A heavier lasting aspect, slower to clear."
+    },
+    {
+      "key": "severe-consequence",
+      "label": "Severe Consequence",
+      "abbr": "M3",
+      "description": "The gravest lasting aspect short of defeat."
+    },
+    {
+      "key": "taken-out",
+      "label": "Taken Out",
+      "abbr": "TO",
+      "description": "Lost the conflict; the opponent decides what happens."
+    },
+    {
+      "key": "conceded",
+      "label": "Conceded",
+      "abbr": "Co",
+      "description": "Bowed out on their own terms, and took a fate point."
+    },
+    {
+      "key": "boosted",
+      "label": "Boosted",
+      "abbr": "Bs",
+      "description": "Holding a temporary boost to spend."
+    }
+  ]
 }

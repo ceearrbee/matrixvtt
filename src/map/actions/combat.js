@@ -11,11 +11,7 @@ import { emitVttError as emitError } from '../../utils/errorHandling.js';
 import { updateTokenSafe } from './tokens.js';
 import { getConcentratingSpell } from '../../ui/spells-tab.js';
 import { computeDerived } from '../../engine/computeDerived.js';
-
-const CONDITIONS = [
-  'prone', 'poisoned', 'stunned', 'paralyzed', 'charmed', 'frightened',
-  'blinded', 'deafened', 'invisible', 'unconscious', 'concentration',
-];
+import { getConditions, conditionLabel } from '../../state/rulesets.js';
 
 /**
  * Stress-model damage/heal. Damage ticks boxes on the linked sheet and
@@ -94,7 +90,7 @@ function DamageDialog({ mr, tokenId, isHeal, onClose }) {
       h('label', { class: 'form-label', for: 'dmg-amount' }, 'Amount'),
       h('input', { type: 'number', class: 'form-input', id: 'dmg-amount', defaultValue: 0, min: '1' }),
     ]),
-    error && h('div', { class: 'form-error', style: 'color:var(--color-text-danger);font-size:var(--font-size-xs);margin-top:6px;' }, error),
+    error && h('div', { class: 'form-error', style: 'color:var(--color-text-danger);font-size:var(--font-size-xs);margin-top:var(--space-sm);' }, error),
     h('div', { class: 'form-actions' }, [
       h('button', { class: 'dbt', 'data-modal-close': true }, 'Cancel'),
       h('button', { class: 'dbt btn-primary', id: 'dmg-apply-btn', onClick: apply }, isHeal ? 'Apply Healing' : 'Apply Damage'),
@@ -206,10 +202,32 @@ function ConditionDialog({ mr, tokenId, token, onClose }) {
   });
   const [filter, setFilter] = useState('');
 
+  const systemConfig = mr.state?.settings?.systemConfig;
+  // The system's own vocabulary, plus anything already on the token
+  // that the system does not declare (a hand-typed or imported one).
+  const declared = getConditions(systemConfig).map((c) => c.key);
+  const all = [...declared, ...[...selected].filter((c) => !declared.includes(c))];
+
   const needle = filter.trim().toLowerCase();
   // A condition the token already has stays listed whatever the filter
   // says, so a filter can never hide something that is in effect.
-  const shown = CONDITIONS.filter((c) => !needle || c.toLowerCase().includes(needle) || selected.has(c));
+  const shown = all.filter((c) => !needle
+    || c.toLowerCase().includes(needle)
+    || conditionLabel(systemConfig, c).toLowerCase().includes(needle)
+    || selected.has(c));
+
+  // A ruleset that declares no conditions, or a name this one does not
+  // carry, would otherwise be a dead end: the filter doubles as the
+  // way to add one.
+  const typed = filter.trim();
+  const canAddTyped = typed !== '' && !all.some(
+    (c) => c.toLowerCase() === typed.toLowerCase()
+      || conditionLabel(systemConfig, c).toLowerCase() === typed.toLowerCase(),
+  );
+  const addTyped = () => {
+    setSelected(new Set([...selected, typed.toLowerCase()]));
+    setFilter('');
+  };
 
   const toggle = (cond) => (e) => {
     const next = new Set(selected);
@@ -249,18 +267,24 @@ function ConditionDialog({ mr, tokenId, token, onClose }) {
             type: 'checkbox', id: `cond-chk-${c}`, class: 'cond-check', value: c,
             checked: selected.has(c), onChange: toggle(c),
           }),
-          h('span', null, c),
+          h('span', null, conditionLabel(systemConfig, c)),
         ]),
         selected.has(c) && h('input', {
           type: 'number', id: `cond-dur-${c}`, class: 'cond-duration form-input cond-grid__duration',
           'data-condition': c, min: '0', step: '1', placeholder: 'rounds',
           value: durations[c] ?? '',
-          'aria-label': `${c} rounds until expiry`,
+          'aria-label': `${conditionLabel(systemConfig, c)} rounds until expiry`,
           title: 'Rounds until auto-expiry. Blank = never expires (clear manually).',
           onInput: (e) => setDurations({ ...durations, [c]: e.currentTarget.value }),
         }),
       ]))),
-    shown.length === 0 && h('p', { class: 'form-help' }, `No condition matches "${filter}".`),
+    canAddTyped && h('button', {
+      type: 'button', class: 'dbt', onClick: addTyped,
+    }, `Add "${typed}"`),
+    shown.length === 0 && !canAddTyped && h('p', { class: 'form-help' },
+      declared.length === 0
+        ? 'This game system declares no conditions. Type one above to add it.'
+        : `No condition matches "${filter}".`),
     h('div', { class: 'form-actions' }, [
       h('button', { class: 'dbt', 'data-modal-close': true }, 'Cancel'),
       h('button', { class: 'dbt btn-primary', id: 'cond-apply-btn', onClick: save }, 'Save Conditions'),

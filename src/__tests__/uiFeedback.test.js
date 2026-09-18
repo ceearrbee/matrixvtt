@@ -30,9 +30,15 @@ vi.mock('../utils/ui-helpers.js', () => ({
   FormReader: class {
     constructor() {}
     collect(schema) { return {}; }
+    // The map form validates its sizes now; this suite is about the
+    // upload path, so the numbers read clean and the errors are empty.
+    validate() {
+      return { values: { name: 'Test', width_cells: 20, height_cells: 20, cell_px: 40 }, errors: {} };
+    }
     getField() { return ''; }
     getCheckbox() { return false; }
   },
+  applyFieldErrors: vi.fn(),
   ModalFactory: {
     create: vi.fn(({ body }) => {
       const el = document.createElement('div');
@@ -109,15 +115,13 @@ describe('UIController - map upload FileReader reject on error', () => {
   });
 
   it('rejects the Promise (does not hang) when FileReader errors during fallback data-URL read', async () => {
-    const { ModalFactory, FormReader } = await import('../utils/ui-helpers.js');
+    const { ModalFactory } = await import('../utils/ui-helpers.js');
     const fakeModal = document.createElement('div');
     fakeModal.innerHTML = '<form id="map-form"><select id="map-source-type"><option value="upload" selected>upload</option></select><input id="map-upload" type="file"></form>';
     document.body.appendChild(fakeModal);
     ModalFactory.create.mockReturnValue(fakeModal);
     
     const ui = makeUI();
-    // Mock collect to return 'upload' for source type
-    vi.mocked(FormReader).prototype.collect = vi.fn().mockReturnValue({ name: 'Test' });
     
     ui.widgetManager = {
       isStandalone: false,

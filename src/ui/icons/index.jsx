@@ -201,7 +201,7 @@ export const EnvironmentIcon = () => h(Svg, {}, [
   h('path', { d: 'M 2 14 Q 5 12.5 8 14 Q 11 15.5 14 14' }),
 ]);
 
-export const PeopleIcon = () => h(Svg, {}, [
+const PeopleIcon = () => h(Svg, {}, [
   h('circle', { cx: 5.5, cy: 5.5, r: 2 }),
   h('path', { d: 'M 2 12.5 Q 2 9 5.5 9 Q 9 9 9 12.5' }),
   h('circle', { cx: 11, cy: 5, r: 1.6 }),
@@ -311,6 +311,17 @@ export const MenuIcon = () => h(Svg, {}, [
   h('path', { d: 'M2.5 4.5h11M2.5 8h11M2.5 11.5h11' }),
 ]);
 
+export const ReplyIcon = () => h(Svg, {}, [
+  h('path', { d: 'M 6 3 L 2 7 L 6 11' }),
+  h('path', { d: 'M 2 7 L 10 7 A 4 4 0 0 1 14 11 L 14 13' }),
+]);
+
+export const LibraryIcon = () => h(Svg, {}, [
+  h('path', { d: 'M 2 10 L 2 13 L 14 13 L 14 10' }),
+  h('path', { d: 'M 8 2 L 8 9' }),
+  h('path', { d: 'M 5 6.5 L 8 9.5 L 11 6.5' }),
+]);
+
 export const RefreshIcon = () => h(Svg, {}, [
   h('path', { d: 'M13 8a5 5 0 1 1-1.5-3.5' }),
   h('path', { d: 'M13 2v3h-3' }),
@@ -340,7 +351,7 @@ export const CopyIcon = () => h(Svg, {}, [
 
 // A horned silhouette: an NPC or monster, distinct from the plain
 // PersonIcon that means a player character.
-export const MonsterIcon = () => h(Svg, {}, [
+const MonsterIcon = () => h(Svg, {}, [
   h('path', { d: 'M 3 6 Q 3 3 5 3.5 L 5.5 5' }),
   h('path', { d: 'M 13 6 Q 13 3 11 3.5 L 10.5 5' }),
   h('path', { d: 'M 4.5 7 Q 4.5 4.5 8 4.5 Q 11.5 4.5 11.5 7 L 11.5 9.5 Q 11.5 13 8 13 Q 4.5 13 4.5 9.5 Z' }),
@@ -350,14 +361,14 @@ export const MonsterIcon = () => h(Svg, {}, [
 
 // A sparked point: casting, distinct from the BookIcon that means
 // written prose (journal, pages).
-export const SpellIcon = () => h(Svg, {}, [
+const SpellIcon = () => h(Svg, {}, [
   h('path', { d: 'M 8 2 L 9.2 6 L 13 7 L 9.2 8 L 8 12 L 6.8 8 L 3 7 L 6.8 6 Z' }),
   h('path', { d: 'M 12 11 L 12.6 12.4 L 14 13 L 12.6 13.6 L 12 15 L 11.4 13.6 L 10 13 L 11.4 12.4 Z' }),
 ]);
 
 // A rising bar step: a trained skill, distinct from the WrenchIcon
 // that means the GM prep workspace.
-export const SkillIcon = () => h(Svg, {}, [
+const SkillIcon = () => h(Svg, {}, [
   h('line', { x1: 3.5, y1: 12.5, x2: 3.5, y2: 9.5 }),
   h('line', { x1: 8, y1: 12.5, x2: 8, y2: 6.5 }),
   h('line', { x1: 12.5, y1: 12.5, x2: 12.5, y2: 3.5 }),

@@ -21,7 +21,14 @@ import { fileURLToPath } from 'node:url';
 
 const srcRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const CHROME_EMOJI = ['🎬', '📖', '👤', '📦', '🗺', '🎲', '🌫', '🌤', '👥', '💢', '🛡', '💀', '🏃', '📌', '🎙', '👢', '🚫', '💬', '⚔', '＋', '⚙', '⭐', '★', '▶', '●', '↻', '☰', '▤', '📋', '🎭'];
+// Any emoji, not a list of the ones somebody thought of. The scan was
+// already widened once - from fourteen named files to the whole tree -
+// after the map context menus carried seventeen emoji for a year. The
+// emoji list had the same shape and the same hole: "🧙 Wizard" sat on
+// the empty roster because nobody had added 🧙. `Extended_Pictographic`
+// is Unicode's own answer to "is this an emoji", so the only way past
+// this gate is an exemption with a reason.
+const EMOJI = /\p{Extended_Pictographic}/gu;
 
 /**
  * Files → the emoji each may keep, and why it is content rather than
@@ -29,34 +36,22 @@ const CHROME_EMOJI = ['🎬', '📖', '👤', '📦', '🗺', '🎲', '🌫', '�
  */
 const ALLOWED = {
   // Activity-log glyphs: they label a line of transcript, not a control.
-  'chat/announcements.js': ['🗺', '🎲', '⚔'],
   'chat/dice-command.js': ['🎲'],
-  'standalone/app-log.js': ['📋'],
-  'ui/attack-modal.js': ['⚔'],
   'ui/character-sheet-sections/lists.js': ['⚔'],
   'ui/chat-log-format.js': ['🎬'],
   'ui/combat/opposed-roll.js': ['⚔'],
   'ui/dice-helpers.js': ['⚔'],
-  'ui/lifecycle-init.js': ['🎬', '💬'],
-  'ui/log-grouping.js': ['🗺', '🎲', '💬', '⚔'],
-  'ui/log-panel.js': ['💬'],
-  'ui/preview/preview-modals.js': ['🛡'],
   'ui/scene-mode.js': ['🎬'],
   'ui/state-effects.js': ['⚔'],
-  'ui/state-updater.js': ['🎲'],
   'ui/tables/TableFormModal.jsx': ['🎲'],
   'ui/tables/rollTable.js': ['🎲'],
   'ui/BrowsePanel.jsx': ['🎲'],
-  'ui/DiceBar.jsx': ['🎬'],
+  'ui/composer/ChatCluster.jsx': ['🎬'],
   // The log filter chips mirror the glyph of the entries they filter,
   // which is the whole recognition cue.
   'ui/LogControls.jsx': ['🗺', '🎲', '💬', '⚔'],
   // Reaction palette and picker data: user-chosen content.
-  'ui/EmojiPicker.jsx': ['🎲'],
-  'ui/LogPanel.jsx': ['💬'],
-  'ui/ThreadView.jsx': ['🎲', '⚔'],
   'utils/wikilinks.js': ['🗺', '🎲'],
-  'ui/chat-send.js': ['💬'],
   // Empty-state and section glyphs, warm by design.
   'ui/index-sections.js': ['🎬', '📖', '👤', '📦'],
   'ui/PartyRoster.jsx': ['🎭'],
@@ -64,10 +59,43 @@ const ALLOWED = {
   'ui/InitiativeEntry.jsx': ['💀'],
   // Paired state markers whose filled/hollow contrast carries the
   // meaning; an SVG pair is a separate piece of work.
-  'ui/Spells.jsx': ['★'],
+  'ui/Spells.jsx': ['★', '😴'],
   'ui/Settings.jsx': ['★'],
   'ui/EntityList.jsx': ['★'],
   'ui/CombatTab.jsx': ['●'],
+  // Damage and healing in the transcript, beside the 🎲 and ⚔ rolls
+  // they follow.
+  'ui/log-grouping.js': ['🗺', '🎲', '💬', '⚔', '💔', '💚'],
+  'ui/state-updater.js': ['🎲', '💔', '💚'],
+  'chat/announcements.js': ['🗺', '🎲', '⚔', '💔', '💚'],
+  // Attack outcomes, written into the log line that reports them.
+  'ui/attack-modal.js': ['⚔', '💥', '🎯', '💨', '❌'],
+  // Speaking mode marks the line it was said in, not the control that
+  // set it - the composer's Say / Describe / OOC pills are words.
+  'ui/chat-send.js': ['💬', '🔒', '💭', '📢'],
+  'ui/lifecycle-init.js': ['🎬', '💬', '🔒', '💭', '📢'],
+  // Reaction palettes: the emoji IS the reaction being sent.
+  'ui/LogPanel.jsx': ['💬', '👍', '👎', '❤', '😂'],
+  'ui/ThreadView.jsx': ['🎲', '⚔', '👍', '👎', '❤', '😂', '💔', '💚'],
+  'ui/EmojiPicker.jsx': ['🎲', '🙂', '🌿', '🍕', '✈', '📚', '❤', '🏁'],
+  // Status glyphs inside a message or a log line, never on a control.
+  'map/actions/combat.js': ['⚠'],
+  'ui/setup-persistence.js': ['⚠'],
+  'ui/sheet-missing-sections.jsx': ['⚠'],
+  'widget/standalone-stub.js': ['⚠'],
+  'ui/NotificationLog.jsx': ['ℹ', '⚠'],
+  'ui/log-panel.js': ['💬', 'ℹ'],
+  'standalone/room-inspector.js': ['🔧', '✅', '⚠', 'ℹ'],
+  'standalone/discovery/render.js': ['🟢'],
+  'standalone/app-log.js': ['📋', '🔄', '💤', '🚪', '👁', '💥'],
+  // Content-kind glyphs on previews and empty rows.
+  'ui/preview/preview-modals.js': ['🛡', '🪄', '🧪'],
+  'ui/spell-preview-sections.js': ['🪄'],
+  'ui/entity/placement.js': ['👹'],
+  'ui/gm/entity-ops.js': ['😴'],
+  'ui/tables/loot-actions.js': ['🎁'],
+  // "has artwork" vs "blank grid", in the row's meta line.
+  'ui/MapsList.jsx': ['🖼', '🏁'],
 };
 
 function stripComments(src) {
@@ -98,8 +126,8 @@ describe('chrome renders SVG icons, not emoji', () => {
       const rel = relative(srcRoot, path);
       const src = stripComments(readFileSync(path, 'utf8'));
       const allowed = ALLOWED[rel] ?? [];
-      return CHROME_EMOJI
-        .filter((e) => !allowed.includes(e) && src.includes(e))
+      return [...new Set(src.match(EMOJI) ?? [])]
+        .filter((e) => !allowed.includes(e))
         .map((e) => `${rel} ${e}`);
     });
     expect(offenders).toEqual([]);

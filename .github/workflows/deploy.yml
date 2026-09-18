@@ -28,6 +28,7 @@ jobs:
   # fails with a 404 and the whole workflow goes red even though the
   # build succeeded.
   preflight:
+    timeout-minutes: 5
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     outputs:
@@ -52,6 +53,8 @@ jobs:
           fi
 
   build:
+    if: needs.preflight.outputs.pages_enabled == 'true'
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     needs: preflight
     steps:
@@ -71,26 +74,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      # A deploy that doesn't bump package.json ships a byte-identical
+      # sw.js, so the browser's update check finds nothing and the
+      # "new build ready" prompt never fires. Manual dispatch skips the
+      # gate so a re-run of an already-successful deploy isn't blocked.
+      - name: Version-bump gate
+        if: github.event_name == 'workflow_run'
+        run: node scripts/check-version-bump.mjs
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Tests
-        run: npm test -- --run
-
-      - name: Production dependency audit
-        run: npm audit --audit-level=high --omit=dev
-
-      - name: Build with Vite
-        run: npm run build
-
-      - name: Static-build smoke
-        run: npm run test:smoke
-
-      - name: Bundle-size gate
-        run: npm run size
+      # The same gate list CI's check job runs, by name rather than by
+      # hand-copy. The two drifted apart once already: this job was
+      # running `npm test`, which applies no coverage floors, and had
+      # never run knip or the pattern scan.
+      - name: Full gate list
+        run: npm run check:ci
 
       # VitePress emits into dist/docs, which the Pages artifact picks
       # up. The app's sidebar links to <base>docs/, so without this
@@ -105,6 +102,7 @@ jobs:
           path: ./dist
 
   deploy:
+    timeout-minutes: 15
     if: needs.preflight.outputs.pages_enabled == 'true'
     environment:
       name: github-pages
@@ -152,3 +150,9 @@ jobs:
           test "$STATUS" = "ok" || { echo "health.status was '$STATUS', expected 'ok'"; exit 1; }
           test "$VERSION" = "$PKG_VERSION" || { echo "deployed version '$VERSION' != built version '$PKG_VERSION'"; exit 1; }
           echo "✓ Deploy verified — version $VERSION live at $PAGE_URL"
+
+      # The health check above proves the version stamp; this walks the
+      # whole live surface (entry HTML, every referenced asset, manifest,
+      # robots, sitemap, leftover placeholders).
+      - name: Verify live deployment
+        run: npm run verify:deploy -- "${{ steps.deployment.outputs.page_url }}"

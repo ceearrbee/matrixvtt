@@ -16,7 +16,7 @@ export default defineConfig({
 
     // Test file patterns
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['.clone/**', 'node_modules/**', 'tests/smoke/**', 'tests/e2e/**'],
+    exclude: ['.clone/**', 'node_modules/**', '.claude/**', 'tests/smoke/**', 'tests/e2e/**'],
 
     // Coverage configuration
     coverage: {
@@ -30,10 +30,10 @@ export default defineConfig({
       ],
       // Ratchet floors just under current coverage; raise as coverage grows.
       thresholds: {
-        lines: 74,
-        functions: 66,
-        branches: 63,
-        statements: 71
+        lines: 79,
+        functions: 72,
+        branches: 68,
+        statements: 76
       }
     },
 

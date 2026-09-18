@@ -4,9 +4,10 @@
  * through the fake client, and the initiative tracker reflects the
  * live turn - including advancing to the next combatant.
  */
-import { test, expect, waitForVttReady } from './fixtures/logged-in.js';
+import { test, expect, waitForVttReady, openMapPane, showMobilePane } from './fixtures/logged-in.js';
 
 async function startCombat(page) {
+  await openMapPane(page);
   await page.getByRole('button', { name: 'Start combat and roll initiative' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Randomize all' }).click();
   await page.waitForFunction(() => window.matrixVTTClient.state.initiative.active === true);
@@ -42,12 +43,17 @@ test.describe('combat and initiative', () => {
     await expect(page.locator('.combat-init-strip__row[data-current="true"]')).toContainText(currentName);
   });
 
-  test('ending a turn advances to the next combatant', async ({ page }) => {
+  test('ending a turn advances to the next combatant', async ({ page, isMobile }) => {
     await waitForVttReady(page);
     await startCombat(page);
 
     const before = await page.evaluate(() => window.matrixVTTClient.state.initiative.current_index);
-    await page.locator('[data-action="end-turn"]').click();
+    // The companion panel carries the control in both layouts; the
+    // map-edge strip carries a second copy on desktop only, so scope to
+    // the panel rather than matching both. On a phone the panel is its
+    // own pane.
+    if (isMobile) await showMobilePane(page, 'panel');
+    await page.locator('#shell-sheet-drawer [data-action="end-turn"]').click();
 
     await page.waitForFunction(
       (i) => window.matrixVTTClient.state.initiative.current_index !== i,

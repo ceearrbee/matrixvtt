@@ -34,6 +34,17 @@ describe('every ruleset ships a playable character sheet', () => {
 
   for (const [name, data] of rulesets) {
     describe(name, () => {
+      it('brings its own condition vocabulary', () => {
+        const conditions = data.conditions;
+        expect(Array.isArray(conditions), `${name} declares no conditions`).toBe(true);
+        expect(conditions.length).toBeGreaterThan(0);
+        for (const c of conditions) {
+          expect(typeof c.key).toBe('string');
+          expect(typeof c.label).toBe('string');
+          expect(typeof c.abbr).toBe('string');
+        }
+      });
+
       it('leads with one turn surface', () => {
         const found = kinds(data.character_sheet).filter((k) => k === 'play_actions');
         expect(found, 'no play_actions section: the sheet never says what to do').toHaveLength(1);

@@ -71,7 +71,7 @@ export function AuraListEditor({ auras, addAura, removeAura, updateAura }) {
         id: `aura-${i}-color`,
         class: 'form-input',
         value: a.color,
-        style: 'height:32px;width:48px;padding:2px;',
+        style: 'height:32px;width:48px;padding:var(--space-2xs);',
         'aria-label': `Aura ${i + 1} colour`,
         onInput: (e) => updateAura(i, { color: e.currentTarget.value }),
       }),

@@ -43,9 +43,6 @@ export function strokeCancel() {
 }
 
 export function strokeIsActive() { return _active; }
-export function strokeStart() { return _start; }
-export function strokeCurrent() { return _current; }
-export function strokePencilPoints() { return _pencilPoints; }
 
 /**
  * Safely round float coordinates to avoid Matrix strict-JSON

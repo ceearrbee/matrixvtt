@@ -3,8 +3,8 @@
  * writing a bare `vtt:hide-next-steps`, so two accounts sharing a
  * browser shared one dismissal: a player signing in after a GM
  * dismissed it never saw their own checklist. That is the exact class
- * `src/utils/user-storage.js` exists to prevent: localStorage caches
- * that survive logout must be user-scoped.
+ * `src/utils/user-storage.js` exists to prevent, and the one CLAUDE.md
+ * names under "localStorage caches that survive logout".
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, cleanup, fireEvent } from '@testing-library/preact';

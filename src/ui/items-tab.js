@@ -77,7 +77,7 @@ function ItemForm({ ui, itemId, onClose }) {
     ]),
     h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label', for: 'item-image-url' }, 'Icon (optional)'),
-      h('div', { style: 'display:flex;gap:6px;align-items:center;' }, [
+      h('div', { style: 'display:flex;gap:var(--space-sm);align-items:center;' }, [
         isEdit && item.image_url && h('img', {
           src: item.image_url, alt: '',
           style: 'width:32px;height:32px;object-fit:contain;border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-sm);',
@@ -86,7 +86,7 @@ function ItemForm({ ui, itemId, onClose }) {
           type: 'text', class: 'form-input', id: 'item-image-url', placeholder: 'Paste a URL or browse the library…',
           defaultValue: isEdit && item.image_url ? item.image_url : '', style: 'flex:1;',
         }),
-        h('button', { type: 'button', class: 'dbt dbt--sm', id: 'item-pick-icon', title: 'Browse the built-in icon library', onClick: pickIcon }, '🗃 Library'),
+        h('button', { type: 'button', class: 'dbt dbt--sm', id: 'item-pick-icon', title: 'Browse the built-in icon library', onClick: pickIcon }, 'Library'),
       ]),
     ]),
     h('div', { class: 'form-row' }, [
@@ -141,7 +141,7 @@ function ItemForm({ ui, itemId, onClose }) {
         h('input', { type: 'text', class: 'form-input', id: 'item-properties', placeholder: 'e.g., Versatile, Finesse', defaultValue: isEdit && item.properties ? item.properties : '', title: 'Additional weapon keywords' }),
       ]),
       h('div', { class: 'form-group' },
-        h('label', { class: 'form-label', style: 'display:flex;align-items:center;gap:6px;cursor:pointer;', title: 'Whether the item is currently in use or worn' }, [
+        h('label', { class: 'form-check-row', title: 'Whether the item is currently in use or worn' }, [
           h('input', { type: 'checkbox', id: 'item-equipped', defaultChecked: isEdit && !!item.equipped, 'aria-label': 'Item is equipped' }),
           'Equipped',
         ])),

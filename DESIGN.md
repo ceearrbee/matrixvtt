@@ -2,7 +2,8 @@
 
 The visual source of truth. `PRODUCT.md` covers who the product serves and how
 it should feel; this file covers what things look like and which tokens to use.
-When this file and a component disagree, the component is the bug.
+The machine-readable sidecar is `.impeccable/design.json` (drives `/impeccable`
+previews). When this file and a component disagree, the component is the bug.
 
 North star: **"The Player's Almanac."** Quiet, bookish chrome; the tactical map
 and the words on a handout are the loudest things on screen, never the toolbar.

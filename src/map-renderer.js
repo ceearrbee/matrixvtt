@@ -21,6 +21,10 @@ import { setupTools, buildStroke } from './map/input/tools.js';
 import { cellToPixel } from './utils/grid-coords.js';
 import { setupPanZoom, zoomAround, ZOOM_STEP } from './map/input/pan-zoom.js';
 import { setupKeyboard } from './map/input/keyboard.js';
+import { selectedTokenIdsSignal } from './state/ui-signals.js';
+import {
+  selectOne, selectMany, toggleInSelection, primaryOf,
+} from './map/token-selection.js';
 import { attachMapActions } from './map/map-actions-wiring.js';
 import { panToToken } from './map/layers/tokens.js';
 import { FrameBatcher } from './state/YjsSignalBridge.js';
@@ -210,6 +214,31 @@ export class MapRenderer {
    * Clearing (id=null) clears all three signal-backed fields.
    */
   setSelectedToken(id) {
+    this._applySelection(selectOne(this.selectedTokenIds, id));
+  }
+
+  /**
+   * Extend or shrink the selection, keeping the primary in step so the
+   * sheet panels follow the last token the user touched.
+   */
+  toggleSelectedToken(id) {
+    this._applySelection(toggleInSelection(this.selectedTokenIds, id));
+  }
+
+  setSelectedTokens(ids) {
+    this._applySelection(selectMany(this.selectedTokenIds, ids));
+  }
+
+  get selectedTokenIds() {
+    return selectedTokenIdsSignal.value;
+  }
+
+  _applySelection(next) {
+    selectedTokenIdsSignal.value = next;
+    this._setPrimarySelection(primaryOf(next));
+  }
+
+  _setPrimarySelection(id) {
     this.selectedToken = id;
     if (this.state) {
       this.state.selectedToken = id;

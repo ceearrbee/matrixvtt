@@ -141,8 +141,8 @@ describe('parseUVTT', () => {
   });
 
   it('skips malformed lights', () => {
-    const { lights } = parseUVTT({
-      resolution: { pixels_per_grid: 1 },
+    const { lights, grid } = parseUVTT({
+      resolution: { pixels_per_grid: 20 },
       lights: [
         null,
         { position: { x: 1, y: 1 } }, // missing range
@@ -151,6 +151,6 @@ describe('parseUVTT', () => {
       ],
     });
     expect(lights).toHaveLength(1);
-    expect(lights[0].x).toBe(2);
+    expect(lights[0].x).toBe(2 * grid.cellPx);
   });
 });

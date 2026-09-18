@@ -11,13 +11,9 @@ import {
   tombstoneOldEntities,
   tombstoneStaleEvents,
 } from './setup-tombstone.js';
-import {
-  saveInitialState,
-  verifyInitialSave,
-  countInitialSaveSteps,
-} from './setup-persistence.js';
+import { saveInitialState } from './setup-persistence.js';
 
-export { tombstoneOldEntities, tombstoneStaleEvents, saveInitialState, verifyInitialSave, countInitialSaveSteps };
+export { tombstoneOldEntities, tombstoneStaleEvents, saveInitialState };
 
 /** Show first-time setup wizard */
 export async function showFirstTimeSetup(ui, { bypassAuthCheck = false } = {}) {
