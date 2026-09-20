@@ -20,6 +20,8 @@ import { AuraListEditor, initialAuras } from './token-form/AuraListEditor.jsx';
 import { rowKey } from '../utils/row-key.js';
 import { rulesetTracksHP, rulesetHasFormField } from './entity-form/system-fields.js';
 import { getCombatSettings } from '../utils/combat-settings.js';
+import { uploadImage } from './maps/upload-map-image.js';
+import { ASSET_KINDS } from '../utils/constants.js';
 
 
 function TokenForm({ ui, token, onClose }) {
@@ -62,7 +64,7 @@ function TokenForm({ ui, token, onClose }) {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await ui.widgetManager.uploadMedia(file);
+      const url = await uploadImage(ui, file, ASSET_KINDS.PORTRAIT);
       setPortraitUrl(url || '');
     } catch (err) {
       ui._toast?.('Portrait upload failed: ' + (err?.message || 'unknown'), 'error');

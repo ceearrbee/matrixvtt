@@ -11,12 +11,7 @@ export default defineConfig({
   outDir: '../dist/docs',
   cleanUrls: true,
   lang: 'en-US',
-  srcExclude: ['superpowers/**'],
   ignoreDeadLinks: true,
-
-  rewrites: {
-    '../README.md':      'contributing/readme.md',
-  },
 
   themeConfig: {
     nav: [
@@ -31,6 +26,7 @@ export default defineConfig({
         text: 'Playing',
         items: [
           { text: 'Running Your First Game', link: '/guide/gm-quickstart' },
+          { text: 'Map Backgrounds', link: '/guide/map-backgrounds' },
           { text: 'Live Playtest Checklist', link: '/guide/live-playtest' },
         ],
       },
@@ -68,6 +64,12 @@ export default defineConfig({
         text: 'Authoring',
         items: [
           { text: 'Ruleset Tutorial', link: '/authoring/tutorial' },
+        ],
+      },
+      {
+        text: 'Licences',
+        items: [
+          { text: 'Bundled Content', link: '/licences/third-party' },
         ],
       },
       {

@@ -32,6 +32,29 @@ cached afterwards, beats a mid-session brick.
 | `MapsPanel-*.js`, `uvttImport-*.js`, `yjs-snapshot-publish-*.js` | small | Feature entry points. |
 | `tour-runtime-*.js` + `driver-*.js/.css` | ~26 KB | Starting the onboarding tour. The mobile-Firefox resume rationale below does not apply: the tour is user-triggered post-login UI, and a failed import degrades to a toast, not a dead shell. |
 
+### Static assets (not visible to `size-limit`)
+
+`package.json#size-limit` globs `dist/assets/*.js`, so nothing under
+`public/` is measured by `npm run size`. Two packs ship there and need
+their budgets written down instead:
+
+| Pack | Shipped | Budget | Loaded |
+|---|---|---|---|
+| `backgrounds/tiles/*.webp` | 16 tiles, ~644 KB | 200 KB per tile, 1.5 MB per pack | On demand: one tile when a map uses it, the manifest when the picker's Textures tab opens. |
+| `icons/**` | ~4000 SVGs, ~35 MB | none (gitignored, generated) | One SVG per rendered icon; the 516 KB manifest only when the icon picker opens. |
+
+Neither is preloaded and neither may appear in `app.html`'s
+modulepreload list.
+
+The map generators (`src/map/generators/`) are code, not assets, and
+they sit on the eager render path because `map-bg.js` imports them.
+Measured cost: `chat-integrator` went 171.09 -> 174.24 kB brotli, about
+3.2 kB, against its 190 kB limit. A generated map is a seed rather than
+an upload, so this buys back far more than it costs. Re-measure with
+`npm run size` before adding a third generator. The tile budgets are enforced by
+`scripts/build-backgrounds.mjs` and `src/__tests__/backgroundProvenance.test.js`,
+and `tests/smoke/static-build.test.js` gates that the credits ship.
+
 ## Policy decisions
 
 1. **Accept the eager floor (~654 KB brotli).** Resilience on mobile

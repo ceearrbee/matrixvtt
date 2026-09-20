@@ -211,6 +211,21 @@ export const LIBRARY_KIND = Object.freeze({
 // Matrix caps a state event near 64KB; stay clear so headers/signatures fit.
 export const LIBRARY_ENTRY_MAX_BYTES = 60000;
 
+// What an uploaded asset is for. Deliberately not LIBRARY_KIND: that is
+// the cross-room content library's vocabulary for entity content, and
+// this is a per-room list of media references.
+export const ASSET_KINDS = Object.freeze({
+  MAP:      'map',
+  PORTRAIT: 'portrait',
+  HANDOUT:  'handout',
+  OTHER:    'other',
+});
+
+// Yjs history is append-only, so the room's asset list has to be bounded
+// or it grows the document for the life of the campaign. At ~160 bytes a
+// record this caps the collection near 32KB.
+export const ASSET_LIBRARY_MAX_ENTRIES = 200;
+
 // Yjs CRDT transport: UPDATE and SYNC_VECTOR are timeline events,
 // SNAPSHOT is a chunked state event (GM-only, PL 50).
 export const YJS_EVENT_TYPES = {

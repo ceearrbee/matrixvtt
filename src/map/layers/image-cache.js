@@ -7,7 +7,7 @@
  * URL to most-recently-used by re-inserting it.
  */
 
-import { resolveMediaUrl } from '../../utils/mxc.js';
+import { resolveMedia } from '../../utils/media-cache.js';
 
 const MAX_IMAGES = 100;
 
@@ -21,10 +21,17 @@ export function getOrLoadImage(mr, url, _id) {
     cache.set(url, existing);
     return existing;
   }
+  // Authenticated media resolves asynchronously, so the src may not be
+  // known yet; the callback re-renders once it is.
+  const src = resolveMedia(url, () => {
+    const pending = cache.get(url);
+    if (pending && !pending.src) pending.src = resolveMedia(url) || '';
+    mr.render?.();
+  });
   const img = new Image();
-  img.onload = () => { mr.render(); };
-  img.onerror = () => { mr.render(); };
-  img.src = resolveMediaUrl(url, mr.state.widgetManager?.homeserver);
+  img.onload = () => { mr.render?.(); };
+  img.onerror = () => { mr.render?.(); };
+  if (src) img.src = src;
   cache.set(url, img);
   if (cache.size > MAX_IMAGES) {
     const oldestKey = cache.keys().next().value;

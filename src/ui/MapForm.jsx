@@ -7,6 +7,7 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { autoFitCellSize } from '../utils/image-fit.js';
+import { SourceField } from './map-form/SourceField.jsx';
 
 function LayerFieldset({ layer, index, onRemove }) {
   return h('fieldset', {
@@ -34,8 +35,6 @@ function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit }) {
     grid: mapConfig?.grid_type || 'square',
     tint: mapConfig?.env_tint || '',
   };
-  const initialSource = def.url.startsWith('data:') ? 'upload' : (def.url ? 'url' : 'none');
-  const [sourceType, setSourceType] = useState(initialSource);
   const [layers, setLayers] = useState((mapConfig?.layers || []).map((l, i) => ({ ...l, _k: i })));
 
   const onSubmit = async (e) => {
@@ -49,20 +48,7 @@ function MapForm({ ui, mapConfig, isNewMode, selectedId, onSaved, submit }) {
       h('label', { class: 'form-label', for: 'map-name' }, 'Map Name'),
       h('input', { type: 'text', class: 'form-input', id: 'map-name', value: def.name, required: true, autofocus: true }),
     ]),
-    h('div', { class: 'form-group' }, [
-      h('label', { class: 'form-label', for: 'map-source-type' }, 'Source'),
-      h('select', { class: 'form-select', id: 'map-source-type', onChange: (e) => setSourceType(e.target.value) }, [
-        ui.widgetManager?.canUploadMedia && h('option', { value: 'upload', selected: sourceType === 'upload' }, 'Upload File'),
-        h('option', { value: 'url', selected: sourceType === 'url' }, 'Image URL'),
-        h('option', { value: 'none', selected: sourceType === 'none' }, 'Grid Only'),
-      ]),
-    ]),
-    h('div', { class: 'form-group', id: 'map-upload-group', hidden: sourceType !== 'upload' }, [
-      h('input', { type: 'file', class: 'form-input', id: 'map-upload', 'aria-label': 'Map image file', accept: 'image/*' }),
-      h('div', { id: 'map-preview' }),
-    ]),
-    h('div', { id: 'map-url-group', class: 'form-group', hidden: sourceType !== 'url' },
-      h('input', { type: 'text', class: 'form-input', id: 'map-url', 'aria-label': 'Map image URL', placeholder: 'Paste a URL or browse the library…', value: def.url })),
+    h(SourceField, { ui, mapConfig, url: def.url, mapId: selectedId, mapSize: { width_cells: def.w, height_cells: def.h, cell_px: def.px } }),
     h('div', { class: 'section-header' }, [
       'Layers ',
       h('button', {

@@ -55,6 +55,8 @@ Play the game. The checklist below is what to consciously exercise while it happ
 - **Chat backfill.** Scroll the chronicle to the top. Older history must either load or end with the explicit "older messages are unavailable" notice, never a silent stop.
 - **Dice and combat.** Run at least one full combat: initiative order, turn advancement, HP changes, a condition applied and removed. Everyone must see the same state at each step.
 - **Keyboard-only interlude.** Spend one of your GM turns without the mouse: command palette, dice roll, token select. Note anywhere you got stuck.
+- **A map nobody uploaded.** Run at least one scene on a bundled texture or a generated layout ([Map Backgrounds](/guide/map-backgrounds)). Check the grid is readable over whatever you picked, and that every player sees the same layout - they paint it from the seed rather than downloading it, so a mismatch is worth reporting.
+- **Uploaded images actually load.** Portraits and uploaded battle maps must render for everyone, not just you. Recent homeservers require authenticated media; if images are blank for a player, note which homeserver and whether they were in the standalone app or a widget.
 
 Keep a note of every rough edge, even ones you work around in the moment. The workaround is data.
 

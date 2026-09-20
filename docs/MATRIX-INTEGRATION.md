@@ -110,3 +110,39 @@ Reusable content (rulesets, characters, NPCs, items, spells, maps) is stored in 
 Discovery (`src/library/discovery.js`) scans `getJoinedRooms()` for the marker and caches the room id in user-scoped `localStorage` (`vtt:library-room`), re-verifying the cache with a single marker probe before trusting it. The room is created lazily on the first library write, with the marker in `initial_state`. Campaign syncers ignore library-room events because `MatrixApiAdapter` filters incoming events by the active `roomId`.
 
 **Limitation:** map `image_url` values are `mxc://` URIs scoped to the homeserver they were uploaded to. Inserting a library map into a campaign on a different homeserver stores the same URI, which that server cannot resolve; the image will not render. There is no cross-homeserver media re-upload.
+
+A map with a **generated background** has no `image_url` at all: it
+carries `background: { kind: 'generated', generator, seed, palette,
+style, params }`, roughly 160 bytes, and every client paints the same
+layout from the seed. Those are portable across homeservers precisely
+because no media is involved. The same is true of a bundled terrain
+tile, `background: { kind: 'tile', tile, scale }`, which resolves to a
+file served with the app.
+
+## Media
+
+Uploads go to the homeserver's media repository through
+`uploadMedia(file)` and are stored as `mxc://` URIs. Every successful
+upload is also recorded in the room's `assets` collection, so an image
+uploaded once can be reused rather than uploaded again; see
+[Data Model Spec](/DATA-MODEL-SPEC).
+
+**Reading media requires authentication.** Matrix 1.11 moved downloads
+to `GET /_matrix/client/v1/media/download/{server}/{id}`, and Synapse
+enforces it from 1.146, so the older `/_matrix/media/v3/download/` path
+returns 404 on a current homeserver. A browser cannot put an
+`Authorization` header on an `<img src>`, so `src/utils/media-cache.js`
+fetches media with the session's access token and hands the page an
+object URL instead. It falls back to the legacy path, cached so the
+failure cannot become a retry loop, when the fetch fails or the
+homeserver predates the endpoint.
+
+**Widget mode goes through the host.** `requestOpenIDConnectToken`
+yields an identity token, not a client access token, so a widget has no
+credential the media endpoint accepts. It asks the host client instead,
+via MSC4039 (`org.matrix.msc4039.upload_file` and
+`download_file`, both in `buildCapabilities`). `WidgetManager` implements
+the same `downloadMedia` the standalone client does, and both publish it
+through `mediaDownloaderSignal`, so `media-cache.js` has one path and no
+idea which transport it is talking to. A host that refuses the
+capability falls back to the legacy URL.

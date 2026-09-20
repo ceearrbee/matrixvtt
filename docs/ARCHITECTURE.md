@@ -24,7 +24,7 @@ Both modes implement the Shared Bridge Contract to ensure compatibility across `
 
 - `src/state/StateManager.js`: Coordinates domain state, event application, and sync rules.
 - `src/ui/ui-methods.js` & `src/ui/App.jsx`: Compose the Preact UI shell and manage feature orchestration.
-- `src/map-renderer.js`: Handles canvas rendering and token interaction.
+- `src/map-renderer.js`: Handles canvas rendering and token interaction. Layers are composed in `src/map/setup-layers.js`; the background layer paints a bundled tile or a seed-generated layout from `src/map/generators/` when the map carries a `background` descriptor, and the image `layers[]` stack on top of it.
 - `src/engine/`: Provides the system-agnostic JSON-AST formula evaluator and rules engine.
 
 ## Trust Boundaries

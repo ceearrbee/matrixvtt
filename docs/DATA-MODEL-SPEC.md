@@ -27,12 +27,20 @@ All campaign entities live in one `Y.Doc` (`src/state/YjsManager.js`).
 It is a CRDT, so concurrent edits from several clients merge without a
 last-write-wins guard and without an app-level version field.
 
-Seventeen keyed collections, each a `Y.Map` of `id` to entity:
+Eighteen keyed collections, each a `Y.Map` of `id` to entity:
 `tokens`, `characters`, `npcs`, `items`, `spells`, `handouts`,
-`tables`, `walls`, `lights`, `pins`, `templates`, `maps`, `pages`, and
-the singleton-shaped `fog`, `initiative`, `settings`, each keyed by the
-empty string. One `Y.Array`, `drawings`, because stroke history is
-append-shaped.
+`tables`, `walls`, `lights`, `pins`, `templates`, `maps`, `pages`,
+`assets`, and the singleton-shaped `fog`, `initiative`, `settings`,
+each keyed by the empty string. One `Y.Array`, `drawings`, because
+stroke history is append-shaped.
+
+`assets` is the room's upload library: `mxc://` references with a name,
+dimensions, who uploaded it and when, so an image uploaded once is
+reusable. It holds references, never bytes, is capped at
+`ASSET_LIBRARY_MAX_ENTRIES` with oldest-first eviction because Yjs
+history is append-only, and is the one collection **not** GM-gated -
+players upload token portraits, which is also why it is a Yjs
+collection rather than a power-level-gated room state event.
 
 Deletion removes the key. There is no empty-object tombstone in the
 document; tombstones survive only in the snapshot chunks described in
@@ -77,9 +85,24 @@ system depend on; each schema file is the full answer.
   `condition_durations`. `map_id` is written once at creation; travel
   pins are the only path that rewrites it.
 - **Map:** `id`, `name`, `width_cells`, `height_cells`, `cell_px`,
-  `grid_type`, `image_url` or a `layers[]` stack. Images are `mxc://`
-  URIs, so a map is only renderable to clients that can reach the
-  homeserver that holds it.
+  `grid_type`, and a background: `image_url`, a `layers[]` stack, or a
+  `background` descriptor. Images are `mxc://` URIs, so a map backed by
+  one is only renderable to clients that can reach the homeserver that
+  holds it.
+
+  A `background` descriptor is painted rather than fetched, so it has no
+  such constraint and costs a couple of hundred bytes instead of a
+  megabyte. Two kinds ship:
+  `{ kind: 'tile', tile, scale }` repeats a bundled terrain texture, and
+  `{ kind: 'generated', generator, seed, palette, style, params }`
+  paints a layout every client reproduces from the seed. Unknown kinds
+  are tolerated and fall back to the theme floor, so a peer on a newer
+  build cannot cost an older one the whole map. The `layers[]` stack
+  still draws on top of whichever is chosen.
+- **Asset:** `id`, `mxc`, `name`, `width`, `height`, `kind`
+  (`map | portrait | handout | other`), `uploaded_by`, `ts`. A record of
+  what has been uploaded into this room, so an image can be reused
+  instead of re-uploaded. References only, never bytes.
 - **Fog:** `mode` (`visible` or `hidden`) and `revealed`, an array of
   `"col,row"` strings. One fog record per map.
 - **Handout:** `visible_to_players`, a boolean. Visibility is all

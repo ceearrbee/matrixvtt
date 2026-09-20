@@ -33,7 +33,8 @@
   --color-focus: #00FFFF;
   --color-kind-fiction: #C99CFF;
 
-  --color-grid-line: rgba(255, 255, 255, 0.15);
+  --color-grid-line: rgba(255, 255, 255, 0.34);
+  --color-grid-halo: rgba(0, 0, 0, 0.4);
   --color-area-reveal: rgba(102, 178, 255, 0.25);
   --color-area-hide: rgba(255, 71, 87, 0.25);
 

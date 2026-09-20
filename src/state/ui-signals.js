@@ -32,6 +32,40 @@ export const debugModeSignal = signal(_readDebugFlag());
  */
 export const logVersionSignal = signal(0);
 
+/**
+ * Homeserver base URL for the live session, set once at bootstrap.
+ *
+ * Lives here rather than being threaded through props because every
+ * `<img>` that shows an `mxc://` portrait needs it, and those are
+ * scattered across the sheet, the roster, the log and the pickers.
+ * Read through `src/utils/media-src.js`, never directly.
+ */
+export const homeserverSignal = signal(null);
+
+/**
+ * Client access token for the live session, set alongside the
+ * homeserver. Needed because authenticated media (Matrix 1.11, enforced
+ * by Synapse 1.146) has to be fetched with an Authorization header
+ * rather than linked to directly. Widget mode never obtains one.
+ */
+export const accessTokenSignal = signal(null);
+
+/**
+ * Bumped whenever a piece of `mxc://` media finishes resolving.
+ * `mediaSrc` reads it, so any component rendering a portrait subscribes
+ * to it for free and repaints when the blob lands.
+ */
+export const mediaVersionSignal = signal(0);
+
+/**
+ * How to fetch `mxc://` media when this session has no access token of
+ * its own. Widget mode sets it to the host client's downloader; the
+ * standalone app leaves it null and uses its own token.
+ *
+ * @type {import('@preact/signals').Signal<((mxc: string) => Promise<Blob|null>)|null>}
+ */
+export const mediaDownloaderSignal = signal(null);
+
 export function bumpLogVersion() {
   logVersionSignal.value = logVersionSignal.value + 1;
 }

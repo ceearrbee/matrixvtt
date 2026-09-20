@@ -57,6 +57,15 @@ scan "Deep-clone via JSON round-trip" 'JSON\.parse\(JSON\.stringify\(' \
 scan "Bare console.log in src/" 'console\.log\(' \
   --exclude=logger.js --exclude=remoteLogger.js
 
+# Reading `window.ui` outside the dev-helper that assigns it. That global
+# is set only under `import.meta.env.DEV`, and every call site was
+# optional-chained, so three context-menu actions and the double-click
+# token preview did nothing at all in a production build and said
+# nothing about it. Components take `ui` as a prop; map modules read
+# `mr._ui`, which MapCanvas assigns when it creates the renderer.
+scan "Reading the dev-only window.ui global" 'window\.ui\b' \
+  --exclude-dir=__tests__ --exclude=app.js --exclude=app-client.js --exclude=globals.d.ts
+
 # eval / new Function - use the AST evaluator at src/engine/evaluate.js
 # instead. Lint catches some, this catches the rest.
 scan "eval or new Function" '\beval\(|new Function\('
@@ -98,8 +107,8 @@ fi
 
 # Commit hashes in the docs that ship. The public repository is an
 # orphan branch whose history is one hand-written commit per release,
-# so no hash from this tree resolves there. CLAUDE.md, audits/ and
-# docs/superpowers/ stay behind and may cite whatever they like.
+# so no hash from this tree resolves there. The docs that stay behind
+# may cite whatever they like.
 # The root *.md glob is expanded here rather than handed to grep, so an
 # unmatched glob cannot masquerade as the grep failure below.
 shopt -s nullglob
@@ -107,7 +116,6 @@ rootmd=(./*.md)
 shopt -u nullglob
 commitref=$(grep -rnE '`[0-9a-f]{7,40}`|[Cc]ommit +[0-9a-f]{7,40}' \
   docs/ "${rootmd[@]}" --include='*.md' \
-  --exclude=CLAUDE.md --exclude-dir=superpowers \
   --exclude-dir=examples --exclude-dir=.vitepress) || commitstatus=$?
 commitstatus=${commitstatus:-0}
 if [ "$commitstatus" -ge 2 ]; then

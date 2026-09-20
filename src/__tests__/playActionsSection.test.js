@@ -55,17 +55,35 @@ describe('play_actions section', () => {
     expect(screen.queryByText('Common')).toBeNull();
   });
 
-  it('clicking an attack opens the attack modal with the right index', () => {
+  it('clicking an attack opens the attack modal with the attack itself', () => {
     const tokenId = 'tok-1';
     const tokens = new Map([[tokenId, { id: tokenId, sheet_id: 'c1' }]]);
     const ui = makeUi({ tokens });
-    const character = { id: 'c1', actions: [{ name: 'Shortsword', attack_bonus: 5, damage: '1d6+3' }] };
+    const shortsword = { name: 'Shortsword', attack_bonus: 5, damage: '1d6+3', damage_type: 'piercing' };
+    const character = { id: 'c1', actions: [shortsword] };
     render(_kindsForTest.play_actions({ ui, character, config }));
     fireEvent.click(screen.getByRole('button', { name: /shortsword/i }));
     expect(ui._showAttackModal).toHaveBeenCalled();
-    const [tid, idx] = ui._showAttackModal.mock.calls[0];
+    const [tid, attack] = ui._showAttackModal.mock.calls[0];
     expect(tid).toBe(tokenId);
-    expect(idx).toBe(0);
+    expect(attack).toEqual(shortsword);
+  });
+
+  // A filtered group indexes its own filtered array, so an index could never
+  // address character.actions - the modal has to receive the attack itself.
+  it('forwards the right attack when the group filter drops earlier actions', () => {
+    const tokenId = 'tok-1';
+    const tokens = new Map([[tokenId, { id: tokenId, sheet_id: 'c1' }]]);
+    const ui = makeUi({ tokens });
+    const character = { id: 'c1', actions: [
+      { name: 'Second Wind' },
+      { name: 'Longbow', attack_bonus: 7, damage: '1d8+4' },
+    ] };
+    render(_kindsForTest.play_actions({ ui, character, config }));
+    fireEvent.click(screen.getByRole('button', { name: /longbow/i }));
+    const [, attack] = ui._showAttackModal.mock.calls[0];
+    expect(attack.name).toBe('Longbow');
+    expect(attack.damage).toBe('1d8+4');
   });
 
   it('clicking a spell calls castSpell with the spell id and character id', () => {

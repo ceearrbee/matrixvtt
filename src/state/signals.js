@@ -26,6 +26,7 @@ export const wallsSignal = signal(new Map());
 export const lightsSignal = signal(new Map());
 export const mapsSignal = signal(new Map());
 export const pagesSignal = signal(new Map());
+export const assetsSignal = signal(new Map());
 
 export const fogSignal = signal(new Map());
 export const initiativeSignal = signal({ active: false, round: 0, current_index: 0, order: [] });

@@ -20,6 +20,8 @@ When a campaign archive is uploaded in the blank-campaign wizard, it takes prece
   "handouts":   [ { "id": "...", ... } ],
   "tables":     [ { "id": "...", ... } ],
   "pins":       [ { "id": "...", ... } ],
+  "walls":      [ { "id": "...", ... } ],
+  "templates":  [ { "id": "...", ... } ],
   "fog":        { "mode": "hidden", "revealed": [] },
   "initiative": { "active": false, "round": 0, "current_index": 0, "order": [] },
   "drawings":   [],
@@ -32,11 +34,31 @@ When a campaign archive is uploaded in the blank-campaign wizard, it takes prece
 | `version` | yes | Current `CAMPAIGN_FORMAT_VERSION = 1`. |
 | `exported_at` | yes | Unix ms timestamp; informational. |
 | `settings` | yes | Merged into session settings on import. See [Ruleset](/formats/ruleset) for the shape of `settings.systemConfig`. |
-| `maps[]`, `tokens[]`, `characters[]`, `npcs[]`, `items[]`, `spells[]`, `handouts[]`, `tables[]`, `pins[]` | arrays | Each entry must have a stable `id`. See [Data Model Spec](/DATA-MODEL-SPEC) for entity fields. |
+| `maps[]`, `tokens[]`, `characters[]`, `npcs[]`, `items[]`, `spells[]`, `handouts[]`, `tables[]`, `pins[]`, `walls[]`, `templates[]` | arrays | Each entry must have a stable `id`. See [Data Model Spec](/DATA-MODEL-SPEC) for entity fields. |
 | `fog` | yes | `{ mode: 'hidden' \| 'revealed', revealed: [[col,row], ...] }`. |
 | `initiative` | yes | Combat tracker state. |
 | `drawings[]` | yes | Array of stroke objects. |
 | `activeMapId` | yes | Must match an `id` in `maps[]`. |
+
+## Maps and their backgrounds
+
+A map entry carries whichever background it uses. An `image_url` or a
+`layers[]` stack holds `mxc://` URIs, which are scoped to the homeserver
+that stored them: importing that archive elsewhere keeps the link but
+the image will not resolve.
+
+A `background` descriptor has no such problem, because nothing was
+uploaded. `{ "kind": "tile", "tile": "cobble", "scale": 1 }` names a
+texture that ships with the app, and
+`{ "kind": "generated", "generator": "dungeon", "seed": "q6ttnj", ... }`
+names a layout any copy of MatrixVTT can paint from the seed. Those
+travel between homeservers intact, which makes them the portable way to
+share a map in an archive.
+
+The room's uploaded-media list (`assets`) is deliberately **not**
+exported. It is a convenience index of `mxc://` URIs that only the
+originating homeserver can serve, so carrying it into another room would
+import a list of dead links.
 
 ### Blank-campaign example
 

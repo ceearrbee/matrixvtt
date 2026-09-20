@@ -43,7 +43,7 @@ export const PUBLIC_SURFACE = {
 
   // Modals + panels (modal-wiring).
   modals: [
-    'openSettings', 'openMapsPanel',
+    'openSettings', 'openMapsPanel', 'showBringTokens',
     'showEntityForm', 'showEditCharacterForm', 'showAddNPCForm',
     'showTokenForm', 'showCharacterWizard',
     'showSpellForm', 'showItemForm', 'showEditItemForm',

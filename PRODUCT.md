@@ -1,8 +1,7 @@
 # MatrixVTT Product Context
 
-Strategic design context for UI work. The visual system lives in DESIGN.md and
-`.impeccable/design.json`; this file covers who the product serves and how it
-should feel. Sourced from the Design Context section of CLAUDE.md.
+Strategic design context for UI work. The visual system lives in DESIGN.md;
+this file covers who the product serves and how it should feel.
 
 ## Register
 

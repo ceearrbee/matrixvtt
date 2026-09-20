@@ -8,7 +8,7 @@
 
 import {
   tokensSignal, charactersSignal, npcsSignal, itemsSignal, spellsSignal,
-  handoutsSignal, tablesSignal, mapsSignal, pagesSignal, fogSignal, initiativeSignal,
+  handoutsSignal, tablesSignal, mapsSignal, pagesSignal, assetsSignal, fogSignal, initiativeSignal,
   settingsSignal, activeMapIdSignal, drawingsSignal, roomMembersSignal,
   pendingKnocksSignal,
   pinsSignal, templatesSignal, wallsSignal, lightsSignal,
@@ -60,6 +60,7 @@ export class StateManager {
     this.templates  = new ReactiveMap(templatesSignal);
     this.walls      = new ReactiveMap(wallsSignal);
     this.lights     = new ReactiveMap(lightsSignal);
+    this.assets     = new ReactiveMap(assetsSignal);
 
     // Metadata about sync progress and errors
     this.lastSentState = new Map();
@@ -219,6 +220,11 @@ export class StateManager {
   switchMap(id)               { return writer.switchMap(this, id); }
   createMap(config)           { return writer.createMap(this, config); }
   duplicateMap(id)            { return writer.duplicateMap(this, id); }
+
+  applyGeneratedWalls(mapId)  { return writer.applyGeneratedWalls(this, mapId); }
+
+  recordAsset(asset)          { return writer.recordAsset(this, asset); }
+  removeAsset(id)             { return writer.removeAsset(this, id); }
 
   updateFog(val)              { return writer.updateFog(this, val); }
 

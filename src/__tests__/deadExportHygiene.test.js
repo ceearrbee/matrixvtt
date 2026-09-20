@@ -73,9 +73,12 @@ describe('ui/MapForm.jsx', () => {
 });
 
 describe('knip.json', () => {
+  // `_public-surface.js` left the list once `uiCallSitesExist.test.js`
+  // began reading it to check call sites, which made it a real consumer
+  // rather than a file knip had to be told to overlook.
   it('no longer hides unused exports inside four live files', () => {
     const config = JSON.parse(read('knip.json'));
-    expect(config.ignore).toEqual(['src/utils/no-op.js', 'src/ui/_public-surface.js']);
+    expect(config.ignore).toEqual(['src/utils/no-op.js']);
   });
 });
 

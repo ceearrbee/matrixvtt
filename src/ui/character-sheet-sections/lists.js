@@ -304,7 +304,7 @@ export function PlayActions({ ui, character, config }) {
           'aria-label': `Use ${item.name}${subtitle ? ` (${subtitle})` : ''}`,
           title: subtitle,
           disabled: !tid,
-          onClick: () => tid && ui?._showAttackModal?.(tid, idx),
+          onClick: () => tid && ui?._showAttackModal?.(tid, item),
         }, [
           h('span', { class: 'action-btn__name' }, item.name),
           subtitle && h('span', { class: 'action-btn__sub' }, subtitle),

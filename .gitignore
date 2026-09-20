@@ -41,7 +41,6 @@ npm-debug.log*
 .clone/
 .clone/
 coverage/
-.claude/
 .codex
 .antigravitycli/
 
@@ -57,3 +56,9 @@ playwright/.cache/
 
 # Deploy artifacts from scripts/package.sh
 /release/
+
+# Generated background manifest + credits (rebuilt from public/backgrounds/
+# sources.json by scripts/build-backgrounds.mjs). The tiles themselves and
+# sources.json are committed - the pack is small enough to review in a diff.
+public/backgrounds/index.json
+public/backgrounds/LICENSE.txt

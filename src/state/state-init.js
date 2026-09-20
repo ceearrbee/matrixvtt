@@ -11,7 +11,7 @@ import { DEFAULTS } from '../utils/constants.js';
 import {
   tokensSignal, charactersSignal, npcsSignal, itemsSignal, spellsSignal,
   handoutsSignal, tablesSignal, pinsSignal, templatesSignal, wallsSignal,
-  lightsSignal, mapsSignal, pagesSignal, fogSignal, initiativeSignal, settingsSignal,
+  lightsSignal, mapsSignal, pagesSignal, assetsSignal, fogSignal, initiativeSignal, settingsSignal,
   activeMapIdSignal, drawingsSignal, roomMembersSignal, reactionsSignal,
 } from './signals.js';
 import { replyContextSignal } from './ui-signals.js';
@@ -30,6 +30,7 @@ export function resetSignals() {
   lightsSignal.value = new Map();
   mapsSignal.value = new Map();
   pagesSignal.value = new Map();
+  assetsSignal.value = new Map();
   settingsSignal.value = { gm_user_ids: [], name: DEFAULTS.CAMPAIGN_NAME, system: 'generic', grid_px: DEFAULTS.GRID_PX };
   activeMapIdSignal.value = null;
   fogSignal.value = new Map();

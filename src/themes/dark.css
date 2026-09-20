@@ -47,7 +47,8 @@
   --color-kind-fiction: #A78BDB;
   --color-kind-prep: var(--color-text-warning);
 
-  --color-grid-line: rgba(255, 255, 255, 0.08);
+  --color-grid-line: rgba(255, 255, 255, 0.22);
+  --color-grid-halo: rgba(0, 0, 0, 0.28);
   --color-area-reveal: rgba(74, 158, 255, 0.15);
   --color-area-hide: rgba(255, 107, 107, 0.15);
 

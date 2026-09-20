@@ -29,6 +29,7 @@ import { createUI } from './ui/ui-methods.js';
 import { ChatIntegrator } from './chat-integrator.js';
 import { DiceRoller } from './dice-roller.js';
 import { clientManagerHasSnapshot } from './utils/room-snapshot-probe.js';
+import { clearMediaSession } from './utils/media-cache.js';
 
 initRemoteLogging();
 
@@ -121,6 +122,7 @@ export class MatrixVTTClient {
     this.state?.destroy();
     this.chat?.destroy();
     this.clientManager?.destroy();
+    clearMediaSession();
     this.clientManager = this.state = this.ui = this.chat = this.diceRoller = window.ui = null;
   }
 }

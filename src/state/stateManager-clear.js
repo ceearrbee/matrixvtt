@@ -13,12 +13,12 @@
 
 import { resetSignals } from './state-init.js';
 
-const YJS_KEYED_MAPS = [
+export const YJS_KEYED_MAPS = [
   'tokensMap', 'charactersMap', 'npcsMap', 'itemsMap', 'spellsMap',
   'handoutsMap', 'tablesMap', 'pinsMap', 'templatesMap', 'wallsMap',
-  'lightsMap', 'mapsMap', 'pagesMap',
+  'lightsMap', 'mapsMap', 'pagesMap', 'assetsMap',
 ];
-const YJS_SINGLETON_MAPS = ['fogMap', 'initiativeMap', 'settingsMap'];
+export const YJS_SINGLETON_MAPS = ['fogMap', 'initiativeMap', 'settingsMap'];
 
 /**
  * Clear all local entity collections, plus optionally the Yjs Y.Maps

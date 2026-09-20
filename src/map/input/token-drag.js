@@ -8,7 +8,7 @@
  * (`'.tokenDrag'`) make the wiring idempotent - re-calling on the
  * same group cleanly replaces the prior bindings.
  *
- * Double-click / double-tap routes through `window.ui.previewToken`
+ * Double-click / double-tap routes through `mr._ui.previewToken`
  * so the same read-only preview popup the entity-list uses opens for
  * map tokens too. Single-click stays as the existing select-and-drag
  * affordance.
@@ -34,7 +34,7 @@ export function enableTokenDrag(group, mr, tokenId) {
   // dblclick / dbltap → preview popup. Wired even when the viewer
   // can't move the token (a player viewing an NPC still gets the
   // preview), so this binding lives outside the canMove gate.
-  const onDouble = () => window.ui?.previewToken?.(tokenId);
+  const onDouble = () => mr._ui?.previewToken?.(tokenId);
   group.on(`dblclick${NS}`, onDouble);
   group.on(`dbltap${NS}`, onDouble);
 

@@ -91,6 +91,7 @@ export function showMapContextMenu(mr, screenX, screenY, col, row) {
   if (!mr.state.isGM?.()) return null;
   const items = [
     { label: 'Add Token Here', action: () => mr.showAddTokenDialog?.(col, row) },
+    { label: 'Place Tokens Here…', action: () => mr._ui?.showBringTokens?.(col, row) },
     { label: 'Add Pin Here', action: () => mr.showPinForm?.(col, row) },
     { label: 'Toggle Fog Cell', action: () => mr._toggleSingleFogCell?.(col, row) },
     'separator',
@@ -138,7 +139,11 @@ export function showTokenContextMenu(mr, token, screenX, screenY) {
   // one click. Left-click selection is the bar's gesture.
 
   const items = [];
-  const ui = window.ui;
+  // The renderer has carried the controller as `_ui` since MapCanvas
+  // created it. This used to read the dev-only global instead, which is
+  // assigned only under import.meta.env.DEV, so Attack, the initiative
+  // items and Duplicate Token silently did nothing in a real build.
+  const ui = mr._ui;
 
   // Attack: non-owner player on their combat turn.
   if (!isGM && !isOwner && ui?._isMyCombatTurn?.() && mr.state.initiative?.active) {

@@ -10,6 +10,7 @@ import { EVENT_TYPES } from '../utils/constants.js';
 import { computeNewPowerLevels } from '../widget/capabilities.js';
 import { assertJoinRule } from '../utils/join-rules.js';
 import { logger } from '../utils/logger.js';
+import { accessTokenSignal, homeserverSignal, mediaDownloaderSignal } from '../state/ui-signals.js';
 
 export class ClientManager {
   constructor({ matrixClientClass = MatrixClient } = {}) {
@@ -30,6 +31,29 @@ export class ClientManager {
     this.serverCapabilities = null;
   }
 
+  /**
+   * Fetch `mxc://` media with this session's access token. Matrix 1.11
+   * moved downloads behind authentication and Synapse enforces it, so
+   * the URL cannot simply be handed to an `<img>`.
+   */
+  async downloadMedia(mxc) {
+    if (typeof mxc !== 'string' || !mxc.startsWith('mxc://')) return null;
+    const token = this.accessToken;
+    if (!token) return null;
+    const path = mxc.slice(6);
+    const base = this.homeserver || `https://${path.split('/')[0]}`;
+    const res = await fetch(`${base}/_matrix/client/v1/media/download/${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`media fetch failed: ${res.status}`);
+    return res.blob();
+  }
+
+  /** Hand the media cache this session's way of reading media. */
+  publishMediaDownloader() {
+    mediaDownloaderSignal.value = (mxc) => this.downloadMedia(mxc);
+  }
+
   get homeserver() { return this._client?.homeserver ?? null; }
   get accessToken() { return this._client?.accessToken ?? null; }
   get roomIdsSupported() { return true; }
@@ -42,6 +66,9 @@ export class ClientManager {
     this._client = new this._matrixClientClass({ homeserver, accessToken, userId });
     this.userId = userId;
     this.roomId = roomId;
+    homeserverSignal.value = this.homeserver;
+    accessTokenSignal.value = this.accessToken;
+    this.publishMediaDownloader();
   }
 
   /**

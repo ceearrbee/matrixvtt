@@ -43,7 +43,14 @@ describe('showMapContextMenu', () => {
     const mr = makeMr({ isGM: true });
     const menu = showMapContextMenu(mr, 100, 200, 3, 4);
     expect(menu).toBeTruthy();
-    expect(menu.querySelectorAll('[role="menuitem"]').length).toBe(5);
+    const labels = [...menu.querySelectorAll('[role="menuitem"]')].map((el) => el.textContent);
+    expect(labels.length).toBe(6);
+    // The same working-memory ceiling the token menu is held to.
+    expect(labels.length).toBeLessThanOrEqual(7);
+    expect(labels).toEqual(expect.arrayContaining([
+      expect.stringContaining('Add Token Here'),
+      expect.stringContaining('Place Tokens Here'),
+    ]));
     const addBtn = [...menu.querySelectorAll('[role="menuitem"]')]
       .find((el) => el.textContent.includes('Add Token Here'));
     addBtn.click();

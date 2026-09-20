@@ -29,6 +29,11 @@ export function buildCapabilities() {
   return [
     'org.matrix.msc2762.request.openid',
     'org.matrix.msc2931.navigate',
+    // MSC4039. A widget holds an OpenID token, not a client access
+    // token, so it can neither upload nor fetch authenticated media by
+    // itself. The host client does both on its behalf.
+    'org.matrix.msc4039.upload_file',
+    'org.matrix.msc4039.download_file',
     'org.matrix.msc3819.send.delayed_event',
     ...RECEIVABLE_STATE_TYPES.map((t) => `org.matrix.msc2762.receive.state_event:${t}`),
     ...SENDABLE_STATE_TYPES.map((t) => `org.matrix.msc2762.send.state_event:${t}`),

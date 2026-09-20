@@ -11,7 +11,7 @@ import { LIBRARY_KIND } from '../../utils/constants.js';
 import { previewSectionsFor } from '../preview/preview-modals.js';
 import { renderItemCardSections } from '../item-card-sections.js';
 import { renderSpellPreviewSections } from '../spell-preview-sections.js';
-import { resolveMediaUrl } from '../../utils/mxc.js';
+import { mediaSrc } from '../../utils/media-src.js';
 import { rulesetFacts, mapFacts, genericFacts } from './preview-facts.js';
 
 function FactGrid({ facts }) {
@@ -45,7 +45,7 @@ function previewBody(ui, entry) {
         fallback: genericFacts(data),
       });
     case LIBRARY_KIND.MAP: {
-      const src = resolveMediaUrl(data.image_url, ui.widgetManager?.homeserver);
+      const src = mediaSrc(data.image_url);
       return h('div', { class: 'library-preview__map' }, [
         src && h('img', { class: 'library-preview__thumb', src, alt: '', loading: 'lazy' }),
         h(FactGrid, { facts: mapFacts(data) }),
@@ -79,7 +79,7 @@ function formatUpdated(ts) {
 export function LibraryPreview({ ui, entry, sourceLabel = null }) {
   const data = entry.data || {};
   const portrait = entry.kind !== LIBRARY_KIND.MAP
-    ? resolveMediaUrl(data.image_url, ui.widgetManager?.homeserver)
+    ? mediaSrc(data.image_url)
     : null;
   const updated = formatUpdated(entry.updated_at);
   return h('div', { class: 'library-preview', 'data-library-preview': entry.id }, [

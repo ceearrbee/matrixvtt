@@ -49,7 +49,8 @@ When a player enters the room, a short welcome points them at the sheet panel: c
 
 Everything below syncs live to every player in the room:
 
-- **Map**: upload a battle map image from the GM tools, set the grid, and drop tokens for characters and monsters.
+- **Map**: give the map a background and drop tokens for characters and monsters. You can upload a battle map image, tile one of the bundled terrain textures, or generate a dungeon or cavern from a seed without uploading anything - see [Map Backgrounds](/guide/map-backgrounds).
+- **Moving between maps**: a new map starts empty. Right-click it and choose Place Tokens Here to bring the party and anything waiting for them across, keeping their HP and sheets. See [Map Backgrounds](/guide/map-backgrounds).
 - **Fog of war**: reveal areas as the party explores. Walls and lights control what token vision exposes.
 - **Initiative**: start combat to build an initiative order and step through turns; HP and conditions live on the tokens.
 - **Dice**: the dice bar rolls with one click, and rolls post to the room chat. Each ruleset brings its own dice (d20, dice pools, Fate dice, exploding dice).

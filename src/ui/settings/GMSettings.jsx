@@ -32,6 +32,26 @@ export function CampaignSettings({ ui, refs }) {
       h('input', { type: 'number', class: 'form-input', id: 'settings-grid', value: ui.state.settings.grid_px, min: 20, max: 100, ref: refs.grid }),
     ]),
     h('div', { class: 'form-group' }, [
+      h('label', { class: 'form-label' }, [
+        h('input', {
+          type: 'checkbox', id: 'settings-combat-follows-map', ref: refs.combatFollowsMap,
+          checked: ui.state.settings.combat_follows_map !== false,
+        }),
+        ' Combat follows the party between maps',
+      ]),
+      h('small', { class: 'settings-hint', 'data-hint-for': 'combat-follows-map' },
+        'On, the initiative order survives a map switch, so a running fight can move rooms. Off, switching maps ends combat.'),
+    ]),
+    h('div', { class: 'form-group' }, [
+      h('label', { class: 'form-label', for: 'settings-max-map-dim' }, 'Largest uploaded map (pixels)'),
+      h('input', {
+        type: 'number', class: 'form-input', id: 'settings-max-map-dim', ref: refs.maxMapDim,
+        value: ui.state.settings.max_map_dim || 2048, min: 512, max: 8192, step: 256,
+      }),
+      h('small', { class: 'settings-hint' },
+        'Map images are shrunk to this on the longest edge before upload. Lower it if your homeserver rejects large files.'),
+    ]),
+    h('div', { class: 'form-group' }, [
       h('label', { class: 'form-label', for: 'settings-grid-type' }, 'Grid Type'),
       h('select', { class: 'form-select', id: 'settings-grid-type', ref: refs.gridType, value: ui.state.settings.grid_type || 'square' }, [
         h('option', { value: 'square' }, 'Square'),

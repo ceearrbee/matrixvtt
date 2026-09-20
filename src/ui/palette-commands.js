@@ -78,6 +78,7 @@ export function buildPaletteCommands(ui, { isGM, combatActive, selectedToken = n
     add('hide-all', COMMAND_GROUPS.SCENE, 'Hide the whole map', () => ui.hideAllFog?.());
     add('add-token', COMMAND_GROUPS.SCENE, 'Add a token to the map', () => ui.beginTokenPlacement?.());
     add('maps', COMMAND_GROUPS.SCENE, 'Open the maps manager', () => ui.openMapsPanel?.());
+    add('bring-tokens', COMMAND_GROUPS.SCENE, 'Place tokens from another map on this one', () => ui.showBringTokens?.());
     // One per door on the map you are looking at: the trip is the
     // point of a travel pin, and right-click was its only path.
     for (const door of travelPinsOn(ui.state?.pins, ui.state?.activeMapId)) {

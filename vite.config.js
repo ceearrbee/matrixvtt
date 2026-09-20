@@ -87,7 +87,7 @@ function buildVersionMetaPlugin() {
 }
 
 /**
- * Dev-only: widen the CSP meta tag so the `/impeccable live` helper at
+ * Dev-only: widen the CSP meta tag so the local design-preview helper at
  * http://localhost:8400 can load its client script and be reached over
  * fetch. `apply: 'serve'` means this never runs for `vite build`, so the
  * committed HTML and the production CSP stay clean.

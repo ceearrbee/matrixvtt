@@ -6,6 +6,7 @@
  */
 import { h } from 'preact';
 import { showIconPicker } from '../icon-picker/IconPickerModal.jsx';
+import { mediaSrc } from '../../utils/media-src.js';
 
 export function PortraitUploader({ ui, portraitUrl, setPortraitUrl, uploading, onPortraitFile }) {
   const openLibrary = () => {
@@ -18,7 +19,7 @@ export function PortraitUploader({ ui, portraitUrl, setPortraitUrl, uploading, o
     h('label', { class: 'form-label', for: 'token-image-upload' }, 'Portrait (optional)'),
     portraitUrl && h('div', { class: 'token-portrait-preview', style: 'display:flex;align-items:center;gap:var(--space-lg);margin-bottom:var(--space-md);' }, [
       h('img', {
-        src: portraitUrl, alt: 'Portrait preview',
+        src: mediaSrc(portraitUrl), alt: 'Portrait preview',
         style: 'width:48px;height:48px;border-radius:50%;object-fit:contain;background:var(--color-background-secondary);border:1px solid var(--color-border-secondary);padding:var(--space-xs);',
       }),
       h('button', {

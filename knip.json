@@ -13,8 +13,7 @@
     "src/**/*.{js,jsx}"
   ],
   "ignore": [
-    "src/utils/no-op.js",
-    "src/ui/_public-surface.js"
+    "src/utils/no-op.js"
   ],
   "ignoreDependencies": [
     "matrix-widget-api",

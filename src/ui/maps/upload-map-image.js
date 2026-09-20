@@ -1,14 +1,18 @@
 /**
- * Uploading a map image, with the robustness the map form worked out:
+ * Uploading an image, with the robustness the map form worked out:
  * pre-shrink, ask before retrying smaller, and fall back to an
  * external URL.
  *
  * Extracted from the map form because the UVTT import needs the same
- * three layers for the image embedded in the file.
+ * three layers for the image embedded in the file, and token portraits
+ * turned out to need them too - that path went straight to uploadMedia
+ * and simply failed on a phone photo.
  */
 
 import { confirmAsync } from '../confirm-dialogs.jsx';
 import { resizeImageBlob } from '../../utils/image-resize.js';
+import { uploadAndRecord } from '../assets/upload-and-record.js';
+import { ASSET_KINDS } from '../../utils/constants.js';
 
 const DEFAULT_MAX_MAP_DIM = 2048;
 const DEFAULT_RESIZE_QUALITY = 0.9;
@@ -25,15 +29,26 @@ const DEFAULT_RESIZE_QUALITY = 0.9;
  * Returns the resulting `mxc://` URL on success, or `null` if the
  * GM declined the retry / a fatal error was already toasted.
  */
-export async function uploadMapImage(ui, file) {
+/**
+ * @param {object} ui
+ * @param {File|Blob} file
+ * @param {string} [kind] - one of ASSET_KINDS
+ * @returns {Promise<string|null>}
+ */
+export async function uploadImage(ui, file, kind = ASSET_KINDS.MAP) {
   const settings = ui.state?.settings ?? {};
   const initialMax = Number(settings.max_map_dim) > 0
     ? Number(settings.max_map_dim)
     : DEFAULT_MAX_MAP_DIM;
-  return _resizeAndUpload(ui, file, initialMax, /* retried */ false);
+  return _resizeAndUpload(ui, file, initialMax, /* retried */ false, kind);
 }
 
-async function _resizeAndUpload(ui, file, maxDim, retried) {
+/** @deprecated Prefer `uploadImage`; kept for the map and UVTT callers. */
+export function uploadMapImage(ui, file) {
+  return uploadImage(ui, file, ASSET_KINDS.MAP);
+}
+
+async function _resizeAndUpload(ui, file, maxDim, retried, kind) {
   let resized;
   try {
     resized = await resizeImageBlob(file, maxDim, DEFAULT_RESIZE_QUALITY);
@@ -44,10 +59,10 @@ async function _resizeAndUpload(ui, file, maxDim, retried) {
     resized = file;
   }
   try {
-    return await ui.widgetManager.uploadMedia(resized);
+    return await uploadAndRecord(ui, resized, kind, { name: file?.name });
   } catch (err) {
     if (retried || !_isTooLarge(err)) throw err;
-    return _retryAtSmallerCap(ui, file, maxDim);
+    return _retryAtSmallerCap(ui, file, maxDim, kind);
   }
 }
 
@@ -59,14 +74,14 @@ function _isTooLarge(err) {
       || /too large|413/i.test(err.message || '');
 }
 
-function _retryAtSmallerCap(ui, file, prevMax) {
+function _retryAtSmallerCap(ui, file, prevMax, kind) {
   return new Promise((resolve) => {
     const next = Math.max(512, Math.round(prevMax / 2));
     confirmAsync(
       `Image still too large for this homeserver after resizing to ${prevMax} px. ` +
       `Retry at ${next} px?`,
       async () => {
-        const url = await _resizeAndUpload(ui, file, next, /* retried */ true);
+        const url = await _resizeAndUpload(ui, file, next, /* retried */ true, kind);
         resolve(url);
       },
       {

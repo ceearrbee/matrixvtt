@@ -15,6 +15,8 @@ hero:
       text: Application
       link: /matrixvtt/
 features:
+  - title: Maps Without Uploads
+    details: Sixteen bundled CC0 terrain textures, and dungeon or cavern layouts generated from a seed. A generated map stores the seed, not the image, and can derive its own line-of-sight walls.
   - title: Content Import
     details: Supports import of campaigns, rulesets, characters, and NPCs.
   - title: Matrix Synchronization

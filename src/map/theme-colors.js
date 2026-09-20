@@ -12,6 +12,7 @@ export function readThemeColors() {
   return {
     mapFloor: read('--color-map-floor', '#1a2035'),
     gridLine: read('--color-grid-line', 'rgba(255, 255, 255, 0.08)'),
+    gridHalo: read('--color-grid-halo', 'rgba(0, 0, 0, 0.45)'),
     hpGood: read('--color-text-success', HP_COLORS.GOOD),
     hpWarn: read('--color-text-warning', HP_COLORS.WARN),
     hpDanger: read('--color-text-danger', HP_COLORS.DANGER),

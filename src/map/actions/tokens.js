@@ -62,7 +62,7 @@ export function removeToken(mr, tokenId) {
         if (mr.state.selectedToken === tokenId) mr.state.selectedToken = null;
         // Mid-combat removals must drop the initiative entry; otherwise
         // the next-turn cycle lands on a tombstoned token id.
-        await window.ui?.removeFromInitiative?.(tokenId);
+        await mr._ui?.removeFromInitiative?.(tokenId);
       } catch (e) {
         emitError('Failed to remove token', e);
       }

@@ -17,14 +17,31 @@ import { setTurnFlag } from './notify/tab-signal.js';
 import { announceMyTurn } from './notify/announce-turn.js';
 import { esc } from '../utils/domHelpers.js';
 import {
-  settingsSignal, initiativeSignal, charactersSignal,
+  settingsSignal, initiativeSignal, charactersSignal, activeMapIdSignal,
 } from '../state/signals.js';
+import { selectedTokenIdsSignal } from '../state/ui-signals.js';
+
+/**
+ * Token selection is per-map, but it lived in a signal nobody reset, so
+ * a marquee selection followed the GM onto the next map: "10 selected",
+ * a bulk action bar, and not one of them on screen.
+ */
+function _clearSelectionOnMapChange() {
+  let lastMapId = activeMapIdSignal.peek();
+  return effect(() => {
+    const mapId = activeMapIdSignal.value;
+    if (mapId === lastMapId) return;
+    lastMapId = mapId;
+    if (selectedTokenIdsSignal.peek().size > 0) selectedTokenIdsSignal.value = new Set();
+  });
+}
 
 export function registerStateEffects(ui) {
   const disposers = [
     _settingsEffect(ui),
     _charactersEffect(ui),
     _initiativeEffect(ui),
+    _clearSelectionOnMapChange(),
   ];
   return () => disposers.forEach((d) => d());
 }

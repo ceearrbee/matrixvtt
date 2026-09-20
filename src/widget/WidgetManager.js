@@ -30,6 +30,7 @@ import { createWidgetReadAdapter } from './widgetReadAdapter.js';
 import { attachWidgetYjs } from './widget-yjs.js';
 import { fetchUserIdFromOpenID } from './openid.js';
 import { EVENT_TYPES, VTT_EVENTS } from '../utils/constants.js';
+import { homeserverSignal, mediaDownloaderSignal } from '../state/ui-signals.js';
 
 export class WidgetManager {
   constructor() {
@@ -41,6 +42,10 @@ export class WidgetManager {
     this.isAppClient = false;
     this.homeserver = null;
     this.userIdResolved = false;
+    // MSC4039: the host uploads on the widget's behalf. Requested in
+    // buildCapabilities; a host that refuses it surfaces through the
+    // capability-denied probe rather than a dead button.
+    this.canUploadMedia = true;
 
     this._canEditCache = { value: null, expiry: 0 };
     // null = not yet probed; room-adapter's withRoomIdFallback sets it.
@@ -71,6 +76,7 @@ export class WidgetManager {
       if (missing.length > 0) {
         logger.error('WidgetManager', 'Required capabilities denied:', missing);
       }
+      this.publishMediaDownloader();
 
       await this.extractWidgetContext();
 
@@ -145,6 +151,7 @@ export class WidgetManager {
       const credentials = await this.widgetApi.requestOpenIDConnectToken();
       if (credentials?.access_token && credentials?.matrix_server_name) {
         this.homeserver = `https://${credentials.matrix_server_name}`;
+        homeserverSignal.value = this.homeserver;
 
         if (!this.userIdResolved) {
           const openIdUserId = await fetchUserIdFromOpenID(credentials);
@@ -245,12 +252,39 @@ export class WidgetManager {
     return setRoomDisplayName(this, displayName);
   }
 
+  /**
+   * Upload through the host client. This used to call
+   * `widgetApi.uploadMedia`, which is not a method on the widget API,
+   * so it threw on the rare occasion anything reached it.
+   */
   async uploadMedia(file) {
-    return /** @type {any} */ (this.widgetApi).uploadMedia(file);
+    const res = await /** @type {any} */ (this.widgetApi).uploadFile(file);
+    return res?.content_uri ?? null;
+  }
+
+  /**
+   * Fetch media through the host client, which holds the access token a
+   * widget is never given. Returns null when the host cannot, so the
+   * caller falls back rather than showing nothing.
+   */
+  async downloadMedia(mxc) {
+    const api = /** @type {any} */ (this.widgetApi);
+    if (typeof api?.downloadFile !== 'function') return null;
+    const res = await api.downloadFile(mxc);
+    return res?.file ?? null;
+  }
+
+  /**
+   * Hand the media cache a way to read `mxc://` through the host. Called
+   * once the widget API is attached.
+   */
+  publishMediaDownloader() {
+    mediaDownloaderSignal.value = (mxc) => this.downloadMedia(mxc);
   }
 
   destroy() {
     this._yjsTransport?.destroy();
+    mediaDownloaderSignal.value = null;
     this.widgetApi = null;
     this.vttApi = null;
   }

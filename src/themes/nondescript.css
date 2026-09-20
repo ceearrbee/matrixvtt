@@ -35,7 +35,8 @@
   --color-focus: #005FCC;
   --color-kind-fiction: var(--color-text-primary);
 
-  --color-grid-line: rgba(17, 17, 17, 0.08);
+  --color-grid-line: rgba(17, 17, 17, 0.22);
+  --color-grid-halo: rgba(255, 255, 255, 0.30);
   --color-area-reveal: rgba(17, 17, 17, 0.08);
   --color-area-hide: rgba(198, 40, 40, 0.12);
 
@@ -99,7 +100,8 @@
     --color-focus: #4DA6FF;
     --color-kind-fiction: var(--color-text-primary);
 
-    --color-grid-line: rgba(238, 238, 238, 0.08);
+    --color-grid-line: rgba(238, 238, 238, 0.22);
+    --color-grid-halo: rgba(0, 0, 0, 0.28);
     --color-area-reveal: rgba(238, 238, 238, 0.06);
     --color-area-hide: rgba(226, 75, 74, 0.15);
 

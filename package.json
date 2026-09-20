@@ -1,13 +1,13 @@
 {
   "name": "matrixvtt",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Production-ready virtual tabletop system built as a Matrix widget with fog of war, initiative tracking, and real-time multiplayer sync",
   "main": "src/app.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/build-icons.mjs && node scripts/build-pwa-icons.mjs",
-    "predev": "node scripts/build-icons.mjs && node scripts/build-pwa-icons.mjs",
+    "prebuild": "node scripts/build-icons.mjs && node scripts/build-pwa-icons.mjs && node scripts/build-backgrounds.mjs",
+    "predev": "node scripts/build-icons.mjs && node scripts/build-pwa-icons.mjs && node scripts/build-backgrounds.mjs",
     "icons:build": "node scripts/build-icons.mjs --force",
     "icons:pwa": "node scripts/build-pwa-icons.mjs --force",
     "build": "vite build",
@@ -37,7 +37,8 @@
     "check:ci": "npm run lint && bash scripts/scan-bad-patterns.sh && npm run knip && npm run typecheck && npm run test:coverage && npm run build && npm run test:smoke && npm run size && npm audit --audit-level=high --omit=dev && npm run docs:verify",
     "size": "size-limit",
     "prepare": "husky",
-    "package": "bash scripts/package.sh"
+    "package": "bash scripts/package.sh",
+    "backgrounds:build": "node scripts/build-backgrounds.mjs --force"
   },
   "lint-staged": {
     "{src,tests,scripts,docs/scripts,eslint-rules}/**/*.{js,jsx,mjs}": "eslint --max-warnings 0"

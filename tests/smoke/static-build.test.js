@@ -96,6 +96,17 @@ describe('static build - GitHub Pages base path', () => {
     expect(ogl).toContain('D6 Adventure (WEG 51011)');
   });
 
+  it('ships the background tiles with their credits, and every manifest entry resolves', () => {
+    const manifest = JSON.parse(readFileSync(resolve(DIST, 'backgrounds/index.json'), 'utf8'));
+    const credits = readFileSync(resolve(DIST, 'backgrounds/LICENSE.txt'), 'utf8');
+    expect(manifest.tiles.length).toBeGreaterThan(0);
+    for (const tile of manifest.tiles) {
+      expect(existsSync(resolve(DIST, `backgrounds/tiles/${tile.file}`)), tile.id).toBe(true);
+      expect(credits, tile.id).toContain(tile.source_url);
+    }
+    expect(credits).toContain('CC0-1.0');
+  });
+
   it('substitutes __BUILD_VERSION__ in sw.js so every deploy invalidates the shell cache', () => {
     const sw = readFileSync(resolve(DIST, 'sw.js'), 'utf8');
     expect(sw, 'sw.js still contains the __BUILD_VERSION__ placeholder').not.toMatch(/__BUILD_VERSION__/);

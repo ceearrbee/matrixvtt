@@ -36,6 +36,7 @@ import {
 } from './preview/preview-modals.js';
 import { previewToken as previewTokenFn } from './preview/preview-token.js';
 import { ENTITY_TYPES } from '../utils/constants.js';
+import { showBringTokensModal } from './BringTokensModal.jsx';
 
 export function attachModalMethods(ui) {
   // Top-level modals
@@ -43,6 +44,7 @@ export function attachModalMethods(ui) {
   // MapsPanel is lazy-loaded to keep the canvas-only bundles lean.
   ui.openMapsPanel = (selectedMapId = null) =>
     import('./MapsPanel.jsx').then((m) => m.openMapsPanel(ui, selectedMapId));
+  ui.showBringTokens = (col, row) => showBringTokensModal({ ui, col, row });
 
   // Character / NPC forms - two wrappers that force the entity type
   // keep callers from confusing PC/NPC paths.

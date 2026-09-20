@@ -53,6 +53,7 @@ export class YjsManager {
     this.templatesMap  = this.doc.getMap('templates');
     this.mapsMap       = this.doc.getMap('maps');
     this.pagesMap      = this.doc.getMap('pages');
+    this.assetsMap     = this.doc.getMap('assets');
     // Singleton-shaped types use Y.Map keyed by '' so bridge('map') reuses.
     this.fogMap        = this.doc.getMap('fog');
     this.initiativeMap = this.doc.getMap('initiative');
@@ -73,6 +74,7 @@ export class YjsManager {
     this.pins       = new YjsSignalBridge(this.pinsMap, 'map');
     this.templates  = new YjsSignalBridge(this.templatesMap, 'map');
     this.maps       = new YjsSignalBridge(this.mapsMap, 'map');
+    this.assets     = new YjsSignalBridge(this.assetsMap, 'map');
     this.pages      = new YjsSignalBridge(this.pagesMap, 'map');
     this.fog        = new YjsSignalBridge(this.fogMap, 'map');
     this.initiative = new YjsSignalBridge(this.initiativeMap, 'map');
@@ -187,6 +189,7 @@ export class YjsManager {
     this.templatesMap  = this.doc.getMap('templates');
     this.mapsMap       = this.doc.getMap('maps');
     this.pagesMap      = this.doc.getMap('pages');
+    this.assetsMap     = this.doc.getMap('assets');
     this.fogMap        = this.doc.getMap('fog');
     this.initiativeMap = this.doc.getMap('initiative');
     this.settingsMap   = this.doc.getMap('settings');
@@ -206,6 +209,7 @@ export class YjsManager {
     this.templates.rebind(this.templatesMap);
     this.maps.rebind(this.mapsMap);
     this.pages.rebind(this.pagesMap);
+    this.assets.rebind(this.assetsMap);
     this.fog.rebind(this.fogMap);
     this.initiative.rebind(this.initiativeMap);
     this.settings.rebind(this.settingsMap);

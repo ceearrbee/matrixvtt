@@ -1,6 +1,7 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { showIconPicker } from '../icon-picker/IconPickerModal.jsx';
+import { mediaSrc } from '../../utils/media-src.js';
 
 export function PortraitField({ initial = '' }) {
   const [url, setUrl] = useState(initial || '');
@@ -17,7 +18,7 @@ export function PortraitField({ initial = '' }) {
       h('div', {
         style: 'width:48px;height:48px;border-radius:50%;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;flex-shrink:0;',
       }, url
-        ? h('img', { src: url, alt: '', style: 'width:100%;height:100%;border-radius:50%;object-fit:contain;' })
+        ? h('img', { src: mediaSrc(url), alt: '', style: 'width:100%;height:100%;border-radius:50%;object-fit:contain;' })
         : h('span', { style: 'font-size:var(--font-size-xs);color:var(--color-text-tertiary);' }, 'None')),
       h('div', { style: 'display:flex;gap:var(--space-sm);align-items:center;flex-wrap:wrap;' }, [
         h('button', {

@@ -16,7 +16,7 @@ export default defineConfig({
 
     // Test file patterns
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['.clone/**', 'node_modules/**', '.claude/**', 'tests/smoke/**', 'tests/e2e/**'],
+    exclude: ['.clone/**', 'node_modules/**', 'tests/smoke/**', 'tests/e2e/**'],
 
     // Coverage configuration
     coverage: {

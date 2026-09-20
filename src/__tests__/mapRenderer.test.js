@@ -150,7 +150,7 @@ describe('MapRenderer - pointer click selects tokens via setupTools', () => {
     const { renderer, state } = makeRenderer();
     state.map = {
       image_url: null, width_cells: 10, height_cells: 10,
-      cell_px: DEFAULTS.GRID_PX, offset_x: 0, offset_y: 0,
+      cell_px: DEFAULTS.GRID_PX,
     };
     state.tokens.set('tok-1', { id: 'tok-1', col: 3, row: 2, name: 'Hero' });
     renderer.activeTool = 'pointer';
@@ -163,7 +163,7 @@ describe('MapRenderer - pointer click selects tokens via setupTools', () => {
     const { renderer, state } = makeRenderer();
     state.map = {
       image_url: null, width_cells: 10, height_cells: 10,
-      cell_px: DEFAULTS.GRID_PX, offset_x: 0, offset_y: 0,
+      cell_px: DEFAULTS.GRID_PX,
     };
     state.tokens.set('tok-1', { id: 'tok-1', col: 3, row: 2 });
     renderer.activeTool = 'pointer';
@@ -236,7 +236,7 @@ describe('MapRenderer - fog error handling', () => {
     onError = (e) => errors.push(e.detail);
     window.addEventListener(VTT_EVENTS.ERROR, onError);
     ({ renderer, state } = makeRenderer());
-    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX, offset_x: 0, offset_y: 0 };
+    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX };
     state.fog = { mode: 'hidden', revealed: [] };
     state.updateFog = vi.fn().mockRejectedValue(new Error('network fail'));
   });
@@ -271,7 +271,7 @@ describe('MapRenderer - showAddTokenDialog error handling', () => {
     onError = (e) => errors.push(e.detail);
     window.addEventListener(VTT_EVENTS.ERROR, onError);
     ({ renderer, state } = makeRenderer());
-    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX, offset_x: 0, offset_y: 0 };
+    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX };
     state.characters = new Map();
     state.npcs = new Map();
     state.widgetManager = { userId: '@test:server' };
@@ -364,7 +364,7 @@ describe('MapRenderer - _startFacingMode error handling', () => {
     onError = (e) => errors.push(e.detail);
     window.addEventListener(VTT_EVENTS.ERROR, onError);
     ({ renderer, state } = makeRenderer());
-    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX, offset_x: 0, offset_y: 0 };
+    state.map = { image_url: null, width_cells: 10, height_cells: 10, cell_px: DEFAULTS.GRID_PX };
     state.tokens.set('tok-1', { id: 'tok-1', col: 2, row: 2, conditions: [], facing: null });
   });
 

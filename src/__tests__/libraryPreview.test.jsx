@@ -3,16 +3,20 @@
  * the shared card renderers, maps as a thumbnail + facts, rulesets as a
  * fact grid, and everything else as a generic fact grid.
  */
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { h } from 'preact';
 import { render, cleanup } from '@testing-library/preact';
 import { LibraryPreview } from '../ui/library/LibraryPreview.jsx';
+import { homeserverSignal } from '../state/ui-signals.js';
 
 function makeUi() {
   return { widgetManager: { homeserver: 'https://hs' }, state: { settings: { systemConfig: {} } } };
 }
 
-afterEach(cleanup);
+// The homeserver behind an mxc thumbnail comes from the session signal
+// now, not a prop threaded down through every component.
+beforeEach(() => { homeserverSignal.value = 'https://hs'; });
+afterEach(() => { cleanup(); homeserverSignal.value = null; });
 
 describe('LibraryPreview', () => {
   it('shows the name, kind badge, and generic facts for an NPC', () => {

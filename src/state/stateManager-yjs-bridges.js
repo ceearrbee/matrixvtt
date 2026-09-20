@@ -16,10 +16,10 @@ import { fogSignal } from './signals.js';
 import { applySettings } from './syncer-apply.js';
 import { isGM } from './reader.js';
 
-const KEYED_COLLECTIONS = [
+export const KEYED_COLLECTIONS = [
   'tokens', 'characters', 'npcs', 'items', 'spells',
   'handouts', 'tables', 'walls', 'lights', 'pins', 'templates', 'maps',
-  'pages',
+  'pages', 'assets',
 ];
 
 export function wireYjsBridges(sm) {

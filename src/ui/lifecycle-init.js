@@ -297,7 +297,6 @@ function _removeCoreListeners(ui) {
   window.removeEventListener(VTT_EVENTS.VIEW_SHEET, ui.handleViewSheet);
   window.removeEventListener(VTT_EVENTS.ERROR, ui._onError);
   window.removeEventListener(VTT_EVENTS.SESSION_RESET, ui._onSessionReset);
-  ui._unbindKeyboardShortcuts?.();
 }
 
 function _removeSyncListeners(ui) {

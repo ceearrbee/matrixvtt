@@ -82,9 +82,20 @@ export async function revealFogAroundToken(sm, tokenId, radiusFeet) {
   }
 }
 
+/**
+ * Initiative is one global order, so by default a combat carries across
+ * a map switch: the strip keeps listing combatants who are no longer on
+ * the map, and End Turn can advance to one nobody can see. Whether that
+ * is right depends on the fiction, so `settings.combat_follows_map`
+ * lets the GM choose. Default true, which is the behaviour that
+ * shipped.
+ */
 export async function switchMap(sm, id) {
   requireGM(sm, 'switch maps');
   if (!sm.maps.has(id)) return;
+  if (sm.settings?.combat_follows_map === false && sm.initiative?.active) {
+    sm.yjs.initiativeMap.set('', { active: false, round: 0, current_index: 0, order: [] });
+  }
   // Through updateSettings so the resolved systemConfig never lands
   // in room state.
   return updateSettings(sm, { ...sm.settings, active_map_id: id });

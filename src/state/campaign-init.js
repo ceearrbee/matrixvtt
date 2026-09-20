@@ -35,7 +35,6 @@ export function initBlankCampaign(sm, campaignName = 'New Campaign', gameSystem 
     sm.yjs.mapsMap.set(mapId, {
       id: mapId, name: 'Empty Map', image_url: null,
       width_cells: 10, height_cells: 10, cell_px: 40,
-      offset_x: 0, offset_y: 0,
     });
   });
 }

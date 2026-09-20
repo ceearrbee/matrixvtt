@@ -127,6 +127,21 @@ npm run build           # Compile static assets to dist/
 npm run size            # Validate bundle size constraints
 ```
 
+`prebuild` and `predev` generate three sets of static assets before
+anything else runs. Each is idempotent and skips when it is already up
+to date, so only the first run pays for them:
+
+| Script | Produces | From |
+|---|---|---|
+| `npm run icons:build` | `public/icons/**` plus its manifest and licence roll, ~35 MB | the two game-icons.net zips at the repository root |
+| `npm run backgrounds:build` | `public/backgrounds/index.json` and `LICENSE.txt` | `public/backgrounds/sources.json` and the committed tiles |
+| (`build-pwa-icons.mjs`) | `public/icon-*.png` | `public/icon.svg` |
+
+The generated files are gitignored; the inputs are committed. The
+backgrounds script is also a gate: it refuses to build if a shipped
+terrain tile has no provenance row in `sources.json`, or names a licence
+outside the allowlist. `icons:build` needs `unzip` on `PATH`.
+
 Reference `docs/RELEASE-CHECKLIST.md` for pre-launch validation and `docs/SECURITY-NOTES.md` for audit documentation.
 
 ### Runtime Requirements

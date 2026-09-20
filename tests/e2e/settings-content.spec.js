@@ -48,10 +48,14 @@ test.describe('settings modal - API status panel', () => {
     await expect(page.getByText('MatrixVTT version')).toBeVisible();
   });
 
+  // Scoped to the About panel: "homeserver" also appears in the
+  // campaign settings hint about shrinking map uploads, and a bare text
+  // match resolved to both.
   test('shows the homeserver row when connected', async ({ page }) => {
     await openAbout(page);
-    await expect(page.getByText('Homeserver')).toBeVisible();
-    await expect(page.getByText('https://fake.matrix.test')).toBeVisible();
+    const about = page.locator('#settings-modal');
+    await expect(about.getByText('Homeserver', { exact: true })).toBeVisible();
+    await expect(about.getByText('https://fake.matrix.test')).toBeVisible();
   });
 
   test('shows the API status row', async ({ page }) => {

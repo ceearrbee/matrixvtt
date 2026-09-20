@@ -11,7 +11,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { signal } from '@preact/signals';
-import { wireYjsBridges } from '../state/stateManager-yjs-bridges.js';
+import { wireYjsBridges, KEYED_COLLECTIONS } from '../state/stateManager-yjs-bridges.js';
 
 function makeSubscriptionManager() {
   const active = new Map();
@@ -55,10 +55,9 @@ const EMPTY_KEYED = () => ({ ids: signal([]), get: () => null });
 function makeStateManager(tokensCollection) {
   const local = new Map();
   const subscriptionManager = makeSubscriptionManager();
-  const fields = [
-    'characters', 'npcs', 'items', 'spells', 'handouts', 'tables',
-    'walls', 'lights', 'pins', 'templates', 'maps', 'pages',
-  ];
+  // Derived from the real list: a new keyed collection used to break
+  // this file until someone remembered to copy it in here too.
+  const fields = KEYED_COLLECTIONS.filter((f) => f !== 'tokens');
   const sm = {
     subscriptionManager,
     tokens: local,

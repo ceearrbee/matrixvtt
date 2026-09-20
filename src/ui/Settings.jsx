@@ -125,6 +125,14 @@ function AboutSection({ ui, isGM, ops, onClose }) {
         '. ',
         h('a', { href: `${import.meta.env.BASE_URL}icons/LICENSE.txt`, target: '_blank', rel: 'noopener' }, 'Full credits.'),
       ]),
+      h('p', { class: 'editorial-body', style: 'font-size: 0.9em;' }, [
+        'Map background tiles from ',
+        h('a', { href: 'https://ambientcg.com', target: '_blank', rel: 'noopener' }, 'ambientCG'),
+        ', released ',
+        h('a', { href: 'https://creativecommons.org/publicdomain/zero/1.0/', target: '_blank', rel: 'noopener' }, 'CC0 1.0'),
+        '. ',
+        h('a', { href: `${import.meta.env.BASE_URL}backgrounds/LICENSE.txt`, target: '_blank', rel: 'noopener' }, 'Full credits.'),
+      ]),
     ]),
     h(SettingsAdvanced, { ui, ops, isGM, onClose }),
   ]);
@@ -137,6 +145,7 @@ function SettingsModal({ ui, ops, onClose, initialSection = null }) {
     // off, so the progress modal isn't stacked behind this one.
     close: onClose,
     name: useRef(null), system: useRef(null), grid: useRef(null), gridType: useRef(null), gms: useRef(null),
+    combatFollowsMap: useRef(null), maxMapDim: useRef(null),
     narrativeMode: useRef(null),
     annDamage: useRef(null), annCombat: useRef(null), annMap: useRef(null),
   };
@@ -167,6 +176,8 @@ function SettingsModal({ ui, ops, onClose, initialSection = null }) {
           systemConfig: ui.state.constructor.getGameSystemPresets()[selectedSystem],
           grid_px: parseInt(refs.grid.current.value),
           grid_type: refs.gridType.current?.value || 'square',
+          combat_follows_map: refs.combatFollowsMap.current?.checked !== false,
+          max_map_dim: parseInt(refs.maxMapDim.current?.value, 10) || 2048,
           gm_user_ids: gmUserIds,
           narrative_mode_override: narrativeMode === 'auto' ? undefined : narrativeMode,
         };

@@ -15,6 +15,7 @@
  */
 
 import { h } from 'preact';
+import { mediaSrc } from '../utils/media-src.js';
 
 function _hueFromName(name) {
   if (!name) return 200;
@@ -42,7 +43,7 @@ export function Avatar({ imageUrl = null, name = '', color = null, size = 32 }) 
       style: `width:${dim};height:${dim}`,
     }, h('img', {
       class: 'avatar__img',
-      src: imageUrl,
+      src: mediaSrc(imageUrl),
       alt: name || '',
       width: size,
       height: size,

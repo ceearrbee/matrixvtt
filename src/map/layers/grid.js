@@ -14,6 +14,13 @@ import { activeMapIdSignal, mapsSignal, settingsSignal } from '../../state/signa
 
 const SQRT3 = Math.sqrt(3);
 
+/**
+ * Fallback halo when a theme has not published one. Dark, because the
+ * themes that omit it are the dark ones, whose grid line is light.
+ */
+const DEFAULT_GRID_HALO = 'rgba(0, 0, 0, 0.28)';
+const HALO_WIDTH_PX = 2.5;
+
 export function createGridLayer(stage, mr) {
   const layer = new Konva.Layer({ listening: false });
   stage.add(layer);
@@ -36,22 +43,34 @@ export function createGridLayer(stage, mr) {
   return { layer, dispose, sync };
 }
 
+/**
+ * The grid line token is tuned to the app theme, which knows nothing
+ * about the image or tile the GM put underneath it: a pale tile under a
+ * dark theme left the grid invisible. So every line is drawn twice, a
+ * wider halo of the opposite polarity first and the themed line on top.
+ * Against a background that matches the theme the halo disappears and
+ * nothing looks different; against the opposite one the halo is what
+ * you read. Costs one extra stroke of an already-built path.
+ */
 export function paintGrid(ctx, mr) {
   const map = mr.state?.map;
   if (!map) return;
   const zoom = mr.zoom || 1;
-  ctx.strokeStyle = mr._colors?.gridLine || 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 1 / zoom;
 
   const gridType = mr.state?.settings?.grid_type;
-  if (gridType === 'hex_pointy' || gridType === 'hex_flat') {
-    paintHexGrid(ctx, map, gridType);
-    return;
-  }
-  paintSquareGrid(ctx, map);
+  if (gridType === 'hex_pointy' || gridType === 'hex_flat') buildHexGrid(ctx, map, gridType);
+  else buildSquareGrid(ctx, map);
+
+  ctx.strokeStyle = mr._colors?.gridHalo || DEFAULT_GRID_HALO;
+  ctx.lineWidth = HALO_WIDTH_PX / zoom;
+  ctx.stroke();
+
+  ctx.strokeStyle = mr._colors?.gridLine || 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 1 / zoom;
+  ctx.stroke();
 }
 
-function paintSquareGrid(ctx, map) {
+function buildSquareGrid(ctx, map) {
   ctx.beginPath();
   for (let c = 0; c <= map.width_cells; c++) {
     ctx.moveTo(c * map.cell_px, 0);
@@ -61,10 +80,9 @@ function paintSquareGrid(ctx, map) {
     ctx.moveTo(0, r * map.cell_px);
     ctx.lineTo(map.width_cells * map.cell_px, r * map.cell_px);
   }
-  ctx.stroke();
 }
 
-function paintHexGrid(ctx, map, orientation) {
+function buildHexGrid(ctx, map, orientation) {
   const size = map.cell_px;
   const w = map.width_cells * size;
   const hMap = map.height_cells * size;
@@ -94,7 +112,6 @@ function paintHexGrid(ctx, map, orientation) {
       }
     }
   }
-  ctx.stroke();
 }
 
 function hexPath(ctx, cx, cy, size, rot) {

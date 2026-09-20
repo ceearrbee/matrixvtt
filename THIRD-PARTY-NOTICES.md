@@ -104,3 +104,27 @@ builds, each licensed under the SIL Open Font License 1.1
 
 The OFL permits bundling and redistribution with software; the fonts are
 not sold separately.
+
+## Map background tiles (`public/backgrounds/tiles/`)
+
+The bundled seamless terrain textures come from **ambientCG**
+(https://ambientcg.com), which releases its entire library under the
+Creative Commons CC0 1.0 Universal public domain dedication
+(https://docs.ambientcg.com/license/, full text at
+https://creativecommons.org/publicdomain/zero/1.0/).
+
+CC0 imposes no attribution requirement. Each tile is credited anyway, in
+`public/backgrounds/sources.json` and in the generated
+`backgrounds/LICENSE.txt` that ships with every build, because recording
+where art came from is the only thing that keeps the claim checkable.
+`scripts/build-backgrounds.mjs` refuses to build if a shipped tile has no
+provenance row or names a licence outside the allowlist, and
+`src/__tests__/backgroundProvenance.test.js` gates the same rule in CI.
+
+Each file is the colour map of the named ambientCG material, resized to
+512x512 and re-encoded as WebP. No other map of the PBR set is bundled.
+
+The procedurally generated map layouts (`src/map/generators/`) are
+original to MatrixVTT and carry no third-party licence. They are painted
+with the tiles above when the textured style is chosen, and with flat
+palette colours otherwise.

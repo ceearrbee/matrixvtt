@@ -19,6 +19,7 @@ import { mapsSignal, activeMapIdSignal } from '../state/signals.js';
 import { MapsList } from './MapsList.jsx';
 import { MapFormPanel } from './MapForm.jsx';
 import { uploadMapImage } from './maps/upload-map-image.js';
+import { normaliseBackground } from '../map/background-source.js';
 
 
 function MapsPanelModal({ ui, initialSelectedId, onClose }) {
@@ -110,6 +111,21 @@ export function mapFormSchema() {
   });
 }
 
+/**
+ * The descriptor rides through the DOM as JSON because submitMapForm is
+ * DOM-driven and its signature is depended on by gm-wiring and the
+ * existing tests. A stale or hand-edited field must not take the save
+ * down with it, so anything unparseable is just no background.
+ */
+function readBackground(raw) {
+  if (!raw) return null;
+  try {
+    return normaliseBackground(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 export async function submitMapForm(ui, modal, selectedId) {
   const $ = (sel) => modal.querySelector(sel);
   const form = new FormReader(modal);
@@ -128,8 +144,11 @@ export async function submitMapForm(ui, modal, selectedId) {
     return false;
   }
 
-  let imageUrl = $('#map-url')?.value || null;
-  if ($('#map-source-type')?.value === 'upload') {
+  const sourceType = $('#map-source-type')?.value;
+  const background = sourceType === 'background' ? readBackground($('#map-background')?.value) : null;
+
+  let imageUrl = background ? null : ($('#map-url')?.value || null);
+  if (sourceType === 'upload') {
     const file = $('#map-upload')?.files?.[0];
     if (file) {
       try {
@@ -142,7 +161,7 @@ export async function submitMapForm(ui, modal, selectedId) {
     }
   }
 
-  const mapConfig = { ...data, image_url: imageUrl, layers, offset_x: 0, offset_y: 0 };
+  const mapConfig = { ...data, image_url: imageUrl, background, layers };
   try {
     if (!selectedId || selectedId === '__new__') await ui.state.createMap(mapConfig);
     else await ui.state.updateMap(selectedId, mapConfig);
