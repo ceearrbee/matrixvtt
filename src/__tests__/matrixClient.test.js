@@ -17,7 +17,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// ─── matrix-js-sdk mock ─────────────────────────────────────────────────────
+// matrix-js-sdk mock
 //
 // One stub client instance per test; `vi.mock` runs once at module load
 // and returns a fresh client from each `createClient` call so tests can
@@ -100,7 +100,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// ─── Lifecycle ──────────────────────────────────────────────────────────────
+// Lifecycle
 
 describe('lifecycle', () => {
   it('start() flips CONNECTING then CONNECTED on sync PREPARED', async () => {
@@ -144,7 +144,7 @@ describe('lifecycle', () => {
   });
 });
 
-// ─── Status listeners ───────────────────────────────────────────────────────
+// Status listeners
 
 describe('status listeners', () => {
   it('invokes the callback synchronously with the current status', () => {
@@ -177,7 +177,7 @@ describe('status listeners', () => {
   });
 });
 
-// ─── Auth error promotion ───────────────────────────────────────────────────
+// Auth error promotion
 
 describe('auth error', () => {
   it('Session.logged_out with M_UNKNOWN_TOKEN flips to AUTH_ERROR and emits VTT_EVENTS.ERROR', async () => {
@@ -263,7 +263,7 @@ describe('auth error', () => {
   });
 });
 
-// ─── sendVTTEvent dispatch ──────────────────────────────────────────────────
+// sendVTTEvent dispatch
 
 describe('sendVTTEvent dispatch', () => {
   it('throws when not CONNECTED', async () => {
@@ -298,7 +298,7 @@ describe('sendVTTEvent dispatch', () => {
   });
 });
 
-// ─── Coalesce throttle (tokens) ─────────────────────────────────────────────
+// Coalesce throttle (tokens)
 
 describe('coalesce throttle', () => {
   it('keeps the latest write per (room, type, stateKey)', async () => {
@@ -355,7 +355,7 @@ describe('coalesce throttle', () => {
   });
 });
 
-// ─── Stream throttle (drawings) ─────────────────────────────────────────────
+// Stream throttle (drawings)
 
 describe('stream throttle', () => {
   it('drains one entry per interval tick', async () => {
@@ -411,7 +411,7 @@ describe('stream throttle', () => {
   });
 });
 
-// ─── Room methods ───────────────────────────────────────────────────────────
+// Room methods
 
 describe('room methods', () => {
   it('getJoinedRooms unwraps joined_rooms', async () => {

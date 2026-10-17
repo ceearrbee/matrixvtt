@@ -8,12 +8,19 @@
  */
 
 import { h } from 'preact';
+import { signal } from '@preact/signals';
+
 import { initiativeSignal, tokensSignal } from '../state/signals.js';
+import { EmptyState } from './EmptyState.jsx';
 import { ENTITY_TYPES } from '../utils/constants.js';
 import { _kindsForTest as SHEET_KINDS } from './characterSheetSections.js';
 import { pairedSlotSection } from './attribute-pairing.js';
 import { DynamicAttributes } from './DynamicAttributes.jsx';
 import { opposedTargetFor, resolveOpposedRoll } from './combat/opposed-roll.js';
+import { InitiativeEntry } from './InitiativeEntry.jsx';
+import { getHPPercentage } from '../utils/ui-helpers.js';
+
+const expandedCombatTokenIdSignal = signal(null);
 
 const DEFAULT_ECONOMY = [
   { key: 'action_used', label: 'A', title: 'Action' },
@@ -57,14 +64,23 @@ export function CombatTab({ ui }) {
   initiativeSignal.value; tokensSignal.value;
   const { order, current_index, active, round } = ui.state.initiative;
 
+  const expandedTokenId = expandedCombatTokenIdSignal.value;
+  const onExpand = (tokenId) => {
+    expandedCombatTokenIdSignal.value = expandedCombatTokenIdSignal.value === tokenId ? null : tokenId;
+  };
+
+
+
+  const isGM = typeof ui?.state?.isGM === 'function' ? ui.state.isGM() : false;
+
   if (!active || !order?.length) {
-    return h('div', {
-      class: 'combat-tab-wrapper combat-tab-wrapper--empty',
-      style: 'padding:var(--space-xl);color:var(--color-text-secondary);font-size:var(--font-size-xs)',
-    }, 'Combat is not active.');
+    return h(EmptyState, {
+      title: 'Combat is not active.',
+      body: 'Start an encounter to track initiative and turns.',
+      cta: isGM && ui?.rollInitiative ? { label: 'Roll Initiative', onClick: () => ui.rollInitiative() } : null,
+    });
   }
 
-  const isGM = ui.state.isGM();
   const myTurn = ui._isMyCombatTurn();
   const canControl = isGM || myTurn;
   const entry = order[current_index];
@@ -80,17 +96,40 @@ export function CombatTab({ ui }) {
   const ruleset = ui.state.settings.systemConfig;
   const economy = ruleset?.action_economy ?? DEFAULT_ECONOMY;
 
+  const turnOrderSection = h('div', { class: 'combat-tab__order' }, [
+    h('div', { class: 'combat-section' }, 'Turn order'),
+    h('div', { class: 'initiative-entries', role: 'list' },
+      order.map((e, index) => h(InitiativeEntry, {
+        key: e.token_id,
+        ui,
+        entry: e,
+        index,
+        current_index,
+        isGM,
+        myTurn: myTurn && index === current_index,
+        actionEconomy: economy,
+        getHPPercentage,
+        isExpanded: expandedTokenId === e.token_id,
+        onExpand,
+      }))
+    ),
+  ]);
+
   if (!canControl) {
     return h('div', {
       class: 'combat-tab-wrapper combat-tab-wrapper--view-only',
       style: 'padding:var(--space-md)',
-    }, h(CurrentCard, { entry, token, round, myTurn }));
+    }, [
+      h(CurrentCard, { entry, token, round, myTurn }),
+      turnOrderSection,
+    ]);
   }
 
   const pairedSlots = pairedSlotSection(ruleset);
 
   return h('div', { class: 'combat-tab-wrapper', style: 'padding:var(--space-md)' }, [
     h(CurrentCard, { entry, token, round, myTurn }),
+    turnOrderSection,
     economy.length > 0 && h('div', { class: 'combat-section' }, 'Action economy'),
     economy.length > 0 && h('div', { class: 'combat-economy-row' },
       economy.map(ae => h('button', {

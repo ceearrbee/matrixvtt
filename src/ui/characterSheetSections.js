@@ -12,10 +12,9 @@
 
 import { h } from 'preact';
 import { dispatchSections } from './section-dispatcher.js';
-import { getPrivateNote, setPrivateNote } from '../utils/private-notes.js';
 import {
   ResourceTrack, StatGrid, Attributes, Saves, Conditions, Defenses, Notes,
-  StressBoxes, Aspects, Wounds, Personality,
+  StressBoxes, Aspects, Wounds, Personality, PrivateNotes,
 } from './character-sheet-sections/display.js';
 import {
   TaggedList, SlotList, BoxTrack, ResourcePool, ButtonAction, PendingModifiersList,
@@ -61,43 +60,7 @@ const KINDS = {
 // without going through the full sheet dispatcher. Not part of the
 // public surface - do not import from production code.
 export const _kindsForTest = KINDS;
-
-/**
- * Per-user private notes for the entity being viewed. Backed by
- * localStorage (truly private; never synced to Matrix). Renders an
- * editable textarea that saves on blur. Section header is always
- * visible - the textarea is empty for entities the user hasn't
- * annotated yet, which is the empty-state cue.
- */
-function PrivateNotes({ ui, character }) {
-  const userId = ui.state?.widgetManager?.userId
-    || ui.widgetManager?.userId
-    || ui.clientManager?.userId
-    || null;
-  const roomId = ui.widgetManager?.roomId
-    || ui.clientManager?.roomId
-    || ui.state?.roomId
-    || null;
-  const entityId = character?.id;
-  const initial = (userId && roomId && entityId)
-    ? getPrivateNote(userId, roomId, entityId)
-    : '';
-  const onBlur = (e) => {
-    if (!userId || !roomId || !entityId) return;
-    setPrivateNote(userId, roomId, entityId, e.target.value);
-  };
-  return h('div', { style: 'display:contents' }, [
-    h('div', { class: 'section-header' }, 'Your private notes'),
-    h('textarea', {
-      class: 'form-input',
-      style: 'width:100%; min-height: 60px; resize: vertical; font-family: var(--font-sans); font-size: var(--font-size-sm);',
-      placeholder: 'Just for you. Stored locally, never sent to other players or the server.',
-      defaultValue: initial,
-      onBlur,
-      'aria-label': 'Private notes (local only)',
-    }),
-  ]);
-}
+export { PrivateNotes };
 
 // Sections flagged `collapsed` in the ruleset (low-frequency reference
 // blocks like coinage / personality / notes) render inside a native
@@ -105,6 +68,7 @@ function PrivateNotes({ ui, character }) {
 // section renders its own `.section-header` inside; CSS hides that inner
 // header so the <summary> is the single visible label.
 function decorateSection(vnode, cfg, i) {
+  if (!vnode) return null;
   if (!cfg?.collapsed) return vnode;
   return h('details', { key: i, class: 'sheet-section-collapsible' }, [
     h('summary', { class: 'section-header' }, cfg.label ?? cfg.title ?? cfg.kind),

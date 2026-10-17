@@ -6,6 +6,7 @@ import { EVENT_TYPES } from '../../utils/constants.js';
 import { Modal } from '../../ui/Modal.jsx';
 import { openModal } from '../../ui/modal-host.js';
 import { enterRoom } from '../session.js';
+import { describeNetworkError } from '../../utils/errorHandling.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -148,7 +149,7 @@ function buildPreviewBody(preview) {
       ? `<div>GM: ${vtt.gmIds.map(escapeHtml).join(', ')}</div>`
       : '';
     campaign = `
-      <div style="margin: var(--space-xl) 0; padding: var(--space-lg); background: var(--surface, rgba(255,255,255,0.04)); border-radius: 6px;">
+      <div style="margin: var(--space-xl) 0; padding: var(--space-lg); background: var(--color-background-secondary); border-radius: 6px;">
         <div><strong>Campaign:</strong> ${escapeHtml(vtt.campaignName || '(unnamed)')}</div>
         <div><strong>System:</strong> ${escapeHtml(vtt.system || 'generic')}</div>
         ${gms}
@@ -226,7 +227,7 @@ export async function confirmAndEnterRoom(app, idOrAlias, displayName, forceWiza
     app.appLog.add('info', `  preview ok name="${preview?.name ?? ''}" notFound=${!!preview?.notFound}`);
   } catch (err) {
     app.appLog.add('error', `✗ preview failed: ${err.message}`);
-    app.setError('discovery-error', `Could not preview ${idOrAlias}: ${err.message}`);
+    app.setError('discovery-error', `Could not preview ${idOrAlias}: ${describeNetworkError(err)}`);
     return;
   }
   app.appLog.add('info', '  showing room-preview modal');

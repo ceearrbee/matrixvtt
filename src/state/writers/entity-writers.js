@@ -10,6 +10,7 @@ import { canMoveToken } from '../reader.js';
 import { segmentsIntersect } from '../../utils/geometry.js';
 import { revealFogAroundToken } from './world-writers.js';
 import { getCombatSettings } from '../../utils/combat-settings.js';
+import { VTTError, ErrorType } from '../../utils/errorHandling.js';
 
 export async function updateToken(sm, tokenId, token) {
   if (Object.keys(token).length === 0) {
@@ -81,14 +82,47 @@ function _crossesSolidWall(sm, token, newCol, newRow, cellPx) {
 // Every VTT entity type writes through its Y.Map. The Y.Map's observer
 // mirrors into sm[coll] via _wireYjsBridges, so consumers reading
 // sm.tokens / sm.characters / etc. see the change after the next tick.
+function _assertEntityWritePermission(sm, coll, id, action, value) {
+  const userId = sm.userId ?? sm.widgetManager?.userId;
+  const pl = sm.powerLevels;
+  if (!userId || !pl?.users || Object.keys(pl.users).length === 0) {
+    return;
+  }
+  const userPl = typeof pl.users[userId] === 'number'
+    ? pl.users[userId]
+    : (typeof pl.users_default === 'number' ? pl.users_default : 0);
+  if (userPl >= 50) return;
+
+  if (coll === 'npcs') {
+    throw new VTTError(ErrorType.PERMISSION, 'Denied: only GM can modify or delete NPCs');
+  }
+
+  if (coll === 'characters') {
+    const existing = sm.characters?.get(id) ?? sm.yjs?.charactersMap?.get(id);
+    if (existing) {
+      const owner = existing.player_user_id || existing.claimed_by_user_id;
+      if (!owner || owner !== userId) {
+        throw new VTTError(ErrorType.PERMISSION, 'Denied: cannot modify or delete unowned or another player character');
+      }
+    } else if (action === 'delete') {
+      throw new VTTError(ErrorType.PERMISSION, 'Denied: cannot delete unowned character');
+    } else if (value && value.player_user_id && value.player_user_id !== userId) {
+      throw new VTTError(ErrorType.PERMISSION, 'Denied: cannot create character for another player');
+    }
+  }
+}
+
 function _collectionUpsert(_coll, _type, yjsField) {
   return async function (sm, id, value) {
     sm.yjs[yjsField].set(id, value);
   };
 }
 
-function _collectionRemove(_coll, _type, yjsField) {
+function _collectionRemove(coll, _type, yjsField) {
   return async function (sm, id) {
+    if (coll === 'npcs' || coll === 'characters') {
+      _assertEntityWritePermission(sm, coll, id, 'delete');
+    }
     sm.yjs[yjsField].delete(id);
   };
 }
@@ -99,8 +133,11 @@ function _collectionRemove(_coll, _type, yjsField) {
 // on the sheet form leaves on-canvas tokens stuck on the old portrait.
 // One Y.Doc transaction = one bridge fire = one render frame for both
 // the sheet AND all bound tokens.
-function _sheetUpsert(yjsField) {
+function _sheetUpsert(yjsField, coll) {
   return async function (sm, id, value) {
+    if (coll === 'npcs' || coll === 'characters') {
+      _assertEntityWritePermission(sm, coll, id, 'update', value);
+    }
     sm.yjs.doc.transact(() => {
       sm.yjs[yjsField].set(id, value);
       const nextUrl = value?.image_url ?? null;
@@ -113,9 +150,9 @@ function _sheetUpsert(yjsField) {
   };
 }
 
-export const updateCharacter = _sheetUpsert('charactersMap');
+export const updateCharacter = _sheetUpsert('charactersMap', 'characters');
 export const deleteCharacter = _collectionRemove('characters', EVENT_TYPES.CHARACTER, 'charactersMap');
-export const updateNPC       = _sheetUpsert('npcsMap');
+export const updateNPC       = _sheetUpsert('npcsMap', 'npcs');
 export const deleteNPC       = _collectionRemove('npcs',       EVENT_TYPES.NPC,       'npcsMap');
 export const updateItem      = _collectionUpsert('items',      EVENT_TYPES.ITEM,      'itemsMap');
 export const deleteItem      = _collectionRemove('items',      EVENT_TYPES.ITEM,      'itemsMap');

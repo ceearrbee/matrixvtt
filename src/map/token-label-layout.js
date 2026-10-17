@@ -21,28 +21,80 @@
 /**
  * @param {TokenBox[]} tokens
  * @param {{
- *   labelHeight: number,
- *   labelWidthOf: (token: TokenBox) => number,
+ *   labelHeight?: number,
+ *   labelWidthOf?: (token: TokenBox) => number,
  *   gap?: number,
- * }} opts
+ *   obstacles?: { id?: string, x: number, y: number, w: number, h: number }[],
+ * } | { id?: string, x: number, y: number, w: number, h: number }[]} [optsOrObstacles]
+ * @param {{ id?: string, x: number, y: number, w: number, h: number }[]} [extraObstacles]
  * @returns {LabelAnchor[]}
  */
-export function layoutTokenLabels(tokens, opts) {
-  const { labelHeight, labelWidthOf, gap = 2 } = opts;
+export function layoutTokenLabels(tokens, optsOrObstacles = {}, extraObstacles = []) {
+  let labelHeight = 12;
+  let labelWidthOf = (t) => t.w;
+  let gap = 2;
+  let obstacles = [];
+
+  if (Array.isArray(optsOrObstacles)) {
+    obstacles = optsOrObstacles;
+  } else if (optsOrObstacles && typeof optsOrObstacles === 'object') {
+    if (optsOrObstacles.labelHeight !== undefined) labelHeight = optsOrObstacles.labelHeight;
+    if (optsOrObstacles.labelWidthOf !== undefined) labelWidthOf = optsOrObstacles.labelWidthOf;
+    if (optsOrObstacles.gap !== undefined) gap = optsOrObstacles.gap;
+    if (Array.isArray(optsOrObstacles.obstacles)) obstacles = optsOrObstacles.obstacles;
+  }
+  if (Array.isArray(extraObstacles) && extraObstacles.length > 0) {
+    obstacles = obstacles.concat(extraObstacles);
+  }
+
   /** @type {LabelAnchor[]} */
   const placed = [];
 
   for (const t of tokens) {
     const w = labelWidthOf(t);
     const centreX = t.x + t.w / 2;
-    let x = Math.round(centreX - w / 2);
-    let y = t.y - labelHeight - gap;
+    const x = Math.round(centreX - w / 2);
+    const yAbove = t.y - labelHeight - gap;
 
-    while (placed.some((p) => boxesOverlap(
-      { x, y, w, h: labelHeight },
-      { x: p.x, y: p.y, w: p.w, h: labelHeight },
-    ))) {
-      y -= labelHeight + gap;
+    const collidesWithObstacleOrToken = (box) => {
+      for (const other of tokens) {
+        if (other.id === t.id) continue;
+        const tokenCollisionBox = {
+          x: other.x,
+          y: other.y,
+          w: other.w,
+          h: other.h + 12,
+        };
+        if (boxesOverlap(box, tokenCollisionBox)) return true;
+      }
+      for (const obs of obstacles) {
+        if (obs.id === t.id) continue;
+        if (boxesOverlap(box, obs)) return true;
+      }
+      return false;
+    };
+
+    const collidesWithPlaced = (box) => {
+      return placed.some((p) => boxesOverlap(box, { x: p.x, y: p.y, w: p.w, h: labelHeight }));
+    };
+
+    let y = yAbove;
+    const candidateAbove = { x, y: yAbove, w, h: labelHeight };
+
+    if (collidesWithObstacleOrToken(candidateAbove)) {
+      const yBelow = t.y + t.h + 12 + gap;
+      const candidateBelow = { x, y: yBelow, w, h: labelHeight };
+      if (!collidesWithObstacleOrToken(candidateBelow) && !collidesWithPlaced(candidateBelow)) {
+        y = yBelow;
+      } else {
+        while (collidesWithPlaced({ x, y, w, h: labelHeight }) || collidesWithObstacleOrToken({ x, y, w, h: labelHeight })) {
+          y -= labelHeight + gap;
+        }
+      }
+    } else {
+      while (collidesWithPlaced({ x, y, w, h: labelHeight })) {
+        y -= labelHeight + gap;
+      }
     }
 
     placed.push({ id: t.id, x, y, w });

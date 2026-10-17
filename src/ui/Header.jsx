@@ -23,6 +23,7 @@ import { useState, useCallback } from 'preact/hooks';
 import { VTT_EVENTS, UI_MODES } from '../utils/constants.js';
 import { labelFor } from './mode-registry.js';
 import { confirmKick, confirmBan } from './destructive-actions.js';
+import { normalizeEmDashes } from '../utils/format.js';
 import { syncOkSignal, tablePhaseSignal, queueCountSignal, gmPrepActiveSignal, layoutModeSignal } from '../state/ui-signals.js';
 import { LAYOUT_MODES } from '../utils/constants.js';
 import { syncChipText } from './sync-chip.js';
@@ -52,19 +53,21 @@ function PresenceBadge({ ui, isGM }) {
     setOpen(o => !o);
   };
 
-  return h('div', {
-    class: 'presence-badge',
-    tabindex: 0,
-    role: 'button',
-    'aria-label': `${members.length} online`,
-    'aria-expanded': String(open),
-    onClick: toggle,
-    onKeyDown: toggle,
-  }, [
-    h('span', { class: 'presence-dot', 'aria-hidden': 'true' }),
-    `${members.length} online`,
-    inCall > 0 && h('span', { class: 'presence-badge__call' }, [
-      ' · ', h(MicIcon, {}), ` ${inCall}`,
+  return h('div', { class: 'presence-badge' }, [
+    h('button', {
+      type: 'button',
+      class: 'presence-badge__trigger',
+      style: 'background:none;border:none;padding:0;font:inherit;color:inherit;',
+      'aria-label': `${members.length} online`,
+      'aria-expanded': String(open),
+      onClick: toggle,
+      onKeyDown: toggle,
+    }, [
+      h('span', { class: 'presence-dot', 'aria-hidden': 'true' }),
+      `${members.length} online`,
+      inCall > 0 && h('span', { class: 'presence-badge__call' }, [
+        ' · ', h(MicIcon, {}), ` ${inCall}`,
+      ]),
     ]),
     h('div', { class: `presence-popover${open ? ' open' : ''}`, role: 'list' },
       members.map(m => h(MemberRow, { m, isMe: m.userId === myUserId, isGM, gmIds, ui, key: m.userId }))),
@@ -74,23 +77,24 @@ function PresenceBadge({ ui, isGM }) {
 function MemberRow({ m, isMe, isGM, gmIds, ui }) {
   const showActions = isGM && !isMe;
   const stop = (fn) => (e) => { e.stopPropagation(); fn(); };
+  const memberName = normalizeEmDashes(m.displayname || m.userId);
   return h('div', { class: 'presence-member' }, [
     h('span', { class: 'presence-member__name' }, [
       gmIds.has(m.userId) ? h(StarIcon, {}) : '',
       m.inCall && h(MicIcon, {}),
       m.inCall ? ' ' : '',
-      m.displayname || m.userId,
+      memberName,
     ]),
     showActions && h('div', { class: 'presence-member__actions' }, [
       h('button', {
         class: 'dbt dbt--compact',
-        title: `Kick ${m.displayname || m.userId} from room`,
+        title: `Kick ${memberName} from room`,
         'aria-label': 'Kick user',
         onClick: stop(() => confirmKick(ui, m.userId, m.displayname)),
       }, h(KickIcon, {})),
       h('button', {
         class: 'dbt dbt--compact',
-        title: `Ban ${m.displayname || m.userId} from room`,
+        title: `Ban ${memberName} from room`,
         'aria-label': 'Ban user',
         style: 'color:var(--color-text-danger)',
         onClick: stop(() => confirmBan(ui, m.userId, m.displayname)),
@@ -117,9 +121,11 @@ export function Header({
 
   // Single status surface for the table phase (the old center pill
   // duplicated this). Non-possessive actor name so it localizes.
-  const subtitle = active && order?.length > 0
+  const rawSubtitle = active && order?.length > 0
     ? `Round ${round} · ${order[current_index]?.name || '-'}`
     : phase === UI_MODES.COMBAT ? 'Combat staged' : 'No combat';
+  const subtitle = normalizeEmDashes(rawSubtitle);
+  const title = normalizeEmDashes(name || '');
 
   const returnToRooms = useCallback(
     () => window.dispatchEvent(new CustomEvent(VTT_EVENTS.RETURN_TO_ROOMS)),
@@ -137,44 +143,54 @@ export function Header({
         onClick: onToggleChannels,
       }, h(MenuIcon, {})),
       h('div', { class: 'vtt-header__titles' }, [
-        h('h1', { class: 'vtt-header__title' }, name),
-        h('span', { class: 'vtt-header__subtitle' }, subtitle),
+        h('h1', { class: 'vtt-header__title' }, title),
+        h('span', { class: `vtt-header__subtitle${rawSubtitle === 'No combat' ? ' vtt-header__subtitle--idle' : ''}` }, subtitle),
       ]),
     ]),
     h('div', { class: 'vtt-header__right' }, [
       h(PresenceBadge, { ui, isGM }),
-      isGM && h('button', {
-        type: 'button',
-        class: `dbt${prepActive ? ' dbt--active' : ''}`,
-        id: 'gm-prep-btn',
-        title: `${HELP_TERMS.prep.short} Alt+P.`,
-        'aria-label': 'Toggle the GM prep workspace',
-        'aria-pressed': String(prepActive),
-        onClick: () => setGmPrep(ui.widgetManager?.userId, ui.widgetManager?.roomId, !prepActive),
-      }, [
-        h(WrenchIcon, {}),
-        !iconMode && h('span', { class: 'dbt__label' }, ' Prep'),
-      ]),
-      isGM && prepActive && h(HelpIcon, { term: 'prep', label: 'What the prep workspace is' }),
-      // Authoring entries are disclosed on intent: they appear with the
-      // prep workspace rather than sitting in the header all session.
-      isGM && prepActive && h('button', {
-        type: 'button',
-        class: 'dbt',
-        id: 'gm-controls-btn',
-        title: 'GM tools', 'aria-label': 'Open GM tools',
-        onClick: () => openGMPanelModal(ui),
-      }, 'GM'),
-      isGM && prepActive && h('button', {
-        type: 'button',
-        class: 'dbt',
-        id: 'new-entity-btn',
-        title: 'Create new (character, NPC, item, spell, map, scene, handout...)',
-        'aria-label': 'Create new',
-        onClick: () => openNewMenu(ui),
-      }, [
-        h(PlusIcon, {}),
-        !iconMode && h('span', { class: 'dbt__label' }, ' New'),
+      isGM && h('div', { class: 'vtt-header__gm-cluster', role: 'group', 'aria-label': 'GM controls' }, [
+        h('button', {
+          type: 'button',
+          class: `dbt${prepActive ? ' dbt--active' : ''}`,
+          id: 'gm-prep-btn',
+          'data-table-mode': prepActive ? 'prep' : 'live',
+          title: `${HELP_TERMS.prep.short} Alt+P.`,
+          'aria-label': 'Toggle the GM prep workspace',
+          'aria-pressed': String(prepActive),
+          onClick: () => setGmPrep(ui.widgetManager?.userId, ui.widgetManager?.roomId, !prepActive),
+        }, [
+          h(WrenchIcon, {}),
+          !iconMode && h('span', { class: 'dbt__label' }, ' Prep'),
+        ]),
+        h('button', {
+          type: 'button',
+          id: 'table-mode-btn',
+          style: 'display: none;',
+          'aria-hidden': 'true',
+          onClick: () => setGmPrep(ui.widgetManager?.userId, ui.widgetManager?.roomId, !prepActive),
+        }),
+        prepActive && h(HelpIcon, { term: 'prep', label: 'What the prep workspace is' }),
+        // Authoring entries are disclosed on intent: they appear with the
+        // prep workspace rather than sitting in the header all session.
+        prepActive && h('button', {
+          type: 'button',
+          class: 'dbt',
+          id: 'gm-controls-btn',
+          title: 'GM tools', 'aria-label': 'Open GM tools',
+          onClick: () => openGMPanelModal(ui),
+        }, 'GM'),
+        prepActive && h('button', {
+          type: 'button',
+          class: 'dbt',
+          id: 'new-entity-btn',
+          title: 'Create new (character, NPC, item, spell, map, scene, handout...)',
+          'aria-label': 'Create new',
+          onClick: () => openNewMenu(ui),
+        }, [
+          h(PlusIcon, {}),
+          !iconMode && h('span', { class: 'dbt__label' }, ' New'),
+        ]),
       ]),
       (() => {
         // Read .value here so both signals subscribe this component.
@@ -182,6 +198,7 @@ export function Header({
         const queued = queueCountSignal.value;
         const label = syncChipText(ok, queued);
         return h('button', {
+          type: 'button',
           class: `dbt ${ok ? 'dbt--active' : 'dbt--warning'}`,
           'data-sync-status': true,
           title: 'Connection status - click for sync details',
@@ -193,12 +210,23 @@ export function Header({
         ]);
       })(),
       ui.widgetManager?.canLeave && h('button', {
+        type: 'button',
         class: 'dbt',
         id: 'back-to-rooms-btn-header',
         title: 'Return to room list',
         'aria-label': 'Return to room list',
         onClick: returnToRooms,
       }, [h(LeaveIcon, {}), !iconMode && h('span', { class: 'dbt__label' }, ' Rooms')]),
+      h('button', {
+        type: 'button',
+        class: 'tb-btn',
+        'aria-label': 'Keyboard shortcuts',
+        title: 'Keyboard shortcuts (?)',
+        onClick: () => {
+          if (typeof ui?.['showKeyboardHelp'] === 'function') ui['showKeyboardHelp']();
+          else import('./keyboard-help.js').then((m) => m.showKeyboardHelp());
+        },
+      }, '?'),
       onToggleSheet && h('button', {
         type: 'button',
         class: 'shell__mobile-toggle shell__mobile-toggle--sheet',

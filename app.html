@@ -37,11 +37,11 @@
   </noscript>
   <link rel="stylesheet" href="src/styles.css">
   <style>
-    /* ── Typography tokens (only used inside .standalone-shell) ───────────── */
+    /* Typography tokens (only used inside .standalone-shell) */
     .standalone-shell {
       --font-headline: 'Work Sans', system-ui, -apple-system, sans-serif;
     }
-    /* ── Screen visibility ──────────────────────────────────────────────────── */
+    /* Screen visibility */
     /* `.screen.active` is kept as a fallback for the VTT branch only. The
        non-VTT screens now sit inside `.standalone-main` and use the shell
        grid for layout instead of flex-centering each card. */
@@ -49,7 +49,7 @@
     .screen.active { display: block; }
     #screen-vtt.active { display: block; min-height: unset; }
 
-    /* ── Standalone shell (sidebar + main) ────────────────────────────────── */
+    /* Standalone shell (sidebar + main) */
     .standalone-shell {
       display: grid;
       grid-template-columns: 450px 1fr;
@@ -207,7 +207,7 @@
       text-decoration: underline;
     }
 
-    /* ── Auth card (sits inside .standalone-main) ─────────────────────────── */
+    /* Auth card (sits inside .standalone-main) */
     .auth-card {
       width: 100%;
       max-width: 560px;
@@ -251,7 +251,8 @@
       color: var(--color-text-primary);
     }
     .auth-card input:focus {
-      outline: none;
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
       border-color: var(--color-text-primary);
     }
     .auth-card details { margin: 12px 0 4px; }
@@ -320,7 +321,7 @@
     }
     #register-back { width: 100%; margin-top: 12px; padding: 10px; }
 
-    /* ── Session cards ──────────────────────────────────────────────────────── */
+    /* Campaign cards */
     .session-card {
       display: flex;
       align-items: center;
@@ -369,7 +370,7 @@
     }
     .new-server-link:hover { text-decoration: underline; }
 
-    /* ── Discovery card ───────────────────────────────────────────────────── */
+    /* Discovery card */
     .discovery-card {
       width: 100%;
       max-width: 800px;
@@ -466,11 +467,11 @@
       padding: 10px 0;
     }
 
-    /* ── New session form ───────────────────────────────────────────────────── */
+    /* New campaign form */
     .new-session-form { display: flex; gap: 8px; margin: 8px 0; align-items: stretch; }
     .new-session-form .form-input { flex: 1; padding: 6px 10px; min-width: 0; }
     .new-session-form .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
-    .new-session-divider { font-size: 0.8em; color: var(--text-muted, #888); margin: 6px 0 2px; text-align: center; }
+    .new-session-divider { font-size: 0.8em; color: var(--color-text-secondary); margin: 6px 0 2px; text-align: center; }
     .create-room-form { display: flex; gap: 8px; margin: 8px 0; align-items: stretch; }
     .create-room-form .form-input { flex: 1; padding: 6px 10px; min-width: 0; }
     .create-room-form .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
@@ -478,7 +479,7 @@
     .inspector-panel .form-input { padding: 6px 10px; min-width: 0; }
     .inspector-panel .dbt { padding: 6px 14px; width: auto; flex: 0 0 auto; margin-top: 0; }
 
-    /* ── Mobile: collapse the sidebar above the main pane ─────────────────── */
+    /* Mobile: collapse the sidebar above the main pane */
     @media (max-width: 768px) {
       .standalone-shell {
         grid-template-columns: 1fr;
@@ -499,7 +500,7 @@
       }
     }
 
-    /* ── Auth notices (beta disclosure, probe/storage hints) ──────────────── */
+    /* Auth notices (beta disclosure, probe/storage hints) */
     .auth-beta-notice {
       font-size: 0.85em;
       line-height: 1.5;
@@ -555,7 +556,7 @@
       color: var(--color-text-primary);
     }
 
-    /* ── VTT leave button - replaced by in-header button, kept hidden ──────── */
+    /* VTT leave button - replaced by in-header button, kept hidden */
     #leave-room-btn { display: none !important; }
 
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }

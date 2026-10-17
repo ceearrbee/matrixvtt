@@ -19,7 +19,7 @@ import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 const ROOT = resolve(import.meta.dirname, '../..');
-const ENTRIES = ['index.html', 'app.html'];
+const ENTRIES = ['index.html', 'index-production.html', 'app.html'];
 const FONTS_DIR = resolve(ROOT, 'public/fonts');
 
 const WOFF2_FILES = [

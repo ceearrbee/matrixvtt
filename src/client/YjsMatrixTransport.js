@@ -21,6 +21,7 @@ import {
 import { isRateLimitError } from '../utils/matrixRetry.js';
 import { VTT_EVENTS } from '../utils/constants.js';
 import { logger } from '../utils/logger.js';
+import { bytesToBase64, base64ToBytes } from '../state/snapshot-chunks.js';
 
 const DRAIN_BASE_MS = 2000;
 const DRAIN_MAX_MS = 30000;
@@ -175,17 +176,20 @@ export class YjsMatrixTransport {
     const { type, content } = event;
     
     if (type === YJS_EVENT_TYPES.UPDATE) {
+      const data = this._base64ToUint8(content?.data);
+      if (!data || data.length === 0) return;
       this.yjsManager.handleMatrixUpdate({
         sequenceId: content.seq,
         index: content.idx,
         total: content.total,
-        data: this._base64ToUint8(content.data),
+        data,
         timestamp: event.origin_server_ts,
       });
     } else if (type === YJS_EVENT_TYPES.SYNC_VECTOR) {
-      const vector = this._base64ToUint8(content.vector);
+      const vector = this._base64ToUint8(content?.vector);
+      if (!vector || vector.length === 0) return;
       this.yjsManager.compareStateVector(vector);
-      this._handlePeerVector(event.sender, content.vector, vector);
+      this._handlePeerVector(event.sender, content?.vector, vector);
     }
   }
 
@@ -320,11 +324,16 @@ export class YjsMatrixTransport {
   }
 
   _uint8ToBase64(arr) {
-    return btoa(String.fromCharCode.apply(null, arr));
+    return bytesToBase64(arr);
   }
 
   _base64ToUint8(str) {
-    return new Uint8Array(atob(str).split('').map(c => c.charCodeAt(0)));
+    try {
+      if (typeof str !== 'string') return null;
+      return base64ToBytes(str);
+    } catch {
+      return null;
+    }
   }
 
   destroy() {

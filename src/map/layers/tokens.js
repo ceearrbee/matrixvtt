@@ -41,25 +41,32 @@ export function getActiveCombatantRingAlpha(t) {
 }
 
 export function panToToken(mr, tokenId) {
-  const t = mr.state.tokens.get(tokenId);
+  const t = mr.state?.tokens?.get?.(tokenId);
   if (!t) return;
-  const px = mr.state.map?.cell_px || 40;
-  const tx = t.x !== undefined ? t.x : (t.col + 0.5) * px;
-  const ty = t.y !== undefined ? t.y : (t.row + 0.5) * px;
+  const px = Number.isFinite(mr.state?.map?.cell_px) && mr.state.map.cell_px > 0 ? mr.state.map.cell_px : 40;
+  const col = Number.isFinite(t.col) ? t.col : 0;
+  const row = Number.isFinite(t.row) ? t.row : 0;
+  const rawTx = t.x !== undefined ? t.x : (col + 0.5) * px;
+  const rawTy = t.y !== undefined ? t.y : (row + 0.5) * px;
+  const tx = Number.isFinite(rawTx) ? rawTx : 0;
+  const ty = Number.isFinite(rawTy) ? rawTy : 0;
+  const zoom = Number.isFinite(mr.zoom) && mr.zoom > 0 ? mr.zoom : 1;
   const canvasW = mr.stage?.width() ?? mr.canvas?.clientWidth ?? mr.canvas?.width ?? 800;
   const canvasH = mr.stage?.height() ?? mr.canvas?.clientHeight ?? mr.canvas?.height ?? 600;
-  mr.panX = canvasW / 2 - tx * mr.zoom;
-  mr.panY = canvasH / 2 - ty * mr.zoom;
+  mr.panX = canvasW / 2 - tx * zoom;
+  mr.panY = canvasH / 2 - ty * zoom;
   mr.render();
 }
 
 export function facingArrowEnd({ x, y, radius, facing }) {
-  if (facing === null || facing === undefined) return null;
-  const reach = radius + ARROW_OVERHANG_PX;
-  return {
-    x: x + Math.cos(facing) * reach,
-    y: y + Math.sin(facing) * reach,
-  };
+  if (facing === null || facing === undefined || !Number.isFinite(facing)) return null;
+  const reach = (Number.isFinite(radius) ? radius : 18) + ARROW_OVERHANG_PX;
+  const bx = Number.isFinite(x) ? x : 0;
+  const by = Number.isFinite(y) ? y : 0;
+  const fx = bx + Math.cos(facing) * reach;
+  const fy = by + Math.sin(facing) * reach;
+  if (!Number.isFinite(fx) || !Number.isFinite(fy)) return null;
+  return { x: fx, y: fy };
 }
 
 export function createTokensLayer(stage, mr) {
@@ -135,7 +142,7 @@ export function createTokensLayer(stage, mr) {
     }
     if (sig !== _lastLabelSig) {
       _lastLabelSig = sig;
-      placeAllLabels(groups, pinGroups);
+      placeAllLabels(groups, pinGroups, mr);
     }
     layer.batchDraw();
   }
@@ -153,22 +160,29 @@ export function createTokensLayer(stage, mr) {
 }
 
 function tokenCentre(t, map, gridType) {
-  const cellPx = map?.cell_px || 40;
-  const size = t.size || 1;
+  const cellPx = Number.isFinite(map?.cell_px) && map.cell_px > 0 ? map.cell_px : 40;
+  const size = Number.isFinite(t?.size) && t.size > 0 ? t.size : 1;
+  const col = Number.isFinite(t?.col) ? t.col : 0;
+  const row = Number.isFinite(t?.row) ? t.row : 0;
   if (size === 1) {
-    const p = cellToPixel(map, t.col, t.row, gridType);
-    return { x: p.x, y: p.y, cellPx, size };
+    const p = cellToPixel(map, col, row, gridType);
+    const px = Number.isFinite(p?.x) ? p.x : 0;
+    const py = Number.isFinite(p?.y) ? p.y : 0;
+    return { x: px, y: py, cellPx, size };
   }
   return {
-    x: (t.col + size / 2) * cellPx,
-    y: (t.row + size / 2) * cellPx,
+    x: (col + size / 2) * cellPx,
+    y: (row + size / 2) * cellPx,
     cellPx,
     size,
   };
 }
 
 function tokenRadius(size, cellPx) {
-  return (size * cellPx) / 2 - 2;
+  const validSize = Number.isFinite(size) && size > 0 ? size : 1;
+  const validPx = Number.isFinite(cellPx) && cellPx > 0 ? cellPx : 40;
+  const r = (validSize * validPx) / 2 - 2;
+  return Number.isFinite(r) && r > 0 ? r : 18;
 }
 
 const AURA_SLOTS = 4;
@@ -283,9 +297,11 @@ function syncAuras(group, token, cellPx) {
       continue;
     }
     const opacity = Number.isFinite(Number(a.opacity)) ? Number(a.opacity) : AURA_DEFAULT_OPACITY;
-    circle.visible(true);
+    const aRadius = Number(a.radius);
+    const radiusPx = Number.isFinite(aRadius) && aRadius > 0 ? aRadius * cellPx : 0;
+    circle.visible(radiusPx > 0);
     circle.position({ x: 0, y: 0 });
-    circle.radius(Number(a.radius) * cellPx);
+    circle.radius(radiusPx);
     circle.fill(a.color || '#5BB8E8');
     circle.opacity(Math.max(0, Math.min(1, opacity)));
   }
@@ -296,11 +312,13 @@ function updateGroup(group, token, id, mr) {
   const gridType = mr.state?.settings?.grid_type;
   const { x: wx, y: wy, cellPx, size } = tokenCentre(token, map, gridType);
   const radius = tokenRadius(size, cellPx);
-  const zoom = mr.zoom || 1;
+  const zoom = Number.isFinite(mr.zoom) && mr.zoom > 0 ? mr.zoom : 1;
   const parts = partsOf.get(group);
 
   if (!group.isDragging()) {
-    group.position({ x: wx, y: wy });
+    const validWx = Number.isFinite(wx) ? wx : 0;
+    const validWy = Number.isFinite(wy) ? wy : 0;
+    group.position({ x: validWx, y: validWy });
   }
   const x = 0;
   const y = 0;
@@ -412,10 +430,10 @@ function updateGroup(group, token, id, mr) {
       // invisible in the screenshot. The label below the bar shifts
       // by the same 2 px via the existing `+ 10` offset.
       hpBg.visible(true);
-      hpBg.position({ x: x - radius, y: y + radius + 4 });
+      hpBg.position({ x: x - radius, y: y + radius + 2 });
       hpBg.size({ width: radius * 2, height: 6 });
       hpFg.visible(true);
-      hpFg.position({ x: x - radius, y: y + radius + 4 });
+      hpFg.position({ x: x - radius, y: y + radius + 2 });
       hpFg.size({ width: radius * 2 * pct, height: 6 });
       hpFg.fill(color);
       if (token.hp_current <= 0) {
@@ -501,20 +519,24 @@ function updateGroup(group, token, id, mr) {
  * width is the *measured* text width capped at the box width (radius*4) - the
  * same cap the `ellipsis` trim uses - so collision boxes match what's drawn.
  */
-function placeAllLabels(tokenGroups, pinGroups) {
+function placeAllLabels(tokenGroups, pinGroups, mr) {
   /** @type {import('../place-map-labels.js').LabelEntry[]} */
   const entries = [];
+  const zoom = mr?.zoom || 1;
 
   // Token labels: group sits at the token's world centre, the `name` node
   // is in group-local coords, so the world anchor is converted back to
-  // local on apply. Width is the measured text capped at 4× radius (the
-  // `ellipsis` trim width) so the collision box matches what's drawn.
+  // local on apply. Width is scaled to allow at least 140px on screen
+  // so names remain readable without collapsing to ellipsis on zoom-out.
   for (const [id, group] of tokenGroups) {
     const { name, body } = partsOf.get(group);
     if (!name.text()) continue;
     const radius = body.radius();
     const { x: wx, y: wy } = group.position();
-    const w = Math.min(name.getTextWidth(), radius * 4);
+    name.width('auto');
+    const measured = name.getTextWidth();
+    const maxLabelWidth = Math.max(radius * 4, 140 / zoom);
+    const w = Math.min(measured, maxLabelWidth);
     name.width(w);
     entries.push({
       id: `tok:${id}`,
@@ -526,7 +548,7 @@ function placeAllLabels(tokenGroups, pinGroups) {
   }
 
   // Pin labels: pin groups sit at 0,0 with children drawn in world coords,
-  // so the anchor is applied directly. Cap at the pin label's 120px box.
+  // so the anchor is applied directly.
   for (const [id, group] of (pinGroups || new Map())) {
     const label = group.findOne('.label');
     const marker = group.findOne('.marker');
@@ -534,7 +556,10 @@ function placeAllLabels(tokenGroups, pinGroups) {
     const cx = marker.x();
     const cy = marker.y();
     const r = marker.radius?.() ?? 8;
-    const w = Math.min(label.getTextWidth(), 120);
+    label.width('auto');
+    const measured = label.getTextWidth();
+    const maxPinWidth = Math.max(120, 140 / zoom);
+    const w = Math.min(measured, maxPinWidth);
     label.width(w);
     entries.push({
       id: `pin:${id}`,
@@ -545,5 +570,17 @@ function placeAllLabels(tokenGroups, pinGroups) {
     });
   }
 
-  placeMapLabels(entries);
+  // Collect pin markers as obstacles so token labels avoid overlapping pins
+  const obstacles = [];
+  for (const [id, group] of (pinGroups || new Map())) {
+    const marker = group.findOne('.marker');
+    if (marker) {
+      const cx = marker.x();
+      const cy = marker.y();
+      const r = marker.radius?.() ?? 10;
+      obstacles.push({ id: `pin-marker:${id}`, x: cx - r, y: cy - r, w: r * 2, h: r * 2 });
+    }
+  }
+
+  placeMapLabels(entries, obstacles);
 }

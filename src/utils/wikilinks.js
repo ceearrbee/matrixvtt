@@ -37,7 +37,17 @@ const PREVIEW_KINDS = {
   spell: { kind: 'spell',     collection: 'spells' },
 };
 
-export function renderWikilinks(text, titleToId, tablesById = null, refs = null) {
+export function formatEntityFallbackName(id) {
+  if (!id) return 'Unknown';
+  const clean = id.replace(/^(?:chr|char|npc|item|spell|map)[-_]/i, '');
+  return clean
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ') || id;
+}
+
+export function renderWikilinks(text, titleToId, tablesById = null, refs = null, opts = null) {
   if (typeof text !== 'string' || text.length === 0) return text;
   return text.replace(WIKILINK, (_, rawTitle) => {
     const title = rawTitle.trim();
@@ -79,6 +89,11 @@ export function renderWikilinks(text, titleToId, tablesById = null, refs = null)
           const safeName = escapeHtml(entity.name || id);
           return `<a href="#" data-preview-kind="${cfg.kind}" data-preview-id="${safeId}" class="wikilink wikilink--preview">${safeName}</a>`;
         }
+        if (opts?.fallback || refs?.fallback) {
+          const safeId = escapeHtml(id);
+          const safeName = escapeHtml(formatEntityFallbackName(id));
+          return `<a href="#" data-preview-kind="${cfg.kind}" data-preview-id="${safeId}" class="wikilink wikilink--preview">${safeName}</a>`;
+        }
         return `<span class="wikilink wikilink--broken">${escapeHtml(title)}</span>`;
       }
     }
@@ -89,13 +104,28 @@ export function renderWikilinks(text, titleToId, tablesById = null, refs = null)
       const safeId = escapeHtml(pageId);
       return `<a href="#" data-page-id="${safeId}" class="wikilink wikilink--page">${escaped}</a>`;
     }
-    const id = titleToId.get(title);
+    const id = titleToId?.get?.(title);
     if (id) {
       const safeId = escapeHtml(id);
       return `<a href="#" data-handout-id="${safeId}" class="wikilink">${escaped}</a>`;
     }
     return `<span class="wikilink wikilink--broken">${escaped}</span>`;
   });
+}
+
+export function resolveWikiTokens(html, ui, opts = { fallback: true }) {
+  if (typeof html !== 'string' || !html.includes('[[')) return html;
+  const refs = {
+    characters: ui?.state?.characters,
+    npcs: ui?.state?.npcs,
+    items: ui?.state?.items,
+    spells: ui?.state?.spells,
+    maps: ui?.state?.maps,
+    fallback: opts?.fallback ?? true,
+  };
+  const titleToId = ui?.state?.handouts;
+  const tables = ui?.state?.tables;
+  return renderWikilinks(html, titleToId, tables, refs, opts);
 }
 
 function escapeHtml(s) {

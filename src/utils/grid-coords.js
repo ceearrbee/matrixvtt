@@ -22,17 +22,19 @@ const SQRT3 = Math.sqrt(3);
  * @returns {{x: number, y: number}} pixel centre
  */
 export function cellToPixel(map, col, row, gridType = 'square') {
-  const size = map?.cell_px ?? 40;
+  const size = Number.isFinite(map?.cell_px) ? map.cell_px : 40;
+  const c = Number.isFinite(col) ? col : 0;
+  const r = Number.isFinite(row) ? row : 0;
   if (gridType === 'hex_pointy') {
     const dx = SQRT3 * size;
     const dy = 1.5 * size;
-    return { x: col * dx + (row % 2 === 1 ? dx / 2 : 0), y: row * dy + size };
+    return { x: c * dx + (r % 2 === 1 ? dx / 2 : 0), y: r * dy + size };
   }
   if (gridType === 'hex_flat') {
     const dx = 1.5 * size;
     const dy = SQRT3 * size;
-    return { x: col * dx + size, y: row * dy + (col % 2 === 1 ? dy / 2 : 0) };
+    return { x: c * dx + size, y: r * dy + (c % 2 === 1 ? dy / 2 : 0) };
   }
   // square default
-  return { x: (col + 0.5) * size, y: (row + 0.5) * size };
+  return { x: (c + 0.5) * size, y: (r + 0.5) * size };
 }

@@ -10,6 +10,7 @@ import { renderMarkdown } from '../../utils/renderMarkdown.js';
 import { calcSkillBonus, proficiencyBonusFor } from '../skill-bonus.js';
 import { resolveGroup } from '../play-actions/sources.js';
 import { computeCurrencyTotals } from '../../engine/currency.js';
+import { tableModeSignal } from '../../state/ui-signals.js';
 
 /**
  * `skill_list` - reads `ruleset.skills[]` for the canonical list,
@@ -354,16 +355,34 @@ export function PlayActions({ ui, character, config }) {
     }
   };
 
+  const combatActive = !!ui?.state?.initiative?.active;
+
   return h('section', { class: 'narrative-section', 'aria-label': config?.label ?? 'Actions' }, [
     h('div', { class: 'section-header' }, config?.label ?? 'Actions'),
-    ...nonEmpty.map((g) => h('div', { key: g.config.label, class: 'narrative-group' }, [
-      h('div', { class: 'section-header section-header--sub' }, g.config.label),
-      h('div', {
+    ...nonEmpty.map((g) => {
+      const isCommon = g.config.source === 'ruleset_common_actions';
+      const buttonRow = h('div', {
         class: 'row-sm row--wrap',
         role: 'group',
         'aria-label': g.config.label,
-      }, g.items.map((item, i) => renderButton(g.config, item, i))),
-    ])),
+      }, g.items.map((item, i) => renderButton(g.config, item, i)));
+
+      if (isCommon) {
+        return h('details', {
+          key: g.config.label,
+          class: 'narrative-group sheet-section-collapsible',
+          open: combatActive,
+        }, [
+          h('summary', { class: 'section-header section-header--sub' }, g.config.label),
+          buttonRow,
+        ]);
+      }
+
+      return h('div', { key: g.config.label, class: 'narrative-group' }, [
+        h('div', { class: 'section-header section-header--sub' }, g.config.label),
+        buttonRow,
+      ]);
+    }),
   ]);
 }
 
@@ -376,6 +395,12 @@ export function ActionList({ ui, character, config }) {
   const field = config?.field ?? 'actions';
   const title = config?.title ?? 'Actions';
   const actions = Array.isArray(character[field]) ? character[field] : [];
+
+  tableModeSignal.value;
+  const isLive = tableModeSignal.value === 'live';
+  if (isLive && actions.length === 0 && !config?.collapsed) {
+    return null;
+  }
 
   return h(Fragment, null, [
     h('div', { class: 'section-header' }, title),

@@ -1,5 +1,5 @@
-/* ==================== THEMES ====================
-   Each palette lives in its own file under src/themes/. dark.css is
+/* Themes */
+/*    Each palette lives in its own file under src/themes/. dark.css is
    the central fallback (matches both `:root` with no data-theme set
    AND `:root[data-theme="dark"]`). Subsequent imports override only
    their matching `[data-theme="X"]` block. Adding a new theme is a
@@ -10,8 +10,11 @@
 @import url('./themes/light.css');
 @import url('./themes/high-contrast.css');
 @import url('./themes/nondescript.css');
+@import url('./themes/tokens.css');
 @import url('./themes/chat-shell-tokens.css');
 @import url('./themes/chat-shell.css');
+@import url('./themes/components.css');
+@import url('./themes/almanac.css');
 
 /* WCAG 2.3 SC 2.3.3 - honour the user's reduced-motion preference by
    neutralising every animation and transition in the app. Applied at the
@@ -35,7 +38,7 @@
   scroll-behavior: auto !important;
 }
 
-/* ==================== CSS VARIABLES ==================== */
+/* CSS Variables */
 
 /* Editorial typography - the Work Sans / Source Serif 4 / Bodoni Moda
  * font families are loaded via <link rel="stylesheet"> in index.html
@@ -97,7 +100,7 @@
 }
 
 
-/* ==================== RESET & BASE ==================== */
+/* Reset & Base */
 * {
   margin: 0;
   padding: 0;
@@ -115,7 +118,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Editorial typography rhythm ────────────────────────────────────
+/* Editorial typography rhythm
  * The marketing page at site/matrixvtt.html sets every section with
  * an eyebrow + heading + body triplet. These three classes codify
  * that pattern so welcome surfaces, modals, and empty states can
@@ -177,12 +180,20 @@ button > svg:only-child {
   margin-right: 0;
 }
 
+html,
 body {
-  /* Restored from the original body block - the editorial insert above
-   * carries font-family / smoothing; these are layout-level. */
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   background: var(--color-background-primary);
   color: var(--color-text-primary);
   overflow: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 #app {
@@ -190,7 +201,8 @@ body {
   flex-direction: column;
   height: 100vh; /* fallback */
   height: 100dvh; /* dynamic viewport - avoids iOS address-bar shift */
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   overflow: hidden;
 }
 
@@ -251,7 +263,7 @@ input {
   border-radius: var(--border-radius-sm);
 }
 
-/* ==================== LOADING STATE ==================== */
+/* Loading State */
 .vtt-loading {
   display: flex;
   flex-direction: column;
@@ -465,8 +477,8 @@ input {
 }
 
 
-/* ==================== MAIN VTT LAYOUT ====================
-   Phase 2b - conversation-first shell.
+/* Main VTT Layout */
+/*    Phase 2b - conversation-first shell.
    Three columns: channels rail | chat column | sheet rail.
    The chat column is a vertical flex stack: header → map strip →
    initiative bar → composer. */
@@ -532,6 +544,7 @@ input {
   height: 100%;
   min-height: 0;
   position: relative;
+  background: var(--map-stage-bg, #e4e2db);
 }
 /* Initiative overlays the top of the map (combat strip in Combat, the
    InitiativeBar otherwise) instead of consuming a row beneath it. */
@@ -548,7 +561,7 @@ input {
 }
 .chronicle {
   flex: 0 0 auto;
-  height: clamp(190px, 26vh, 340px);
+  height: clamp(220px, 34vh, 380px);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -605,18 +618,43 @@ input {
   font-style: italic;
 }
 /* InitiativeBar (non-combat), overlaid on the map: lay entries out in a
-   row that scrolls horizontally; hide the secondary chrome. */
+   single horizontal row with header and entries side-by-side. */
+.almanac-map > .initiative-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) var(--space-xs);
+}
 .almanac-map .initiative-panel .initiative-panel__header {
-  padding: var(--space-xs) var(--space-md);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 0 var(--space-xs);
+  border-bottom: 0;
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
 }
 .almanac-map .initiative-panel .initiative-round {
   display: none;
 }
+.almanac-map > .initiative-panel > :not(.initiative-panel__header):not(.initiative-round) {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 .almanac-map .initiative-panel .initiative-entries {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: var(--space-sm);
-  padding: var(--space-xs) var(--space-sm);
+  padding: 0;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -624,29 +662,57 @@ input {
   flex: 0 0 auto;
   width: 160px;
   padding: var(--space-xs) var(--space-sm);
-  border-bottom: 0;
-  border: 0.5px solid var(--color-border-tertiary);
+  border: 0.5px solid transparent;
   border-radius: var(--border-radius-md);
-  background: var(--color-background-primary);
+  background: var(--color-background-secondary);
   cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.almanac-map .initiative-panel .ie:hover,
+.almanac-map .initiative-panel .ie:focus-within {
+  background: var(--color-background-hover);
+  border-color: var(--color-border-tertiary);
 }
 .almanac-map .initiative-panel .ie.cur {
   border-color: var(--color-border-info);
   background: var(--color-background-info);
+  box-shadow: var(--shadow-sm);
 }
 .almanac-map .initiative-panel .ie__hp-bar {
   height: 4px;
 }
-/* Hide secondary chrome inside the pill - keep just the essentials
-   (dot, name, init, HP bar). Expanded actions stay one-click away
-   via the existing expand mechanism, just collapsed in the bar. */
-.almanac-map .initiative-panel .ie__trackers,
-.almanac-map .initiative-panel .ie__hp-adjust,
-.almanac-map .initiative-panel .ie__movement,
-.almanac-map .initiative-panel .ie__conditions,
-.almanac-map .initiative-panel .ie__action-economy,
-.almanac-map .initiative-panel .ie__expanded {
+/* Hide secondary chrome for inactive combatants - keep essentials
+   (dot, name, init, HP bar). Expanded actions appear on hover, focus,
+   or when active / explicitly expanded. */
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__trackers,
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__hp-adjust,
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__movement,
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__conditions,
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__action-economy,
+.almanac-map .initiative-panel .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__expanded,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__trackers,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__hp-adjust,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__movement,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__conditions,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__action-economy,
+.combat-tab__order .initiative-entry:not(.cur):not(.initiative-entry--expanded):not(:hover):not(:focus-within) .ie__expanded {
   display: none;
+}
+.combat-tab__order .ie {
+  border: 0.5px solid transparent;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--space-xs);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.combat-tab__order .ie:hover,
+.combat-tab__order .ie:focus-within {
+  background: var(--color-background-hover);
+  border-color: var(--color-border-tertiary);
+}
+.combat-tab__order .ie.cur {
+  border: 0.5px solid var(--color-border-info);
+  background: var(--color-background-info);
 }
 .map-strip__collapse {
   position: absolute;
@@ -665,6 +731,10 @@ input {
   cursor: pointer;
   font-size: var(--font-size-sm);
   line-height: 1;
+}
+.almanac-map:has(.initiative-panel) .map-strip__collapse,
+.almanac-map:has(.combat-init-strip) .map-strip__collapse {
+  top: 40px;
 }
 .map-strip__collapse:hover,
 .map-strip__collapse:focus-visible {
@@ -733,7 +803,7 @@ input {
    kept here as a breadcrumb for greppers. */
 /* UI MODE RULES END */
 
-/* ── Almanac left index ──────────────────────────────────────────────────
+/* Almanac left index
    The always-expanded multi-section index (Scenes / Journal / NPCs / Items /
    Maps·GM) + footer. Desktop shows this; the slim IconRail is hidden and
    reappears only on mobile (see the mobile @media block). */
@@ -781,7 +851,7 @@ input {
 }
 .left-index__foot .dbt { flex: 1; justify-content: center; }
 
-/* ── Consolidated global menu + notification log ───────────────────── */
+/* Consolidated global menu + notification log */
 .global-menu {
   display: flex;
   flex-direction: column;
@@ -848,7 +918,7 @@ input {
 }
 .ctab__txt { font-size: inherit; }
 
-/* ── Almanac right companion ─────────────────────────────────────────────
+/* Almanac right companion
    The persistent tab set (Combat / Sheet / Spells / Skills / Items / Party /
    NPCs). Tab bodies reuse the existing sheet/combat/roster components. */
 .right-companion {
@@ -858,40 +928,77 @@ input {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  background: var(--color-background-secondary);
   border-left: 0.5px solid var(--color-border-tertiary);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding-right: var(--space-xs);
 }
 .ctabs {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   row-gap: var(--space-2xs);
   flex-shrink: 0;
   border-bottom: 0.5px solid var(--color-border-tertiary);
   background: var(--color-background-secondary);
+  align-items: center;
+  overflow: hidden;
 }
 .ctabs--sub {
-  background: var(--color-background-primary);
-  padding-left: var(--space-sm);
+  background: var(--color-bg-inset, rgba(0, 0, 0, 0.2));
+  padding: var(--space-2xs);
+  border-radius: var(--border-radius-sm);
+  gap: var(--space-2xs);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  margin: var(--space-xs);
+  box-sizing: border-box;
 }
-.ctabs--sub .ctab {
+.ctabs--sub .ctab,
+.sheet-tabs .ctab {
   font-size: var(--font-size-xs);
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  border: none !important;
+  border-bottom: none !important;
+  border-bottom-color: transparent !important;
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: background 120ms ease, color 120ms ease;
+}
+.ctabs--sub .ctab:hover,
+.sheet-tabs .ctab:hover {
+  background: var(--color-background-hover, rgba(255, 255, 255, 0.05));
+  color: var(--color-text-primary);
 }
 .ctab {
   cursor: pointer;
   font-family: var(--font-headline);
   font-size: var(--font-size-xs);
-  padding: var(--space-sm) var(--space-sm);
+  padding: var(--space-sm) var(--space-xs);
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--color-text-secondary);
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 .ctab:hover { color: var(--color-text-primary); }
 .ctab.on {
   color: var(--color-text-info);
   border-bottom-color: var(--color-border-info);
+}
+.ctabs--sub .ctab.on,
+.sheet-tabs .ctab.on {
+  background: var(--color-background-tertiary) !important;
+  color: var(--color-text-primary);
+  border: none !important;
+  border-bottom: none !important;
+  border-bottom-color: transparent !important;
+  box-shadow: var(--elev-1);
 }
 .ctab__badge {
   display: inline-block;
@@ -909,12 +1016,16 @@ input {
   flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  width: 100%;
   /* Reserve the scrollbar's width so fixed-column grids (stat grid,
      attributes, saves) aren't clipped by it against the panel edge. */
   scrollbar-gutter: stable;
+  padding-right: var(--space-xs);
 }
 
-/* ── Channels rail ──────────────────────────────────────────────────────── */
+/* Channels rail */
 .channels-rail {
   display: flex;
   flex-direction: column;
@@ -1001,7 +1112,7 @@ input {
   font-size: 14px;
 }
 
-/* ── Drag-to-resize handle on the companion's left edge ─────────────────── */
+/* Drag-to-resize handle on the companion's left edge */
 .right-companion__resize {
   position: absolute;
   top: 0;
@@ -1028,17 +1139,20 @@ input {
   .right-companion__resize { display: none; }
 }
 
-/* ==================== HEADER ==================== */
+/* Header */
 .vtt-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  padding: var(--space-sm) var(--space-xl);
+  padding: var(--space-sm) var(--space-xl) var(--space-sm) var(--space-md);
   gap: var(--space-md);
   background: var(--color-background-secondary);
   border-bottom: 0.5px solid var(--color-border-tertiary);
   position: relative;
   z-index: var(--z-panel);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 .vtt-header__left,
@@ -1050,6 +1164,20 @@ input {
 }
 .vtt-header__right {
   justify-self: end;
+  padding-right: var(--space-xs);
+}
+.vtt-header__gm-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 1px var(--space-2xs);
+  border-radius: var(--border-radius-md);
+  border: 1px solid transparent;
+}
+.vtt-header__gm-cluster:has(#gm-controls-btn),
+.vtt-header__gm-cluster:focus-within {
+  border-color: var(--color-border-secondary);
+  background: var(--color-background-secondary);
 }
 .vtt-header__titles {
   display: flex;
@@ -1079,6 +1207,10 @@ input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.vtt-header__subtitle--idle {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .debug-bar {
@@ -1196,7 +1328,7 @@ input {
   color: var(--color-text-inverse);
 }
 
-/* ==================== INITIATIVE TRACKER ==================== */
+/* Initiative Tracker */
 .initiative-panel {
   position: relative;
   border-right: 0.5px solid var(--color-border-tertiary);
@@ -1271,8 +1403,9 @@ input {
   gap: var(--space-2xs);
 }
 .ie__hp-adjust-btn {
-  min-width: 22px;
-  height: 22px;
+  min-width: 24px;
+  min-height: 24px;
+  height: 24px;
   padding: 0 var(--space-xs);
   font-size: var(--font-size-xs);
   line-height: 1;
@@ -1340,7 +1473,7 @@ input {
   transition: width 200ms ease, background 200ms ease;
 }
 
-/* ==================== MAP CANVAS ==================== */
+/* Map Canvas */
 .map-container {
   overflow: hidden;
   position: relative;
@@ -1390,11 +1523,13 @@ input {
   margin: 0;
 }
 
-/* ==================== DRAWING TOOLBAR ==================== */
+/* Drawing Toolbar */
 .draw-toolbar {
   position: absolute;
-  bottom: 68px;
-  right: 8px;
+  top: 52px;
+  left: 12px;
+  bottom: auto;
+  right: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
@@ -1409,14 +1544,16 @@ input {
      bound it to the container height minus the bottom anchor and a top
      gap, and scroll if it somehow exceeds that. */
   max-height: calc(100% - 88px);
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .draw-toolbar__content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: var(--space-2xs);
-  overflow: hidden;
   transition: max-height 0.3s ease, opacity 0.2s ease;
 }
 
@@ -1424,28 +1561,42 @@ input {
   max-height: 0;
   opacity: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 .dtb-btn--toggle {
-  font-weight: bold;
-  border-bottom: 0.5px solid var(--color-border-tertiary);
-  margin-bottom: var(--space-2xs);
-  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  flex: 0 0 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dtb-btn--toggle:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 .draw-toolbar--collapsed .dtb-btn--toggle {
-  border-bottom: none;
-  border-radius: var(--border-radius-lg);
+  border-radius: var(--border-radius-sm);
 }
 
 .dtb-btn {
-  /* Compact icon button for the floating vertical map toolbar. The
-     name lives in aria-label + a shortcut-bearing title tooltip
-     (tldraw / Figma floating-toolbar convention); a stacked visible
-     label would multiply this vertical strip's height until it
-     overflowed the map, so labels stay in the tooltip. */
+  /* Compact square icon button for the floating map toolbar. */
+  width: 32px;
+  height: 32px;
   min-width: 32px;
   min-height: 32px;
+  flex: 0 0 32px;
   padding: 0;
   font-size: 13px;
   line-height: 1;
@@ -1519,7 +1670,7 @@ input {
 }
 
 .dtb-width {
-  width: 32px;
+  min-width: 56px;
   height: 32px;
   padding: 0 var(--space-2xs);
   font-size: var(--font-size-xs);
@@ -1530,12 +1681,13 @@ input {
   cursor: pointer;
 }
 
-/* CSS tooltips - appear to the left of the toolbar */
+/* CSS tooltips - appear to the right of the toolbar on desktop */
 .dtb-btn[data-tooltip] { position: relative; }
 .dtb-btn[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
-  right: calc(100% + 8px);
+  left: calc(100% + 8px);
+  right: auto;
   top: 50%;
   transform: translateY(-50%);
   background: var(--color-background-secondary);
@@ -1552,7 +1704,8 @@ input {
   z-index: var(--z-panel);
   box-shadow: var(--elev-1);
 }
-.dtb-btn[data-tooltip]:hover::after { opacity: 1; }
+.dtb-btn[data-tooltip]:hover::after,
+.dtb-btn[data-tooltip]:focus-visible::after { opacity: 1; }
 
 .map-controls {
   position: absolute;
@@ -1573,6 +1726,27 @@ input {
   color: var(--color-text-primary);
   border-radius: var(--border-radius-lg);
   backdrop-filter: blur(4px);
+}
+
+.draw-toolbar .map-controls {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 0.5px solid var(--color-border-tertiary);
+  width: 100%;
+}
+
+.draw-toolbar .map-controls button {
+  min-width: 28px;
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--border-radius-sm);
 }
 
 .token-inspector {
@@ -1646,7 +1820,7 @@ input {
   border-color: var(--color-border-secondary);
 }
 
-/* ==================== CHARACTER SHEET PANEL ==================== */
+/* Character Sheet Panel */
 .sheet-panel {
   position: relative;
   border-left: 0.5px solid var(--color-border-tertiary);
@@ -1656,7 +1830,7 @@ input {
   min-width: 180px;
 }
 
-.sheet-tabs {
+.sheet-tabs:not(.ctabs--sub) {
   display: flex;
   flex-wrap: wrap;
   row-gap: var(--space-2xs);
@@ -1729,10 +1903,44 @@ input {
    rows breathe and never touch (or clip against) the panel edge. */
 .char-sheet,
 .npc-sheet {
-  padding: 0 var(--space-sm);
+  padding: 0 var(--space-lg);
+  box-sizing: border-box;
+}
+.char-sheet .dbt--sm,
+.char-sheet .action-btn,
+.npc-sheet .dbt--sm,
+.npc-sheet .action-btn {
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-tertiary);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.char-sheet .dbt--sm:hover,
+.char-sheet .action-btn:hover,
+.npc-sheet .dbt--sm:hover,
+.npc-sheet .action-btn:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border-primary);
+  box-shadow: var(--elev-1);
+}
+.char-sheet .dbt--ghost,
+.npc-sheet .dbt--ghost {
+  border: 1px dashed var(--color-border-secondary);
+  background: transparent;
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.char-sheet .dbt--ghost:hover,
+.npc-sheet .dbt--ghost:hover {
+  background: var(--color-background-hover);
+  border-color: var(--color-border-primary);
 }
 
-/* ── Calmer-view sheet groups ────────────────────────────────────────────── */
+/* Calmer-view sheet groups */
 /* Collapsible cards that wrap the section list when the user opts into the
    "Calmer view" toggle. Off by default - when the toggle is off, the rail
    renders flat exactly as before and these styles never apply. */
@@ -1768,7 +1976,7 @@ input {
   padding: var(--space-lg) var(--space-xl);
 }
 
-/* ── Log tab ─────────────────────────────────────────────────────────────── */
+/* Log tab */
 .log-controls {
   display: flex;
   flex-direction: column;
@@ -1833,7 +2041,7 @@ input {
 .log-ts    { font-size: var(--font-size-xs); color: var(--color-text-tertiary); flex-shrink: 0; }
 .log-empty { padding: var(--space-3xl); text-align: center; color: var(--color-text-tertiary); font-size: 12px; }
 
-/* ── Social chat surface - Discord/Obsidian feel ──────────────────────── */
+/* Social chat surface - Discord/Obsidian feel */
 .log-panel {
   display: flex;
   flex-direction: column;
@@ -1915,7 +2123,7 @@ input {
 .log-group__bodies .log-msg .log-body > b:first-child {
   color: var(--color-text-tertiary);
   font-weight: 400;
-  margin-right: var(--space-2xs);
+  margin-right: 0;
 }
 .log-group__bodies .log-msg .log-body > b:first-child + br + b,
 .log-group__bodies .log-msg .log-body > b:first-child ~ b {
@@ -1969,6 +2177,7 @@ input {
 /* Suppress the embedded title from formatSceneRootBody - the card
    owns the title now. The body keeps the opening line. */
 .log-scene-card .log-entry__scene-title { display: none; }
+.log-scene-card .log-entry__scene-opening { max-width: 75ch; }
 .log-scene-card__ts {
   position: absolute;
   top: var(--space-md);
@@ -2061,7 +2270,7 @@ input {
   }
 }
 
-/* ── Narrative-mode breathing-room variant ────────────────────────────── */
+/* Narrative-mode breathing-room variant */
 .log-panel--narrative .log-panel__feed {
   gap: var(--space-xl);
   padding: var(--space-2xl) var(--space-3xl);
@@ -2089,7 +2298,7 @@ input {
           mask-image: linear-gradient(to bottom, transparent 0, black var(--space-3xl));
 }
 
-/* ── LogControls: trigger + popover ───────────────────────────────────── */
+/* LogControls: trigger + popover */
 .log-controls {
   position: absolute;
   top: var(--space-sm);
@@ -2233,7 +2442,7 @@ input {
 }
 .log-load-more { width: 100%; margin-top: var(--space-md); }
 
-/* ── Character switcher (players with multiple claimed chars) ────────────── */
+/* Character switcher (players with multiple claimed chars) */
 .char-switcher {
   padding: var(--space-sm) var(--space-md);
   border-bottom: 1px solid var(--color-border-primary);
@@ -2259,21 +2468,40 @@ input {
   display: none !important;
 }
 
-/* ==================== ATTRIBUTE BOX ==================== */
+/* Attribute Box */
 .ab {
   text-align: center;
   padding: var(--space-xs) var(--space-2xs);
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-lg);
-  border: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-tertiary);
+  border-radius: var(--border-radius-md);
+  border: 1px solid transparent;
 }
 
 .ab.hi {
   background: var(--color-background-info);
-  border-color: var(--color-border-info);
+  border: 1px solid transparent;
 }
 
-/* ==================== DICE BAR ==================== */
+.ab[style*="cursor:pointer"],
+.ab[data-roll-attribute-label] {
+  cursor: pointer;
+  border: 1px solid var(--color-border-secondary);
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  user-select: none;
+}
+.ab[style*="cursor:pointer"]:hover,
+.ab[data-roll-attribute-label]:hover {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border-primary);
+  box-shadow: var(--elev-1);
+  transform: translateY(-1px);
+}
+.ab[style*="cursor:pointer"]:active,
+.ab[data-roll-attribute-label]:active {
+  transform: translateY(0);
+}
+
+/* Dice Bar */
 .dice-bar {
   grid-column: 1 / -1;
   display: flex;
@@ -2290,6 +2518,18 @@ input {
    (see the ≤768px block) so an expanded dice tray can't wrap the chat
    input + Send onto a stray line. */
 .dice-bar__chat-cluster { display: contents; }
+.dice-bar__composer-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.dice-bar__input-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1 1 auto;
+}
 
 .dice-bar__mod-label {
   font-size: var(--font-size-xs); /* was 11px, upgraded to 12px for WCAG */
@@ -2397,7 +2637,7 @@ input {
   flex-shrink: 0;
 }
 
-/* ──────────── Chat speaking mode + tone (rolegate-style) ──────────── */
+/* Chat speaking mode + tone (rolegate-style) */
 .dice-bar__chat-mode {
   display: inline-flex;
   gap: var(--space-2xs);
@@ -2507,7 +2747,7 @@ input {
   font-style: italic;
 }
 
-/* ==================== UTILITY CLASSES ==================== */
+/* Utility Classes */
 .hp-bar {
   margin-bottom: var(--space-lg);
 }
@@ -2538,13 +2778,30 @@ input {
   text-align: center;
   padding: var(--space-2xs) var(--space-xs);
   background: var(--color-background-tertiary);
-  border: 0.5px solid var(--color-border-secondary);
+  border: none;
   border-radius: var(--border-radius-sm);
   color: var(--color-text-primary);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.hp-edit-input::-webkit-inner-spin-button,
+.hp-edit-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .hp-edit-input:focus {
   outline: 2px solid var(--color-focus);
   outline-offset: 1px;
+}
+.hp-bar .dbt--compact {
+  border: none;
+  background: var(--color-background-tertiary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-secondary);
+}
+.hp-bar .dbt--compact:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 /* Handout cards */
@@ -2616,7 +2873,7 @@ input {
   align-self: center;
 }
 
-/* ==================== LOG CONTAINER (Live + Scenes sub-tabs) ==================== */
+/* Log Container (Live + Scenes sub-tabs) */
 .log-container {
   display: flex;
   flex-direction: column;
@@ -2736,7 +2993,7 @@ input {
 .scene-card__body p:first-child { margin-top: 0; }
 .scene-card__body p:last-child  { margin-bottom: 0; }
 
-/* ==================== PAGES PANEL ==================== */
+/* Pages Panel */
 .pages-panel {
   display: flex;
   flex-direction: column;
@@ -2867,7 +3124,7 @@ input {
   min-width: 120px;
 }
 
-/* ==================== PAGE DRAWER (read view) ==================== */
+/* Page Drawer (read view) */
 .page-drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -2939,7 +3196,7 @@ input {
   gap: var(--space-sm);
 }
 
-/* ==================== EDITOR MODAL SPLIT ==================== */
+/* Editor Modal Split */
 .page-editor-split {
   display: grid;
   grid-template-columns: 1fr;
@@ -2969,7 +3226,7 @@ input {
   background: var(--color-background-secondary);
 }
 
-/* ==================== MARKDOWN TYPOGRAPHY ==================== */
+/* Markdown Typography */
 .markdown h1 { font-size: 1.4em; margin: 0.4em 0 0.3em; color: var(--color-text-primary); }
 .markdown h2 { font-size: 1.2em; margin: 0.6em 0 0.3em; color: var(--color-text-primary); }
 .markdown h3 { font-size: 1.05em; margin: 0.6em 0 0.2em; color: var(--color-text-primary); }
@@ -3008,7 +3265,7 @@ input {
 .markdown em { font-style: italic; }
 .markdown strong { font-weight: 600; color: var(--color-text-primary); }
 
-/* ==================== THREAD VIEW (in PageView comments) ==================== */
+/* Thread View (in PageView comments) */
 .thread-view {
   display: flex;
   flex-direction: column;
@@ -3152,13 +3409,10 @@ input {
 }
 
 .stats-grid--3col {
-  /* minmax(0,1fr) so columns shrink below their content instead of
-     forcing the grid (and the whole rail) wider than the panel and
-     clipping the last column. */
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
 }
 
-/* ==================== SETTINGS DIALOG ==================== */
+/* Settings Dialog */
 .modal-content.settings-modal {
   max-width: min(94vw, 1000px);
   width: 94vw;
@@ -3524,8 +3778,8 @@ input {
   display: none;
 }
 
-/* ==================== NARRATIVE PRIMITIVES ====================
- * Generic config-driven sections (tagged_list, slot_list, box_track,
+/* Narrative Primitives */
+/*  * Generic config-driven sections (tagged_list, slot_list, box_track,
  * resource_pool, button_action, pending_modifiers_list). See
  * docs/RULESET-SPEC.md and src/ui/characterSheetSections.js. */
 
@@ -3765,7 +4019,7 @@ input {
   cursor: not-allowed;
 }
 
-/* ==================== MODAL ==================== */
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -3777,6 +4031,63 @@ input {
   align-items: center;
   justify-content: center;
   z-index: var(--z-drawer);
+}
+
+/* Help popover - lightweight anchored popover replacing full-screen modal */
+.help-popover {
+  position: absolute;
+  bottom: calc(100% + var(--space-xs));
+  right: 0;
+  z-index: var(--z-popup);
+  width: min(360px, 90vw);
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--elev-2);
+  padding: var(--space-md);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+.help-popover.modal-overlay {
+  position: absolute;
+  top: auto;
+  left: auto;
+  right: 0;
+  bottom: calc(100% + var(--space-xs));
+  background: var(--color-background-primary);
+  display: block;
+}
+.help-popover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-border-tertiary);
+  padding-bottom: var(--space-xs);
+}
+.help-popover__title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.help-popover__close {
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--space-2xs);
+  line-height: 1;
+}
+.help-popover__close:hover,
+.help-popover__close:focus-visible {
+  color: var(--color-text-primary);
+}
+.help-popover__body {
+  max-height: 240px;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -3838,7 +4149,7 @@ input {
   display: none;
 }
 
-/* ==================== GM CONTROLS ==================== */
+/* GM Controls */
 .gm-section {
   margin-bottom: var(--space-4xl);
 }
@@ -3865,7 +4176,7 @@ input {
   min-width: 100px;
 }
 
-/* ==================== CONTEXT MENU ==================== */
+/* Context Menu */
 .context-menu {
   position: fixed;
   background: var(--color-background-secondary);
@@ -3915,7 +4226,7 @@ input {
   margin: var(--space-xs) 0;
 }
 
-/* ==================== FORMS ==================== */
+/* Forms */
 .form-group {
   margin-bottom: var(--space-2xl);
 }
@@ -4023,7 +4334,7 @@ input {
   background: var(--color-background-secondary);
 }
 
-/* ── Map form (right pane of MapsPanel) ─────────────────────────── */
+/* Map form (right pane of MapsPanel) */
 .map-form-pane {
   flex: 1;
   overflow-y: auto;
@@ -4070,7 +4381,7 @@ input {
 #add-layer-btn { float: right; }
 .map-form-actions { margin-top: var(--space-4xl); }
 
-/* ── Setup wizard ───────────────────────────────────────────────── */
+/* Setup wizard */
 .wizard-banner {
   margin-bottom: var(--space-2xl);
   padding: var(--space-lg) var(--space-xl);
@@ -4146,7 +4457,7 @@ input {
   margin-top: var(--space-md);
 }
 
-/* ── Next-steps checklist ───────────────────────────────────────── */
+/* Next-steps checklist */
 /* One row: a title, a chip per step, a dismiss link. It wraps only when
    the column is too narrow to hold them. */
 .next-steps {
@@ -4175,6 +4486,9 @@ input {
 .next-steps__mark { color: var(--color-text-success); }
 .next-steps__chip[data-done="true"] {
   color: var(--color-text-tertiary);
+  opacity: 0.55;
+  background: transparent;
+  border-color: transparent;
 }
 .next-steps__chip[data-done="true"] .next-steps__label {
   text-decoration: line-through;
@@ -4198,7 +4512,17 @@ input {
   z-index: var(--z-hud);
 }
 
-/* ── Welcome / waiting modals ───────────────────────────────────── */
+.shell__chat:has(.next-steps) .initiative-idle,
+.shell:has(.next-steps) #start-combat-btn,
+.map-strip:has(.next-steps) #start-combat-btn,
+body:has(.next-steps) #start-combat-btn,
+.shell__chat:has(.next-steps-bar) .initiative-idle,
+.shell:has(.next-steps-bar) #start-combat-btn,
+.map-strip:has(.next-steps-bar) #start-combat-btn {
+  display: none !important;
+}
+
+/* Welcome / waiting modals */
 .welcome-modal { max-width: 420px; }
 .welcome-modal--center {
   text-align: center;
@@ -4229,7 +4553,7 @@ input {
   line-height: 1.6;
 }
 
-/* ==================== FOCUS INDICATORS (WCAG 2.4.7) ==================== */
+/* Focus Indicators (WCAG 2.4.7) */
 /* Visible focus indicators for all interactive elements */
 button:focus-visible,
 .tab:focus-visible,
@@ -4310,7 +4634,7 @@ button:focus-visible,
   box-shadow: 0 0 0 1px var(--color-background-primary);
 }
 
-/* ==================== SCROLLBAR STYLING ==================== */
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -4329,7 +4653,7 @@ button:focus-visible,
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* ==================== NEW UI ELEMENT STYLES ==================== */
+/* New UI Element Styles */
 
 /* Initiative entry buttons */
 .ie__actions {
@@ -4394,7 +4718,7 @@ button:focus-visible,
   flex: 1;
 }
 
-/* ==================== SHEET PANEL COMPONENTS ==================== */
+/* Sheet Panel Components */
 
 /* Entity header (character / NPC name + avatar row) */
 .entity-header {
@@ -4520,11 +4844,45 @@ button:focus-visible,
   min-width: 0;
 }
 
-.skill-row--roll { cursor: pointer; }
+.skill-row--roll {
+  cursor: pointer;
+  padding: var(--space-2xs) var(--space-xs);
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.15s ease;
+}
+.skill-row--roll:hover {
+  background: var(--color-background-secondary);
+}
+
+.sheet-conditions--none {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-md);
+}
 
 .entity-subtitle--none {
   font-style: italic;
   margin-bottom: var(--space-lg);
+}
+
+.sheet-conditions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-2xs);
+  margin-bottom: var(--space-lg);
+}
+
+.sheet-condition-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-md);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border-radius: var(--radius-pill);
+  background: var(--color-background-warning);
+  color: var(--color-text-warning);
+  border: 1px solid var(--color-border-warning, rgba(239, 159, 39, 0.3));
 }
 
 .defenses { margin-bottom: var(--space-lg); }
@@ -4533,6 +4891,18 @@ button:focus-visible,
   font-size: var(--font-size-sm);
   line-height: 1.6;
   margin-bottom: var(--space-xl);
+}
+
+.private-notes-container {
+  margin-top: var(--space-md);
+}
+
+.private-notes-textarea {
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
 }
 
 .stress-row { margin-bottom: var(--space-lg); }
@@ -4902,7 +5272,7 @@ button.item-card__tag--holder:hover {
   background: var(--color-background-tertiary);
 }
 
-/* ==================== COMBAT ENHANCEMENTS ==================== */
+/* Combat Enhancements */
 
 /* "Your Turn" pulsing banner */
 .your-turn-banner {
@@ -5098,11 +5468,22 @@ button.item-card__tag--holder:hover {
 
 /* contenteditable initiative roll */
 .ie__init[contenteditable="true"] {
-  outline: 1px solid var(--color-text-info);
+  outline: none;
+  border: none;
   border-radius: var(--border-radius-sm);
   padding: 0 var(--space-2xs);
   min-width: 14px;
   cursor: text;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.ie__init[contenteditable="true"]:focus,
+.ie__init[contenteditable="true"]:hover {
+  outline: 1px solid var(--color-border-secondary);
+  background: var(--color-background-tertiary);
+}
+.ie__init[contenteditable="true"]:focus-visible {
+  outline: 2px solid var(--color-focus);
 }
 
 /* Combat tab in sheet panel */
@@ -5122,7 +5503,7 @@ button.item-card__tag--holder:hover {
   padding-top: 0;
 }
 
-/* ── Suggested mode banner (GM broadcast) ──────────────────────────────── */
+/* Suggested mode banner (GM broadcast) */
 .suggested-mode-banner {
   display: flex;
   align-items: center;
@@ -5155,7 +5536,7 @@ button.item-card__tag--holder:hover {
   font-weight: 600;
 }
 
-/* ── PartyRoster - GM Prep right-rail card view ───────────────────────── */
+/* PartyRoster - GM Prep right-rail card view */
 .party-roster {
   display: flex;
   flex-direction: column;
@@ -5312,7 +5693,7 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-secondary);
 }
 
-/* ── Avatar primitive - circular portrait with monogram fallback ──────── */
+/* Avatar primitive - circular portrait with monogram fallback */
 .avatar {
   display: inline-flex;
   align-items: center;
@@ -5345,7 +5726,7 @@ button.item-card__tag--holder:hover {
 .avatar[data-size="18"] .avatar__monogram,
 .avatar[data-size="20"] .avatar__monogram { font-size: 9px; }
 
-/* ── EmptyState - Notion-pattern hero ─────────────────────────────────── */
+/* EmptyState - Notion-pattern hero */
 .empty-state__glyph {
   font-size: 28px;
   margin-bottom: var(--space-sm);
@@ -5365,13 +5746,13 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-secondary);
 }
 
-/* ── stat-box - reusable label/value square ─────────────────────────────── */
+/* stat-box - reusable label/value square */
 .stat-box {
   text-align: center;
   padding: var(--space-xs) var(--space-2xs);
-  background: var(--color-background-secondary);
+  background: var(--color-background-tertiary);
   border-radius: var(--border-radius-lg);
-  border: 0.5px solid var(--color-border-tertiary);
+  border: none;
 }
 .stat-box__label {
   font-size: var(--font-size-xs);
@@ -5385,7 +5766,7 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-primary);
 }
 
-/* ── IconRail - slim icon-only left nav with collapsible drawer ─────────── */
+/* IconRail - slim icon-only left nav with collapsible drawer */
 .icon-rail-host {
   display: flex;
   height: 100%;
@@ -5491,8 +5872,7 @@ button.item-card__tag--holder:hover {
 .icon-rail__row-meta {
   font-size: var(--font-size-xs);
   color: var(--color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 .icon-rail__empty {
   font-size: var(--font-size-xs);
@@ -5575,7 +5955,7 @@ button.item-card__tag--holder:hover {
   margin: 0 0 var(--space-md);
 }
 
-/* ── CombatInitiativeStrip - bottom strip below the map ─────────────────── */
+/* CombatInitiativeStrip - bottom strip below the map */
 .combat-init-strip {
   display: flex;
   align-items: stretch;
@@ -5638,14 +6018,42 @@ button.item-card__tag--holder:hover {
   height: 100%;
   border-radius: var(--border-radius-sm);
 }
+.combat-init-strip__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.combat-init-strip__round {
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--color-background-tertiary);
+  border-radius: var(--border-radius-sm);
+}
+.combat-init-strip__timer {
+  font-variant-numeric: tabular-nums;
+}
+.combat-init-strip__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
 .combat-init-strip__end-turn {
   flex-shrink: 0;
   align-self: center;
 }
+.combat-init-strip__stop-btn {
+  flex-shrink: 0;
+  align-self: center;
+}
 
-/* ── Tool-group tabs in the floating MapStrip toolbar ───────────────────── */
+/* Tool-group tabs in the floating MapStrip toolbar */
 .draw-toolbar__groups {
   display: flex;
+  align-items: center;
   gap: var(--space-2xs);
   padding: var(--space-2xs);
   background: var(--color-background-secondary);
@@ -5796,7 +6204,7 @@ button.item-card__tag--holder:hover {
   padding: var(--space-2xs) var(--space-sm) var(--space-xs);
 }
 
-/* ==================== CONDITIONS PICKER ==================== */
+/* Conditions Picker */
 
 .condition-grid {
   display: grid;
@@ -5936,7 +6344,7 @@ button.item-card__tag--holder:hover {
   padding: 0 var(--space-xs);
 }
 
-/* ==================== MOBILE / RESPONSIVE ==================== */
+/* Mobile / Responsive */
 
 /* Drawing toolbar tooltips: show on focus as well as hover (touch-friendly) */
 .dtb-btn[data-tooltip]:focus::after {
@@ -5980,7 +6388,7 @@ button.item-card__tag--holder:hover {
      mobile, so it's removed from grid flow. A reserved init row makes
      auto-flow place the map in it, collapsing the map to that row's
      height and shoving the sheet into the 1fr slot. */
-  /* ── Mobile: bottom-tab, one-pane shell ────────────────────────────
+  /* Mobile: bottom-tab, one-pane shell
      The desktop three columns collapse to a single main area (grid row 1)
      that shows exactly ONE surface at a time, chosen by the MobileTabBar
      via `data-mobile-pane`. The tab bar owns row 2. `.shell__channels`,
@@ -6177,6 +6585,10 @@ button.item-card__tag--holder:hover {
     top: auto;
     left: auto;
   }
+  .dtb-btn[data-tooltip]::after {
+    left: auto;
+    right: calc(100% + 8px);
+  }
 
   /* Make modals full-screen on small displays */
   .modal-content {
@@ -6220,6 +6632,7 @@ button.item-card__tag--holder:hover {
 
   /* Ensure touch targets meet WCAG 2.5.5 (44×44px minimum) */
   .dtb-btn,
+  .dtb-group,
   .dtb-color,
   .dtb-width,
   .map-controls button,
@@ -6237,9 +6650,9 @@ button.item-card__tag--holder:hover {
     min-height: 44px;
   }
 
-  /* ── Other-pane mobile parity ─────────────────────────────────────
+  /* Other-pane mobile parity
      Bring the Combat, Sheet, and Journal panes in line with the Chat
-     pane's unified control vocabulary (34–44px touch targets, no
+     pane's unified control vocabulary (34-44px touch targets, no
      awkward stretched layouts when a region renders as a full pane). */
 
   /* The rail stays: the bottom tab bar navigates panes but has no Menu
@@ -6291,7 +6704,7 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-success);
 }
 
-/* ── Spell card ───────────────────────────────────────────────────────────── */
+/* Spell card */
 .spell-card {
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-md);
@@ -6376,7 +6789,7 @@ button.item-card__tag--holder:hover {
   margin-bottom: var(--space-md);
 }
 
-/* ── Spell slot pips ─────────────────────────────────────────────────────── */
+/* Spell slot pips */
 .spell-slots-grid {
   padding: var(--space-xs) var(--space-lg) var(--space-md);
   display: flex;
@@ -6407,18 +6820,23 @@ button.item-card__tag--holder:hover {
   margin-left: auto;
 }
 .spell-slot-pip {
-  width: 12px;
-  height: 12px;
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
+  padding: var(--space-xs);
+  box-sizing: border-box;
+  background-clip: content-box;
   border-radius: 50%;
   border: 1px solid var(--color-border-secondary);
   background: transparent;
   cursor: pointer;
-  padding: 0;
   flex-shrink: 0;
   transition: border-color 0.1s;
 }
 .spell-slot-pip--used {
   background: var(--color-background-info);
+  background-clip: content-box;
   border-color: var(--color-border-info);
 }
 .spell-slot-pip:disabled {
@@ -6428,7 +6846,7 @@ button.item-card__tag--holder:hover {
   border-color: var(--color-text-info);
 }
 
-/* ── Skills tab ──────────────────────────────────────────────────────────── */
+/* Skills tab */
 .skills-tab-list {
   padding: var(--space-xs) 0;
 }
@@ -6482,22 +6900,28 @@ button.item-card__tag--holder:hover {
   opacity: 0.6;
 }
 .skill-full-row__prof-btn {
-  width: 14px;
-  height: 14px;
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
+  padding: var(--space-xs);
+  box-sizing: border-box;
+  background-clip: content-box;
   border-radius: 50%;
   border: 1px solid var(--color-border-secondary);
   background: transparent;
   cursor: pointer;
-  padding: 0;
   flex-shrink: 0;
   transition: background 0.1s, border-color 0.1s;
 }
 .skill-full-row__prof-btn--proficient {
   background: var(--color-background-info);
+  background-clip: content-box;
   border-color: var(--color-border-info);
 }
 .skill-full-row__prof-btn--expertise {
   background: var(--color-background-info);
+  background-clip: content-box;
   border-color: var(--color-border-info);
   box-shadow: 0 0 0 2px var(--color-background-primary), 0 0 0 3px var(--color-border-info);
 }
@@ -6517,7 +6941,7 @@ button.item-card__tag--holder:hover {
   box-shadow: 0 0 0 1px var(--color-background-primary), 0 0 0 2px var(--color-border-info);
 }
 
-/* ==================== FLOATING DOCS (pop-up handouts + pages) ==================== */
+/* Floating Docs (pop-up handouts + pages) */
 .floating-doc {
   position: fixed;
   z-index: calc(var(--z-floating-doc) + var(--doc-order, 0));
@@ -6630,7 +7054,7 @@ button.item-card__tag--holder:hover {
   }
 }
 
-/* ==================== VISUAL EDITOR (Toast UI Editor) ==================== */
+/* Visual Editor (Toast UI Editor) */
 .editor-mode-toggle {
   display: flex;
   align-items: center;
@@ -6712,7 +7136,7 @@ button.item-card__tag--holder:hover {
   color: var(--color-text-primary);
 }
 
-/* ==================== CONNECTION LOST RECOVERY ==================== */
+/* Connection Lost Recovery */
 /* Full-screen card shown when initVTT fails with a transport-level
    error (dynamic-import or fetch NetworkError). See ConnectionLost.jsx. */
 .connection-lost {
@@ -6762,7 +7186,7 @@ button.item-card__tag--holder:hover {
   min-width: 120px;
 }
 
-/* ==================== REDUCED MOTION ==================== */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .loading-spinner {
     animation: none;
@@ -6819,7 +7243,7 @@ button.item-card__tag--holder:hover {
   outline-offset: 2px;
 }
 
-/* ==================== LAYOUT UTILITIES ==================== */
+/* Layout Utilities */
 /* Replace hardcoded inline styles like `display:flex;gap:var(--space-md)` with
    these utility classes so the spacing scale stays consistent. */
 
@@ -6858,7 +7282,7 @@ button.item-card__tag--holder:hover {
 }
 
 
-/* ── Icon picker ────────────────────────────────────────────────── */
+/* Icon picker */
 .icon-picker {
   display: flex;
   flex-direction: column;
@@ -7434,7 +7858,25 @@ button.item-card__tag--holder:hover {
   font-size: var(--font-size-xs);
   text-align: center;
   z-index: var(--z-hud);
-  pointer-events: none;
+  pointer-events: auto;
+}
+.almanac-map:has(.initiative-panel) .map-hint,
+.almanac-map:has(.combat-init-strip) .map-hint {
+  top: 40px;
+}
+.map-hint__action {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.map-hint__action:hover,
+.map-hint__action:focus-visible {
+  color: var(--color-text-info);
 }
 
 /* ─── Token action bar ─── */
@@ -7446,11 +7888,24 @@ button.item-card__tag--holder:hover {
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
-  padding: var(--space-2xs) var(--space-sm);
+  padding: 3px var(--space-sm);
   background: var(--color-background-secondary);
-  border: 0.5px solid var(--color-border-primary);
-  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elev-2);
   z-index: var(--z-hud);
+  backdrop-filter: blur(8px);
+}
+.token-action-bar .dbt {
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+  padding: 3px var(--space-md);
+  font-size: var(--font-size-xs);
+  box-shadow: none;
+}
+.token-action-bar .dbt:hover {
+  background: var(--color-background-tertiary);
 }
 .token-action-bar__name {
   font-size: var(--font-size-xs);
@@ -7463,7 +7918,7 @@ button.item-card__tag--holder:hover {
   margin-right: var(--space-2xs);
 }
 
-/* ── Invite modal ───────────────────────────────────────────────────── */
+/* Invite modal */
 .invite-modal {
   display: flex;
   flex-direction: column;

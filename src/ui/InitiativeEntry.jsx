@@ -3,6 +3,7 @@
  */
 
 import { h } from 'preact';
+import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { conditionAbbr, conditionLabel } from '../state/rulesets.js';
@@ -76,14 +77,28 @@ export function InitiativeEntry({
   // and expanded rows show the full layout.
   const isCompact = !isCurrent && !isExpanded;
 
+  let sortable;
+  try {
+    const hasDispatcher = typeof useSortable === 'function' && (
+      Boolean(/** @type {any} */ (useSortable)?.mock) ||
+      React?.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE?.H != null
+    );
+    if (hasDispatcher) {
+      sortable = useSortable({ id: entry.token_id, disabled: !isGM });
+    } else {
+      sortable = { attributes: {}, listeners: {}, setNodeRef: null, transform: null, transition: null, isDragging: false };
+    }
+  } catch {
+    sortable = { attributes: {}, listeners: {}, setNodeRef: null, transform: null, transition: null, isDragging: false };
+  }
   const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: entry.token_id, disabled: !isGM });
+    attributes = {},
+    listeners = {},
+    setNodeRef = null,
+    transform = null,
+    transition = null,
+    isDragging = false,
+  } = sortable || {};
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -138,9 +153,11 @@ export function InitiativeEntry({
         ]),
         needsRoll
           ? h('button', { class: 'ie__init ie__roll-init', title: 'Roll initiative', onClick: (e) => { e.stopPropagation(); ui.rollMyInitiative(entry.token_id); } }, [h(DiceIcon, {}), ' Roll'])
-          : isGM
-            ? h('span', { class: 'ie__init', contentEditable: true, 'data-init-roll': true, 'data-index': index, title: 'Click to edit', onBlur: onInitBlur, onPointerDown: (e) => e.stopPropagation() }, String(entry.initiative ?? '?'))
-            : h('span', { class: 'ie__init' }, String(entry.initiative ?? '-')),
+          : (entry.initiative != null && Number(entry.initiative) !== 0)
+            ? isGM
+              ? h('span', { class: 'ie__init', contentEditable: true, 'data-init-roll': true, 'data-index': index, title: 'Click to edit', onBlur: onInitBlur, onPointerDown: (e) => e.stopPropagation() }, String(entry.initiative))
+              : h('span', { class: 'ie__init' }, String(entry.initiative))
+            : null,
       ]),
       h('div', { class: 'ie__body' }, [
         h('span', { class: 'ie__hp-text' }, `${entry.hp_current ?? '?'}/${entry.hp_max ?? '?'}`),

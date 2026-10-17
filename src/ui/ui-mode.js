@@ -25,6 +25,7 @@ import {
   layoutModeSignal,
   sheetPanelWidthSignal,
   focusModeSignal,
+  tableModeSignal,
 } from '../state/ui-signals.js';
 import { initiativeSignal } from '../state/signals.js';
 import { readSheetPanelWidth } from '../utils/sheet-panel-size.js';
@@ -121,6 +122,7 @@ export function hydratePhase(userId, roomId, isGM) {
   } catch { /* storage blocked - keep the migrated value */ }
   tablePhaseSignal.value = phase;
   gmPrepActiveSignal.value = prep;
+  tableModeSignal.value = prep ? 'prep' : 'live';
 
   // One-shot sweep of the retired `vtt:calmer-view` toggle.
   try {
@@ -155,6 +157,7 @@ export function setPhase(userId, roomId, phase, opts = {}) {
  */
 export function setGmPrep(userId, roomId, active) {
   gmPrepActiveSignal.value = !!active;
+  tableModeSignal.value = active ? 'prep' : 'live';
   if (!userId || !roomId) return;
   try { writeUserScoped(prepBaseKey(roomId), userId, active ? '1' : '0'); } catch { /* ignore */ }
 }

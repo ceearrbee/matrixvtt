@@ -14,7 +14,7 @@
 
 import { effect } from '@preact/signals';
 import Konva from 'konva';
-import { wallsSignal, activeMapIdSignal } from '../../state/signals.js';
+import { wallsSignal, activeMapIdSignal, mapsSignal } from '../../state/signals.js';
 
 const DOOR_COLOR = 'rgba(120, 200, 140, 0.7)';
 const WALL_COLOR = 'rgba(255, 140, 60, 0.7)';
@@ -33,6 +33,8 @@ export function createWallsLayer(stage, mr) {
   });
   layer.add(preview);
 
+  let _lastCommittedSig = '';
+
   function isGM() {
     return !!mr.state?.isGM?.();
   }
@@ -40,10 +42,26 @@ export function createWallsLayer(stage, mr) {
   function syncCommitted() {
     const walls = wallsSignal.value;
     const activeId = activeMapIdSignal.value;
+    const gm = isGM();
+    const zoom = Number.isFinite(mr.zoom) && mr.zoom > 0 ? mr.zoom : 1;
+    let sig = `${gm}|${activeId || ''}|z${zoom};`;
+    if (gm && walls) {
+      for (const [id, w] of walls) {
+        if (!w?.p1 || !w?.p2 || w.map_id !== activeId) continue;
+        if (!Number.isFinite(w.p1.x) || !Number.isFinite(w.p1.y) ||
+            !Number.isFinite(w.p2.x) || !Number.isFinite(w.p2.y)) continue;
+        sig += `${id}|${w.p1.x}|${w.p1.y}|${w.p2.x}|${w.p2.y}|${w.is_portal}|${w.is_open}|${w.blocks_sight};`;
+      }
+    }
+    if (sig === _lastCommittedSig) return;
+    _lastCommittedSig = sig;
+
     const keep = new Set();
-    if (isGM() && walls) {
+    if (gm && walls) {
       for (const [id, w] of walls) {
         if (!w?.p1 || !w?.p2) continue;
+        if (!Number.isFinite(w.p1.x) || !Number.isFinite(w.p1.y) ||
+            !Number.isFinite(w.p2.x) || !Number.isFinite(w.p2.y)) continue;
         if (w.map_id !== activeId) continue;
         keep.add(id);
         let line = lines.get(id);
@@ -67,7 +85,6 @@ export function createWallsLayer(stage, mr) {
           });
           line._portalClickBound = true;
         }
-        const zoom = mr.zoom || 1;
         const isPortal = w.is_portal === true;
         const isOpen = isPortal ? w.is_open === true : w.blocks_sight === false;
         line.points([w.p1.x, w.p1.y, w.p2.x, w.p2.y]);
@@ -93,9 +110,11 @@ export function createWallsLayer(stage, mr) {
     const drawing = mr.drawing;
     const show = isGM()
       && mr.activeTool === 'wall'
-      && drawing?.isActive && drawing.start && drawing.current;
+      && drawing?.isActive && drawing.start && drawing.current
+      && Number.isFinite(drawing.start.x) && Number.isFinite(drawing.start.y)
+      && Number.isFinite(drawing.current.x) && Number.isFinite(drawing.current.y);
     if (!show) { preview.visible(false); return; }
-    const zoom = mr.zoom || 1;
+    const zoom = Number.isFinite(mr.zoom) && mr.zoom > 0 ? mr.zoom : 1;
     preview.visible(true);
     preview.points([drawing.start.x, drawing.start.y, drawing.current.x, drawing.current.y]);
     preview.strokeWidth(2 / zoom);
@@ -103,6 +122,16 @@ export function createWallsLayer(stage, mr) {
   }
 
   function sync() {
+    const activeId = activeMapIdSignal.value;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
+        && typeof map.cell_px === 'number') {
+      const w = map.width_cells * map.cell_px;
+      const h = map.height_cells * map.cell_px;
+      layer.clipFunc((ctx) => { ctx.rect(0, 0, w, h); });
+    } else {
+      layer.clipFunc(null);
+    }
     syncCommitted();
     syncPreview();
     layer.batchDraw();
@@ -111,8 +140,8 @@ export function createWallsLayer(stage, mr) {
   const dispose = effect(() => {
     wallsSignal.value;
     activeMapIdSignal.value;
-    syncCommitted();
-    layer.batchDraw();
+    mapsSignal.value;
+    sync();
   });
 
   return { layer, lines, dispose, sync };

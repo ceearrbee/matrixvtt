@@ -9,6 +9,7 @@ import { bumpLogVersion } from '../state/ui-signals.js';
 import { CHAT_MSGTYPES } from '../chat/timeline-intake.js';
 import { logger } from '../utils/logger.js';
 import { setSyncPhase } from './sync/sync-progress.js';
+import { formatSceneRootBody, formatSayLogBody } from './chat-log-format.js';
 
 const MAX_LOG_ENTRIES = 2000;
 
@@ -139,6 +140,17 @@ export async function backfillRecentHistory(ui, { minEntries = 25, maxPages = 12
 }
 
 function _processHistoricalMessages(ui, messages) {
+  const resolveEntity = {
+    refs: {
+      characters: ui.state?.characters,
+      npcs: ui.state?.npcs,
+      items: ui.state?.items,
+      spells: ui.state?.spells,
+      maps: ui.state?.maps,
+      fallback: true,
+    },
+    tables: ui.state?.tables,
+  };
   for (const e of messages.reverse()) {
     ui._seenLogEventIds.add(e.event_id);
     const body = e.content.body ?? '';
@@ -155,9 +167,33 @@ function _processHistoricalMessages(ui, messages) {
     // same fields - keep parity here for the backfill path.
     const isSceneRoot = e.content?.['com.vtt.scene_root'] === true;
     const sceneTitle = e.content?.['com.vtt.scene_title'] ?? null;
+    const fmt = {
+      format: e.content?.format ?? null,
+      formatted_body: e.content?.formatted_body ?? null,
+      fallback: true,
+      resolveEntity,
+    };
+    let html;
+    if (isSceneRoot) {
+      html = formatSceneRootBody(sceneTitle, body, fmt, resolveEntity);
+    } else {
+      const speakAsTokenId = e.content?.['com.vtt.speak_as_token'] ?? null;
+      let tokenId = speakAsTokenId;
+      if (!tokenId) {
+        try {
+          tokenId = ui._findTokenForSender ? ui._findTokenForSender(e.sender) : findTokenForSender(ui, e.sender);
+        } catch {
+          tokenId = null;
+        }
+      }
+      const token = tokenId ? ui.state?.tokens?.get?.(tokenId) : null;
+      const displayName = token?.name ?? sender;
+      const personaName = speakAsTokenId ? (token?.name ?? null) : null;
+      html = formatSayLogBody(displayName, body, personaName, fmt, resolveEntity);
+    }
     ui.activityLog.push({
       icon: '💬',
-      html: `<b>${_esc(sender)}</b>: ${_esc(body)}`,
+      html,
       text, ts,
       eventId: e.event_id ?? null,
       sender: e.sender ?? null,
@@ -175,10 +211,11 @@ function _esc(s) {
 
 /** Map a sender's Matrix user ID to a token ID via their claimed character. */
 export function findTokenForSender(ui, userId) {
+  if (!ui?.state?.characters || !ui?.state?.tokens) return null;
   for (const [charId, char] of ui.state.characters) {
-    if (char.claimed_by_user_id === userId) {
+    if (char?.claimed_by_user_id === userId) {
       for (const [tokenId, token] of ui.state.tokens) {
-        if (token.sheet_id === charId) return tokenId;
+        if (token?.sheet_id === charId) return tokenId;
       }
     }
   }

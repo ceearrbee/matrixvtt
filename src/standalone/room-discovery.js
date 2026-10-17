@@ -15,6 +15,7 @@ import { startInvitePolling, stopInvitePolling } from './discovery/invite-pollin
 import {
   renderPendingInvites, renderRecentSessions, renderActiveSessions,
 } from './discovery/render.js';
+import { describeNetworkError } from '../utils/errorHandling.js';
 
 export async function loadDiscovery(app) {
   app.appLog.add('info', '← discovery screen');
@@ -123,12 +124,12 @@ export async function loadDiscovery(app) {
 function _renderScanFailure(app, err) {
   const errEl = app.doc.getElementById('discovery-error');
   if (!errEl) {
-    app.setError('discovery-error', 'Failed to scan rooms from Matrix: ' + err.message);
+    app.setError('discovery-error', 'Failed to scan rooms from Matrix: ' + describeNetworkError(err));
     return;
   }
   errEl.textContent = '';
   const span = document.createElement('span');
-  span.textContent = `Failed to scan rooms: ${err.message}. `;
+  span.textContent = `Failed to scan rooms: ${describeNetworkError(err)}. `;
   errEl.appendChild(span);
   const retry = document.createElement('button');
   retry.type = 'button';

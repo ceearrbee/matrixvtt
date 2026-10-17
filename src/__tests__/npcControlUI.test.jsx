@@ -3,12 +3,20 @@
  * hand a creature (summon / familiar / henchman) to a player, who then
  * sees it in their Party roster. Players never see the picker.
  */
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { h } from 'preact';
 import { render, fireEvent, cleanup } from '@testing-library/preact';
 import { NPCSheet } from '../ui/NPCSheet.jsx';
+import { tableModeSignal } from '../state/ui-signals.js';
 
-afterEach(() => cleanup());
+beforeEach(() => {
+  tableModeSignal.value = 'prep';
+});
+
+afterEach(() => {
+  cleanup();
+  tableModeSignal.value = 'prep';
+});
 
 function mkUi({ isGM = true, controlledBy = null } = {}) {
   const npc = { id: 'npc-fam', type: 'npc', name: 'Pseudodragon', cr: '1/4', controlled_by: controlledBy };
@@ -62,5 +70,18 @@ describe('NPC sheet control picker', () => {
   it('hides the picker from non-GM players', () => {
     const { container } = render(h(NPCSheet, { ui: mkUi({ isGM: false }) }));
     expect(container.querySelector('[data-npc-control]')).toBeNull();
+  });
+
+  it('hides authoring chrome (Controlled by and Place button) in live mode', () => {
+    tableModeSignal.value = 'prep';
+    const prepResult = render(h(NPCSheet, { ui: mkUi() }));
+    expect(prepResult.container.querySelector('[data-npc-control]')).not.toBeNull();
+    expect(prepResult.container.querySelector('#npc-place-btn')).not.toBeNull();
+    cleanup();
+
+    tableModeSignal.value = 'live';
+    const liveResult = render(h(NPCSheet, { ui: mkUi() }));
+    expect(liveResult.container.querySelector('[data-npc-control]')).toBeNull();
+    expect(liveResult.container.querySelector('#npc-place-btn')).toBeNull();
   });
 });

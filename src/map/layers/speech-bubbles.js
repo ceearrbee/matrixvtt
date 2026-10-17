@@ -49,6 +49,9 @@ export function createSpeechBubblesLayer(stage, mr) {
   const layer = new Konva.Layer({ listening: false });
   stage.add(layer);
 
+  const activeTimers = new Set();
+  const activeTweens = new Set();
+
   function addBubble(x, y, body) {
     const text = truncate(body);
     if (!text) return;
@@ -89,7 +92,8 @@ export function createSpeechBubblesLayer(stage, mr) {
     layer.add(label);
 
     const lifetimeMs = computeBubbleLifetime(body);
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
+      activeTimers.delete(timerId);
       if (prefersReducedMotion()) {
         label.destroy();
         layer.batchDraw();
@@ -100,18 +104,25 @@ export function createSpeechBubblesLayer(stage, mr) {
         duration: BUBBLE_FADE_MS / 1000,
         opacity: 0,
         onFinish: () => {
+          activeTweens.delete(fade);
           fade.destroy();
           label.destroy();
           layer.batchDraw();
         },
       });
+      activeTweens.add(fade);
       fade.play();
     }, lifetimeMs - BUBBLE_FADE_MS);
+    activeTimers.add(timerId);
 
     layer.batchDraw();
   }
 
   function destroy() {
+    for (const t of activeTimers) clearTimeout(t);
+    activeTimers.clear();
+    for (const tw of activeTweens) tw.destroy();
+    activeTweens.clear();
     layer.destroy();
   }
 

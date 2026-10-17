@@ -115,7 +115,13 @@ export class YjsManager {
    * Transport Boundary: Entry point for updates from Matrix.
    */
   handleMatrixUpdate(payload) {
+    if (!payload) return;
     const { sequenceId, index, total, data, timestamp } = payload;
+
+    if (!Number.isInteger(index) || !Number.isInteger(total)) return;
+    if (total <= 0 || total > 256) return;
+    if (index < 0 || index >= total) return;
+    if (!(data instanceof Uint8Array) && !Array.isArray(data)) return;
 
     // 1. Snapshot Cutoff Check: The Yjs state vector is authoritative,
     // but the timestamp check is a vital optimization to avoid buffering
@@ -137,6 +143,13 @@ export class YjsManager {
     buffer.chunks.set(index, new Uint8Array(data));
 
     if (buffer.chunks.size === buffer.total) {
+      for (let i = 0; i < buffer.total; i++) {
+        const c = buffer.chunks.get(i);
+        if (!(c instanceof Uint8Array) && !Array.isArray(c)) {
+          this._reassemblyBuffers.delete(sequenceId);
+          return;
+        }
+      }
       const fullUpdate = this._reassemble(buffer);
       this._reassemblyBuffers.delete(sequenceId);
       this._applyValidatedUpdate(fullUpdate);
@@ -155,13 +168,14 @@ export class YjsManager {
   }
 
   _reassemble(buffer) {
-    const sortedIndices = Array.from(buffer.chunks.keys()).sort((a, b) => a - b);
-    const totalLength = Array.from(buffer.chunks.values()).reduce((acc, c) => acc + c.length, 0);
+    const chunks = buffer?.chunks || buffer;
+    const sortedIndices = Array.from(chunks.keys()).sort((a, b) => a - b);
+    const totalLength = Array.from(chunks.values()).reduce((acc, c) => acc + c.length, 0);
     const result = new Uint8Array(totalLength);
     let offset = 0;
     for (const idx of sortedIndices) {
-      result.set(buffer.chunks.get(idx), offset);
-      offset += buffer.chunks.get(idx).length;
+      result.set(chunks.get(idx), offset);
+      offset += chunks.get(idx).length;
     }
     return result;
   }

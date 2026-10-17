@@ -14,11 +14,7 @@
 // anyway, so no real caching ever happens here.
 const SHELL = 'mvtt-shell-__BUILD_VERSION__';
 
-const PRECACHE = [
-  '__BASE_URL__app.html',
-  '__BASE_URL__manifest.json',
-  '__BASE_URL__icon.svg'
-];
+const PRECACHE = ['__BASE_URL__app.html', '__BASE_URL__manifest.json', '__BASE_URL__icon.svg'];
 
 // ── Install: pre-cache the app shell ────────────────────────────────────────
 // On localhost we never want a SW alive - it precaches app.html and
@@ -48,10 +44,7 @@ self.addEventListener('install', event => {
   // until the page asks for it, so a deploy never replaces a build
   // under a live session. The page prompts; SKIP_WAITING below is how
   // it accepts.
-  event.waitUntil(
-    caches.open(SHELL)
-      .then(cache => cache.addAll(PRECACHE))
-  );
+  event.waitUntil(caches.open(SHELL).then(cache => cache.addAll(PRECACHE)));
 });
 
 // The one message this worker answers. Sent by the page to the waiting
@@ -69,10 +62,9 @@ self.addEventListener('activate', event => {
     return;
   }
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(k => k !== SHELL).map(k => caches.delete(k))
-      ))
+    caches
+      .keys()
+      .then(keys => Promise.all(keys.filter(k => k !== SHELL).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -104,8 +96,7 @@ self.addEventListener('fetch', event => {
   // HTML navigations → network-first so a fresh deploy is picked up
   // immediately; fall back to cache when offline. App chunks are
   // content-hashed, so the HTML is the only thing that can go stale.
-  if (request.mode === 'navigate' ||
-      (request.headers.get('accept') || '').includes('text/html')) {
+  if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
     event.respondWith(
       fetch(request)
         .then(response => {

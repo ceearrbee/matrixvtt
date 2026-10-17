@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/preact';
+import { render, fireEvent } from '@testing-library/preact';
 import { h } from 'preact';
 
 import { CharacterSheet } from '../ui/CharacterSheet.jsx';
@@ -19,6 +19,10 @@ import { NPCSheet } from '../ui/NPCSheet.jsx';
 import { EntityList } from '../ui/EntityList.jsx';
 import { Items } from '../ui/Items.jsx';
 import { Spells } from '../ui/Spells.jsx';
+import { BrowsePanel } from '../ui/BrowsePanel.jsx';
+import { OOCPanel } from '../ui/OOCPanel.jsx';
+import { resolveMediaUrl } from '../utils/mxc.js';
+import { parseRevealedCells } from '../map/fog-cells.js';
 import { ENTITY_TYPES } from '../utils/constants.js';
 
 function mkUi(overrides = {}) {
@@ -75,7 +79,7 @@ function renderHTML(tree) {
 }
 
 function assertNoRawXSS(container, payload) {
-  // Structural: no parsed <script>, <img onerror=…>, <svg onload=…> nodes.
+  // Structural: no parsed <script>, <img onerror=...>, <svg onload=...> nodes.
   expect(container.querySelectorAll('script')).toHaveLength(0);
   for (const el of container.querySelectorAll('*')) {
     for (const attr of el.attributes ?? []) {
@@ -100,9 +104,9 @@ function assertNoRawXSS(container, payload) {
   }
 }
 
-// ── CharacterSheet – XSS in character fields ─────────────────────────────────
+// CharacterSheet - XSS in character fields
 
-describe('CharacterSheet – XSS safety', () => {
+describe('CharacterSheet - XSS safety', () => {
   const base = () => ({
     id: 'chr-1', name: 'Hero', class_level: 'Fighter 5', species: 'Human',
     hp_current: 40, hp_max: 40, ac: 16, speed: 30, initiative_bonus: 2,
@@ -134,9 +138,9 @@ describe('CharacterSheet – XSS safety', () => {
   });
 });
 
-// ── NPCSheet – XSS in NPC fields ─────────────────────────────────────────────
+// NPCSheet - XSS in NPC fields
 
-describe('NPCSheet – XSS safety', () => {
+describe('NPCSheet - XSS safety', () => {
   const baseNPC = () => ({
     id: 'npc-1', name: 'Goblin Boss', cr: '5', size_category: 'Medium',
     hp_current: 100, hp_max: 100, ac: 15, speed: 30, attributes: {}, actions: [],
@@ -155,9 +159,9 @@ describe('NPCSheet – XSS safety', () => {
   });
 });
 
-// ── EntityList (character list) – XSS in list item fields ────────────────────
+// EntityList (character list) - XSS in list item fields
 
-describe('EntityList(PC) – XSS safety', () => {
+describe('EntityList(PC) - XSS safety', () => {
   it('escapes XSS payloads in character names', () => {
     for (const payload of ['<script>alert(1)</script>', '"><img src=x onerror=alert(1)>', "' onclick='alert(1)'"]) {
       const ui = mkUi({
@@ -171,9 +175,9 @@ describe('EntityList(PC) – XSS safety', () => {
   });
 });
 
-// ── Baseline: safe data passes through intact ────────────────────────────────
+// Baseline: safe data passes through intact
 
-describe('rendering – safe data', () => {
+describe('rendering - safe data', () => {
   it('CharacterSheet preserves normal text', () => {
     const ui = mkUi({
       currentCharacter: {
@@ -201,9 +205,9 @@ describe('rendering – safe data', () => {
   });
 });
 
-// ── Items – XSS prevention in item names ─────────────────────────────────────
+// Items - XSS prevention in item names
 
-describe('Items – XSS prevention', () => {
+describe('Items - XSS prevention', () => {
   const character = { id: 'char-1', name: 'Hero', inventory_ids: ['item-1'] };
 
   function mkItemUi(itemOverrides = {}) {
@@ -248,9 +252,9 @@ describe('Items – XSS prevention', () => {
   });
 });
 
-// ── Spells – XSS prevention in spell fields ──────────────────────────────────
+// Spells - XSS prevention in spell fields
 
-describe('Spells – XSS prevention', () => {
+describe('Spells - XSS prevention', () => {
   const character = {
     id: 'char-1', name: 'Wizard', inventory_ids: [],
     spell_ids: ['spell-1'], spellcasting_ability: 'int', spell_slots: {},
@@ -304,5 +308,90 @@ describe('Spells – XSS prevention', () => {
     const ui = mkSpellUi({ description: '<img src=x onerror=alert(1)>' });
     const c = renderHTML(h(Spells, { ui }));
     expect(c.querySelectorAll('img[onerror]')).toHaveLength(0);
+  });
+});
+
+// BrowsePanel and OOCPanel - XSS safety in log entries
+
+describe('BrowsePanel and OOCPanel - XSS safety', () => {
+  it('BrowsePanel renders entry text as safe text children rather than unescaped HTML', () => {
+    const payload = '<script>window.hacked=1</script><b>bold</b><img src=x onerror=alert(1)>';
+    const ui = {
+      ...mkUi(),
+      activityLog: [
+        { icon: '🎲', text: payload, ts: 100 },
+      ],
+    };
+    const c = renderHTML(h(BrowsePanel, { ui }));
+    fireEvent.click(c.querySelector('[data-browse-tab="rolls"]'));
+    expect(c.querySelectorAll('script')).toHaveLength(0);
+    expect(c.querySelectorAll('b')).toHaveLength(0);
+    expect(c.querySelectorAll('img')).toHaveLength(0);
+    expect(c.textContent).toContain(payload);
+  });
+
+  it('OOCPanel renders entry text as safe text children rather than unescaped HTML', () => {
+    const payload = '<script>window.hacked=1</script><b>bold</b><img src=x onerror=alert(1)>';
+    const ui = {
+      ...mkUi(),
+      activityLog: [
+        { msgtype: 'm.notice', text: payload, ts: 101 },
+      ],
+    };
+    const c = renderHTML(h(OOCPanel, { ui }));
+    expect(c.querySelectorAll('script')).toHaveLength(0);
+    expect(c.querySelectorAll('b')).toHaveLength(0);
+    expect(c.querySelectorAll('img')).toHaveLength(0);
+    expect(c.textContent).toContain(payload);
+  });
+});
+
+// resolveMediaUrl - protocol safety
+
+describe('resolveMediaUrl - protocol safety', () => {
+  it('blocks javascript: URLs', () => {
+    expect(resolveMediaUrl('javascript:alert(1)', 'https://hs')).toBe('');
+    expect(resolveMediaUrl('JAVASCRIPT:alert(1)', 'https://hs')).toBe('');
+    expect(resolveMediaUrl('javascript:void(0)', null)).toBe('');
+  });
+
+  it('blocks unsafe data URLs and protocol-relative URLs', () => {
+    expect(resolveMediaUrl('data:text/html,<script>alert(1)</script>', 'https://hs')).toBe('');
+    expect(resolveMediaUrl('//evil.example.com/malicious.png', 'https://hs')).toBe('');
+  });
+
+  it('allows safe protocols and paths', () => {
+    expect(resolveMediaUrl('https://example.com/safe.png', 'https://hs')).toBe('https://example.com/safe.png');
+    expect(resolveMediaUrl('http://example.com/safe.png', 'https://hs')).toBe('http://example.com/safe.png');
+    expect(resolveMediaUrl('/icons/token.svg', 'https://hs')).toBe('/icons/token.svg');
+    expect(resolveMediaUrl('blob:https://example.com/uuid', 'https://hs')).toBe('blob:https://example.com/uuid');
+    expect(resolveMediaUrl('data:image/png;base64,abc', 'https://hs')).toBe('data:image/png;base64,abc');
+  });
+});
+
+// parseRevealedCells - malformed input validation
+
+describe('parseRevealedCells - malformed input validation', () => {
+  it('ignores malformed, non-string, or NaN/Infinity coordinate pairs', () => {
+    const inputs = [
+      '0,0',
+      'invalid',
+      '1,NaN',
+      'NaN,2',
+      'Infinity,0',
+      '0,-Infinity',
+      null,
+      undefined,
+      42,
+      {},
+      '3,4',
+    ];
+    expect(parseRevealedCells(inputs)).toEqual([[0, 0], [3, 4]]);
+  });
+
+  it('handles empty or missing arrays safely', () => {
+    expect(parseRevealedCells([])).toEqual([]);
+    expect(parseRevealedCells(null)).toEqual([]);
+    expect(parseRevealedCells(undefined)).toEqual([]);
   });
 });

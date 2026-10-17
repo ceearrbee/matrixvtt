@@ -8,7 +8,7 @@ import { render, h } from 'preact';
 import { fireEvent } from '@testing-library/preact';
 import { buildTokenBarActions } from '../ui/token-bar-actions.js';
 import { TokenActionBar } from '../ui/TokenActionBar.jsx';
-import { selectedTokenSignal } from '../state/ui-signals.js';
+import { selectedTokenSignal, companionCollapsedSignal, activeTabSignal, selectedNPCIdSignal } from '../state/ui-signals.js';
 import { tokensSignal } from '../state/signals.js';
 
 const TOKEN = { id: 't1', name: 'Goblin', type: 'npc', owner_user_id: null, visible: true };
@@ -89,5 +89,26 @@ describe('TokenActionBar', () => {
     return Promise.resolve().then(() => {
       expect(host.querySelector('.token-action-bar')).toBeNull();
     });
+  });
+
+  it('suppresses the bar when companion is expanded and inspecting the same entity', () => {
+    selectedTokenSignal.value = TOKEN.id;
+    companionCollapsedSignal.value = false;
+    activeTabSignal.value = 'npcs';
+    selectedNPCIdSignal.value = TOKEN.id;
+
+    render(h(TokenActionBar, { ui: makeUi() }), host);
+    expect(host.querySelector('#token-action-bar')).toBeNull();
+
+    // When companion is collapsed, bar renders
+    companionCollapsedSignal.value = true;
+    render(h(TokenActionBar, { ui: makeUi() }), host);
+    expect(host.querySelector('#token-action-bar')).not.toBeNull();
+
+    // When companion is open but inspecting a different entity, bar renders
+    companionCollapsedSignal.value = false;
+    selectedNPCIdSignal.value = 'other-npc';
+    render(h(TokenActionBar, { ui: makeUi() }), host);
+    expect(host.querySelector('#token-action-bar')).not.toBeNull();
   });
 });

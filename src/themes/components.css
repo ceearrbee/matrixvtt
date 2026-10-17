@@ -1,0 +1,170 @@
+/* components.css - VTT tabletop components */
+
+/* Map stage backdrop */
+.map-strip,
+.map-viewport,
+.map-container {
+  background: var(--map-stage-bg, #e4e2db);
+}
+
+/* Map toolbar flattened buttons and integrated zoom dock */
+.map-toolbar.draw-toolbar,
+.draw-toolbar {
+  top: 52px;
+  left: 12px;
+  bottom: auto;
+  right: auto;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-lg);
+}
+
+.map-toolbar .dtb-btn,
+.draw-toolbar .dtb-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.map-toolbar .dtb-btn:hover,
+.draw-toolbar .dtb-btn:hover {
+  background: var(--color-background-tertiary);
+}
+
+.draw-toolbar .map-controls,
+.map-toolbar__zoom {
+  position: static;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 0.5px solid var(--color-border-tertiary);
+  width: 100%;
+}
+
+.draw-toolbar .map-controls button,
+.map-toolbar__zoom button,
+.map-toolbar__zoom .map-tool-btn {
+  min-width: 28px;
+  width: 28px;
+  min-height: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
+  box-shadow: none;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.draw-toolbar .map-controls button:hover,
+.map-toolbar__zoom button:hover,
+.map-toolbar__zoom .map-tool-btn:hover {
+  background: var(--color-background-hover, var(--color-background-secondary));
+}
+
+/* Token action bar: unified floating pill toolbar without nested boxes */
+.token-action-bar {
+  position: absolute;
+  bottom: var(--space-sm);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 3px var(--space-sm);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elev-2);
+  z-index: var(--z-hud);
+  backdrop-filter: blur(8px);
+}
+
+.token-action-bar .dbt {
+  border: none;
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+  padding: 3px var(--space-md);
+  font-size: var(--font-size-xs);
+  box-shadow: none;
+}
+
+.token-action-bar .dbt:hover {
+  background: var(--color-background-tertiary);
+}
+
+/* Streamlined Initiative Strip, Active Card, and Chips */
+.initiative-strip,
+.combat-init-strip {
+  padding: var(--space-xs) var(--space-lg);
+  background: var(--color-background-secondary);
+  border-bottom: 0.5px solid var(--color-border-primary);
+}
+
+.initiative-strip button,
+.combat-init-strip button,
+.init-active-card button,
+.init-chip button {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.init-chip,
+.init-active-card {
+  border: none;
+  box-shadow: none;
+}
+
+/* Secondary Sub-Tab Bar (.sheet-tabs under .companion-tabs) */
+.sheet-tabs,
+.ctabs--sub {
+  background: var(--color-bg-inset, rgba(0, 0, 0, 0.2));
+  padding: var(--space-2xs);
+  border-radius: var(--border-radius-sm);
+  gap: var(--space-2xs);
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+}
+
+.sheet-tabs .tab,
+.sheet-tabs .tab-btn,
+.ctabs--sub .ctab {
+  font-size: var(--font-size-xs);
+  padding: var(--space-2xs) var(--space-sm);
+  border: none;
+  border-bottom: none;
+  border-radius: var(--border-radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.sheet-tabs .tab:hover,
+.sheet-tabs .tab-btn:hover,
+.ctabs--sub .ctab:hover {
+  background: var(--color-background-hover, rgba(255, 255, 255, 0.05));
+  color: var(--color-text-primary);
+}
+
+.sheet-tabs .tab.on,
+.sheet-tabs .tab-btn.on,
+.sheet-tabs .tab--active,
+.ctabs--sub .ctab.on {
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
+  border: none !important;
+  border-bottom: none !important;
+  border-bottom-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+

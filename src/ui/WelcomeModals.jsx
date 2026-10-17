@@ -12,13 +12,12 @@ function WaitingForGMModal({ ui, authOk, diag = null, onClose }) {
   const [title, body] = !authOk
     ? [
         'Authentication Failed',
-        `MatrixVTT could not verify your identity.<br>
-         This usually means the homeserver's OpenID endpoint is unreachable or blocked by CORS.<br><br>
-         Try reloading the widget. If the problem persists, check the browser console for details.`
+        `MatrixVTT could not verify your account connection with the homeserver.<br>
+         Try reloading the widget or ask the room admin to check the homeserver configuration.`
       ]
     : [
         'Waiting for GM',
-        `No session has been set up in this room yet.<br>
+        `No campaign has been set up in this room yet.<br>
          A room moderator or GM needs to create the session first.`
       ];
 

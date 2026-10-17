@@ -73,19 +73,18 @@ describe('MapStrip toolbar - contextual groups', () => {
     expect(navTab.getAttribute('aria-disabled')).toBe('false');
   });
 
-  it('combat mode locks the toolbar to Navigation (pointer + measure)', () => {
+  it('combat mode allows drawing group and surfaces navigation by default', () => {
     tablePhaseSignal.value = UI_MODES.COMBAT;
-    activeToolGroupSignal.value = TOOL_GROUPS.DRAWING; // user tried to switch
+    activeToolGroupSignal.value = TOOL_GROUPS.NAVIGATION;
     const { container } = render(h(MapStrip, { ui: mkUi() }));
     const ids = toolIds(container);
     expect(ids).toContain('pointer');
     expect(ids).toContain('measure');
-    for (const id of ['pencil', 'line', 'rect', 'circle']) {
-      expect(ids).not.toContain(id);
-    }
-    // Group tabs render but are aria-disabled in Combat.
+    // Navigation and Drawing tabs are unlocked in Combat.
     const navTab = container.querySelector(`[data-tool-group="${TOOL_GROUPS.NAVIGATION}"]`);
-    expect(navTab.getAttribute('aria-disabled')).toBe('true');
+    expect(navTab.getAttribute('aria-disabled')).toBe('false');
+    const drawTab = container.querySelector(`[data-tool-group="${TOOL_GROUPS.DRAWING}"]`);
+    expect(drawTab.getAttribute('aria-disabled')).toBe('false');
   });
 
   it('Prep mode: switching to the Drawing group surfaces pencil / line / rect / circle', () => {

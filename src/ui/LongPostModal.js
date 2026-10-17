@@ -34,8 +34,6 @@ function LongPostBody({ ui, syncInline, roomId, initial, onClose }) {
   useLayoutEffect(() => {
     const root = rootRef.current;
     const textarea = root.querySelector('#long-post-textarea');
-    // Set the value as a property after mount so a draft containing
-    // HTML-significant characters round-trips intact.
     textarea.value = initial;
     const toggle = bindVisualEditorToggle(root, textarea);
     toggleRef.current = toggle;

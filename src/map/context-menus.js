@@ -11,6 +11,7 @@
 
 import { esc } from '../utils/domHelpers.js';
 import { destinationOf, runTravel } from './actions/pin-travel.js';
+import { selectedTokenSignal } from '../state/ui-signals.js';
 
 function closeAnyOpenMenu() {
   document.querySelectorAll('.context-menu').forEach((m) => m.remove());
@@ -155,6 +156,33 @@ export function showTokenContextMenu(mr, token, screenX, screenY) {
     label: 'View Sheet',
     action: () => {
       window.dispatchEvent(new CustomEvent('vtt:view-sheet', { detail: { tokenId: token.id } }));
+    },
+  });
+
+  if (isGM || isOwner) {
+    items.push({
+      label: 'Adjust HP & Conditions',
+      action: () => {
+        selectedTokenSignal.value = token.id;
+        mr.setSelectedToken?.(token.id);
+      },
+    });
+  }
+
+  items.push({
+    label: 'Ping Here',
+    action: () => {
+      let px = tokenData.x;
+      let py = tokenData.y;
+      if ((px == null || py == null) && tokenData.col != null && tokenData.row != null && mr.state?.map) {
+        const cellPx = mr.state.map.cell_px || 40;
+        const size = tokenData.size || 1;
+        px = (tokenData.col + size / 2) * cellPx;
+        py = (tokenData.row + size / 2) * cellPx;
+      }
+      if (px != null && py != null) {
+        mr.broadcastPing?.(px, py);
+      }
     },
   });
 

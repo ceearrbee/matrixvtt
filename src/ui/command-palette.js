@@ -130,6 +130,7 @@ function _selectResult(ui, entry) {
 
 function PaletteRow({ result, index, active, onPick }) {
   return h('div', {
+    id: `cp-opt-${index}`,
     class: `cp-row${active ? ' cp-row--active' : ''}`,
     role: 'option',
     'data-index': String(index),
@@ -180,7 +181,9 @@ function PaletteBody({ ui, entries, onClose }) {
     h('input', {
       id: 'cp-input', type: 'text', class: 'form-input', placeholder: 'Search, or run a command…',
       'aria-label': 'Search the campaign, or run a command', autocomplete: 'off',
+      role: 'combobox', 'aria-expanded': 'true',
       'aria-controls': 'cp-results', 'aria-autocomplete': 'list',
+      'aria-activedescendant': results.length > 0 ? `cp-opt-${activeIndex}` : undefined,
       onInput: (e) => { setQuery(e.target.value.trim()); setActiveIndex(0); },
       onKeyDown,
     }),

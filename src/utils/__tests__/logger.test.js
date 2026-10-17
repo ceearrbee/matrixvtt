@@ -36,9 +36,6 @@ describe('Logger Utility', () => {
   });
 
   it('should only log if import.meta.env.DEV is true (mocked)', () => {
-    // Note: In tests, import.meta.env.DEV is usually true.
-    // To truly test production exclusion, we'd need to mock the environment.
-    // For now, let's just ensure it DOES log in the test environment.
     logger.log('Test', 'Should be visible');
     expect(logSpy).toHaveBeenCalled();
   });

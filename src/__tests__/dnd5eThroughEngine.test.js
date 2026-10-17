@@ -11,7 +11,7 @@ import { lookupTable } from '../engine/lookupTable.js';
 import { applyHarm } from '../engine/applyHarm.js';
 import { runStateMachine } from '../engine/runStateMachine.js';
 
-// Helper: evaluation context includes tables for @lookup.
+// Evaluation context includes tables for @lookup.
 function ctx(extra = {}) {
   return { tables: dnd5e.tables, ...extra };
 }

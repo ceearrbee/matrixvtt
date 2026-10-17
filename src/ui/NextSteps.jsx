@@ -53,6 +53,7 @@ export function NextSteps({ ui }) {
   initiativeSignal.value; roomMembersSignal.value;
 
   if (dismissed === '1') return null;
+  if (ui.state?.initiative?.active === true) return null;
 
   const steps = nextStepsFor({
     isGM: ui.state?.isGM?.() === true,

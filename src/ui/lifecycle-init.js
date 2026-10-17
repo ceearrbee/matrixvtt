@@ -217,22 +217,32 @@ function _setupChatListeners(ui) {
       isSceneRoot: !!isSceneRoot, sceneTitle: sceneTitle ?? null,
       long: isLongBody(body),
     };
-    const fmt = { format, formatted_body };
+    const resolveEntity = {
+      refs: {
+        characters: ui.state?.characters,
+        npcs: ui.state?.npcs,
+        items: ui.state?.items,
+        spells: ui.state?.spells,
+        maps: ui.state?.maps,
+      },
+      tables: ui.state?.tables,
+    };
+    const fmt = { format, formatted_body, resolveEntity };
 
     if (isSceneRoot) {
-      ui._log('🎬', formatSceneRootBody(sceneTitle, body, fmt), logOpts);
+      ui._log('🎬', formatSceneRootBody(sceneTitle, body, fmt, resolveEntity), logOpts);
     } else if (whisperTo) {
       const toDisplay = whisperTo.split(':')[0].replace('@', '');
       ui._log('🔒', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b>: ${esc(body)}`, logOpts);
     } else if (msgtype === 'm.emote') {
-      ui._log('💭', formatEmoteLogBody(displayName, body, personaName, fmt), logOpts);
+      ui._log('💭', formatEmoteLogBody(displayName, body, personaName, fmt, resolveEntity), logOpts);
       if (!historical && tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, body);
     } else if (msgtype === 'm.notice') {
       // OOC: dim/italic styling, no speech bubble (out-of-character is not
       // a thing a token says).
       ui._log('📢', `<span class="log-entry--ooc">((OOC)) <b>${esc(displayName)}</b>: ${renderChatBody(body, fmt)}</span>`, logOpts);
     } else {
-      ui._log('💬', formatSayLogBody(displayName, body, personaName, fmt), logOpts);
+      ui._log('💬', formatSayLogBody(displayName, body, personaName, fmt, resolveEntity), logOpts);
       if (!historical && tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, body);
     }
     // Mirror live (non-historical) chat to the polite live region so

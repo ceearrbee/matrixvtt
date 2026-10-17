@@ -21,6 +21,8 @@ import { openLongPostModal } from '../LongPostModal.js';
 import { SceneIcon, LongPostIcon, PersonIcon } from '../icons/index.jsx';
 import { readDraft, writeDraft, autoGrow } from '../chat-composer-helpers.js';
 import { ChatModePills } from './dice-controls.jsx';
+import { normalizeEmDashes } from '../../utils/format.js';
+
 
 function TonePill() {
   const [open, setOpen] = useState(false);
@@ -119,119 +121,118 @@ export function ChatCluster({ ui, isGM, extras = null, isMobile = false }) {
   const [personaPickerOpen, setPersonaPickerOpen] = useState(false);
   const currentPersona = personas.find(([id]) => id === speakAsSignal.value);
   const personaLabel = currentPersona?.[1]?.name ?? 'You';
+  const hasMeta = !!(scene || replyCtx || showChipStack);
 
   return h('div', { class: 'dice-bar__chat-cluster' }, [
-    h('div', { class: 'dice-bar__sep' }),
-    scene && h('div', { class: 'scene-banner', role: 'status', 'aria-live': 'polite' }, [
-      h('span', { class: 'scene-banner__icon', 'aria-hidden': 'true' }, '🎬'),
-      h('span', { class: 'scene-banner__title' }, `Posting in: ${scene.title}`),
-      h('button', {
+    hasMeta && h('div', { class: 'dice-bar__composer-meta' }, [
+      scene && h('div', { class: 'scene-banner', role: 'status', 'aria-live': 'polite' }, [
+        h('span', { class: 'scene-banner__icon', 'aria-hidden': 'true' }, '🎬'),
+        h('span', { class: 'scene-banner__title' }, `Posting in: ${normalizeEmDashes(scene.title)}`),
+        h('button', {
+          type: 'button',
+          class: 'scene-banner__leave',
+          title: 'Leave the scene; subsequent chat goes to the main timeline',
+          'aria-label': 'Leave scene',
+          onClick: () => leaveScene(ui),
+        }, '×'),
+      ]),
+      replyCtx && h('div', { class: 'reply-context-chip' }, [
+        h('span', null, `Replying to ${replyCtx.rootSender}: ${replyCtx.rootPreview}…`),
+        h('button', {
+          type: 'button',
+          onClick: () => { replyContextSignal.value = null; },
+          'aria-label': 'Clear reply context',
+          title: 'Clear reply context',
+        }, '×'),
+      ]),
+      showChipStack && h(ChatModePills, {}),
+      showChipStack && mode === 'say' && h(TonePill, {}),
+      showChipStack && !scene && h('button', {
         type: 'button',
-        class: 'scene-banner__leave',
-        title: 'Leave the scene; subsequent chat goes to the main timeline',
-        'aria-label': 'Leave scene',
-        onClick: () => leaveScene(ui),
-      }, '×'),
+        class: 'dbt dbt--sm scene-start-btn',
+        title: 'Start a scene-thread: every chat sent while in-scene threads under it',
+        'aria-label': 'Start a scene',
+        onClick: () => showSceneStartModal(ui),
+      }, [h(SceneIcon, {}), ' Scene']),
     ]),
-    replyCtx && h('div', { class: 'reply-context-chip' }, [
-      h('span', null, `Replying to ${replyCtx.rootSender}: ${replyCtx.rootPreview}…`),
-      h('button', {
+    h('div', { class: 'dice-bar__input-row' }, [
+      h('div', { class: 'dice-bar__sep' }),
+      mode !== 'ooc' && personas.length > 0 && h('button', {
         type: 'button',
-        onClick: () => { replyContextSignal.value = null; },
-        'aria-label': 'Clear reply context',
-        title: 'Clear reply context',
-      }, '×'),
-    ]),
-    showChipStack && h(ChatModePills, {}),
-    showChipStack && mode === 'say' && h(TonePill, {}),
-    // Persona widget. The chip is the always-visible representation
-    // of the current speak-as identity; the underlying <select> stays
-    // in the DOM (gated by `personaPickerOpen` via a visibility
-    // class so existing tests can find #speak-as-select) but is
-    // visually hidden until the chip is clicked. OOC drops both
-    // entirely - the player is always themselves in OOC.
-    mode !== 'ooc' && personas.length > 0 && h('button', {
-      type: 'button',
-      class: `dbt dbt--sm persona-chip${currentPersona ? ' dbt--active' : ''}`,
-      'data-persona-chip': true,
-      'aria-expanded': String(personaPickerOpen),
-      'aria-haspopup': 'listbox',
-      title: currentPersona
-        ? `Speaking as ${personaLabel} (click to change)`
-        : 'Click to speak as a character',
-      onClick: () => setPersonaPickerOpen((v) => !v),
-    }, [
-      h('span', { class: 'persona-chip__icon', 'aria-hidden': 'true' }, h(PersonIcon, {})),
-      h('span', { class: 'persona-chip__label' }, personaLabel),
-    ]),
-    mode !== 'ooc' && personas.length > 0
-      && h(HelpIcon, { key: 'persona-help', term: 'persona', label: 'What speaking as someone else does' }),
-    mode !== 'ooc' && personas.length > 0 && h('select', {
-      id: 'speak-as-select',
-      class: `dice-bar__speak-as${personaPickerOpen ? '' : ' dice-bar__speak-as--collapsed'}`,
-      'aria-label': 'Speak as character',
-      title: 'Speak as…',
-      value: speakAsSignal.value,
-      onChange: (e) => {
-        ui.setSpeakAs?.(e.target.value);
-        // Auto-collapse the picker after a choice - the chip will
-        // reflect the new persona name.
-        setPersonaPickerOpen(false);
-      },
-    }, [
-      h('option', { value: '' }, 'Speak as yourself'),
-      ...personas.map(([id, t]) =>
-        h('option', { value: id, key: id }, t.name)),
-    ]),
-    showChipStack && !scene && h('button', {
-      type: 'button',
-      class: 'dbt dbt--sm scene-start-btn',
-      title: 'Start a scene-thread: every chat sent while in-scene threads under it',
-      'aria-label': 'Start a scene',
-      onClick: () => showSceneStartModal(ui),
-    }, [h(SceneIcon, {}), ' Scene']),
-    h('label', { for: 'chat-input', class: 'sr-only' }, 'Chat message'),
-    h('textarea', {
-      id: 'chat-input',
-      ref: chatRef,
-      class: 'dice-bar__chat-input chat-input--multiline',
-      rows: 1,
-      placeholder: isMobile
-        ? (mode === 'describe' ? 'Describe…' : mode === 'ooc' ? 'OOC…' : 'Message…')
-        : mode === 'describe'
-          ? 'Describe… (Shift+Enter for newline · markdown supported)'
-          : mode === 'ooc'
-            ? 'Out-of-character message… (Shift+Enter for newline · markdown supported)'
-            : 'Send message… (Ctrl+K to search or run a command · /w @user to whisper)',
-      autocomplete: 'off',
-      'aria-label': 'Chat message input',
-      title: 'Chat message input. Enter to send, Shift+Enter for newline.',
-      onKeyDown: onChatKey,
-      onInput: onChatInput,
-      onFocus: () => setComposerFocused(true),
-      // Defer blur a tick so any in-flight click on a chip pill (Say /
-      // Describe / OOC / Tone / persona) lands before showChipStack
-      // re-evaluates to false and unmounts those buttons.
-      onBlur: () => setTimeout(() => setComposerFocused(false), 0),
-    }),
-    h('button', {
-      type: 'button',
-      class: 'dbt dbt--sm long-post-btn',
-      'aria-label': 'Open full editor for a long post',
-      title: 'Open the full editor (WYSIWYG, multi-paragraph)',
-      onClick: () => openLongPostModal({
-        ui,
-        syncInline: () => {
-          const input = chatRef.current;
-          if (!input) return;
-          input.value = readDraft(roomId);
-          autoGrow(input);
+        class: `dbt dbt--sm persona-chip${currentPersona ? ' dbt--active' : ''}`,
+        'data-persona-chip': true,
+        'aria-expanded': String(personaPickerOpen),
+        'aria-haspopup': 'listbox',
+        title: currentPersona
+          ? `Speaking as ${personaLabel} (click to change)`
+          : 'Click to speak as a character',
+        onClick: () => setPersonaPickerOpen((v) => !v),
+      }, [
+        h('span', { class: 'persona-chip__icon', 'aria-hidden': 'true' }, h(PersonIcon, {})),
+        h('span', { class: 'persona-chip__label' }, personaLabel),
+      ]),
+      mode !== 'ooc' && personas.length > 0
+        && h(HelpIcon, { key: 'persona-help', term: 'persona', label: 'What speaking as someone else does' }),
+      mode !== 'ooc' && personas.length > 0 && h('select', {
+        id: 'speak-as-select',
+        class: `dice-bar__speak-as${personaPickerOpen ? '' : ' dice-bar__speak-as--collapsed'}`,
+        'aria-label': 'Speak as character',
+        title: 'Speak as…',
+        value: speakAsSignal.value,
+        onChange: (e) => {
+          ui.setSpeakAs?.(e.target.value);
+          // Auto-collapse the picker after a choice - the chip will
+          // reflect the new persona name.
+          setPersonaPickerOpen(false);
         },
+      }, [
+        h('option', { value: '' }, 'Speak as yourself'),
+        ...personas.map(([id, t]) =>
+          h('option', { value: id, key: id }, t.name)),
+      ]),
+      h('label', { for: 'chat-input', class: 'sr-only' }, 'Chat message'),
+      h('textarea', {
+        id: 'chat-input',
+        ref: chatRef,
+        class: 'dice-bar__chat-input chat-input--multiline',
+        rows: 1,
+        placeholder: isMobile
+          ? (mode === 'describe' ? 'Describe…' : mode === 'ooc' ? 'OOC…' : 'Message…')
+          : mode === 'describe'
+            ? 'Describe… (Shift+Enter for newline · markdown supported)'
+            : mode === 'ooc'
+              ? 'Out-of-character message… (Shift+Enter for newline · markdown supported)'
+              : 'Send message… (Ctrl+K to search or run a command · /w @user to whisper)',
+        autocomplete: 'off',
+        'aria-label': 'Chat message input',
+        title: 'Chat message input. Enter to send, Shift+Enter for newline.',
+        onKeyDown: onChatKey,
+        onInput: onChatInput,
+        onFocus: () => setComposerFocused(true),
+        // Defer blur a tick so any in-flight click on a chip pill (Say /
+        // Describe / OOC / Tone / persona) lands before showChipStack
+        // re-evaluates to false and unmounts those buttons.
+        onBlur: () => setTimeout(() => setComposerFocused(false), 0),
       }),
-    }, h(LongPostIcon, {})),
-    // Mobile-only nodes spliced in by DiceBar (actions popover trigger;
-    // next-turn when combat is active). Null/empty on desktop.
-    ...(Array.isArray(extras) ? extras : extras ? [extras] : []),
-    h('button', { class: 'dbt', id: 'chat-send', 'aria-label': 'Send chat message', title: 'Send chat message', onClick: sendChat }, 'Send'),
+      h('button', {
+        type: 'button',
+        class: 'dbt dbt--sm long-post-btn',
+        'aria-label': 'Open full editor for a long post',
+        title: 'Open the full editor (WYSIWYG, multi-paragraph)',
+        onClick: () => openLongPostModal({
+          ui,
+          syncInline: () => {
+            const input = chatRef.current;
+            if (!input) return;
+            input.value = readDraft(roomId);
+            autoGrow(input);
+          },
+        }),
+      }, h(LongPostIcon, {})),
+      // Mobile-only nodes spliced in by DiceBar (actions popover trigger;
+      // next-turn when combat is active). Null/empty on desktop.
+      ...(Array.isArray(extras) ? extras : extras ? [extras] : []),
+      h('button', { class: 'dbt', id: 'chat-send', 'aria-label': 'Send chat message', title: 'Send chat message', onClick: sendChat }, 'Send'),
+    ]),
   ]);
 }

@@ -80,7 +80,7 @@ describe('ScenesDrawer', () => {
     const { container } = render(h(ScenesDrawer, { ui }));
     expect(container.querySelectorAll('.icon-rail__row')).toHaveLength(1);
     const row = rowByText(container, 'The Throne Room');
-    expect(row.textContent).toContain('dm');
+    expect(row.textContent).toContain('by dm');
 
     fireEvent.click(row);
     expect(activeChannelSignal.value).toBe(`${CHANNEL_KEYS.SCENE_PREFIX}evt-1`);
@@ -101,6 +101,8 @@ describe('JournalDrawer', () => {
     const { container } = render(h(JournalDrawer, { ui }));
     expect(container.textContent).toContain('Local Rumors');
     expect(container.textContent).toContain('Session Notes');
+    expect(container.textContent).toContain('Campaign Logs');
+    expect(container.querySelector('[data-section="journal"]')).not.toBeNull();
 
     fireEvent.click(rowByText(container, 'Local Rumors'));
     expect(openDoc).toHaveBeenCalledWith('handout', 'h1');

@@ -124,7 +124,7 @@ describe('<LogPanel> reaction badges', () => {
   });
 });
 
-// ─── C3-C4: Quick-react bar, picker, badge toggle ────────────────────────────
+// C3-C4: Quick-react bar, picker, badge toggle
 
 describe('<LogPanel> quick-react bar (C3-C4)', () => {
   let host;

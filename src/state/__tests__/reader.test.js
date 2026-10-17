@@ -59,6 +59,12 @@ describe('isGM', () => {
     expect(isGM({ powerLevels: null, widgetManager: { userId: '@x:m' } })).toBe(false);
     expect(isGM(makeSm({ userId: undefined, gms: ['@gm:m'] }))).toBe(false);
   });
+  it('does not recurse when sm delegates isGM to reader.isGM (StateManager pattern)', () => {
+    const sm = makeSm({ userId: '@gm:m', gms: ['@gm:m'] });
+    sm.isGM = function() { return isGM(this); };
+    expect(isGM(sm)).toBe(true);
+    expect(sm.isGM()).toBe(true);
+  });
 });
 
 describe('canEditEntity', () => {

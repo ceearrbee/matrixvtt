@@ -19,8 +19,6 @@ class WidgetApi {
   async start() {
     if (window.parent !== window.self) {
       logger.log('Widget API', 'Running in iframe - attempting parent communication');
-      // In a real implementation, this would set up postMessage handlers
-      // For now, we just acknowledge we're in a widget context
       return Promise.resolve();
     } else {
       logger.log('Widget API', 'Not in iframe - standalone mode');
@@ -34,9 +32,6 @@ class WidgetApi {
   async requestCapabilities(capabilities) {
     logger.log('Widget API', 'Requesting capabilities:', capabilities);
     this.capabilities = capabilities;
-
-    // In a real implementation, this would negotiate with the Matrix client
-    // For now, we just grant all requested capabilities
     return Promise.resolve(capabilities);
   }
 
@@ -45,9 +40,6 @@ class WidgetApi {
    */
   async sendStateEvent(eventType, stateKey, content) {
     logger.log('Widget API', `sendStateEvent: ${eventType}#${stateKey}`, content);
-
-    // In a real implementation, this would postMessage to the parent
-    // For standalone mode, we just log it
     return Promise.resolve({
       event_id: `$local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     });

@@ -93,9 +93,9 @@ export function DiscoveryScreen({ app }) {
     h('div', { class: 'section-heading', id: 'invites-heading', style: 'display:none' }, 'Pending Invites'),
     h('div', { id: 'invites-list' }),
 
-    h('div', { class: 'section-heading' }, 'New campaign'),
+    h('div', { class: 'section-heading' }, 'Join a campaign'),
     h('p', { class: 'room-empty', style: 'margin-top: 0;' },
-      'Creating a campaign makes you its GM. Players get in by opening the invite link you share.'),
+      'Have an invite link, room ID, or alias? Jump right in.'),
     h('div', { class: 'new-session-form' }, [
       h('label', { for: 'new-session-input', class: 'sr-only' }, 'Invite link, room ID, or alias'),
       h('input', {
@@ -107,7 +107,10 @@ export function DiscoveryScreen({ app }) {
       }),
       h('button', { class: 'dbt btn-primary', id: 'new-session-btn', onClick: onNewSession }, 'Join')
     ]),
-    h('div', { class: 'new-session-divider' }, '- or -'),
+
+    h('div', { class: 'section-heading' }, 'Create a campaign'),
+    h('p', { class: 'room-empty', style: 'margin-top: 0;' },
+      'Start a new table. Creating a campaign makes you its GM. Players get in by opening the invite link you share.'),
     h('div', { class: 'create-room-form' }, [
       h('label', { for: 'create-room-input', class: 'sr-only' }, 'Campaign name'),
       h('input', {

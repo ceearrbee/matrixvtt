@@ -10,6 +10,7 @@ import { closeAllModals } from '../utils/modal-helpers.js';
 import { getAccessibilitySettings, setAccessibilitySetting } from '../ui/settings-helpers.js';
 import { docsHref } from '../utils/docs-link.js';
 import { consumePendingInvite, loadPendingInvite } from './pending-invite.js';
+import { MatrixClient } from '../client/MatrixClient.js';
 
 const TAGLINE =
   'A browser-only virtual tabletop. Your campaigns live in Matrix rooms: no server to run, no data to lose.';
@@ -182,6 +183,11 @@ export function StandaloneShell({ app }) {
   const onSignOut = async () => {
     if (auth?.client) await auth.client.logout().catch(() => {});
     app.matrixVTTClient?.destroy();
+    try {
+      await MatrixClient.deleteStoreData(auth?.userId);
+    } catch {
+      // ignore
+    }
     // Unsent work belongs to the session that made it; a signed-out
     // account must not leave writes waiting for the next one.
     clearPendingForUser(auth?.userId ?? null);

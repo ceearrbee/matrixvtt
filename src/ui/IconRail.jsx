@@ -4,7 +4,7 @@
  * Replaces the verbose ChannelsRail "file-explorer" feel with a slim
  * icon-only column that expands one of five content drawers on click.
  * Editorial vocabulary: 56px wide collapsed, ~280px drawer, 0.5px
- * borders, restrained typography (matches matrix_vtt_mockup.html).
+ * borders, restrained typography (matches mockups/matrix_vtt_mockup.html).
  *
  *   Menu     - consolidated global menu (actions only)
  *   Scenes   - list of scene-root events; routes the centre column
@@ -20,7 +20,7 @@
 
 import { h } from 'preact';
 import {
-  openIconRailDrawerSignal, drawerManuallyChosenSignal,
+  openIconRailDrawerSignal, drawerManuallyChosenSignal, leftRailCollapsedSignal,
 } from '../state/ui-signals.js';
 import { ICON_RAIL_DRAWERS } from '../utils/constants.js';
 import { persistIconRailDrawer } from './ui-mode.js';
@@ -113,6 +113,16 @@ export function IconRail({ ui }) {
       ]),
       h('div', { class: 'icon-rail__divider', 'aria-hidden': 'true' }),
       ...ICON_DEFS.map(iconBtn),
+      leftRailCollapsedSignal.value && h('button', {
+        type: 'button',
+        class: 'icon-rail__btn icon-rail__btn--expand',
+        'aria-label': 'Expand left sidebar',
+        title: 'Expand sidebar',
+        onClick: () => { leftRailCollapsedSignal.value = false; },
+      }, [
+        h('span', { class: 'icon-rail__glyph', 'aria-hidden': 'true' }, '»'),
+        h('span', { class: 'icon-rail__label' }, 'Expand'),
+      ]),
     ]),
     DrawerComponent && h('aside', {
       class: 'icon-rail__drawer',

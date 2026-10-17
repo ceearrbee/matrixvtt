@@ -522,6 +522,9 @@
         "max_field": "hp_max"
       },
       {
+        "kind": "conditions"
+      },
+      {
         "kind": "play_actions",
         "label": "Actions",
         "groups": [
@@ -579,16 +582,12 @@
       },
       {
         "kind": "attributes",
-        "label": "Attributes",
-        "collapsed": true
+        "label": "Attributes"
       },
       {
         "kind": "saves",
         "label": "Saving Throws",
         "collapsed": true
-      },
-      {
-        "kind": "conditions"
       },
       {
         "kind": "currency",

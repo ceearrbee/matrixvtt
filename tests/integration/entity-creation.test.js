@@ -17,9 +17,7 @@ import {
   validateStateEvent
 } from '../../src/utils/schemas.js';
 
-// ─────────────────────────────────────────────
 // Token shapes
-// ─────────────────────────────────────────────
 
 describe('Token entity shape', () => {
   it('freshly created PC token passes validation', () => {
@@ -95,9 +93,7 @@ describe('Token entity shape', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // Character shapes
-// ─────────────────────────────────────────────
 
 describe('Character entity shape', () => {
   it('freshly created PC character passes validation', () => {
@@ -150,9 +146,7 @@ describe('Character entity shape', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // Initiative shapes
-// ─────────────────────────────────────────────
 
 describe('Initiative entity shape', () => {
   const validEntry = (n) => ({
@@ -198,9 +192,7 @@ describe('Initiative entity shape', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // Settings shapes
-// ─────────────────────────────────────────────
 
 describe('Settings entity shape', () => {
   it('settings with valid Matrix user IDs passes validation', () => {

@@ -33,6 +33,16 @@ describe('dnd5e sheet is a summary (no duplicated full lists)', () => {
     expect(Array.isArray(dnd5e.spell_schools) && dnd5e.spell_schools.length).toBeGreaterThan(0);
     expect(Array.isArray(dnd5e.skills) && dnd5e.skills.length).toBeGreaterThan(0);
   });
+
+  it('places conditions near HP and keeps attributes expanded by default', () => {
+    const sections = dnd5e.character_sheet.sections;
+    const hpIndex = sections.findIndex((s) => s.id === 'hp');
+    const condIndex = sections.findIndex((s) => s.kind === 'conditions');
+    expect(condIndex).toBe(hpIndex + 1);
+
+    const attrSection = sections.find((s) => s.kind === 'attributes');
+    expect(attrSection?.collapsed).toBeFalsy();
+  });
 });
 
 describe('npc sheet collapses reference/situational stat-block groups', () => {

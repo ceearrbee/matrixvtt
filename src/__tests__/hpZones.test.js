@@ -18,7 +18,7 @@ describe('HP zones', () => {
     expect(getHPZone({ hp_current: 50, hp_max: 50 })).toBe('healthy');
   });
 
-  it('classifies 25–50% as wounded', () => {
+  it('classifies 25-50% as wounded', () => {
     expect(getHPZone({ hp_current: 20, hp_max: 50 })).toBe('wounded');
     expect(getHPZone({ hp_current: 13, hp_max: 50 })).toBe('wounded');
   });

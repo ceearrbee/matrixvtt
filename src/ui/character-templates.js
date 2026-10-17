@@ -100,9 +100,4 @@ export async function saveCharacterAsTemplate(ui, charId) {
 
 export async function deleteCharacterTemplate(ui, index) {
   await ui.state.updateSettings(removeTemplateFromSettings(ui.state.settings, index));
-  // Refresh template picker if still open
-  const picker = document.getElementById('template-picker');
-  if (picker) {
-    picker.innerHTML = ui._renderTemplatePicker();
-  }
 }

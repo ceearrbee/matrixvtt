@@ -4,7 +4,7 @@
 
 import { h } from 'preact';
 import * as v from 'valibot';
-import { esc } from '../utils/domHelpers.js';
+import { esc, safeHtml } from '../utils/domHelpers.js';
 import { Modal } from './Modal.jsx';
 import { openModal } from './modal-host.js';
 import { FormReader, applyFieldErrors } from '../utils/ui-helpers.js';
@@ -102,17 +102,18 @@ export function buildCharacterFromWizardData(data, system, ruleset) {
 
 function _renderStepFields(step, formData) {
   return step.fields.map(f => {
+    const key = esc(f.key);
     const label = esc(f.label);
     const val = esc(String(formData[f.key] ?? ''));
     const isNumber = f.type === 'int';
     const bounds = isNumber
-      ? `min="${f.min ?? 1}"${f.max !== undefined ? ` max="${f.max}"` : ''}`
+      ? `min="${esc(f.min ?? 1)}"${f.max !== undefined ? ` max="${esc(f.max)}"` : ''}`
       : '';
     return `
       <div class="form-group">
-        <label class="form-label" for="wiz-${f.key}">${label}</label>
-        <input type="${isNumber ? 'number' : 'text'}" class="form-input" id="wiz-${f.key}"
-               name="${f.key}" value="${val}" ${bounds} placeholder="${label}">
+        <label class="form-label" for="wiz-${key}">${label}</label>
+        <input type="${isNumber ? 'number' : 'text'}" class="form-input" id="wiz-${key}"
+               name="${key}" value="${val}" ${bounds} placeholder="${label}">
       </div>
     `;
   }).join('');
@@ -202,12 +203,11 @@ export function showCharacterWizard(ui) {
     // every user-authored field (step.label, formData values) is routed
     // through `esc(...)` before insertion. Trust contract verified in the
     // helper definitions above.
-    // eslint-disable-next-line vtt/no-raw-html-interpolation
     body.innerHTML = `
-      <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:var(--space-2xl);display:flex;flex-wrap:wrap;gap:var(--space-xs);align-items:center;">${_renderWizardProgress(steps, currentStep)}</div>
+      <div class="wizard-progress" style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:var(--space-2xl);display:flex;flex-wrap:wrap;gap:var(--space-xs);align-items:center;">${safeHtml(_renderWizardProgress(steps, currentStep))}</div>
       <h3 class="wizard-step-label">${esc(step.label)}</h3>
       <form id="wizard-step-form">
-        ${_renderStepFields(step, formData)}
+        ${safeHtml(_renderStepFields(step, formData))}
         <div style="margin-top: var(--space-2xl); padding: var(--space-lg); background: var(--color-background-secondary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-primary);">
           <p style="margin: 0; font-size: 11px; color: var(--color-text-secondary); line-height: 1.4;">
             <strong>Character Note:</strong> Characters are stored securely on your Matrix accounts server. All changes are synced in real-time.

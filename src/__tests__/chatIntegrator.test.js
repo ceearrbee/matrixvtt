@@ -122,9 +122,7 @@ describe('ChatIntegrator announcement persistence', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // executeDiceRollFromChat - real dice invocation
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.executeDiceRollFromChat', () => {
   it('calls diceRoller.roll with the notation string', async () => {
@@ -228,9 +226,7 @@ describe('ChatIntegrator.executeDiceRollFromChat', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // handleTimelineEvent - end-to-end dispatch
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.handleTimelineEvent', () => {
   it('dispatches vtt:chat-message with correct sender and body', async () => {
@@ -327,9 +323,7 @@ describe('ChatIntegrator.handleTimelineEvent', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // init / destroy lifecycle
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.init / destroy lifecycle', () => {
   it('init registers matrix:timeline-event on window', () => {
@@ -367,9 +361,7 @@ describe('ChatIntegrator.init / destroy lifecycle', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // executeDiceRollFromChat - error propagation
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.executeDiceRollFromChat - error propagation', () => {
   it('propagates exception when diceRoller.roll() throws', async () => {
@@ -380,9 +372,7 @@ describe('ChatIntegrator.executeDiceRollFromChat - error propagation', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // getCharacterNameForUser
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.getCharacterNameForUser', () => {
   it('returns null when userId is null', () => {
@@ -428,9 +418,7 @@ describe('ChatIntegrator.getCharacterNameForUser', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // Announcement gates
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator announcement gates', () => {
   beforeEach(() => { mockState.sendRoomEvent.mockReset(); });
@@ -533,9 +521,7 @@ describe('ChatIntegrator announcement gates', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // postDiceRollToChat
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.postDiceRollToChat', () => {
   it('sends formatted roll message with expression and total', async () => {
@@ -590,9 +576,7 @@ describe('ChatIntegrator.postDiceRollToChat', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // announceMessage
-// ─────────────────────────────────────────────
 
 describe('ChatIntegrator.announceMessage', () => {
   it('sends message with ⚔️ prefix', async () => {
@@ -608,7 +592,7 @@ describe('ChatIntegrator.announceMessage', () => {
   });
 });
 
-// ─── Pass 16 additions ────────────────────────────────────────────────────────
+// Pass 16 additions
 
 describe('ChatIntegrator._send - error suppression', () => {
   it('does not throw when sendRoomEvent rejects', async () => {
@@ -675,7 +659,7 @@ describe('ChatIntegrator - historical event handling', () => {
   });
 });
 
-// ─── announceInitiativeOrder guard ───────────────────────────────────────────
+// announceInitiativeOrder guard
 
 describe('ChatIntegrator.announceInitiativeOrder', () => {
   it('does not throw when order is null', async () => {

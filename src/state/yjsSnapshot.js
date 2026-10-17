@@ -22,7 +22,18 @@ import { chooseLatestCompleteSnapshot, joinChunks, base64ToBytes } from './snaps
 export async function loadLatestSnapshot(sm, api) {
   try {
     const events = await api.receiveStateEvents(YJS_EVENT_TYPES.SNAPSHOT);
-    const picked = chooseLatestCompleteSnapshot(events || []);
+    const pl = sm?.powerLevels;
+    let filteredEvents = events || [];
+    if (pl?.users && Object.values(pl.users).some((v) => typeof v === 'number' && v >= 50)) {
+      filteredEvents = filteredEvents.filter((e) => {
+        const sender = e?.sender;
+        const senderPl = (sender && typeof pl.users[sender] === 'number')
+          ? pl.users[sender]
+          : (typeof pl.users_default === 'number' ? pl.users_default : 0);
+        return senderPl >= 50;
+      });
+    }
+    const picked = chooseLatestCompleteSnapshot(filteredEvents, { powerLevels: pl, sm });
     if (!picked) return false;
     const ordered = [...picked.chunks].sort((a, b) => a.idx - b.idx);
     const bytes = joinChunks(ordered.map((c) => base64ToBytes(c.data)));

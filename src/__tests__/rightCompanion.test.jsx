@@ -11,22 +11,24 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { h } from 'preact';
 import { render, cleanup, fireEvent } from '@testing-library/preact';
 import { RightCompanion } from '../ui/RightCompanion.jsx';
+import { Items } from '../ui/Items.jsx';
 import { settingsSignal, initiativeSignal } from '../state/signals.js';
-import { activeTabSignal } from '../state/ui-signals.js';
-import { TABS } from '../utils/constants.js';
+import { activeTabSignal, layoutModeSignal } from '../state/ui-signals.js';
+import { TABS, LAYOUT_MODES } from '../utils/constants.js';
 
-function makeUi(/** @type {any} */ { isGM = false, systemConfig = {}, initiative } = {}) {
+function makeUi(/** @type {any} */ { isGM = false, systemConfig = {}, initiative, characters } = {}) {
+  const chars = characters !== undefined ? characters : new Map([['c1', { id: 'c1', name: 'Hero' }]]);
   return /** @type {any} */ ({
     state: {
       isGM: () => isGM,
-      characters: new Map(),
+      characters: chars,
       npcs: new Map(),
       tokens: new Map(),
       items: new Map(),
       settings: { systemConfig, environment: {} },
       initiative: initiative || { active: false, round: 0, current_index: 0, order: [] },
       damageLog: [],
-      getCurrentCharacter: () => null,
+      getCurrentCharacter: () => chars.values().next().value || null,
     },
     switchTab: (t) => { activeTabSignal.value = t; },
   });
@@ -38,10 +40,12 @@ beforeEach(() => {
   settingsSignal.value = { systemConfig: {} };
   initiativeSignal.value = { active: false, round: 0, current_index: 0, order: [] };
   activeTabSignal.value = TABS.PARTY;
+  layoutModeSignal.value = LAYOUT_MODES.TEXT;
 });
 afterEach(() => {
   cleanup();
   activeTabSignal.value = TABS.PARTY;
+  layoutModeSignal.value = LAYOUT_MODES.TEXT;
 });
 
 describe('RightCompanion - persistent tab set', () => {
@@ -61,6 +65,13 @@ describe('RightCompanion - persistent tab set', () => {
     expect(sub).not.toBeNull();
     expect(tab(sub, TABS.SHEET)).not.toBeNull();
     expect(tab(sub, TABS.ITEMS)).not.toBeNull();
+  });
+
+  it('hides the sheet-family sub-nav when no characters exist', () => {
+    activeTabSignal.value = TABS.SHEET;
+    const { container } = render(h(RightCompanion, { ui: makeUi({ characters: new Map() }) }));
+    const sub = container.querySelector('.ctabs--sub');
+    expect(sub).toBeNull();
   });
 
   it('keeps the top-level Sheet tab selected while a family member is active', () => {
@@ -137,5 +148,66 @@ describe('RightCompanion - persistent tab set', () => {
     const { container } = render(h(RightCompanion, { ui }));
     fireEvent.click(tab(container, TABS.ITEMS));
     expect(activeTabSignal.value).toBe(TABS.ITEMS);
+  });
+
+  it('displays "Overview" as label for the sheet sub-tab', () => {
+    activeTabSignal.value = TABS.SHEET;
+    const { container } = render(h(RightCompanion, { ui: makeUi() }));
+    const subSheet = container.querySelector('#companion-subtab-sheet');
+    expect(subSheet).not.toBeNull();
+    expect(subSheet.textContent).toContain('Overview');
+  });
+
+  it('renders "Combat" label on the Combat tab in text mode, icon-only in icon mode', () => {
+    const initiative = { active: true, round: 1, current_index: 0, order: [{ token_id: 'a' }] };
+    initiativeSignal.value = initiative;
+    layoutModeSignal.value = LAYOUT_MODES.TEXT;
+    const { container, rerender } = render(h(RightCompanion, { ui: makeUi({ initiative }) }));
+    const combatTab = tab(container, TABS.COMBAT);
+    expect(combatTab.textContent).toContain('Combat');
+
+    layoutModeSignal.value = LAYOUT_MODES.ICON;
+    rerender(h(RightCompanion, { ui: makeUi({ initiative }) }));
+    const iconModeCombatTab = tab(container, TABS.COMBAT);
+    expect(iconModeCombatTab.querySelector('.ctab__txt')).toBeNull();
+  });
+
+  it('allows GM to switch between character inventory and all items', () => {
+    const character = { id: 'c1', name: 'Aria', inventory_ids: ['item-1'] };
+    const item1 = { id: 'item-1', name: 'Moonblade', kind: 'weapon' };
+    const item2 = { id: 'item-2', name: 'Rations', kind: 'consumable' };
+    const items = new Map([['item-1', item1], ['item-2', item2]]);
+    const ui = {
+      state: {
+        isGM: () => true,
+        getCurrentCharacter: () => character,
+        canEditEntity: () => true,
+        items,
+        tokens: new Map(),
+        characters: new Map([['c1', character]]),
+        settings: { systemConfig: {} },
+      },
+      showItemForm: () => {},
+    };
+
+    const { container } = render(h(Items, { ui }));
+    // Defaults to character view with toggle
+    expect(container.textContent).toContain("Aria's Inventory");
+    expect(container.textContent).toContain('Moonblade');
+
+    const allBtn = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'All items');
+    expect(allBtn).not.toBeNull();
+    fireEvent.click(allBtn);
+
+    // Now in All items view
+    expect(container.textContent).toContain('All items');
+    expect(container.textContent).toContain('On character');
+
+    const charBtn = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'Character');
+    expect(charBtn).not.toBeNull();
+    fireEvent.click(charBtn);
+
+    // Back to Character view
+    expect(container.textContent).toContain("Aria's Inventory");
   });
 });

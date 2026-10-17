@@ -11,6 +11,7 @@ import {
 } from '../DiscoveryCards.jsx';
 import { confirmAndEnterRoom } from './room-preview.js';
 import { confirmed } from '../../ui/confirm-dialogs.jsx';
+import { describeNetworkError } from '../../utils/errorHandling.js';
 
 export async function renderPendingInvites(app, client) {
   const list = app.doc.getElementById('invites-list');
@@ -27,7 +28,7 @@ export async function renderPendingInvites(app, client) {
   renderInviteList(list, invites, {
     accept: async (inv) => {
       try { await confirmAndEnterRoom(app, inv.roomId, inv.name); }
-      catch (err) { app.setError('discovery-error', `Failed to accept invite: ${err.message}`); }
+      catch (err) { app.setError('discovery-error', `Failed to accept invite: ${describeNetworkError(err)}`); }
     },
     decline: async (inv) => {
       if (!(await confirmed(`Decline invite to "${inv.name}"?`, { title: 'Decline invite', confirmText: 'Decline', confirmClass: 'dbt--danger' }))) return;
@@ -35,7 +36,7 @@ export async function renderPendingInvites(app, client) {
         await client.leaveRoom(inv.roomId);
         await app.loadDiscovery();
       } catch (err) {
-        app.setError('discovery-error', `Failed to decline invite: ${err.message}`);
+        app.setError('discovery-error', `Failed to decline invite: ${describeNetworkError(err)}`);
       }
     },
   });
@@ -113,7 +114,7 @@ export function renderActiveSessions(app, totalRooms, results) {
         removeRecentSession(app.auth.userId, r.id);
         await app.loadDiscovery();
       } catch (err) {
-        app.setError('discovery-error', 'Failed to leave room: ' + err.message);
+        app.setError('discovery-error', 'Failed to leave room: ' + describeNetworkError(err));
       }
     },
   });
@@ -136,6 +137,7 @@ function renderOtherJoinedRooms(app, otherRooms) {
 
   fresh.style.display = '';
   fresh.textContent = `Show all joined rooms (${otherRooms.length})`;
+  fresh.setAttribute('aria-expanded', 'false');
   list.style.display = 'none';
   list.replaceChildren();
 
@@ -146,6 +148,7 @@ function renderOtherJoinedRooms(app, otherRooms) {
       list.style.display = 'none';
       list.replaceChildren();
       fresh.textContent = `Show all joined rooms (${otherRooms.length})`;
+      fresh.setAttribute('aria-expanded', 'false');
       return;
     }
     list.style.display = 'block';
@@ -158,10 +161,11 @@ function renderOtherJoinedRooms(app, otherRooms) {
           removeRecentSession(app.auth.userId, r.id);
           await app.loadDiscovery();
         } catch (err) {
-          app.setError('discovery-error', 'Failed to leave room: ' + err.message);
+          app.setError('discovery-error', 'Failed to leave room: ' + describeNetworkError(err));
         }
       },
     });
     fresh.textContent = `Hide joined rooms (${otherRooms.length})`;
+    fresh.setAttribute('aria-expanded', 'true');
   });
 }

@@ -561,7 +561,7 @@ describe('stateEventsEqual', () => {
   });
 });
 
-// ─── Pass 16 additions ────────────────────────────────────────────────────────
+// Pass 16 additions
 
 describe('validateFog - boundaries', () => {
   it('throws when content is null', () => {
@@ -587,13 +587,11 @@ describe('validateFog - boundaries', () => {
   });
 });
 
-// ─── New additions ─────────────────────────────────────────────────────────────
+// New additions
 
 import { validateItem, validateSpell } from '../schemas.js';
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateItem - direct unit tests
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateItem - direct unit tests', () => {
   it('throws on null input', () => {
     expect(() => validateItem(null)).toThrow(VTTError);
@@ -632,9 +630,7 @@ describe('validateItem - direct unit tests', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateSpell - direct unit tests
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateSpell - direct unit tests', () => {
   it('throws on null input', () => {
     expect(() => validateSpell(null)).toThrow(VTTError);
@@ -676,9 +672,7 @@ describe('validateSpell - direct unit tests', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateMap - boundary completeness
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateMap - boundary completeness', () => {
   const base = { width_cells: 20, height_cells: 15, cell_px: 40 };
 
@@ -716,18 +710,14 @@ describe('validateToken - boundaries', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateCharacter - type: null
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateCharacter - explicit null type', () => {
   it('throws when type is null (not "pc" or "npc")', () => {
     expect(() => validateCharacter({ id: 'c', name: 'Hero', type: null })).toThrow(/type must be pc or npc/);
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateInitiative - current_index edge values
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateInitiative - current_index edge values', () => {
   const validEntry = { id: 'i', character_id: 'c', token_id: 't', name: 'Hero', initiative: 10 };
 
@@ -740,9 +730,7 @@ describe('validateInitiative - current_index edge values', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // validateStateEvent - prototype pollution
-// ─────────────────────────────────────────────────────────────────────────────
 describe('validateStateEvent - prototype pollution safety', () => {
   it('fog event with __proto__ content is rejected by validator (invalid mode)', () => {
     const poisoned = Object.create(null);
@@ -765,9 +753,7 @@ describe('validateStateEvent - prototype pollution safety', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // stateEventsEqual - undefined/null inputs
-// ─────────────────────────────────────────────────────────────────────────────
 describe('stateEventsEqual - undefined/null inputs', () => {
   it('(undefined, undefined) → true (both JSON.stringify to undefined, undefined === undefined)', () => {
     // JSON.stringify(undefined) returns undefined (not a string).
@@ -846,7 +832,7 @@ describe('stateEventsEqual - array and nested object comparisons', () => {
   });
 });
 
-// ─── Action economy flags ─────────────────────────────────────────────────────
+// Action economy flags
 
 describe('validateInitiative - action economy flags', () => {
   const base = { id: 'i1', character_id: 'c1', token_id: 't1', name: 'H', initiative: 10 };
@@ -876,7 +862,7 @@ describe('validateInitiative - action economy flags', () => {
   });
 });
 
-describe('validateFog – no console side effects', () => {
+describe('validateFog - no console side effects', () => {
   it('does not call console.error when rejecting an invalid cell coordinate', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
@@ -887,7 +873,7 @@ describe('validateFog – no console side effects', () => {
   });
 });
 
-describe('validateStateEvent – no console side effects', () => {
+describe('validateStateEvent - no console side effects', () => {
   it('does not call console.warn for an unknown event type', () => {
     const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateStateEvent('com.vtt.unknown_type', { anything: true });

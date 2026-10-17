@@ -6,6 +6,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { StateManager } from '../StateManager.js';
+import { wireYjsBridges } from '../stateManager-yjs-bridges.js';
 import { createMockWidgetManager } from '../../../tests/mocks/widgetManager.mock.js';
 import { createMockStateEvent } from '../../../tests/mocks/widgetApi.mock.js';
 import { EVENT_TYPES } from '../../utils/constants.js';
@@ -89,11 +90,9 @@ function makeStateManager(overrides = {}) {
   return new StateManager(wm);
 }
 
-// ─────────────────────────────────────────────
-// handleStateEvent – routing
-// ─────────────────────────────────────────────
+// handleStateEvent - routing
 
-describe('handleStateEvent – routing', () => {
+describe('handleStateEvent - routing', () => {
   // VTT entity state rides on Yjs; handleStateEvent only routes
   // POWER_LEVELS now. The Yjs-routed types never reach this handler.
 
@@ -106,11 +105,9 @@ describe('handleStateEvent – routing', () => {
   });
 });
 
-// ─────────────────────────────────────────────
-// sendStateEvent – change detection cache
-// ─────────────────────────────────────────────
+// sendStateEvent - change detection cache
 
-describe('sendStateEvent – change detection', () => {
+describe('sendStateEvent - change detection', () => {
   let sm, wm;
   beforeEach(() => {
     wm = createMockWidgetManager({ isStandalone: false });
@@ -132,9 +129,7 @@ describe('sendStateEvent – change detection', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // debouncedSend
-// ─────────────────────────────────────────────
 
 describe('StateManager.debouncedSend', () => {
   beforeEach(() => { vi.useFakeTimers(); });
@@ -161,9 +156,7 @@ describe('StateManager.debouncedSend', () => {
   });
 });
 
-// ─────────────────────────────────────────────
 // Permissions
-// ─────────────────────────────────────────────
 
 describe('StateManager permissions', () => {
   it('isGM follows power level, not gm_user_ids', () => {
@@ -186,5 +179,66 @@ describe('StateManager permissions', () => {
 
     sm.powerLevels = { users: { '@player:s': 50 } };
     expect(sm.canMoveToken('t1')).toBe(true);
+  });
+});
+
+// bridgeFogCollection subscription deduplication
+
+describe('bridgeFogCollection subscription deduplication', () => {
+  it('avoids re-subscribing existing fog IDs on subsequent bridge.ids emissions', () => {
+    let idsCallback;
+    const fogSignals = new Map([
+      ['fog-1', { subscribe: vi.fn() }],
+      ['fog-2', { subscribe: vi.fn() }],
+    ]);
+    const sm = {
+      subscriptionManager: {
+        subscribe: vi.fn((key, sig, cb) => {
+          if (key === 'yjs:fog-ids') idsCallback = cb;
+        }),
+        unsubscribe: vi.fn(),
+      },
+      yjs: {
+        tokens: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        characters: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        npcs: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        items: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        spells: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        handouts: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        tables: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        walls: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        lights: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        pins: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        templates: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        maps: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        pages: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        assets: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        initiative: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        settings: { ids: { subscribe: vi.fn() }, get: vi.fn() },
+        drawings: { get: vi.fn() },
+        fog: {
+          ids: {},
+          get: vi.fn((id) => fogSignals.get(id)),
+        },
+        onDivergence: vi.fn(),
+      },
+    };
+
+    wireYjsBridges(sm);
+
+    // Initial emission with fog-1
+    idsCallback(['fog-1']);
+    const fog1Calls = sm.subscriptionManager.subscribe.mock.calls.filter((c) => c[0] === 'yjs:fog:fog-1').length;
+    expect(fog1Calls).toBe(1);
+
+    // Second emission with same fog-1 plus fog-2
+    idsCallback(['fog-1', 'fog-2']);
+    const fog1CallsAfter = sm.subscriptionManager.subscribe.mock.calls.filter((c) => c[0] === 'yjs:fog:fog-1').length;
+    expect(fog1CallsAfter).toBe(1);
+    expect(sm.subscriptionManager.subscribe).toHaveBeenCalledWith('yjs:fog:fog-2', fogSignals.get('fog-2'), expect.any(Function));
+
+    // Third emission without fog-1 un-subscribes fog-1
+    idsCallback(['fog-2']);
+    expect(sm.subscriptionManager.unsubscribe).toHaveBeenCalledWith('yjs:fog:fog-1');
   });
 });

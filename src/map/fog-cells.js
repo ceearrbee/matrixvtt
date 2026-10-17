@@ -10,7 +10,9 @@
 export function parseRevealedCells(revealed) {
   const cells = [];
   for (const cell of revealed || []) {
+    if (typeof cell !== 'string') continue;
     const [c, r] = cell.split(',').map(Number);
+    if (!Number.isFinite(c) || !Number.isFinite(r)) continue;
     cells.push([c, r]);
   }
   return cells;

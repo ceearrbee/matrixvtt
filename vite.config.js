@@ -196,6 +196,7 @@ export default defineConfig({
       'react-dom': 'preact/compat',
       'react-dom/test-utils': 'preact/test-utils',
       'react/jsx-runtime': 'preact/jsx-runtime',
+      '@matrix-org/matrix-sdk-crypto-wasm': resolve(__dirname, 'src/client/crypto-wasm-stub.js'),
       // In production, replace dev-only utilities with no-ops to ensure they are excluded from the bundle
       ...(process.env.NODE_ENV === 'production' ? {
         './utils/remoteLogger.js': resolve(__dirname, 'src/utils/no-op.js'),

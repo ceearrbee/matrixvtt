@@ -102,7 +102,7 @@ export function Modal({
         // eyebrow; every other dialog leaves it empty.
         eyebrow && h('span', { class: 'eyebrow wizard-eyebrow' }, eyebrow),
         h('h2', { id: titleId, class: headingClass }, title),
-        h('button', { class: 'modal-close', 'aria-label': 'Close', title: 'Close', onClick: () => requestClose(false) }, '✕'),
+        h('button', { type: 'button', class: 'modal-close', 'aria-label': 'Close', title: 'Close', onClick: () => requestClose(false) }, '✕'),
       ]),
       h('div', { class: 'modal-body' }, children),
     ]),

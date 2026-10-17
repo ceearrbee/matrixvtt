@@ -15,7 +15,7 @@ import {
   trapFocusIn
 } from '../ui-helpers.js';
 
-// ─── getHPPercentage ──────────────────────────────────────────────────────────
+// getHPPercentage
 
 describe('getHPPercentage', () => {
   it('returns 0 for null entity', () => {
@@ -51,7 +51,7 @@ describe('getHPPercentage', () => {
   });
 });
 
-// ─── getHPColor ───────────────────────────────────────────────────────────────
+// getHPColor
 
 describe('getHPColor', () => {
   it('returns success color at 100%', () => {
@@ -79,7 +79,7 @@ describe('getHPColor', () => {
   });
 });
 
-// ─── FormReader.getField ──────────────────────────────────────────────────────
+// FormReader.getField
 
 describe('FormReader.getField', () => {
   function makeEl(html) {
@@ -109,7 +109,7 @@ describe('FormReader.getField', () => {
   });
 });
 
-// ─── FormReader.getInt ────────────────────────────────────────────────────────
+// FormReader.getInt
 
 describe('FormReader.getInt', () => {
   function makeEl(html) {
@@ -139,7 +139,7 @@ describe('FormReader.getInt', () => {
   });
 });
 
-// ─── FormReader.getCheckbox ───────────────────────────────────────────────────
+// FormReader.getCheckbox
 
 describe('FormReader.getCheckbox', () => {
   function makeEl(html) {
@@ -164,7 +164,7 @@ describe('FormReader.getCheckbox', () => {
   });
 });
 
-// ─── FormReader.getSelect ─────────────────────────────────────────────────────
+// FormReader.getSelect
 
 describe('FormReader.getSelect', () => {
   function makeEl(html) {
@@ -189,7 +189,7 @@ describe('FormReader.getSelect', () => {
   });
 });
 
-// ─── trapFocusIn ─────────────────────────────────────────────────────────────
+// trapFocusIn
 
 describe('trapFocusIn', () => {
   it('returns a cleanup function', () => {

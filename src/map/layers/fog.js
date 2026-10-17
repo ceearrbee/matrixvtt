@@ -51,6 +51,16 @@ export function createFogLayer(stage, mr) {
   layer.add(visionShape);
 
   function sync() {
+    const activeId = activeMapIdSignal.value;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
+        && typeof map.cell_px === 'number') {
+      const w = map.width_cells * map.cell_px;
+      const h = map.height_cells * map.cell_px;
+      layer.clipFunc((ctx) => { ctx.rect(0, 0, w, h); });
+    } else {
+      layer.clipFunc(null);
+    }
     const fog = mr.state?.fog ?? { mode: FOG_MODES.HIDDEN, revealed: [] };
     layer.visible(fog.mode === FOG_MODES.HIDDEN);
     layer.batchDraw();

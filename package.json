@@ -1,6 +1,6 @@
 {
   "name": "matrixvtt",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Production-ready virtual tabletop system built as a Matrix widget with fog of war, initiative tracking, and real-time multiplayer sync",
   "main": "src/app.js",
   "type": "module",
@@ -33,6 +33,7 @@
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
     "audit": "npm audit --audit-level=high",
+    "audit:hygiene": "node scripts/audit-code-hygiene.mjs",
     "check": "npm run lint && npm run typecheck && npm run test",
     "check:ci": "npm run lint && bash scripts/scan-bad-patterns.sh && npm run knip && npm run typecheck && npm run test:coverage && npm run build && npm run test:smoke && npm run size && npm audit --audit-level=high --omit=dev && npm run docs:verify",
     "size": "size-limit",
@@ -41,7 +42,7 @@
     "backgrounds:build": "node scripts/build-backgrounds.mjs --force"
   },
   "lint-staged": {
-    "{src,tests,scripts,docs/scripts,eslint-rules}/**/*.{js,jsx,mjs}": "eslint --max-warnings 0"
+    "{src,tests,scripts,docs/scripts,eslint-rules}/**/*.{js,jsx,mjs}": "eslint --max-warnings 0 --no-warn-ignored"
   },
   "overrides": {
     "esbuild": "^0.25.12",

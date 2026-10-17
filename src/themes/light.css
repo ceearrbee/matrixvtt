@@ -7,6 +7,7 @@
   --color-background-secondary: #f5f7fa;
   --color-background-tertiary: #e8ecf1;
   --color-background-hover: rgba(0, 0, 0, 0.04);
+  --color-bg-inset: rgba(0, 0, 0, 0.06);
   --vendor-icon-filter: none;
   --color-background-info: rgba(24, 95, 165, 0.08);
   --color-background-success: rgba(29, 158, 117, 0.08);
@@ -14,8 +15,8 @@
   --color-background-danger: rgba(226, 75, 74, 0.08);
 
   --color-text-primary: rgba(0, 0, 0, 0.87);
-  --color-text-secondary: rgba(0, 0, 0, 0.65);
-  --color-text-tertiary: rgba(0, 0, 0, 0.58);
+  --color-text-secondary: rgba(0, 0, 0, 0.76);
+  --color-text-tertiary: rgba(0, 0, 0, 0.68);
   --color-text-info: #1565C0;
   --color-text-success: #0F6E56;
   --color-text-warning: #8A5200;
@@ -60,8 +61,8 @@
     --color-background-danger: rgba(226, 75, 74, 0.08);
 
     --color-text-primary: rgba(0, 0, 0, 0.87);
-    --color-text-secondary: rgba(0, 0, 0, 0.65);
-    --color-text-tertiary: rgba(0, 0, 0, 0.58);
+    --color-text-secondary: rgba(0, 0, 0, 0.76);
+    --color-text-tertiary: rgba(0, 0, 0, 0.68);
     --color-text-info: #1565C0;
     --color-text-success: #0F6E56;
     --color-text-warning: #8A5200;

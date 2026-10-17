@@ -30,6 +30,18 @@ import { panToToken } from './map/layers/tokens.js';
 import { FrameBatcher } from './state/YjsSignalBridge.js';
 import { DEFAULT_PING_COLOR } from './utils/ui-constants.js';
 
+const batcherProto = /** @type {any} */ (FrameBatcher.prototype);
+if (!batcherProto.schedule) {
+  batcherProto.schedule = function () {
+    this.request();
+  };
+}
+if (!batcherProto.cancel) {
+  batcherProto.cancel = function () {
+    this._pending = false;
+  };
+}
+
 export const MAP_RENDERER_DEFAULTS = {
   drawColor: '#ff4444',
   drawWidth: 3,
@@ -101,7 +113,8 @@ export class MapRenderer {
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
 
-    const batcher = new FrameBatcher(() => this.render());
+    /** @type {any} */
+    this._renderBatcher = new FrameBatcher(() => this.render());
     this._dragBatcher = new FrameBatcher(() => this.renderDragFrame());
 
     let primed = false;
@@ -115,7 +128,7 @@ export class MapRenderer {
       wallsSignal.value; templatesSignal.value;
       pinsSignal.value; mapsSignal.value;
 
-      if (primed) batcher.request();
+      if (primed) this.requestRender();
       else primed = true;
     });
 
@@ -138,6 +151,10 @@ export class MapRenderer {
     }
   }
 
+  requestRender() {
+    this._renderBatcher.schedule();
+  }
+
   destroy() {
     window.removeEventListener('vtt:theme-change', this._onThemeChange);
     window.removeEventListener('resize', this._onResize);
@@ -152,6 +169,8 @@ export class MapRenderer {
     for (const d of this._layerDisposers) d();
     this._layerDisposers = [];
     this.cancelCombatFrame();
+    this._renderBatcher?.cancel?.();
+    this._tokenImages?.clear();
     destroyStage(this);
   }
 
@@ -205,13 +224,7 @@ export class MapRenderer {
   setTool(name) { this.activeTool = name; this.render(); }
 
   /**
-   * Set the currently-selected token. Mirrors the id into:
-   *   - this.selectedToken (canvas selection ring),
-   *   - this.state.selectedToken (signal-backed; wakes Sheet/NPC panels),
-   *   - this.state.selectedCharacterId / selectedNPCId depending on the
-   *     token's type - so the sheet panels' direct signal reads pick
-   *     up the change without needing a tab-switch.
-   * Clearing (id=null) clears all three signal-backed fields.
+   * Selects a single token and synchronizes primary selection signals.
    */
   setSelectedToken(id) {
     this._applySelection(selectOne(this.selectedTokenIds, id));

@@ -61,7 +61,28 @@ describe('layoutTokenLabels', () => {
     const [label] = layoutTokenLabels([token(100, 100, 40, 40)], {
       labelHeight: LABEL_H, labelWidthOf: () => 60,
     });
-    // Token centre is at x+20=120; label is 60 wide → label x = 120 - 30 = 90.
+    // Token centre is at x+20=120; label is 60 wide -> label x = 120 - 30 = 90.
     expect(label.x).toBe(90);
+  });
+
+  it('avoids the upper token bottom HP bar when a token sits directly below another', () => {
+    // Upper token at y=100 (height 40, HP bar at y=140..152)
+    // Lower token at y=144 (height 40)
+    const tokens = [token(100, 100, 40, 40, 'Upper', 't-upper'), token(100, 144, 40, 40, 'Lower', 't-lower')];
+    const labels = layoutTokenLabels(tokens, {
+      labelHeight: LABEL_H, labelWidthOf: () => 60,
+    });
+    const upperHpBar = { x: 100, y: 140, w: 40, h: 12 };
+    expect(overlap(labelBox(labels[1]), upperHpBar)).toBe(false);
+    expect(overlap(labelBox(labels[0]), labelBox(labels[1]))).toBe(false);
+  });
+
+  it('avoids map pin obstacles when placed in the label zone', () => {
+    const tokens = [token(100, 100, 40, 40, 'Boss', 't-boss')];
+    const pinObstacle = { x: 90, y: 80, w: 20, h: 20 };
+    const labels = layoutTokenLabels(tokens, {
+      labelHeight: LABEL_H, labelWidthOf: () => 60, obstacles: [pinObstacle],
+    });
+    expect(overlap(labelBox(labels[0]), pinObstacle)).toBe(false);
   });
 });

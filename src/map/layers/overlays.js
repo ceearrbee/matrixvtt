@@ -17,7 +17,7 @@ import Konva from 'konva';
 import { getTokensInCircle, getTokensInCone } from '../../utils/geometry.js';
 import { marqueeColors } from '../token-marquee.js';
 import { measureDistanceCells } from '../../utils/hexGrid.js';
-import { activeMapIdSignal } from '../../state/signals.js';
+import { activeMapIdSignal, mapsSignal } from '../../state/signals.js';
 
 const CELL_FEET = 5;
 
@@ -32,12 +32,21 @@ export function createOverlaysLayer(stage, mr) {
       paintAoEHighlight(ctx, mr);
       paintAreaSelection(ctx, mr);
       paintMeasure(ctx, mr);
-      paintPins(ctx, mr);
     },
   });
   layer.add(shape);
 
   function sync() {
+    const activeId = activeMapIdSignal.value;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
+        && typeof map.cell_px === 'number') {
+      const w = map.width_cells * map.cell_px;
+      const h = map.height_cells * map.cell_px;
+      layer.clipFunc((ctx) => { ctx.rect(0, 0, w, h); });
+    } else {
+      layer.clipFunc(null);
+    }
     layer.batchDraw();
   }
 
@@ -117,17 +126,4 @@ function paintMeasure(ctx, mr) {
   ctx.font = 'bold 12px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(`${feet} ft`, (x1 + x2) / 2, (y1 + y2) / 2 - 5);
-}
-
-function paintPins(ctx, mr) {
-  (mr.state?.pins || []).forEach((p) => {
-    if (p.gm_only && !mr.state.isGM()) return;
-    ctx.fillStyle = p.gm_only ? '#b45050' : '#508cdc';
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 6 / (mr.zoom || 1), 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'white';
-    ctx.font = `${10 / (mr.zoom || 1)}px sans-serif`;
-    ctx.fillText(p.title, p.x, p.y + 12 / (mr.zoom || 1));
-  });
 }

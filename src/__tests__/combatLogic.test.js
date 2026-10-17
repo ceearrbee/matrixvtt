@@ -9,7 +9,7 @@
 
 import { describe, it, expect } from 'vitest';
 
-// ─── Pure-logic extracts mirroring UIController methods ───────────────────────
+// Pure-logic extracts mirroring UIController methods
 
 /**
  * Mirrors the action-economy reset in UIController.nextTurn().
@@ -68,7 +68,7 @@ function removeFromInitiative(initiative, tokenId) {
   return initiative;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 function makeEntry(id, tokenId, overrides = {}) {
   return { id, token_id: tokenId, name: id, initiative: 10, character_id: id, ...overrides };
@@ -78,7 +78,7 @@ function makeInitiative(entries, current_index = 0, round = 1) {
   return { active: true, order: entries, current_index, round };
 }
 
-// ─── nextTurn - action economy reset ─────────────────────────────────────────
+// nextTurn - action economy reset
 
 describe('nextTurn - action economy reset', () => {
   it('clears action_used on the incoming combatant', () => {
@@ -123,7 +123,7 @@ describe('nextTurn - action economy reset', () => {
   });
 });
 
-// ─── removeFromInitiative - current_index adjustment ─────────────────────────
+// removeFromInitiative - current_index adjustment
 
 describe('removeFromInitiative - current_index adjustment', () => {
   it('removing an entry AFTER current leaves current_index unchanged', () => {

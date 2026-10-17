@@ -26,6 +26,7 @@ export function MapCanvas({ ui }) {
     return () => {
       renderer.destroy();
       ui.mapRenderer = null;
+      if (ui.state) ui.state.mapRenderer = null;
     };
   }, [ui]);
 

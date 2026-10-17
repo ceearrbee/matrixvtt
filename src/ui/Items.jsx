@@ -58,7 +58,7 @@ function HolderBadge({ ui, item_id, classification }) {
 }
 
 function ItemCard({ ui, item, itemId, canEdit, holder = null }) {
-  const ruleset = ui.state.settings.systemConfig;
+  const ruleset = ui.state.settings?.systemConfig;
   // Per-type sections from ruleset.item_kinds[type], falling back to
   // the shared ruleset.item_card.sections list.
   const sections = getItemSections(ruleset, item);
@@ -123,7 +123,7 @@ function ItemCard({ ui, item, itemId, canEdit, holder = null }) {
   );
 }
 
-function GMItemsView({ ui }) {
+function GMItemsView({ ui, scopeToggle = null }) {
   const [filter, setFilter] = useState('character');
   const classification = classifyItems(ui);
 
@@ -147,6 +147,7 @@ function GMItemsView({ ui }) {
 
   return h('div', { class: 'items-tab-wrapper' }, [
     h(TabToolbar, { title: 'All items', modifier: 'cluster' }, [
+      scopeToggle,
       filterBtn('character', 'On character'),
       filterBtn('available', 'Available / on map'),
       h(
@@ -186,18 +187,43 @@ export function Items({ ui }) {
   charactersSignal.value;
   tokensSignal.value;
 
-  if (ui.state.isGM()) return h(GMItemsView, { ui });
-
+  const isGM = ui.state.isGM();
   const character = ui.state.getCurrentCharacter();
-  if (!character) return h(NoCharacterSelected, { ui });
+  const [gmScope, setGmScope] = useState(character ? 'character' : 'all');
 
-  const canEdit = ui.state.canEditEntity(character);
+  const scopeToggle = isGM && character ? h('div', { class: 'dbt-group items-scope-toggle', role: 'group', 'aria-label': 'Items scope' }, [
+    h('button', {
+      type: 'button',
+      class: `dbt dbt--sm${gmScope === 'character' ? ' dbt--active' : ''}`,
+      'aria-pressed': String(gmScope === 'character'),
+      onClick: () => setGmScope('character'),
+    }, 'Character'),
+    h('button', {
+      type: 'button',
+      class: `dbt dbt--sm${gmScope === 'all' ? ' dbt--active' : ''}`,
+      'aria-pressed': String(gmScope === 'all'),
+      onClick: () => setGmScope('all'),
+    }, 'All items'),
+  ]) : null;
+
+  if (isGM) {
+    if (!character || gmScope === 'all') {
+      return h(GMItemsView, { ui, scopeToggle });
+    }
+  } else if (!character) {
+    return h(NoCharacterSelected, { ui });
+  }
+
+  const canEdit = typeof ui.state?.canEditEntity === 'function'
+    ? ui.state.canEditEntity(character)
+    : (ui.state?.isGM?.() ?? false);
   const itemsWithIds = (character.inventory_ids ?? [])
     .map(id => ({ id, item: ui.state.items.get(id) }))
     .filter(p => p.item);
 
   return h('div', { class: 'items-tab-wrapper' }, [
-    h(TabToolbar, { title: `${character.name}'s Inventory` },
+    h(TabToolbar, { title: `${character.name}'s Inventory`, modifier: scopeToggle ? 'cluster' : undefined }, [
+      scopeToggle,
       canEdit &&
         h(
           'button',
@@ -209,8 +235,8 @@ export function Items({ ui }) {
             onClick: () => ui.showItemForm(null),
           },
           '+ Add Item'
-        )
-    ),
+        ),
+    ]),
     itemsWithIds.length === 0
       ? h(EmptyState, {
           title: 'Nothing in this inventory',

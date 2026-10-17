@@ -126,10 +126,21 @@ export async function startScene(ui, title, openingPost) {
   // scene wouldn't see the chapter chrome in their own log until a
   // round-trip via someone else's view. The shared formatter keeps
   // local-echo and remote-receive identical.
+  const resolveEntity = {
+    refs: {
+      characters: ui.state?.characters,
+      npcs: ui.state?.npcs,
+      items: ui.state?.items,
+      spells: ui.state?.spells,
+      maps: ui.state?.maps,
+      fallback: true,
+    },
+    tables: ui.state?.tables,
+  };
   const html = formatSceneRootBody(trimmedTitle, trimmedPost, {
     format: content.format,
     formatted_body: content.formatted_body,
-  });
+  }, resolveEntity);
   ui._log?.('🎬', html, {
     eventId,
     sender: ui.state.widgetManager?.userId ?? null,

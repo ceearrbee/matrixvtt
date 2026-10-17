@@ -12,10 +12,13 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { h } from 'preact';
 import { render } from '@testing-library/preact';
 import { renderSectionList } from '../ui/characterSheetSections.js';
-import { tablePhaseSignal } from '../state/ui-signals.js';
+import { tablePhaseSignal, tableModeSignal } from '../state/ui-signals.js';
 import { UI_MODES } from '../utils/constants.js';
 
-beforeEach(() => { tablePhaseSignal.value = UI_MODES.COMBAT; });
+beforeEach(() => {
+  tablePhaseSignal.value = UI_MODES.COMBAT;
+  tableModeSignal.value = 'prep';
+});
 
 function mkUi() {
   return { state: { settings: { systemConfig: {} }, canEditEntity: () => false } };
@@ -90,5 +93,29 @@ describe('action_list kind', () => {
 
     const headers = [...container.querySelectorAll('.section-header')].map((e) => e.textContent);
     expect(headers).toEqual(['Actions', 'Legendary Actions', 'Lair Actions', 'Traits']);
+  });
+
+  it('hides empty action lists completely when tableMode is live', () => {
+    tableModeSignal.value = 'live';
+    const character = {
+      id: 'goblin',
+      actions: [{ name: 'Scimitar' }],
+      legendary_actions: [],
+      lair_actions: [],
+      traits: [],
+    };
+    const sections = [
+      { kind: 'action_list' },
+      { kind: 'action_list', field: 'legendary_actions', title: 'Legendary Actions' },
+      { kind: 'action_list', field: 'lair_actions',      title: 'Lair Actions' },
+      { kind: 'action_list', field: 'traits',            title: 'Traits' },
+    ];
+    const tree = h('div', null, renderSectionList(mkUi(), character, sections));
+    const { container } = render(tree);
+
+    const headers = [...container.querySelectorAll('.section-header')].map((e) => e.textContent);
+    expect(headers).toEqual(['Actions']);
+    expect(container.textContent).not.toContain('No legendary actions');
+    expect(container.textContent).not.toContain('No lair actions');
   });
 });

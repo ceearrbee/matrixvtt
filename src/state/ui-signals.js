@@ -7,7 +7,7 @@
  * UI reactivity.
  */
 
-import { signal } from '@preact/signals';
+import { signal, computed } from '@preact/signals';
 import { TABS, UI_MODES, STORAGE_KEYS, LAYOUT_MODES } from '../utils/constants.js';
 
 /**
@@ -93,6 +93,16 @@ export const layoutModeSignal = /** @type {import('@preact/signals').Signal<'tex
  */
 export const selectedCharacterIdSignal = signal(null);
 export const selectedNPCIdSignal = signal(null);
+
+/**
+ * Currently inspected entity id (character or NPC) across the sheet/companion panels.
+ */
+export const selectedEntitySignal = computed(() => {
+  if (activeTabSignal.value === TABS.SHEET) {
+    return selectedCharacterIdSignal.value;
+  }
+  return selectedNPCIdSignal.value || selectedCharacterIdSignal.value || null;
+});
 export const speakAsSignal = signal('');
 
 /**
@@ -319,3 +329,34 @@ export const plSplitFailedSignal = signal(/** @type {string[] | null} */ (null))
 // localStorage so the composer's macro list repaints when one is
 // saved. See src/ui/dice-macros.js.
 export const diceMacrosSignal = signal(/** @type {string[]} */ ([]));
+
+/**
+ * Desktop right companion panel collapse state.
+ */
+export const companionCollapsedSignal = signal(false);
+
+/**
+ * Desktop left navigation rail collapse state.
+ */
+export const leftRailCollapsedSignal = signal(false);
+
+/**
+ * Table mode: 'prep' (authoring, campaign setup) vs 'live' (active session play).
+ * Synchronized with gmPrepActiveSignal so the two axes never diverge.
+ */
+export const tableModeSignal = signal(/** @type {'prep' | 'live'} */ ('live'));
+
+gmPrepActiveSignal.subscribe((active) => {
+  tableModeSignal.value = active ? 'prep' : 'live';
+});
+
+/**
+ * Reset ephemeral UI signals to default.
+ */
+export function resetUiSignals() {
+  companionCollapsedSignal.value = false;
+  leftRailCollapsedSignal.value = false;
+  gmPrepActiveSignal.value = false;
+  tableModeSignal.value = 'live';
+}
+

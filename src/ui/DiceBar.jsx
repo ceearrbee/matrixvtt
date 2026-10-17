@@ -95,6 +95,7 @@ export function DiceBar({ ui }) {
     !isMobile && h(QuickTray, { ui, key: 'quick-tray' }),
     !isMobile && h('button', {
       key: 'dice-toggle',
+      type: 'button',
       class: `dbt dbt--sm${diceStripOpen ? ' dbt--active' : ''}`,
       'data-dice-strip-toggle': true,
       'aria-expanded': String(diceStripOpen),
@@ -105,6 +106,7 @@ export function DiceBar({ ui }) {
     ...(diceStripOpen ? DiceButtons({ ui, selected, onSelect: setSelected }) : []),
     ...(diceStripOpen ? ModifierRow({ ui, selected }) : []),
     diceStripOpen && h('button', {
+      type: 'button',
       class: `dbt${extrasOpen ? ' dbt--active' : ''}`,
       'data-dice-more': true,
       'aria-label': extrasOpen ? 'Hide extra dice tools' : 'Show extra dice tools',

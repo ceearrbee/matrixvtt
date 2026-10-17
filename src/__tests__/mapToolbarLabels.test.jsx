@@ -46,6 +46,16 @@ describe('map toolbar discoverability', () => {
     for (const btn of buttons) {
       expect(btn.getAttribute('aria-label'), `tool ${btn.dataset.tool} aria-label`).toBeTruthy();
       expect(btn.getAttribute('title'), `tool ${btn.dataset.tool} title`).toBeTruthy();
+      expect(btn.getAttribute('data-tooltip'), `tool ${btn.dataset.tool} data-tooltip`).toBeTruthy();
+    }
+  });
+
+  it('GM scene action buttons also carry data-tooltip', () => {
+    gmPrepActiveSignal.value = true;
+    render(h(MapStrip, { ui: makeUi({ isGM: true }) }), host);
+    const sceneActions = host.querySelectorAll('.dtb-btn[data-scene-action]');
+    for (const btn of sceneActions) {
+      expect(btn.getAttribute('data-tooltip'), `action ${btn.dataset.sceneAction} data-tooltip`).toBeTruthy();
     }
   });
 

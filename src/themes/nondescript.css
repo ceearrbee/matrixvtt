@@ -8,6 +8,7 @@
   --color-background-secondary: #F9F9F9;
   --color-background-tertiary: #F4F4F4;
   --color-background-hover: rgba(17, 17, 17, 0.04);
+  --color-bg-inset: rgba(17, 17, 17, 0.05);
   --vendor-icon-filter: none;
   --color-background-info: rgba(17, 17, 17, 0.05);
   --color-background-success: rgba(15, 110, 86, 0.08);
@@ -73,6 +74,7 @@
     --color-background-secondary: #111111;
     --color-background-tertiary: #161616;
     --color-background-hover: rgba(238, 238, 238, 0.06);
+    --color-bg-inset: rgba(238, 238, 238, 0.06);
     --vendor-icon-filter: invert(0.85);
     --color-background-info: rgba(238, 238, 238, 0.06);
     --color-background-success: rgba(76, 209, 55, 0.12);

@@ -43,6 +43,7 @@ afterEach(() => {
 
 describe('clear all drawings', () => {
   it('asks for confirmation before wiping', async () => {
+    activeToolGroupSignal.value = TOOL_GROUPS.DRAWING;
     const ui = mkUi();
     const { container } = render(h(MapStrip, { ui }));
     // Clear lives behind the toolbar's ⋯ overflow with undo and redo.

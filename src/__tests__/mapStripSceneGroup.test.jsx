@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, h } from 'preact';
 import { fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
-import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
+import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal, tableModeSignal } from '../state/ui-signals.js';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { loadTestMap } from './helpers/loadedMap.js';
 
@@ -74,5 +74,12 @@ describe('map toolbar Scene group', () => {
     render(h(MapStrip, { ui: makeUi({ isGM: false }) }), host);
     expect(host.querySelector('[data-tool-group="gm"]')).toBeNull();
     expect(host.querySelector('[data-scene-action]')).toBeNull();
+  });
+
+  it('hides the Scene group tab when tableMode is live even for GM with prep active', () => {
+    tableModeSignal.value = 'live';
+    render(h(MapStrip, { ui: makeUi({ isGM: true }) }), host);
+    expect(host.querySelector('[data-tool-group="gm"]')).toBeNull();
+    tableModeSignal.value = 'prep';
   });
 });

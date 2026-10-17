@@ -2,7 +2,7 @@
  * Avatar primitive - circular portrait with monogram fallback.
  *
  * When `image_url` is set, render an <img> at the requested size.
- * Otherwise, render a colored circle with a 1–2 letter monogram derived
+ * Otherwise, render a colored circle with a 1-2 letter monogram derived
  * from `name`. Color falls back to a hash-derived hue if no explicit
  * `color` is provided.
  */

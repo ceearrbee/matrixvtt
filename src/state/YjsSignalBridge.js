@@ -118,7 +118,6 @@ export class YjsSignalBridge {
   }
 
   /**
-   * Get the signal for a specific entity.
    * @param {string} id
    * @returns {import('@preact/signals').Signal}
    */

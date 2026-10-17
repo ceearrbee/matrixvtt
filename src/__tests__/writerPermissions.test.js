@@ -41,7 +41,7 @@ async function expectRejectsPermission(promise) {
   expectPermissionError(caught);
 }
 
-// ─── session-writers ──────────────────────────────────────────────────────
+// session-writers
 
 describe('session-writers - GM gates', () => {
   it('updateSettings rejects non-GM', async () => {
@@ -59,7 +59,7 @@ describe('session-writers - GM gates', () => {
   });
 });
 
-// ─── combat-writers ───────────────────────────────────────────────────────
+// combat-writers
 
 describe('combat-writers - GM gates', () => {
   describe('non-GM rejected', () => {
@@ -125,7 +125,7 @@ describe('combat-writers - GM gates', () => {
   });
 });
 
-// ─── world-writers ────────────────────────────────────────────────────────
+// world-writers
 
 describe('world-writers - GM gates', () => {
   describe('non-GM rejected (fog)', () => {

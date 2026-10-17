@@ -23,6 +23,8 @@ import { renderMarkdown } from '../utils/renderMarkdown.js';
 import { renderWikilinks } from '../utils/wikilinks.js';
 import { canEditPage } from '../state/reader.js';
 import { dispatchRollWikilink } from './tables/wikilink.js';
+import { normalizeEmDashes } from '../utils/format.js';
+
 import { dispatchMapWikilink } from './maps/wikilink.js';
 import { ensurePageThreadRoot } from '../utils/page-comments.js';
 import { ThreadView } from './ThreadView.jsx';
@@ -56,7 +58,7 @@ function buildWikilinkRefs(ui) {
   };
 }
 
-function handleWikilinkClick(ui, e) {
+export function handleWikilinkClick(ui, e) {
   const handoutLink = e.target.closest?.('a.wikilink[data-handout-id]');
   if (handoutLink) {
     e.preventDefault();
@@ -274,7 +276,7 @@ function FloatingDoc({ ui, descriptor, index }) {
     ]);
   }
 
-  const title = handout?.title || page?.title || 'Untitled';
+  const title = normalizeEmDashes(handout?.title || page?.title || 'Untitled');
   const titleId = `floating-doc-title-${descriptor.key.replace(/[^a-z0-9]/gi, '-')}`;
 
   return h('aside', {

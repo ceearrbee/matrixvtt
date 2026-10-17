@@ -2,8 +2,8 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { h } from 'preact';
 import { render, cleanup, fireEvent } from '@testing-library/preact';
 import { MapStrip } from '../ui/MapStrip.jsx';
-import { tablePhaseSignal, gmPrepActiveSignal } from '../state/ui-signals.js';
-import { UI_MODES } from '../utils/constants.js';
+import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
+import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { loadTestMap } from './helpers/loadedMap.js';
 
 vi.mock('../map-renderer.js', () => ({
@@ -15,8 +15,17 @@ vi.mock('../map-renderer.js', () => ({
 }));
 
 // Toolbar now renders in every phase; prep is enabled so GM tools are reachable.
-beforeEach(() => { tablePhaseSignal.value = UI_MODES.NARRATIVE; gmPrepActiveSignal.value = true; });
-afterEach(() => { cleanup(); tablePhaseSignal.value = UI_MODES.NARRATIVE; gmPrepActiveSignal.value = false; });
+beforeEach(() => {
+  tablePhaseSignal.value = UI_MODES.NARRATIVE;
+  gmPrepActiveSignal.value = true;
+  activeToolGroupSignal.value = TOOL_GROUPS.DRAWING;
+});
+afterEach(() => {
+  cleanup();
+  tablePhaseSignal.value = UI_MODES.NARRATIVE;
+  gmPrepActiveSignal.value = false;
+  activeToolGroupSignal.value = TOOL_GROUPS.NAVIGATION;
+});
 
 function makeUI(extra = {}) {
   return {

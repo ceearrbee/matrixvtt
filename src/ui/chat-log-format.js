@@ -14,7 +14,10 @@
  */
 
 import { esc } from '../utils/domHelpers.js';
-import { renderMarkdown } from '../utils/renderMarkdown.js';
+import { renderMarkdown, hasMarkdown } from '../utils/renderMarkdown.js';
+import { renderWikilinks } from '../utils/wikilinks.js';
+import { normalizeEmDashes } from '../utils/format.js';
+
 
 const LONG_BODY_CHARS = 600;
 const LONG_BODY_NEWLINES = 12;
@@ -34,25 +37,38 @@ export function isLongBody(body) {
 }
 
 /**
- * Render a chat body for the log. If the sender supplied `formatted_body`
- * (Element markdown send, our own markdown send, etc.) we run the SOURCE
- * (`body`, which is markdown / plain text) through DOMPurified
- * renderMarkdown locally - never trust foreign HTML. Otherwise we
- * escape the plain body.
+ * Render a chat body for the log. When markdown is present (either via formatted_body
+ * or source syntax like **bold**, *italic*, [[wikilinks]], etc.), we run the source
+ * body through DOMPurified renderMarkdown and renderWikilinks locally.
  *
  * @param {string} body
- * @param {{ format?: string|null, formatted_body?: string|null }} opts
+ * @param {{ format?: string|null, formatted_body?: string|null, resolveEntity?: any }} opts
  * @returns {string} safe HTML
  */
-export function renderChatBody(body, { format, formatted_body } = {}) {
+export function renderChatBody(body, opts = {}) {
+  const { format, formatted_body, resolveEntity } = (typeof opts === 'object' && opts !== null) ? opts : {};
+  const normalizedBody = typeof body === 'string' ? normalizeEmDashes(body) : (body || '');
+  let rendered;
   if (format === 'org.matrix.custom.html' && typeof formatted_body === 'string' && formatted_body) {
-    // Re-render from source markdown when present; only fall back to the
-    // foreign HTML if the source isn't markdown-y. renderMarkdown +
-    // DOMPurify is cheap and guarantees the same sanitization rules
-    // we use everywhere else.
-    return renderMarkdown(body || '');
+    rendered = renderMarkdown(normalizedBody);
+  } else if (typeof normalizedBody === 'string' && hasMarkdown(normalizedBody)) {
+    rendered = renderMarkdown(normalizedBody);
+  } else {
+    rendered = esc(normalizedBody);
   }
-  return esc(body || '');
+
+  rendered = rendered.trim();
+
+  // Strip wrapping single paragraph so inline prefixes stay on the same line
+  if (rendered.startsWith('<p>') && rendered.endsWith('</p>') && rendered.indexOf('<p>', 3) === -1) {
+    rendered = rendered.slice(3, -4);
+  }
+
+  const titleToId = resolveEntity?.titleToId || null;
+  const tablesById = resolveEntity?.tables || resolveEntity?.tablesById || null;
+  const refs = resolveEntity?.refs || resolveEntity || null;
+
+  return renderWikilinks(rendered, titleToId, tablesById, refs, opts);
 }
 
 /**
@@ -81,9 +97,17 @@ export function prefixBodyWithPersona(body, personaName, mode) {
  * @returns {boolean}
  */
 export function bodyAlreadyPrefixed(body, personaName, mode) {
-  if (!personaName || mode === 'ooc') return false;
-  if (mode === 'describe') return body.startsWith(`${personaName} `);
-  return body.startsWith(`${personaName}: `);
+  if (!body || typeof body !== 'string' || mode === 'ooc') return false;
+  if (/^[\p{Extended_Pictographic}\uFE0F\u200D]+/u.test(body)) {
+    return true;
+  }
+  if (!personaName) return false;
+  if (mode === 'describe') {
+    if (body.startsWith(`${personaName} `)) return true;
+  } else {
+    if (body.startsWith(`${personaName}: `)) return true;
+  }
+  return false;
 }
 
 /**
@@ -93,28 +117,45 @@ export function bodyAlreadyPrefixed(body, personaName, mode) {
  *
  * @param {string} displayName
  * @param {string} body
- * @param {string|null} personaName
+ * @param {string|null|object} personaName
  * @returns {string} safe HTML
  */
-export function formatSayLogBody(displayName, body, personaName, fmt = null) {
-  const rendered = renderChatBody(body, fmt || {});
-  if (bodyAlreadyPrefixed(body, personaName, 'say')) {
+export function formatSayLogBody(displayName, body, personaName = null, fmt = null, resolveEntity = null) {
+  let pName = personaName;
+  let opts = fmt;
+  let resolver = resolveEntity;
+
+  if (personaName && typeof personaName === 'object') {
+    opts = personaName;
+    pName = personaName.personaName ?? null;
+    resolver = personaName.resolveEntity ?? resolveEntity;
+  }
+  const effectivePersona = pName || displayName;
+  const mergedOpts = (opts && typeof opts === 'object') ? { ...opts, resolveEntity: resolver } : { resolveEntity: resolver };
+  const rendered = renderChatBody(body, mergedOpts);
+  if (bodyAlreadyPrefixed(body, effectivePersona, 'say')) {
     return rendered;
   }
   return `<b>${esc(displayName)}</b>: ${rendered}`;
 }
 
-/**
- * Describe-mode log entry. m.emote convention is `* <subject> <verb>`.
- * If the body already starts with the persona name (because we sent it
- * with the persona embedded as the subject), just italicise the body
- * with a leading `*`. Otherwise prepend the displayName.
- *
- * @param {string} displayName
- * @param {string} body
- * @param {string|null} personaName
- * @returns {string} safe HTML
- */
+export function stripRedundantSceneTitle(openingBody, title) {
+  if (!openingBody || typeof openingBody !== 'string') return '';
+  if (!title || typeof title !== 'string') return openingBody;
+  const rawBody = openingBody.trimStart();
+  const firstNl = rawBody.indexOf('\n');
+  const firstLine = (firstNl === -1 ? rawBody : rawBody.slice(0, firstNl)).trim();
+  const lineWithoutIcon = firstLine.replace(/^🎬\s*/u, '');
+  const normFirst = lineWithoutIcon.replace(/[\u2014\u2013-]/g, '-').trim();
+  const normTitle = title.replace(/[\u2014\u2013-]/g, '-').trim();
+
+  if (normFirst === normTitle) {
+    if (firstNl === -1) return '';
+    return rawBody.slice(firstNl + 1).trimStart();
+  }
+  return openingBody;
+}
+
 /**
  * Build the chapter-break HTML for a scene root. Used both by the
  * inbound dispatch (a remote user started a scene) and the local
@@ -124,19 +165,24 @@ export function formatSayLogBody(displayName, body, personaName, fmt = null) {
  * @param {string} title
  * @param {string} openingBody
  * @param {{ format?: string|null, formatted_body?: string|null } | null} fmt
+ * @param {any} resolveEntity
  * @returns {string} safe HTML
  */
-export function formatSceneRootBody(title, openingBody, fmt) {
-  const safeTitle = esc(title || 'Scene');
-  const rendered  = renderChatBody(openingBody, fmt || {});
+export function formatSceneRootBody(title, openingBody, fmt = null, resolveEntity = null) {
+  const normTitle = normalizeEmDashes(title || 'Scene');
+  const safeTitle = esc(normTitle);
+  const opts = (fmt && typeof fmt === 'object') ? { ...fmt, resolveEntity } : { resolveEntity };
+  const strippedOpening = stripRedundantSceneTitle(normalizeEmDashes(openingBody), title);
+  const rendered  = renderChatBody(strippedOpening, opts);
   return `<div class="log-entry--scene-root">`
        +   `<div class="log-entry__scene-title">🎬 ${safeTitle}</div>`
        +   `<div class="log-entry__scene-opening">${rendered}</div>`
        + `</div>`;
 }
 
-export function formatEmoteLogBody(displayName, body, personaName, fmt = null) {
-  const rendered = renderChatBody(body, fmt || {});
+export function formatEmoteLogBody(displayName, body, personaName, fmt = null, resolveEntity = null) {
+  const opts = (fmt && typeof fmt === 'object') ? { ...fmt, resolveEntity } : { resolveEntity };
+  const rendered = renderChatBody(body, opts);
   if (bodyAlreadyPrefixed(body, personaName, 'describe')) {
     return `<i>* ${rendered}</i>`;
   }

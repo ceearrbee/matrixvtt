@@ -235,4 +235,10 @@ describe('static build - GitHub Pages base path', () => {
       }
     }
   });
+
+  it('excludes dev diagnostics and mockups from the production bundle', () => {
+    expect(existsSync(resolve(DIST, 'diag.html'))).toBe(false);
+    expect(existsSync(resolve(DIST, 'mockups'))).toBe(false);
+    expect(existsSync(resolve(DIST, 'matrix_vtt_mockup.html'))).toBe(false);
+  });
 });

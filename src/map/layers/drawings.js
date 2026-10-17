@@ -10,7 +10,7 @@
 
 import { effect } from '@preact/signals';
 import Konva from 'konva';
-import { drawingsSignal, activeMapIdSignal } from '../../state/signals.js';
+import { drawingsSignal, activeMapIdSignal, mapsSignal } from '../../state/signals.js';
 
 export function createDrawingsLayer(stage, mr) {
   const layer = new Konva.Layer({ listening: false });
@@ -23,23 +23,38 @@ export function createDrawingsLayer(stage, mr) {
   previewRef.visible(false);
   layer.add(previewRef);
 
+  let _lastCommittedSig = '';
+
   function applyStroke(shape, s) {
-    shape.stroke(s.color);
-    shape.strokeWidth(s.width);
+    shape.stroke(s.color || '#fff');
+    shape.strokeWidth(Number.isFinite(s.width) && s.width > 0 ? s.width : 1);
     shape.lineCap('round');
     shape.lineJoin('round');
     if (s.type === 'pencil' || s.type === 'line') {
       const pts = [];
-      for (const p of s.points) { pts.push(p.x, p.y); }
+      if (Array.isArray(s.points)) {
+        for (const p of s.points) {
+          if (p && Number.isFinite(p.x) && Number.isFinite(p.y)) {
+            pts.push(p.x, p.y);
+          }
+        }
+      }
       shape.points(pts);
       shape.closed(false);
     } else if (s.type === 'rect') {
-      shape.position({ x: s.x, y: s.y });
-      shape.size({ width: s.w, height: s.h });
+      const x = Number.isFinite(s.x) ? s.x : 0;
+      const y = Number.isFinite(s.y) ? s.y : 0;
+      const w = Number.isFinite(s.w) && s.w >= 0 ? s.w : 0;
+      const h = Number.isFinite(s.h) && s.h >= 0 ? s.h : 0;
+      shape.position({ x, y });
+      shape.size({ width: w, height: h });
       shape.fillEnabled(false);
     } else if (s.type === 'circle') {
-      shape.position({ x: s.x, y: s.y });
-      shape.radius(s.r);
+      const x = Number.isFinite(s.x) ? s.x : 0;
+      const y = Number.isFinite(s.y) ? s.y : 0;
+      const r = Number.isFinite(s.r) && s.r >= 0 ? s.r : 0;
+      shape.position({ x, y });
+      shape.radius(r);
       shape.fillEnabled(false);
     }
   }
@@ -56,6 +71,14 @@ export function createDrawingsLayer(stage, mr) {
   function syncCommitted() {
     const list = drawingsSignal.value || [];
     const activeId = activeMapIdSignal.value;
+    let sig = `${activeId || ''};`;
+    for (const s of list) {
+      if (!s?.id || s.map_id !== activeId) continue;
+      sig += `${s.id}|${s.type}|${s.color}|${s.width}|${s.x}|${s.y}|${s.w}|${s.h}|${s.r}|${s.points ? s.points.length : 0};`;
+    }
+    if (sig === _lastCommittedSig) return;
+    _lastCommittedSig = sig;
+
     const keep = new Set();
     for (const s of list) {
       if (!s?.id) continue;
@@ -110,6 +133,16 @@ export function createDrawingsLayer(stage, mr) {
   function getPreview() { return previewRef; }
 
   function sync() {
+    const activeId = activeMapIdSignal.value;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
+        && typeof map.cell_px === 'number') {
+      const w = map.width_cells * map.cell_px;
+      const h = map.height_cells * map.cell_px;
+      layer.clipFunc((ctx) => { ctx.rect(0, 0, w, h); });
+    } else {
+      layer.clipFunc(null);
+    }
     syncCommitted();
     syncPreview();
     layer.batchDraw();
@@ -118,8 +151,8 @@ export function createDrawingsLayer(stage, mr) {
   const dispose = effect(() => {
     drawingsSignal.value;
     activeMapIdSignal.value;
-    syncCommitted();
-    layer.batchDraw();
+    mapsSignal.value;
+    sync();
   });
 
   return { layer, shapes, dispose, sync, getPreview };

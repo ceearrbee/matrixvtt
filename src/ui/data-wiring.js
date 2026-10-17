@@ -1,7 +1,7 @@
 /**
  * data-wiring.js - entity CRUD methods attached to the ui controller.
  * Extracted from `ui-methods.js` as part of the ongoing effort to keep
- * that file inside the 300–400 LOC cap.
+ * that file inside the 300-400 LOC cap.
  *
  * Every method is a thin forward to a feature module; no logic lives
  * here.

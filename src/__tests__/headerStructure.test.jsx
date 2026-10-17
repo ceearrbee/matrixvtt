@@ -55,13 +55,17 @@ describe('Header structure', () => {
 
   it('subtitle reads "No combat" at rest', () => {
     const { container } = render(h(Header, { ui: makeUi() }));
-    expect(container.querySelector('.vtt-header__subtitle').textContent).toBe('No combat');
+    const sub = container.querySelector('.vtt-header__subtitle');
+    expect(sub.textContent).toBe('No combat');
+    expect(sub.classList.contains('vtt-header__subtitle--idle')).toBe(true);
   });
 
   it('subtitle reads "Combat staged" when phase is combat with no active order', () => {
     tablePhaseSignal.value = UI_MODES.COMBAT;
     const { container } = render(h(Header, { ui: makeUi() }));
-    expect(container.querySelector('.vtt-header__subtitle').textContent).toBe('Combat staged');
+    const sub = container.querySelector('.vtt-header__subtitle');
+    expect(sub.textContent).toBe('Combat staged');
+    expect(sub.classList.contains('vtt-header__subtitle--idle')).toBe(false);
   });
 
   it('subtitle shows round + actor (non-possessive) during active combat', () => {
@@ -69,7 +73,9 @@ describe('Header structure', () => {
     ui.state.initiative = { active: true, round: 3, current_index: 0, order: [{ name: 'Aria' }] };
     initiativeSignal.value = ui.state.initiative;
     const { container } = render(h(Header, { ui }));
-    expect(container.querySelector('.vtt-header__subtitle').textContent).toBe('Round 3 · Aria');
+    const sub = container.querySelector('.vtt-header__subtitle');
+    expect(sub.textContent).toBe('Round 3 · Aria');
+    expect(sub.classList.contains('vtt-header__subtitle--idle')).toBe(false);
   });
 
   it('shows a GM "+ New" create button once prep is active', () => {
@@ -82,6 +88,17 @@ describe('Header structure', () => {
     gmPrepActiveSignal.value = true;
     render(h(Header, { ui: makeUi({ isGM: false }) }));
     expect(document.getElementById('new-entity-btn')).toBeNull();
+  });
+
+  it('groups GM controls in a gm-cluster group', () => {
+    gmPrepActiveSignal.value = true;
+    const { container } = render(h(Header, { ui: makeUi({ isGM: true }) }));
+    const cluster = container.querySelector('.vtt-header__gm-cluster');
+    expect(cluster).not.toBeNull();
+    expect(cluster.getAttribute('role')).toBe('group');
+    expect(cluster.getAttribute('aria-label')).toBe('GM controls');
+    expect(cluster.querySelector('#gm-prep-btn')).not.toBeNull();
+    expect(cluster.querySelector('#new-entity-btn')).not.toBeNull();
   });
 
   it('renders the mobile drawer toggles when callbacks are provided', () => {

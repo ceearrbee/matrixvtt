@@ -115,14 +115,27 @@ function shouldDropForVisibility(sm, field, val) {
 
 function bridgeFogCollection(sm) {
   const bridge = sm.yjs.fog;
+  /** @type {Set<string>} */
+  const subscribed = new Set();
+
   sm.subscriptionManager.subscribe('yjs:fog-ids', bridge.ids, (ids) => {
+    const present = new Set(ids);
     batch(() => {
       const next = new Map(fogSignal.value);
-      for (const id of next.keys()) if (!ids.includes(id)) next.delete(id);
+      for (const id of next.keys()) {
+        if (!present.has(id)) next.delete(id);
+      }
+      for (const id of [...subscribed]) {
+        if (present.has(id)) continue;
+        sm.subscriptionManager.unsubscribe(`yjs:fog:${id}`);
+        subscribed.delete(id);
+      }
       fogSignal.value = next;
       for (const id of ids) {
+        if (subscribed.has(id)) continue;
         const ySignal = bridge.get(id);
         if (!ySignal) continue;
+        subscribed.add(id);
         sm.subscriptionManager.subscribe(`yjs:fog:${id}`, ySignal, (val) => {
           const m = new Map(fogSignal.value);
           if (val && Object.keys(val).length > 0) m.set(id, val);

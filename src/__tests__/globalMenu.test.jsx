@@ -39,4 +39,15 @@ describe('GlobalMenu', () => {
     const { container } = render(h(GlobalMenu, { ui, onSelect: () => {} }));
     expect(container.querySelector('[data-menu-item="maps"]')).toBeNull();
   });
+
+  it('does not duplicate This table group label when canLeave is true', () => {
+    const ui = makeUi();
+    ui.widgetManager.canLeave = true;
+    const { container } = render(h(GlobalMenu, { ui, onSelect: () => {} }));
+    const labels = [...container.querySelectorAll('.global-menu__group-label')]
+      .map((el) => el.textContent);
+    const tableLabels = labels.filter((t) => t === 'This table');
+    expect(tableLabels.length).toBe(1);
+    expect(container.querySelector('[data-menu-item="leave"]')).not.toBeNull();
+  });
 });

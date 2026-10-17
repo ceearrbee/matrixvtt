@@ -74,7 +74,6 @@ test.describe('cold start to a playable table', () => {
   });
 
   test('a GM not in Prep sees no scene-authoring chrome', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'the map tool groups have no phone affordance');
     await page.goto('app.html');
     await page.fill('#username', 'playwright');
     await page.fill('#password', 'hunter2');
@@ -84,6 +83,11 @@ test.describe('cold start to a playable table', () => {
     await expect(page.locator('#setup-wizard')).toBeVisible({ timeout: 15_000 });
     await page.getByRole('button', { name: 'Create campaign' }).click();
     await expect(page.locator('.shell[data-ui-mode]')).toBeVisible({ timeout: 15_000 });
+
+    if (isMobile) {
+      const tab = page.locator('[data-mobile-tab="map"]');
+      if (await tab.isVisible()) await tab.click();
+    }
 
     await expect(page.locator('[data-tool-group="gm"]')).toHaveCount(0);
     await expect(page.locator('#new-entity-btn')).toHaveCount(0);

@@ -7,7 +7,18 @@
 
 export function resolveMediaUrl(url, homeserver) {
   if (!url) return null;
-  if (!url.startsWith('mxc://')) return url;
+  if (!url.startsWith('mxc://')) {
+    if (
+      url.startsWith('https://') ||
+      url.startsWith('http://') ||
+      url.startsWith('blob:') ||
+      url.startsWith('data:image/') ||
+      (url.startsWith('/') && !url.startsWith('//'))
+    ) {
+      return url;
+    }
+    return '';
+  }
   const path = url.slice(6);
   const base = homeserver || `https://${path.split('/')[0]}`;
   return `${base}/_matrix/media/v3/download/${path}`;

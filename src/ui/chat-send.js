@@ -24,7 +24,7 @@ import {
   activeSceneSignal,
 } from '../state/ui-signals.js';
 import { formatToneBody } from './chat-tones.js';
-import { prefixBodyWithPersona, formatSayLogBody, formatEmoteLogBody } from './chat-log-format.js';
+import { prefixBodyWithPersona, formatSayLogBody, formatEmoteLogBody, renderChatBody } from './chat-log-format.js';
 import { renderMarkdown, hasMarkdown } from '../utils/renderMarkdown.js';
 import { parseSlash } from './slash-commands.js';
 
@@ -143,21 +143,31 @@ export async function sendChatMessage(ui, rawValue) {
   const displayName =
     personaOverride ?? token?.name ?? myUserId?.split(':')[0]?.replace('@', '') ?? '?';
 
+  const resolveEntity = {
+    refs: {
+      characters: ui.state?.characters,
+      npcs: ui.state?.npcs,
+      items: ui.state?.items,
+      spells: ui.state?.spells,
+      maps: ui.state?.maps,
+    },
+    tables: ui.state?.tables,
+  };
   const fmt = content.formatted_body
-    ? { format: content.format, formatted_body: content.formatted_body }
-    : null;
+    ? { format: content.format, formatted_body: content.formatted_body, resolveEntity }
+    : { resolveEntity };
 
   if (whisperTo) {
     const toDisplay = whisperTo.split(':')[0].replace('@', '');
     ui._log('🔒', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b>: ${esc(finalBody)}`, { eventId, sender: myUserId });
   } else if (mode === 'describe') {
-    ui._log('💭', formatEmoteLogBody(displayName, finalBody, personaName, fmt), { eventId, sender: myUserId, msgtype: 'm.emote' });
+    ui._log('💭', formatEmoteLogBody(displayName, finalBody, personaName, fmt, resolveEntity), { eventId, sender: myUserId, msgtype: 'm.emote' });
     if (tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, finalBody);
   } else if (mode === 'ooc') {
-    const rendered = fmt ? renderMarkdown(finalBody) : esc(finalBody);
+    const rendered = renderChatBody(finalBody, fmt);
     ui._log('📢', `<span class="log-entry--ooc">((OOC)) <b>${esc(displayName)}</b>: ${rendered}</span>`, { eventId, sender: myUserId, msgtype: 'm.notice' });
   } else {
-    ui._log('💬', formatSayLogBody(displayName, finalBody, personaName, fmt), { eventId, sender: myUserId });
+    ui._log('💬', formatSayLogBody(displayName, finalBody, personaName, fmt, resolveEntity), { eventId, sender: myUserId });
     if (tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, finalBody);
   }
 }

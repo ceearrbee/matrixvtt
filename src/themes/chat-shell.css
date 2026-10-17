@@ -19,9 +19,7 @@
  *  11. Mobile / narrow-viewport overrides
  */
 
-/* ============================================================== *
- *  1. Top-level chat-shell layout                                  *
- * ============================================================== */
+/* 1. Top-level chat-shell layout */
 
 .chat-shell {
   display: grid;
@@ -93,9 +91,7 @@
   gap: var(--space-md);
 }
 
-/* ============================================================== *
- *  2. Header - title + tool-cluster                                *
- * ============================================================== */
+/* 2. Header - title + tool-cluster */
 
 .chat-shell-header {
   display: flex;
@@ -130,9 +126,7 @@
   gap: var(--space-md);
 }
 
-/* ============================================================== *
- *  3. ComposerChip - the pill button primitive                     *
- * ============================================================== */
+/* 3. ComposerChip - the pill button primitive */
 
 .composer-chip {
   display: inline-flex;
@@ -219,9 +213,7 @@
   color: var(--md-primary);
 }
 
-/* ============================================================== *
- *  4. QuickTray                                                    *
- * ============================================================== */
+/* 4. QuickTray */
 
 .quick-tray {
   display: flex;
@@ -266,9 +258,7 @@
   border-color: var(--md-primary);
 }
 
-/* ============================================================== *
- *  5. Composer                                                     *
- * ============================================================== */
+/* 5. Composer */
 
 .composer {
   display: flex;
@@ -326,9 +316,7 @@
   flex: 1 1 100%;
 }
 
-/* ============================================================== *
- *  6. FloatingPopup                                                *
- * ============================================================== */
+/* 6. FloatingPopup */
 
 .floating-popup {
   position: fixed;
@@ -349,10 +337,143 @@
   animation: floating-popup-in 0.18s var(--ease-decelerate);
 }
 
+.floating-popup[data-popup-id="globalMenu"],
+.floating-popup[data-floating-popup="globalMenu"],
+.global-menu-popover {
+  width: 220px;
+  bottom: 48px;
+  left: 12px;
+  transform: none;
+  animation: floating-popup-in-left 0.18s var(--ease-decelerate);
+}
+
+.menu-grid,
+.global-menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.global-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.global-menu__group-label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  padding: var(--space-xs) var(--space-md) var(--space-2xs);
+  user-select: none;
+}
+
+.global-menu__group--unlabelled {
+  border-top: 0.5px solid var(--color-border-tertiary);
+  padding-top: var(--space-xs);
+  margin-top: var(--space-2xs);
+}
+
+.menu-grid button,
+.global-menu button,
+.global-menu__item {
+  border: none;
+  background: transparent;
+  text-align: left;
+  width: 100%;
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--border-radius-sm);
+  justify-content: flex-start;
+  box-shadow: none;
+  font-size: var(--font-size-sm, 13px);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast, 0.15s ease);
+}
+
+.menu-grid button:hover,
+.global-menu button:hover,
+.global-menu__item:hover {
+  background: var(--bg-2, var(--color-background-tertiary, #2d3444));
+}
+
+@keyframes floating-popup-in-left {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
 @keyframes floating-popup-in {
   from { opacity: 0; transform: translate(-50%, 8px); }
   to   { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* 6b. Collapsible Right Companion on Desktop */
+
+.shell[data-companion-collapsed="true"] {
+  --sheet-panel-width: 28px !important;
+}
+
+.shell[data-companion-collapsed="true"] > .shell__sheet {
+  width: 28px;
+  min-width: 28px;
+  overflow: hidden;
+}
+
+.right-companion--collapsed {
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ctabs--collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xs) 0;
+}
+
+.ctab--collapse {
+  margin-left: auto;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: var(--space-sm) var(--space-xs);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
+
+.ctabs--collapsed .ctab--collapse {
+  margin-left: 0;
+  width: 24px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* 6c. Compact Left Rail Empty States */
+
+.icon-rail__empty-compact,
+.empty-state--compact {
+  padding: var(--space-md) var(--space-xl);
+}
+
+.icon-rail__empty-compact .empty-state,
+.empty-state--compact .empty-state {
+  padding: var(--space-xs) 0;
+  gap: var(--space-md);
+}
+
+.icon-rail__empty-compact .empty-state__glyph,
+.empty-state--compact .empty-state__glyph,
+.icon-rail__empty-compact .editorial-body,
+.empty-state--compact .editorial-body {
+  display: none;
+}
+
 
 .floating-popup__title {
   display: flex;
@@ -425,9 +546,7 @@
   border-color: color-mix(in oklch, var(--md-primary) 40%, var(--md-outline));
 }
 
-/* ============================================================== *
- *  7. DockSlot                                                     *
- * ============================================================== */
+/* 7. DockSlot */
 
 .dock-slot {
   display: flex;
@@ -497,9 +616,7 @@
   border-left: var(--chrome-hairline);
 }
 
-/* ============================================================== *
- *  8. OOCPanel                                                     *
- * ============================================================== */
+/* 8. OOCPanel */
 
 .ooc-panel {
   display: flex;
@@ -572,9 +689,7 @@
 
 .ooc-panel__send:hover { opacity: 0.9; }
 
-/* ============================================================== *
- *  9. BrowsePanel                                                  *
- * ============================================================== */
+/* 9. BrowsePanel */
 
 .browse-panel {
   display: flex;
@@ -664,9 +779,7 @@
   font-size: 0.9em;
 }
 
-/* ============================================================== *
- *  10. ModePopup                                                   *
- * ============================================================== */
+/* 10. ModePopup */
 
 .mode-popup {
   display: flex;
@@ -778,12 +891,9 @@
   font-size: 0.92em;
 }
 
-/* ============================================================== *
- *  11. Narrow viewport overrides                                   *
- * ============================================================== */
+/* 11. Narrow viewport overrides */
 
-/* ============================================================== *
- *  11. Hosted-panel sizing overrides                               *
+/* 11. Hosted-panel sizing overrides                               *
  *                                                                  *
  *  Panels designed for the legacy shell (SheetPanel / PartyRoster  *
  *  / InitiativeBar / MapStrip / IconRail / NotesPanel / DicePanel) *
@@ -792,7 +902,7 @@
  *  dock slot, those ancestors don't match and the panels collapse *
  *  or overflow. These rules normalise each panel to fill its new  *
  *  host without disturbing the legacy-shell mount.                *
- * ============================================================== */
+ */
 
 /* Every panel root fills the container width. */
 .floating-popup__body > *,
@@ -866,8 +976,7 @@
   gap: var(--space-xs);
 }
 
-/* ============================================================== *
- *  12. Legacy integration polish                                   *
+/* 12. Legacy integration polish                                   *
  *                                                                  *
  *  Visual cohesion pass for the chat-shell rebuild's pieces when   *
  *  mounted alongside the existing App.jsx chrome:                  *
@@ -876,7 +985,7 @@
  *    - QuickTray distinguished from the DiceBar below              *
  *    - chat log gets a faint surface-variant tint so it reads as   *
  *      a first-class region instead of empty white space           *
- * ============================================================== */
+ */
 
 /* Header right cluster - group chips with thin vertical dividers
  * so 10 buttons in a row stop looking like an undifferentiated wall. */
@@ -928,15 +1037,14 @@
   display: none;
 }
 
-/* ============================================================== *
- *  Button vocabulary unification - header context                  *
+/* Button vocabulary unification - header context                  *
  *                                                                  *
  *  Restyle .dbt buttons inside .vtt-header so they read as the     *
  *  same pill family as the new chat-shell chips                    *
  *  (.composer-chip / .persona-chip / .quick-tray__btn). Scoped to  *
  *  the header so dice toolbars and other rectangular toolbars      *
  *  elsewhere keep their existing density.                          *
- * ============================================================== */
+ */
 
 .vtt-header .dbt {
   border-radius: var(--radius-pill);
@@ -971,8 +1079,7 @@
   font-size: 0.85em;
 }
 
-/* ============================================================== *
- *  Empty state tuning                                              *
+/* Empty state tuning                                              *
  *                                                                  *
  *  "Quiet here" used the editorial Bodoni serif at the inherited   *
  *  size (~22-28px), which visually competed with the map above. *
@@ -1028,8 +1135,7 @@
 }
 
 
-/* ============================================================== *
- *  Mobile cohesion pass - single consolidated breakpoint           *
+/* Mobile cohesion pass - single consolidated breakpoint           *
  *                                                                  *
  *  All mobile-specific rules live in this one @media block at the *
  *  end of the file, at 768px to match the legacy breakpoint in    *
@@ -1051,11 +1157,11 @@
  *    H. FloatingPopup → bottom sheet                              *
  *    I. ChatShell internal padding (only used when the new shell  *
  *       is mounted; currently inert behind feature flag)          *
- * ============================================================== */
+ */
 
 @media (max-width: 768px) {
 
-  /* === A. Header layout =========================================== */
+  /* A. Header layout */
   .vtt-header {
     display: flex;
     flex-wrap: wrap;
@@ -1087,7 +1193,7 @@
     white-space: nowrap;
   }
 
-  /* === B. Hide non-essential header controls ===================== *
+  /* B. Hide non-essential header controls
    * Use specific .vtt-header selectors so they win against the
    * legacy base rules without resorting to !important. */
   .vtt-header .presence-badge,
@@ -1101,7 +1207,7 @@
   /* The room-list return stays in the header on mobile (icon-only via
      the .dbt__label hide): it is the only non-destructive way back. */
 
-  /* === C. Touch-target minimums (WCAG / Material 44×44) ========== *
+  /* C. Touch-target minimums (WCAG / Material 44×44)
    * Every interactive chip / pill / icon button gets a minimum
    * touch area on touch viewports. Padding may be larger than
    * visual chrome - that's intentional. */
@@ -1121,7 +1227,7 @@
     padding: 0 var(--space-lg);
   }
 
-  /* === C2. Compact the log empty state ========================== *
+  /* C2. Compact the log empty state
    * In Combat the map dominates the viewport, leaving the log feed a
    * short band. The empty-state hero (glyph + title + 2-line body) at
    * its desktop padding overflows that band, cutting the body copy
@@ -1142,7 +1248,7 @@
     font-size: 0.85em;
   }
 
-  /* === D. ModeSelector collapse ================================== *
+  /* D. ModeSelector collapse
    *  The ⋯ overflow toggle and the secondary dropdown now live in the
    *  base rules above and apply at all widths, so only the mobile-only
    *  mode-selector trigger remains here. */
@@ -1199,16 +1305,14 @@
   .mode-selector--open .mode-selector__list { max-width: calc(100vw - 16px); }
   .mode-selector--open .mode-selector__list .dbt__label { white-space: nowrap; }
 
-  /* === E. Map drawing toolbar - hidden ============================ *
-   * Specific selector + !important to override the legacy
-   * absolute-positioned base rule. */
-  .shell__chat .draw-toolbar,
-  .map-strip .draw-toolbar,
-  .draw-toolbar {
+  /* === E. Map drawing toolbar - hidden on non-map mobile panes === */
+  .shell[data-mobile-pane="chat"] .draw-toolbar,
+  .shell[data-mobile-pane="journal"] .draw-toolbar,
+  .shell[data-mobile-pane="panel"] .draw-toolbar {
     display: none !important;
   }
 
-  /* === F. IconRail drawer mobile ================================= */
+  /* F. IconRail drawer mobile */
   .shell__channels .icon-rail {
     width: 44px;
   }
@@ -1229,14 +1333,14 @@
     position: relative;
   }
 
-  /* === G. Composer + textarea constraints ======================== *
+  /* G. Composer + textarea constraints
    * Textarea grows to fill but can shrink (flex: 1 1 0) so it
    * shares a row with the Send button rather than wrapping to its
    * own line. Send button keeps an explicit min-width so the touch
    * target stays usable even with a short textarea. Combatant
    * initiative strip gets compact padding so it doesn't dominate
    * mobile vertical space. */
-  /* ── Mobile composer - single row + popover for actions ─────────────
+  /* Mobile composer - single row + popover for actions
      The inline dice strip + QuickTray collapse behind a ⚙ button that
      opens ComposerActionsPopover (rpglog-style). Every chip/button in
      the composer row shares one height (34px) and rounded shape so it
@@ -1322,7 +1426,7 @@
     background: var(--md-surface, var(--color-background-secondary));
     border: 1px solid var(--md-outline, var(--color-border-tertiary));
     border-radius: var(--radius-lg, 8px);
-    box-shadow: var(--elev-3, 0 8px 24px rgba(0, 0, 0, 0.18));
+    box-shadow: var(--elev-3);
     padding: var(--space-lg) var(--space-xl);
     display: flex;
     flex-direction: column;
@@ -1390,7 +1494,7 @@
   .shell__mobile-toggle--sheet .shell__mobile-toggle__label { display: none; }
   .shell__mobile-toggle--sheet { max-width: none; }
 
-  /* === H. FloatingPopup → bottom sheet =========================== */
+  /* H. FloatingPopup -> bottom sheet */
   .floating-popup {
     bottom: 0;
     left: 0;

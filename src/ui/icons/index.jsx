@@ -47,7 +47,7 @@ export const LeaveIcon = () => h(Svg, {}, [
   h('line', { x1: 6, y1: 8, x2: 14, y2: 8 }),
 ]);
 
-// ── Sheet tabs ──────────────────────────────────────────────────────
+// Sheet tabs
 export const CombatIcon = () => h(Svg, {}, [
   // Two crossed swords - diagonal lines with small hilts at the bottom.
   h('line', { x1: 3, y1: 3, x2: 11, y2: 11 }),
@@ -126,7 +126,7 @@ export const TrashIcon = () => h(Svg, {}, [
   h('line', { x1: 9, y1: 7, x2: 9, y2: 11 }),
 ]);
 
-// ── Chat / dice bar ─────────────────────────────────────────────────
+// Chat / dice bar
 export const SceneIcon = () => h(Svg, {}, [
   // Film-frame rectangle with perforation dots.
   h('rect', { x: 3, y: 4, width: 10, height: 8 }),
@@ -142,7 +142,7 @@ export const LongPostIcon = () => h(Svg, {}, [
   h('line', { x1: 10, y1: 4, x2: 12, y2: 6 }),
 ]);
 
-// ── Initiative panel ────────────────────────────────────────────────
+// Initiative panel
 export const StartCombatIcon = () => h(Svg, {}, [
   // Same crossed-swords as the Combat tab but at slightly larger
   // scale; the start button is verb-heavier so we let it breathe.
@@ -154,7 +154,7 @@ export const EndCombatIcon = () => h(Svg, {}, [
   h('rect', { x: 4, y: 4, width: 8, height: 8, fill: 'currentColor' }),
 ]);
 
-// ── Left index / rail navigation ────────────────────────────────────
+// Left index / rail navigation
 export const BookIcon = () => h(Svg, {}, [
   h('path', { d: 'M 8 3.5 Q 5.5 2 3 3 L 3 12.5 Q 5.5 11.5 8 13 Q 10.5 11.5 13 12.5 L 13 3 Q 10.5 2 8 3.5 Z' }),
   h('line', { x1: 8, y1: 3.5, x2: 8, y2: 13 }),
@@ -175,7 +175,7 @@ export const ChatIcon = () => h(Svg, {}, [
   h('path', { d: 'M 2.5 3.5 L 13.5 3.5 L 13.5 10.5 L 7 10.5 L 4 13 L 4 10.5 L 2.5 10.5 Z' }),
 ]);
 
-// ── GM panel sub-navigation ─────────────────────────────────────────
+// GM panel sub-navigation
 export const DiceIcon = () => h(Svg, {}, [
   h('rect', { x: 3, y: 3, width: 10, height: 10, rx: 1.5 }),
   h('circle', { cx: 6, cy: 6, r: 0.7, fill: 'currentColor', stroke: 'none' }),
@@ -219,7 +219,7 @@ export const DamageIcon = () => h(Svg, {}, [
   h('path', { d: 'M 4 4 L 6 6 M 10 10 L 12 12 M 12 4 L 10 6 M 6 10 L 4 12' }),
 ]);
 
-// ── Combat / initiative chrome ──────────────────────────────────────
+// Combat / initiative chrome
 export const ShieldIcon = () => h(Svg, {}, [
   h('path', { d: 'M 8 2 L 13 4 L 13 8 Q 13 12 8 14 Q 3 12 3 8 L 3 4 Z' }),
 ]);
@@ -230,7 +230,7 @@ export const RunIcon = () => h(Svg, {}, [
   h('path', { d: 'M 9 4 L 13 8 L 9 12' }),
 ]);
 
-// ── Popup / presence chrome ─────────────────────────────────────────
+// Popup / presence chrome
 export const PinIcon = () => h(Svg, {}, [
   h('path', { d: 'M 6 2.5 L 10 2.5 L 10 7 L 12 9 L 4 9 L 6 7 Z' }),
   h('line', { x1: 8, y1: 9, x2: 8, y2: 13.5 }),
@@ -254,7 +254,7 @@ export const BanIcon = () => h(Svg, {}, [
   h('line', { x1: 4.2, y1: 4.2, x2: 11.8, y2: 11.8 }),
 ]);
 
-// ── Mode registry (mobile panel tab) ────────────────────────────────
+// Mode registry (mobile panel tab)
 export const SheetIcon = () => h(Svg, {}, [
   h('rect', { x: 3.5, y: 2, width: 9, height: 12, rx: 1 }),
   h('line', { x1: 6, y1: 5.5, x2: 10, y2: 5.5 }),
@@ -303,8 +303,8 @@ export const CircleToolIcon = () => h(Svg, {}, [
 ]);
 
 export const RulerIcon = () => h(Svg, {}, [
-  h('path', { d: 'M2 11 11 2l3 3-9 9z' }),
-  h('path', { d: 'M5.2 7.8l1.2 1.2M7.4 5.6l1.2 1.2M9.6 3.4l1.2 1.2' }),
+  h('rect', { x: 2, y: 5, width: 12, height: 6, rx: 1 }),
+  h('path', { d: 'M4 5v2.5M6.5 5v4M9 5v2.5M11.5 5v4' }),
 ]);
 
 export const MenuIcon = () => h(Svg, {}, [

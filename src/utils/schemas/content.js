@@ -35,7 +35,7 @@ export function validateSpell(content) {
     content.level < 0 ||
     content.level > 9
   ) {
-    failValidation('Spell level must be an integer 0–9');
+    failValidation('Spell level must be an integer 0-9');
   }
   if (content.prepared !== undefined && typeof content.prepared !== 'boolean') {
     failValidation('Spell prepared must be boolean');

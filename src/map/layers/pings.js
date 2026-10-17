@@ -23,6 +23,9 @@ export function createPingsLayer(stage, mr) {
   const layer = new Konva.Layer({ listening: false });
   stage.add(layer);
 
+  const activeTimers = new Set();
+  const activeTweens = new Set();
+
   function addPing(x, y, color) {
     const circle = new Konva.Circle({
       x, y,
@@ -37,10 +40,12 @@ export function createPingsLayer(stage, mr) {
     if (prefersReducedMotion()) {
       circle.radius(PING_MAX_RADIUS);
       circle.opacity(0.8);
-      setTimeout(() => {
+      const timerId = setTimeout(() => {
+        activeTimers.delete(timerId);
         circle.destroy();
         layer.batchDraw();
       }, PING_LIFETIME_MS);
+      activeTimers.add(timerId);
       layer.batchDraw();
       return;
     }
@@ -51,16 +56,22 @@ export function createPingsLayer(stage, mr) {
       radius: PING_MAX_RADIUS,
       opacity: 0,
       onFinish: () => {
+        activeTweens.delete(tween);
         tween.destroy();
         circle.destroy();
         layer.batchDraw();
       },
     });
+    activeTweens.add(tween);
     tween.play();
     layer.batchDraw();
   }
 
   function destroy() {
+    for (const t of activeTimers) clearTimeout(t);
+    activeTimers.clear();
+    for (const tw of activeTweens) tw.destroy();
+    activeTweens.clear();
     layer.destroy();
   }
 

@@ -19,7 +19,7 @@
 
 import { http, HttpResponse } from 'msw';
 
-// ── Matrix homeserver stubs ───────────────────────────────────────────────────
+// Matrix homeserver stubs
 
 /**
  * Media download (covers mxc:// URI resolution)

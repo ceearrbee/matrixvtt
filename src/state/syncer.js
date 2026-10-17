@@ -96,9 +96,13 @@ export async function loadInitialState(sm) {
 
   sm.refreshing = true;
   try {
-    clearAllCollections(sm);
     await loadPowerLevels(sm, api);
-    await loadLatestSnapshot(sm, api);
+    const loaded = await loadLatestSnapshot(sm, api);
+    if (!loaded) {
+      clearAllCollections(sm);
+    }
+  } catch (err) {
+    logger.warn('MatrixIO', 'initial state load aborted', err);
   } finally {
     sm.refreshing = false;
   }
@@ -113,6 +117,7 @@ async function loadPowerLevels(sm, api) {
     if (event) handleStateEvent(sm, event);
   } catch (err) {
     logger.warn('MatrixIO', 'power_levels read failed', err);
+    throw err;
   }
 }
 

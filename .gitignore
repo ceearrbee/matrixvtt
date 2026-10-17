@@ -25,6 +25,7 @@ build/
 
 # Generated icon library (rebuilt from the .zip files by scripts/build-icons.mjs)
 public/icons/
+black-transparent-game-icons.net.svg.zip
 
 # Raster app icons (rebuilt from public/icon.svg by scripts/build-pwa-icons.mjs).
 # Not icon*.png, which would swallow the committed icon.svg's neighbours.

@@ -40,14 +40,16 @@ function ensureUnzip() {
 }
 
 function zipsPresent() {
-  return existsSync(ZIP_DARK) && existsSync(ZIP_LIGHT);
+  return existsSync(ZIP_DARK) || existsSync(ZIP_LIGHT);
 }
 
 function newerThanZips(targetPath) {
   if (!existsSync(targetPath)) return false;
   if (!zipsPresent()) return true; // manifest exists, can't compare → trust it
   const t = statSync(targetPath).mtimeMs;
-  return t >= statSync(ZIP_DARK).mtimeMs && t >= statSync(ZIP_LIGHT).mtimeMs;
+  const darkOk = !existsSync(ZIP_DARK) || t >= statSync(ZIP_DARK).mtimeMs;
+  const lightOk = !existsSync(ZIP_LIGHT) || t >= statSync(ZIP_LIGHT).mtimeMs;
+  return darkOk && lightOk;
 }
 
 function shouldSkip() {
@@ -75,7 +77,6 @@ function clean() {
 
 function extractZip(zipPath, outRoot, sourcePrefix) {
   // Layout inside zip: icons/<color>/transparent/1x1/<author>/<name>.svg
-  // We want them flattened to <outRoot>/<author>/<name>.svg
   const tmp = join(OUT, `_tmp_${sourcePrefix}`);
   mkdirSync(tmp, { recursive: true });
   execSync(`unzip -q -o '${zipPath}' -d '${tmp}'`, { stdio: 'inherit' });
@@ -84,7 +85,7 @@ function extractZip(zipPath, outRoot, sourcePrefix) {
   // Move author folders to outRoot
   execSync(`mv ${src.replace(/'/g, "'\\''")}/* '${outRoot}'/`, { stdio: 'inherit', shell: '/bin/bash' });
   // Save licence (only once - both zips ship the same one)
-  if (sourcePrefix === '000000') {
+  if (!existsSync(LICENSE_OUT)) {
     const lic = join(tmp, 'icons', 'license.txt');
     if (existsSync(lic)) {
       writeFileSync(LICENSE_OUT, readFileSync(lic, 'utf8'));
@@ -93,7 +94,22 @@ function extractZip(zipPath, outRoot, sourcePrefix) {
   rmSync(tmp, { recursive: true, force: true });
 }
 
-// ─── category heuristics ──────────────────────────────────────────
+async function deriveThemeFrom(srcRoot, dstRoot, fromFill, toFill) {
+  const authors = await readdir(srcRoot, { withFileTypes: true });
+  for (const ad of authors) {
+    if (!ad.isDirectory()) continue;
+    const dstAuthor = join(dstRoot, ad.name);
+    mkdirSync(dstAuthor, { recursive: true });
+    const files = await readdir(join(srcRoot, ad.name), { withFileTypes: true });
+    for (const fd of files) {
+      if (!fd.isFile() || !fd.name.endsWith('.svg')) continue;
+      const svg = readFileSync(join(srcRoot, ad.name, fd.name), 'utf8');
+      writeFileSync(join(dstAuthor, fd.name), svg.replaceAll(fromFill, toFill));
+    }
+  }
+}
+
+// category heuristics
 
 const CATEGORIES = [
   {
@@ -228,10 +244,24 @@ async function main() {
   mkdirSync(OUT_DARK, { recursive: true });
   mkdirSync(OUT_LIGHT, { recursive: true });
 
-  info('extracting dark theme…');
-  extractZip(ZIP_DARK, OUT_DARK, '000000');
-  info('extracting light theme…');
-  extractZip(ZIP_LIGHT, OUT_LIGHT, 'ffffff');
+  const hasDark = existsSync(ZIP_DARK);
+  const hasLight = existsSync(ZIP_LIGHT);
+
+  if (hasDark) {
+    info('extracting dark theme…');
+    extractZip(ZIP_DARK, OUT_DARK, '000000');
+  }
+  if (hasLight) {
+    info('extracting light theme…');
+    extractZip(ZIP_LIGHT, OUT_LIGHT, 'ffffff');
+  }
+  if (!hasDark && hasLight) {
+    info('deriving dark theme from light theme…');
+    await deriveThemeFrom(OUT_LIGHT, OUT_DARK, '#fff', '#000');
+  } else if (!hasLight && hasDark) {
+    info('deriving light theme from dark theme…');
+    await deriveThemeFrom(OUT_DARK, OUT_LIGHT, '#000', '#fff');
+  }
 
   info('building manifest…');
   const manifest = await buildManifest();

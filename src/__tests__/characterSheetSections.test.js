@@ -76,6 +76,11 @@ describe('renderSectionList', () => {
     ]);
     expect(out).toHaveLength(2);
   });
+
+  it('notes kind includes private notes when ui is provided', () => {
+    const { container } = render(h('div', null, renderSectionList(mkUi(), character, [{ kind: 'notes' }])));
+    expect(container.querySelector('[aria-label="Private notes (local only)"]')).not.toBeNull();
+  });
 });
 
 describe('section kinds - DOM output', () => {

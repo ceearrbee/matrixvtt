@@ -113,7 +113,6 @@ export function rollNPCAction(ui, npcId, actionIndex) {
 }
 
 /**
- * Get the roll formula template for a given check type from the active ruleset.
  * @param {'attribute'|'skill'|'save'|'initiative'|'attack'} type
  */
 export function getRollFormula(ui, type) {

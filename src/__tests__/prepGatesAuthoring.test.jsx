@@ -89,4 +89,13 @@ describe('map Scene tool group follows Prep', () => {
     expect(host.querySelector('.dtb-group--active').getAttribute('data-tool-group'))
       .toBe(TOOL_GROUPS.NAVIGATION);
   });
+
+  it('allows selecting Draw group during combat without Prep', () => {
+    tablePhaseSignal.value = UI_MODES.COMBAT;
+    gmPrepActiveSignal.value = false;
+    activeToolGroupSignal.value = TOOL_GROUPS.DRAWING;
+    prender(h(MapStrip, { ui: makeUi() }), host);
+    const activeTab = host.querySelector('.dtb-group--active');
+    expect(activeTab?.getAttribute('data-tool-group')).toBe(TOOL_GROUPS.DRAWING);
+  });
 });

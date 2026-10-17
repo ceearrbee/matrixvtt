@@ -4,7 +4,7 @@
  * the big modals. Every scan, these and the original four alike,
  * blocks on moderate and above.
  */
-import { test, expect, waitForVttShell, openSheetRail } from './fixtures/logged-in.js';
+import { test, expect, waitForVttShell, openSheetRail, openMapPane } from './fixtures/logged-in.js';
 import AxeBuilder from '@axe-core/playwright';
 
 const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -40,8 +40,8 @@ test.describe('axe: play-surface regions', () => {
   });
 
   test('map region and drawing toolbar', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'the drawing toolbar has no phone affordance');
-    await waitForVttShell(page);
+    if (isMobile) await openMapPane(page);
+    else await waitForVttShell(page);
     await expect(page.locator('.draw-toolbar')).toBeVisible();
     await expectClean(page, '.map-strip, .draw-toolbar', 'map region');
   });

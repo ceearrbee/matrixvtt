@@ -20,7 +20,7 @@
 import { h } from 'preact';
 import { useEffect, useRef, useId } from 'preact/hooks';
 import { createPortal } from 'preact/compat';
-import { trapFocusIn } from '../modal-focus.js';
+import { trapFocusIn, FOCUSABLE } from '../modal-focus.js';
 import { PinIcon } from '../icons/index.jsx';
 
 /**
@@ -44,7 +44,6 @@ export function FloatingPopup({ open, name, title, onClose, pinned = false, onTo
     if (!open) return undefined;
 
     previouslyFocusedRef.current = /** @type {HTMLElement|null} */ (document.activeElement);
-    const releaseTrap = popupRef.current ? trapFocusIn(popupRef.current) : () => {};
 
     const onKey = (e) => {
       if (e.key === 'Escape' && !pinned) {
@@ -65,13 +64,22 @@ export function FloatingPopup({ open, name, title, onClose, pinned = false, onTo
     return () => {
       document.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onOutside);
-      releaseTrap();
       const prev = previouslyFocusedRef.current;
       if (prev && typeof prev.focus === 'function') {
         try { prev.focus(); } catch { /* element gone; ignore */ }
       }
     };
   }, [open, pinned, onClose]);
+
+  useEffect(() => {
+    if (pinned || !popupRef.current) return undefined;
+    const cleanup = trapFocusIn(popupRef.current);
+    if (!popupRef.current.contains(document.activeElement)) {
+      const first = popupRef.current.querySelector(FOCUSABLE);
+      first?.focus();
+    }
+    return cleanup;
+  }, [pinned, open]);
 
   if (!open) return null;
 

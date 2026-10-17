@@ -61,15 +61,10 @@ export function OOCPanel({ ui }) {
         ? h('div', { class: 'ooc-panel__empty', 'data-ooc-empty': '' },
             'No out-of-character messages yet.')
         : entries.map((e, i) => h('div', {
-            key: i,
+            key: e.ts || i,
             class: 'ooc-panel__entry',
             'data-ooc-entry': '',
-            // Body text is already escaped by the log pipeline before
-            // it reaches activityLog[].text (see chat-send.js & the
-            // m.notice path); rendering with dangerouslySetInnerHTML
-            // here mirrors how LogPanel handles the same entries.
-            dangerouslySetInnerHTML: { __html: e.text || '' },
-          }))
+          }, e.text || ''))
     ),
     h('div', { class: 'ooc-panel__composer', key: 'c' }, [
       h('label', { for: 'ooc-quick-input', class: 'sr-only', key: 'lbl' }, 'OOC message'),

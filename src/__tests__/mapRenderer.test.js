@@ -41,7 +41,7 @@ afterAll(() => {
   }
 });
 
-// ─── Canvas + state mocks ─────────────────────────────────────────────────────
+// Canvas + state mocks
 
 function makeCanvas() {
   const el = document.createElement('div');
@@ -73,7 +73,7 @@ function makeRenderer() {
   return { renderer, state };
 }
 
-// ─── Constructor initialization ───────────────────────────────────────────────
+// Constructor initialization
 
 describe('MapRenderer constructor', () => {
   it('initialises with correct defaults', () => {
@@ -85,7 +85,7 @@ describe('MapRenderer constructor', () => {
   });
 });
 
-// ─── _getTokenRadius ──────────────────────────────────────────────────────────
+// _getTokenRadius
 
 describe('getTokenRadius', () => {
   it('returns base radius (cellSize * 0.375) for size 1', () => {
@@ -111,7 +111,7 @@ describe('getTokenRadius', () => {
   });
 });
 
-// ─── Zoom bounds ──────────────────────────────────────────────────────────────
+// Zoom bounds
 
 describe('MapRenderer zoom bounds', () => {
   let renderer;
@@ -226,7 +226,7 @@ describe('MapRenderer - token write error handling', () => {
   });
 });
 
-// ─── fog update error handling ───────────────────────────────────────────────
+// fog update error handling
 
 describe('MapRenderer - fog error handling', () => {
   let renderer, state, errors, onError;
@@ -261,7 +261,7 @@ describe('MapRenderer - fog error handling', () => {
   });
 });
 
-// ─── showAddTokenDialog error handling ───────────────────────────────────────
+// showAddTokenDialog error handling
 
 describe('MapRenderer - showAddTokenDialog error handling', () => {
   let renderer, state, errors, onError;
@@ -294,7 +294,7 @@ describe('MapRenderer - showAddTokenDialog error handling', () => {
   });
 });
 
-// ─── applyDamage / applyHealing error handling ───────────────────────────────
+// applyDamage / applyHealing error handling
 
 describe('MapRenderer - applyDamage / applyHealing error handling', () => {
   let renderer, state, errors, onError;
@@ -325,7 +325,7 @@ describe('MapRenderer - applyDamage / applyHealing error handling', () => {
   });
 });
 
-// ─── showConditionDialog apply handler error handling ─────────────────────────
+// showConditionDialog apply handler error handling
 
 describe('MapRenderer - showConditionDialog error handling', () => {
   let renderer, state, errors, onError;
@@ -354,7 +354,7 @@ describe('MapRenderer - showConditionDialog error handling', () => {
   });
 });
 
-// ─── _startFacingMode click handler error handling ────────────────────────────
+// _startFacingMode click handler error handling
 
 describe('MapRenderer - _startFacingMode error handling', () => {
   let renderer, state, errors, onError;
@@ -385,7 +385,7 @@ describe('MapRenderer - _startFacingMode error handling', () => {
   });
 });
 
-// ─── removeToken confirm handler error handling ───────────────────────────────
+// removeToken confirm handler error handling
 
 describe('MapRenderer - removeToken error handling', () => {
   let renderer, state, errors, onError;
@@ -415,7 +415,7 @@ describe('MapRenderer - removeToken error handling', () => {
   });
 });
 
-// ─── addCondition / removeCondition error handling ───────────────────────────
+// addCondition / removeCondition error handling
 
 describe('MapRenderer - addCondition / removeCondition error handling', () => {
   let renderer, state, errors, onError;

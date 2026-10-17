@@ -52,4 +52,24 @@ describe('token hint pointer copy', () => {
     expect(hint).toBeTruthy();
     expect(hint.textContent).toMatch(/right-click/i);
   });
+
+  it('renders actionable button calling ui.beginTokenPlacement', () => {
+    const beginTokenPlacement = vi.fn();
+    const ui = { ...mkUi(), beginTokenPlacement };
+    const { container } = render(h(MapStrip, { ui }));
+    const btn = container.querySelector('button.map-hint__action');
+    expect(btn).toBeTruthy();
+    expect(btn?.textContent).toBe('Place a token');
+    btn?.click();
+    expect(beginTokenPlacement).toHaveBeenCalledTimes(1);
+  });
+
+  it('map-canvas-desc includes cycle, arrow keys, confirm, cancel, and measure shortcuts', () => {
+    const { container } = render(h(MapStrip, { ui: mkUi() }));
+    const desc = container.querySelector('#map-canvas-desc');
+    expect(desc).toBeTruthy();
+    expect(desc?.textContent).toBe(
+      'Drag tokens to move them. Scroll or pinch to zoom. Space+drag to pan. Press N or Shift+N to cycle tokens, arrow keys to move the selected token, Enter to confirm move, Escape to cancel, or M to measure distance.'
+    );
+  });
 });

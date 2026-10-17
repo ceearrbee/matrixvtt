@@ -13,6 +13,7 @@ import { buildCharacterFormulaContext } from '../../engine/characterFormulaConte
 import { EmptyState } from '../EmptyState.jsx';
 import { ENTITY_TYPES } from '../../utils/constants.js';
 import { DynamicAttributes } from '../DynamicAttributes.jsx';
+import { getPrivateNote, setPrivateNote } from '../../utils/private-notes.js';
 
 function resolveInventory(character, itemsMap) {
   const ids = character?.inventory_ids ?? [];
@@ -108,6 +109,12 @@ export function StatGrid({ ui, character, config }) {
     ])),
   );
   if (!config.label) return grid;
+  if (config.label === 'Load and Wealth' || config.collapsed) {
+    return h('details', { class: 'sheet-section-collapsible' }, [
+      h('summary', { class: 'section-header' }, config.label),
+      grid,
+    ]);
+  }
   return h(Fragment, null, [
     h('div', { class: 'section-header' }, config.label),
     grid,
@@ -150,8 +157,10 @@ export function Conditions({ character }) {
   const conds = Array.isArray(character.conditions) ? character.conditions : [];
   return h(Fragment, null, [
     h('div', { class: 'section-header' }, 'Conditions'),
-    h('div', { class: 'entity-subtitle entity-subtitle--none' },
-      conds.length ? conds.join(', ') : 'None active'),
+    conds.length
+      ? h('div', { class: 'sheet-conditions-list' },
+          conds.map((c) => h('span', { key: c, class: 'sheet-condition-pill' }, c)))
+      : h('div', { class: 'entity-subtitle entity-subtitle--none sheet-conditions--none' }, 'None active'),
   ]);
 }
 
@@ -179,15 +188,45 @@ export function Defenses({ character }) {
   ]);
 }
 
-export function Notes({ character }) {
+export function PrivateNotes({ ui, character }) {
+  const userId = ui?.state?.widgetManager?.userId
+    || ui?.widgetManager?.userId
+    || ui?.clientManager?.userId
+    || null;
+  const roomId = ui?.widgetManager?.roomId
+    || ui?.clientManager?.roomId
+    || ui?.state?.roomId
+    || null;
+  const entityId = character?.id;
+  const initial = (userId && roomId && entityId)
+    ? getPrivateNote(userId, roomId, entityId)
+    : '';
+  const onBlur = (e) => {
+    if (!userId || !roomId || !entityId) return;
+    setPrivateNote(userId, roomId, entityId, e.target.value);
+  };
+  return h('div', { class: 'private-notes-container' }, [
+    h('div', { class: 'section-header' }, 'Your private notes'),
+    h('textarea', {
+      class: 'form-input private-notes-textarea',
+      placeholder: 'Just for you. Stored locally, never sent to other players or the server.',
+      defaultValue: initial,
+      onBlur,
+      'aria-label': 'Private notes (local only)',
+    }),
+  ]);
+}
+
+export function Notes({ ui, character }) {
   return h(Fragment, null, [
     h('div', { class: 'section-header' }, 'Notes'),
-    character.notes
+    character?.notes
       ? h(TrustedMarkup, {
           class: 'handout-content char-notes',
           html: renderMarkdown(character.notes),
         })
       : h(EmptyState, { message: 'No notes yet.' }),
+    ui && h(PrivateNotes, { ui, character }),
   ]);
 }
 

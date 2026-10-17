@@ -31,7 +31,7 @@ describe('map toolbar overflow', () => {
     localStorage.clear();
     tablePhaseSignal.value = UI_MODES.NARRATIVE;
     gmPrepActiveSignal.value = false;
-    activeToolGroupSignal.value = TOOL_GROUPS.NAVIGATION;
+    activeToolGroupSignal.value = TOOL_GROUPS.DRAWING;
     host = document.createElement('div');
     document.body.appendChild(host);
   });

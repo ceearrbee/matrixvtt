@@ -68,4 +68,21 @@ describe('one left rail', () => {
     expect(css).not.toMatch(/\.shell__channels > \.icon-rail-host/);
     expect(css).not.toMatch(/\.left-index \{ display: none; \}/);
   });
+
+  it('renders quiet compact empty states with creation CTAs in the left index', () => {
+    prender(h(LeftIndex, { ui: makeUi() }), host);
+    const compacts = host.querySelectorAll('.icon-rail__empty-compact');
+    expect(compacts.length).toBeGreaterThan(0);
+    // CTAs are retained
+    const ctas = host.querySelectorAll('.empty-state__cta');
+    expect(ctas.length).toBeGreaterThan(0);
+  });
+
+  it('anchors globalMenu floating popup at bottom-left in chat-shell.css', () => {
+    const chatCss = fs.readFileSync(path.join(process.cwd(), 'src/themes/chat-shell.css'), 'utf8');
+    expect(chatCss).toMatch(/\.floating-popup\[data-(?:popup-id|floating-popup)="globalMenu"\]/);
+    expect(chatCss).toContain('bottom: 48px;');
+    expect(chatCss).toContain('left: 12px;');
+  });
 });
+

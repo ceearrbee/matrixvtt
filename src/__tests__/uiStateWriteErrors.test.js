@@ -123,7 +123,7 @@ function makeUI(sendStateEvent) {
   return { ui, state };
 }
 
-// Helper to build the settings form modal DOM
+// Build the settings form modal DOM
 function makeSettingsModal() {
   const modal = document.createElement('div');
   modal.innerHTML = `
@@ -185,7 +185,7 @@ describe('UIController.reorderInitiative - error handling', () => {
   });
 });
 
-// ─── toggleSpellPrepared ─────────────────────────────────────────────────────
+// toggleSpellPrepared
 
 function makeUIWithSpell(sendStateEvent) {
   const spellId = 'spell-1';
@@ -222,7 +222,7 @@ describe('UIController.toggleSpellPrepared - error handling', () => {
   });
 });
 
-// ─── toggleEquipItem ─────────────────────────────────────────────────────────
+// toggleEquipItem
 
 function makeUIWithItem(sendStateEvent) {
   const itemId = 'item-1';
@@ -259,7 +259,7 @@ describe('UIController.toggleEquipItem - error handling', () => {
   });
 });
 
-// ─── deleteSkillOverride ─────────────────────────────────────────────────────
+// deleteSkillOverride
 
 function makeUIWithCharacter(sendStateEvent) {
   const charId = 'char-1';
@@ -315,7 +315,7 @@ describe('UIController.deleteSkillOverride - error handling', () => {
   });
 });
 
-// ─── endCombat ───────────────────────────────────────────────────────────────
+// endCombat
 
 import { ModalFactory } from '../utils/ui-helpers.js';
 
@@ -360,7 +360,7 @@ describe('UIController.endCombat - error handling', () => {
   });
 });
 
-// ─── createCharacter ─────────────────────────────────────────────────────────
+// createCharacter
 
 function makeUIForCharacterCreate(sendStateEvent) {
   const state = {
@@ -413,7 +413,7 @@ describe('UIController.createCharacter - error handling', () => {
   });
 });
 
-// ─── createToken ─────────────────────────────────────────────────────────────
+// createToken
 
 function makeUIForCreateToken(sendStateEvent) {
   const state = {
@@ -456,7 +456,7 @@ describe('UIController.createToken - error handling', () => {
   });
 });
 
-// ─── createNPC ───────────────────────────────────────────────────────────────
+// createNPC
 
 function makeUIForNPCCreate(sendStateEvent) {
   const state = {
@@ -507,7 +507,7 @@ describe('UIController.createNPC - error handling', () => {
   });
 });
 
-// ─── _createNPCFromTemplate ──────────────────────────────────────────────────
+// _createNPCFromTemplate
 
 const npcTemplate = {
   name: 'Goblin', cr: '1/4', size_category: 'Small',
@@ -535,7 +535,7 @@ describe('UIController._createNPCFromTemplate - error handling', () => {
   });
 });
 
-// ─── toggleSpellSlotPip ──────────────────────────────────────────────────────
+// toggleSpellSlotPip
 
 function makeUIForSpellSlot(sendStateEvent) {
   const charId = 'char-1';
@@ -574,7 +574,7 @@ describe('UIController.toggleSpellSlotPip - error handling', () => {
   });
 });
 
-// ─── showAddSkillOverrideForm ────────────────────────────────────────────────
+// showAddSkillOverrideForm
 
 describe('UIController.showAddSkillOverrideForm - error handling', () => {
   afterEach(() => { document.body.innerHTML = ''; vi.clearAllMocks(); });
@@ -609,7 +609,7 @@ describe('UIController.showAddSkillOverrideForm - error handling', () => {
   });
 });
 
-// ─── cycleSkillProficiency ───────────────────────────────────────────────────
+// cycleSkillProficiency
 
 describe('UIController.cycleSkillProficiency - error handling', () => {
   afterEach(() => { document.body.innerHTML = ''; });
@@ -631,7 +631,7 @@ describe('UIController.cycleSkillProficiency - error handling', () => {
   });
 });
 
-// ─── createSpell / updateSpell / deleteSpell ─────────────────────────────────
+// createSpell / updateSpell / deleteSpell
 
 function makeUIForSpellForm(sendStateEvent) {
   const charId  = 'char-1';
@@ -741,7 +741,7 @@ describe('UIController.deleteSpell - error handling', () => {
   });
 });
 
-// ─── claimCharacter / unclaimCharacter ───────────────────────────────────────
+// claimCharacter / unclaimCharacter
 
 function makeUIForClaim(sendStateEvent) {
   const charId = 'char-1';
@@ -826,7 +826,7 @@ describe('UIController.unclaimCharacter - error handling', () => {
   });
 });
 
-// ─── createItem / deleteItem ─────────────────────────────────────────────────
+// createItem / deleteItem
 
 function makeUIForItemForm(sendStateEvent) {
   const charId = 'char-1';
@@ -913,7 +913,7 @@ describe('UIController.deleteItem - error handling', () => {
   });
 });
 
-// ─── adjustXP ────────────────────────────────────────────────────────────────
+// adjustXP
 
 function makeUIForAdjustXP(sendStateEvent) {
   const charId = 'char-1';
@@ -951,7 +951,7 @@ describe('UIController.adjustXP - error handling', () => {
   });
 });
 
-// ─── updateToken / updateCharacter / updateNPC ────────────────────────────────
+// updateToken / updateCharacter / updateNPC
 
 function makeUIForUpdateToken(sendStateEvent) {
   const tokenId = 'tok-1';
@@ -1010,7 +1010,7 @@ describe('UIController.updateItem - error handling', () => {
   });
 });
 
-// ─── initiative turn methods ─────────────────────────────────────────────────
+// initiative turn methods
 
 function makeUIForInitiative(sendStateEvent) {
   const state = withFacade({
@@ -1114,7 +1114,7 @@ describe('UIController.setTurn - error handling', () => {
   });
 });
 
-// ─── addTokenToInitiative ────────────────────────────────────────────────────
+// addTokenToInitiative
 
 describe('UIController.addTokenToInitiative - error handling', () => {
   afterEach(() => { document.body.innerHTML = ''; });
@@ -1136,7 +1136,7 @@ describe('UIController.addTokenToInitiative - error handling', () => {
   });
 });
 
-// ─── placeSheetOnMap ─────────────────────────────────────────────────────────
+// placeSheetOnMap
 
 function makeUIForPlaceSheet(sendStateEvent) {
   const charId = 'char-1';
@@ -1179,7 +1179,7 @@ describe('UIController.placeSheetOnMap - error handling', () => {
   });
 });
 
-// ─── deleteCharacter / deleteNPC ─────────────────────────────────────────────
+// deleteCharacter / deleteNPC
 
 function makeUIForDeleteEntity(sendStateEvent) {
   const charId = 'char-1';

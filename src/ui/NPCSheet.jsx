@@ -9,7 +9,7 @@
 import { h } from 'preact';
 import { EditIcon, MapsIcon } from './icons/index.jsx';
 import { npcsSignal, tokensSignal, settingsSignal, roomMembersSignal } from '../state/signals.js';
-import { selectedNPCIdSignal, selectedTokenSignal, tablePhaseSignal } from '../state/ui-signals.js';
+import { selectedNPCIdSignal, selectedTokenSignal, tablePhaseSignal, tableModeSignal } from '../state/ui-signals.js';
 import { renderSectionList, renderPrivateNotesSection } from './characterSheetSections.js';
 import { ENTITY_TYPES, LIBRARY_KIND } from '../utils/constants.js';
 import { SheetHeader } from './SheetHeader.jsx';
@@ -24,7 +24,7 @@ export function NPCSheet({ ui }) {
   // tablePhaseSignal must be dereferenced here - renderSectionList reads it
   // internally to switch section layout by phase, but that's a non-component
   // helper whose read does not subscribe us.
-  npcsSignal.value; tokensSignal.value; selectedNPCIdSignal.value; selectedTokenSignal.value; settingsSignal.value; tablePhaseSignal.value; roomMembersSignal.value;
+  npcsSignal.value; tokensSignal.value; selectedNPCIdSignal.value; selectedTokenSignal.value; settingsSignal.value; tablePhaseSignal.value; roomMembersSignal.value; tableModeSignal.value;
   const npcId = ui.state.selectedNPCId;
   const npc = npcId ? ui.state.npcs.get(npcId) : null;
 
@@ -32,6 +32,7 @@ export function NPCSheet({ ui }) {
     return h(EntityList, { ui, type: ENTITY_TYPES.NPC });
   }
 
+  const isLive = tableModeSignal.value === 'live';
   const isGM = ui.state.isGM();
   const ruleset = ui.state.settings.systemConfig;
   const rulesetLoaded = !!ruleset && Object.keys(ruleset).length > 0;
@@ -57,14 +58,15 @@ export function NPCSheet({ ui }) {
           'aria-label': 'Edit NPC', title: 'Edit NPC',
           onClick: () => ui.showEntityForm(ENTITY_TYPES.NPC, npc.id),
         }, h(EditIcon, {})),
-        h('button', {
+        !isLive && h('button', {
+          id: 'npc-place-btn',
           class: 'dbt dbt--sm', title: 'Place on map', 'aria-label': 'Place on map',
           onClick: () => ui.placeSheetOnMap(npc.id, ENTITY_TYPES.NPC),
         }, [h(MapsIcon, {}), ' Place']),
-        isGM && h(SaveToLibraryButton, { ui, kind: LIBRARY_KIND.NPC, entity: npc }),
-      ],
+        isGM && !isLive && h(SaveToLibraryButton, { ui, kind: LIBRARY_KIND.NPC, entity: npc }),
+      ].filter(Boolean),
     }),
-    isGM && h('div', { class: 'npc-control' }, [
+    isGM && !isLive && h('div', { class: 'npc-control' }, [
       h('label', { class: 'npc-control__label', for: 'npc-control-select' }, 'Controlled by'),
       h('select', {
         id: 'npc-control-select',

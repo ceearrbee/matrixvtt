@@ -17,7 +17,6 @@ export { tombstoneOldEntities, tombstoneStaleEvents, saveInitialState };
 
 /** Show first-time setup wizard */
 export async function showFirstTimeSetup(ui, { bypassAuthCheck = false } = {}) {
-  // Check if this user can create a session (must be room mod/admin)
   const authOk = ui.widgetManager.userIdResolved;
   let canCreate = bypassAuthCheck;
   if (!canCreate) {

@@ -134,12 +134,51 @@ export default [
     },
   },
 
+  // Service worker
+  {
+    files: ['public/sw.js'],
+    languageOptions: {
+      globals: {
+        ...globals.serviceworker,
+        __BUILD_VERSION__: 'readonly',
+        __BASE_URL__: 'readonly',
+      },
+    },
+    rules: {
+      'security/detect-object-injection': 'off',
+    },
+  },
+
+  // Root config files and dev scripts running in Node
+  {
+    files: [
+      '*.config.js',
+      '*.config.mjs',
+      'vite.chunks.js',
+      'dev-https.js',
+      'docs/.vitepress/config.mjs',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-regexp': 'off',
+      'no-console': 'off',
+    },
+  },
+
   // Ignore generated / dependency output and vendored bundles
   {
     ignores: [
       'node_modules/**',
       'dist/**',
-      'public/sw.js',
+      'coverage/**',
+      '.*/**',
+      'docs/.vitepress/**',
       // Vendored / minified third-party bundles checked in to src/
       'src/matrix-widget-api.js',
       'src/matrix-widget-stub.js',

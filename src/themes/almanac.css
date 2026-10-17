@@ -1,0 +1,40 @@
+/* almanac.css - Rebalanced layout and reading measure for the Almanac shell */
+
+.almanac-map {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chronicle {
+  flex: 0 0 auto;
+  height: clamp(220px, 34vh, 380px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 0.5px solid var(--color-border-tertiary);
+}
+
+/* Constrain narrative message prose measure to 72ch */
+.chronicle .log-msg,
+.chronicle .log-body,
+.chronicle .log-group__bodies,
+.chronicle .log-synth-row,
+.chronicle .prose,
+.narrative-body,
+.narrative-post {
+  max-width: 72ch;
+}
+
+.chronicle .log-scene-card {
+  max-width: 100%;
+  width: 100%;
+}
+
+.chronicle .log-scene-card .log-entry__scene-opening {
+  max-width: 75ch;
+}
+

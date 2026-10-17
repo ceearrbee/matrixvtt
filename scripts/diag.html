@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MatrixVTT dynamic-import diagnostic</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: -apple-system, system-ui, sans-serif;
+      background: #0f1115; color: #e6e8ec;
+      padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) 12px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    h1 { margin: 0 0 4px 0; font-size: 18px; }
+    .hint { font-size: 13px; color: #9aa2b0; margin: 0 0 6px; line-height: 1.4; }
+    button {
+      display: block; width: 100%;
+      padding: 12px; min-height: 44px;
+      font-size: 15px; line-height: 1.2;
+      background: #1d2330; color: #e6e8ec;
+      border: 1px solid #2c3445; border-radius: 6px;
+      cursor: pointer; text-align: left;
+    }
+    button:active { background: #2a3346; }
+    button.primary { background: #2563a3; border-color: #3b82c4; }
+    button.warn { background: #6f3a1a; border-color: #8a4b22; }
+    #log {
+      flex: 1;
+      background: #04060a; color: #cfd5e1;
+      padding: 8px; border-radius: 6px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 12px; line-height: 1.5;
+      white-space: pre-wrap; word-break: break-all;
+      overflow: auto; min-height: 180px;
+    }
+    .row { display: flex; gap: 6px; }
+    .row > button { flex: 1; }
+    .ok { color: #6ee78a; }
+    .err { color: #ff9a9a; }
+    .info { color: #9bbcff; }
+  </style>
+</head>
+<body>
+  <h1>MatrixVTT import diagnostic</h1>
+  <p class="hint">
+    Tap buttons in order. Steps marked <strong>OFFLINE</strong> require you to turn WiFi off first.
+    Goal: figure out why <code>PageView.jsx</code> can't reload after a network blip.
+  </p>
+
+  <button class="primary" data-step="warmup">1. Warm-up import (online) - expect ✓</button>
+  <button class="warn"    data-step="offline">2. Re-import same URL OFFLINE - expect ✗ TypeError</button>
+  <button class="primary" data-step="recache">3. Re-import SAME URL after WiFi back - KEY TEST</button>
+  <button class="primary" data-step="cachebust">4. Import with cache-bust ?v=N - should always succeed online</button>
+  <button class="primary" data-step="fetch">5. Plain fetch() of the file (compare to native HTTP)</button>
+
+  <div class="row">
+    <button data-step="clear">Clear log</button>
+    <button data-step="copy">Copy log</button>
+  </div>
+
+  <pre id="log"></pre>
+
+  <script type="module">
+    const logEl = document.getElementById('log');
+    const lines = [];
+    function log(klass, msg) {
+      const ts = new Date().toISOString().slice(11, 23);
+      const line = `${ts} ${msg}`;
+      lines.push(line);
+      const div = document.createElement('div');
+      if (klass) div.className = klass;
+      div.textContent = line;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // Module target - relative to this page (works on any host:port the
+    // dev server is bound to, no hard-coding).
+    const REL = '/matrixvtt/src/ui/PageView.jsx';
+    const target = new URL(REL, location.href).href;
+    let cb = 1;
+
+    log('info', `target: ${target}`);
+    log('info', `ua:     ${navigator.userAgent}`);
+    log('info', `online: ${navigator.onLine}`);
+
+    async function timed(label, fn) {
+      const t0 = performance.now();
+      try {
+        const v = await fn();
+        log('ok', `  ✓ ${label} ${(performance.now() - t0).toFixed(0)}ms`);
+        return v;
+      } catch (e) {
+        log('err', `  ✗ ${label} ${(performance.now() - t0).toFixed(0)}ms ${e.name}: ${e.message}`);
+        return null;
+      }
+    }
+
+    const handlers = {
+      async warmup() {
+        log('', `→ import('${target}')`);
+        const mod = await timed('warmup import', () => import(target));
+        if (mod) log('', `  exports: ${Object.keys(mod).join(', ')}`);
+      },
+      async offline() {
+        log('', `→ import('${target}') (expect failure if WiFi is off)`);
+        log('info', `  online flag: ${navigator.onLine}`);
+        await timed('offline import', () => import(target));
+      },
+      async recache() {
+        log('', `→ import('${target}') AGAIN (same URL, WiFi should be back)`);
+        log('info', `  online flag: ${navigator.onLine}`);
+        log('info', `  ── if this STILL fails after WiFi recovers, Firefox is caching the rejection.`);
+        await timed('recache import', () => import(target));
+      },
+      async cachebust() {
+        const url = `${target}?cb=${cb++}`;
+        log('', `→ import('${url}') (cache-busted)`);
+        const mod = await timed('cachebust import', () => import(url));
+        if (mod) log('', `  exports: ${Object.keys(mod).join(', ')}`);
+      },
+      async fetch() {
+        log('', `→ fetch('${target}')`);
+        await timed('fetch', async () => {
+          const r = await fetch(target, { cache: 'no-store' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const text = await r.text();
+          log('', `  HTTP ${r.status} ${text.length} bytes`);
+        });
+      },
+      clear() {
+        lines.length = 0;
+        logEl.replaceChildren();
+      },
+      async copy() {
+        try {
+          await navigator.clipboard.writeText(lines.join('\n'));
+          log('ok', 'log copied to clipboard');
+        } catch (e) {
+          log('err', `copy failed: ${e.message}`);
+        }
+      },
+    };
+
+    document.body.addEventListener('click', (ev) => {
+      const step = ev.target?.dataset?.step;
+      if (step && handlers[step]) handlers[step]();
+    });
+
+    window.addEventListener('online',  () => log('info', '🟢 online event'));
+    window.addEventListener('offline', () => log('info', '🔴 offline event'));
+    window.addEventListener('error', (e) => log('err', `💥 window.error ${e.message}`));
+    window.addEventListener('unhandledrejection', (e) => log('err', `💥 unhandledrejection ${e.reason?.message || e.reason}`));
+  </script>
+</body>
+</html>

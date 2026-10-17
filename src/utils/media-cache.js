@@ -21,7 +21,16 @@
 import { accessTokenSignal, homeserverSignal, mediaDownloaderSignal } from '../state/ui-signals.js';
 import { logger } from './logger.js';
 
-export const MEDIA_CACHE_MAX = 60;
+export const MEDIA_CACHE_MAX = 200;
+
+const ALLOWED_SCHEMES = ['mxc://', 'https://', 'http://', 'blob:', 'data:image/', '/'];
+
+function isAllowedUrl(url) {
+  for (const prefix of ALLOWED_SCHEMES) {
+    if (url.startsWith(prefix)) return true;
+  }
+  return false;
+}
 
 /** mxc uri -> object URL, or a legacy URL when authentication is unavailable. */
 const resolved = new Map();
@@ -34,6 +43,7 @@ const inFlight = new Map();
  */
 export function resolveMedia(url, onReady) {
   if (!url) return null;
+  if (typeof url !== 'string' || !isAllowedUrl(url)) return '';
   if (!url.startsWith('mxc://')) return url;
 
   const hit = resolved.get(url);
@@ -89,15 +99,30 @@ function legacyUrl(url, homeserver) {
   return `${base}/_matrix/media/v3/download/${path}`;
 }
 
-function evict() {
-  while (resolved.size > MEDIA_CACHE_MAX) {
-    const oldest = resolved.keys().next().value;
-    release(resolved.get(oldest));
-    resolved.delete(oldest);
+function delayedRelease(value) {
+  if (typeof value === 'string' && value.startsWith('blob:')) {
+    if (globalThis.process?.env?.NODE_ENV === 'test') {
+      URL.revokeObjectURL(value);
+      return;
+    }
+    const timer = setTimeout(() => {
+      URL.revokeObjectURL(value);
+    }, 60_000);
+    const maybeTimer = /** @type {any} */ (timer);
+    if (typeof maybeTimer?.unref === 'function') maybeTimer.unref();
   }
 }
 
-function release(value) {
+function evict() {
+  while (resolved.size > MEDIA_CACHE_MAX) {
+    const oldest = resolved.keys().next().value;
+    const value = resolved.get(oldest);
+    resolved.delete(oldest);
+    delayedRelease(value);
+  }
+}
+
+export function release(value) {
   if (typeof value === 'string' && value.startsWith('blob:')) URL.revokeObjectURL(value);
 }
 
@@ -107,15 +132,17 @@ function release(value) {
  * login never serves the first one's images.
  */
 export function clearMediaSession() {
-  _resetMediaCache();
+  clearMediaCache();
   accessTokenSignal.value = null;
   homeserverSignal.value = null;
   mediaDownloaderSignal.value = null;
 }
 
-// Test-only reset
-export function _resetMediaCache() {
+export function clearMediaCache() {
   for (const value of resolved.values()) release(value);
   resolved.clear();
   inFlight.clear();
 }
+
+// Test-only reset compatibility alias
+export const _resetMediaCache = clearMediaCache;

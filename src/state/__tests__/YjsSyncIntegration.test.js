@@ -216,7 +216,7 @@ describe('Distributed Sync Integration (Yjs + Matrix)', () => {
     expect(managerA.tokens.get('base').value).toBe(0);
   });
 
-  // ─── Multi-type convergence (1.1b) ────────────────────────────────────────
+  // Multi-type convergence (1.1b)
 
   it('walls converge across two clients', async () => {
     managerA.wallsMap.set('w1', { id: 'w1', p1: { x: 0, y: 0 }, p2: { x: 10, y: 0 } });

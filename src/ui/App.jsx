@@ -5,7 +5,9 @@ import { settingsSignal, initiativeSignal } from '../state/signals.js';
 import {
   tablePhaseSignal, gmPrepActiveSignal, openIconRailDrawerSignal, mobilePaneSignal,
   debugModeSignal, layoutModeSignal, sheetPanelWidthSignal, focusModeSignal,
+  companionCollapsedSignal, selectedCharacterIdSignal, selectedTokenSignal,
 } from '../state/ui-signals.js';
+import { UI_MODES } from '../utils/constants.js';
 import { DEFAULT_SHEET_WIDTH } from '../utils/sheet-panel-size.js';
 import { Header } from './Header.jsx';
 import { DiceBar } from './DiceBar.jsx';
@@ -53,14 +55,38 @@ export function App({ ui }) {
   const sheetWidth = sheetPanelWidthSignal.value ?? DEFAULT_SHEET_WIDTH;
   const focusMode = focusModeSignal.value;
 
+  // Auto-expand right companion on explicit tab switch, combat activation,
+  // or entity selection.
+  useEffect(() => {
+    if (!ui || typeof ui.switchTab !== 'function') return;
+    const origSwitchTab = ui.switchTab;
+    ui.switchTab = function(...args) {
+      companionCollapsedSignal.value = false;
+      return origSwitchTab.apply(this, args);
+    };
+    return () => {
+      ui.switchTab = origSwitchTab;
+    };
+  }, [ui]);
+
+  const selectedCharId = selectedCharacterIdSignal.value;
+  const selectedTokenId = selectedTokenSignal.value;
+  useEffect(() => {
+    if (selectedCharId || selectedTokenId) {
+      companionCollapsedSignal.value = false;
+    }
+  }, [selectedCharId, selectedTokenId]);
+
+  useEffect(() => {
+    if (phase === UI_MODES.COMBAT) {
+      companionCollapsedSignal.value = false;
+    }
+  }, [phase]);
+
   const hideInit = !ui.state.initiative?.active && !ui.state.isGM();
 
   const [channelsOpen, setChannelsOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
-  // Remember the element that opened each drawer so closing returns
-  // focus there. Otherwise keyboard / screen-
-  // reader users land back on body and have to tab through the chat
-  // column to resume.
   const lastFocusRef = useRef(null);
 
   const toggleDrawer = (key) => {
@@ -116,12 +142,13 @@ export function App({ ui }) {
       'data-mobile-pane': mobilePane,
       'data-icon-rail-open': iconRailDrawer || null,
       'data-focus': focusMode ? 'on' : null,
+      'data-companion-collapsed': companionCollapsedSignal.value ? 'true' : undefined,
       style: `--sheet-panel-width: ${sheetWidth}px;`,
     }, [
       // One left-navigation mount. LeftIndex picks its own variant: the
       // always-expanded accordion, or the slim one-drawer rail on a
       // phone or under the icon layout preference.
-      h('aside', {
+      h('div', {
         class: 'shell__channels', key: 'channels',
         id: 'shell-channels-drawer',
       }, h(LeftIndex, { ui, key: 'left-index' })),
@@ -144,7 +171,7 @@ export function App({ ui }) {
           h(DiceBar, { ui, key: 'dice' }),
         ]),
       ]),
-      h('aside', {
+      h('div', {
         class: 'shell__sheet', key: 'sheet',
         id: 'shell-sheet-drawer',
       }, h(railFor(phase, isGM, prepActive), { ui })),

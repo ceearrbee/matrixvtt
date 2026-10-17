@@ -61,13 +61,10 @@ function ResultList({ items, empty }) {
   }
   return h('ul', { class: 'browse-panel__results', role: 'list' },
     items.map((e, i) => h('li', {
-      key: i,
+      key: e?.ts || i,
       class: 'browse-panel__result',
       'data-browse-result': '',
-      // entry.text is already escaped by the log pipeline (same path
-      // LogPanel relies on for chat rendering).
-      dangerouslySetInnerHTML: { __html: e?.text || '' },
-    })),
+    }, e?.text || '')),
   );
 }
 

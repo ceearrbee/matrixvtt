@@ -16,6 +16,10 @@ import { logVersionSignal, activeSceneSignal } from '../state/ui-signals.js';
 import { HelpIcon } from './HelpIcon.jsx';
 import { ThreadView } from './ThreadView.jsx';
 import { EmptyState } from './EmptyState.jsx';
+import { resolveWikiTokens } from '../utils/wikilinks.js';
+import { handleWikilinkClick } from './FloatingDoc.jsx';
+import { normalizeEmDashes } from '../utils/format.js';
+
 
 function relativeTs(ts) {
   // The log entry stores ts as a localized "HH:MM" string already. We
@@ -28,7 +32,8 @@ function displayNameFor(sender) {
   // Matrix user ids look like @local:server.tld - show the local part
   // for the card meta line; the full id stays in the title attribute.
   const idx = sender.indexOf(':');
-  return idx > 1 ? sender.slice(1, idx) : sender;
+  const name = idx > 1 ? sender.slice(1, idx) : sender;
+  return normalizeEmDashes(name);
 }
 
 function authorInitials(sender) {
@@ -41,6 +46,7 @@ function SceneCard({ ui, entry, replyCount, active, expanded, onToggleExpand }) 
   return h('div', {
     class: `scene-card${active ? ' scene-card--active' : ''}`,
     'data-event-id': entry.eventId,
+    onClick: (ev) => handleWikilinkClick(ui, ev),
   }, [
     h('div', { class: 'scene-card__head' }, [
       h('span', {
@@ -48,7 +54,7 @@ function SceneCard({ ui, entry, replyCount, active, expanded, onToggleExpand }) 
         'aria-hidden': 'true',
         title: sender || '',
       }, authorInitials(sender)),
-      h('span', { class: 'scene-card__title' }, entry.sceneTitle || 'Untitled scene'),
+      h('span', { class: 'scene-card__title' }, normalizeEmDashes(entry.sceneTitle || 'Untitled scene')),
       active && h('span', { class: 'scene-card__badge', 'aria-label': 'Currently active scene' }, 'Active'),
     ]),
     h('div', { class: 'scene-card__meta' }, [
@@ -61,7 +67,7 @@ function SceneCard({ ui, entry, replyCount, active, expanded, onToggleExpand }) 
     entry.html
       ? h('div', {
           class: `scene-card__body${expanded ? ' scene-card__body--full' : ''}`,
-          dangerouslySetInnerHTML: { __html: entry.html },
+          dangerouslySetInnerHTML: { __html: resolveWikiTokens(entry.html, ui) },
         })
       : null,
     h('div', { class: 'scene-card__actions' }, [

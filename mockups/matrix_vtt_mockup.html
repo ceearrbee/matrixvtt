@@ -1,0 +1,375 @@
+
+<style>
+.vt{font-family:var(--font-sans);display:grid;grid-template:36px 1fr 52px/110px 1fr 220px;height:540px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary);}
+.tab{cursor:pointer;font-size:12px;padding:6px 10px;border-bottom:2px solid transparent;color:var(--color-text-secondary);user-select:none;}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);}
+.ie{padding:5px 7px;cursor:pointer;border-bottom:0.5px solid var(--color-border-tertiary);}
+.ie:hover:not(.cur){background:var(--color-background-secondary);}
+.ie.cur{background:var(--color-background-warning);}
+.ab{text-align:center;padding:5px 2px;background:var(--color-background-secondary);border-radius:4px;border:0.5px solid var(--color-border-tertiary);}
+.ab.hi{background:var(--color-background-info);border-color:var(--color-border-info);}
+.dbt{font-size:11px;padding:3px 7px;}
+.panel{display:none;padding:10px 12px;}
+.panel.on{display:block;}
+</style>
+
+<div class="vt">
+
+<!-- HEADER -->
+<div style="grid-column:1/-1;display:flex;align-items:center;padding:0 12px;gap:8px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);">
+  <span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">The Sunken Keep</span>
+  <span style="font-size:11px;color:var(--color-text-tertiary);">Round 3 · Aria's turn</span>
+  <div style="margin-left:auto;display:flex;gap:4px;">
+    <button class="dbt">Map</button>
+    <button class="dbt">Library</button>
+    <button class="dbt" style="background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info);">● Live</button>
+  </div>
+</div>
+
+<!-- INITIATIVE -->
+<div style="border-right:0.5px solid var(--color-border-tertiary);overflow-y:auto;background:var(--color-background-primary);">
+  <div style="padding:6px 7px 2px;font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;">Initiative</div>
+
+  <div class="ie cur">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#185FA5;flex-shrink:0;"></div>
+      <span style="font-size:11px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Aria</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">25</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:70%;background:#185FA5;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#534AB7;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Kael</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">22</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:100%;background:#534AB7;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#993C1D;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Orc Guard</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">18</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:73%;background:#993C1D;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#0F6E56;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Finn</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">15</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:73%;background:#0F6E56;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#791F1F;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Orc Boss</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">12</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:75%;background:#791F1F;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#3B6D11;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Sora</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">10</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:72%;background:#3B6D11;border-radius:2px;"></div>
+    </div>
+  </div>
+
+  <div class="ie">
+    <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#993C1D;flex-shrink:0;"></div>
+      <span style="font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Orc Guard 2</span>
+      <span style="font-size:10px;color:var(--color-text-secondary);">8</span>
+    </div>
+    <div style="height:3px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:100%;background:#993C1D;border-radius:2px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP CANVAS -->
+<div style="overflow:hidden;position:relative;background:#0d1118;">
+  <svg width="100%" height="100%" viewBox="0 0 350 452" style="display:block;" preserveAspectRatio="xMidYMid meet">
+
+    <!-- DUNGEON ROOMS -->
+    <rect x="10" y="10" width="300" height="268" rx="3" fill="#1a2035"/>
+    <rect x="90" y="278" width="120" height="74" fill="#1a2035"/>
+    <rect x="10" y="352" width="200" height="90" rx="3" fill="#1a2035"/>
+
+    <!-- GRID: vertical -->
+    <line x1="50"  y1="10"  x2="50"  y2="278" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="90"  y1="10"  x2="90"  y2="352" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="130" y1="10"  x2="130" y2="352" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="170" y1="10"  x2="170" y2="442" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="210" y1="10"  x2="210" y2="278" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="250" y1="10"  x2="250" y2="278" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="290" y1="10"  x2="290" y2="278" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="50"  y1="352" x2="50"  y2="442" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="130" y1="352" x2="130" y2="442" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+
+    <!-- GRID: horizontal -->
+    <line x1="10"  y1="50"  x2="310" y2="50"  stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="90"  x2="310" y2="90"  stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="130" x2="310" y2="130" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="170" x2="310" y2="170" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="210" x2="310" y2="210" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="250" x2="310" y2="250" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="90"  y1="318" x2="210" y2="318" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+    <line x1="10"  y1="392" x2="210" y2="392" stroke="rgba(255,255,255,0.055)" stroke-width="0.5"/>
+
+    <!-- Door -->
+    <rect x="140" y="275" width="20" height="6" rx="2" fill="#4a5570"/>
+
+    <!-- === TOKENS === -->
+    <!-- Aria (active) cell(1,1) → (70,70) -->
+    <circle cx="70" cy="70" r="19" fill="none" stroke="#EF9F27" stroke-width="2.5" stroke-dasharray="5 2.5" opacity="0.9"/>
+    <circle cx="70" cy="70" r="15" fill="#185FA5"/>
+    <text x="70" y="70" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="10" font-weight="500" fill="white">Ar</text>
+
+    <!-- Kael cell(3,2) → (150,110) -->
+    <circle cx="150" cy="110" r="15" fill="#534AB7"/>
+    <text x="150" y="110" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="10" font-weight="500" fill="white">Ka</text>
+
+    <!-- Finn cell(1,4) → (70,190) -->
+    <circle cx="70" cy="190" r="15" fill="#0F6E56"/>
+    <text x="70" y="190" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="10" font-weight="500" fill="white">Fi</text>
+
+    <!-- Sora cell(4,5) → (190,230) -->
+    <circle cx="190" cy="230" r="15" fill="#3B6D11"/>
+    <text x="190" y="230" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="10" font-weight="500" fill="white">So</text>
+
+    <!-- Orc Guard 1 cell(5,1) → (230,70) bloodied -->
+    <circle cx="230" cy="70" r="15" fill="#7A2E12"/>
+    <circle cx="230" cy="70" r="15" fill="none" stroke="#E24B4A" stroke-width="1.5" opacity="0.8"/>
+    <text x="230" y="70" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="9" font-weight="500" fill="white">OG</text>
+
+    <!-- Orc Guard 2 cell(6,3) → (270,150) -->
+    <circle cx="270" cy="150" r="15" fill="#7A2E12"/>
+    <text x="270" y="150" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="9" font-weight="500" fill="white">OG</text>
+
+    <!-- Orc Boss cell(6,5) → (270,230) large -->
+    <circle cx="270" cy="230" r="22" fill="#5A1010"/>
+    <circle cx="270" cy="230" r="22" fill="none" stroke="#E24B4A" stroke-width="1.5" opacity="0.9"/>
+    <text x="270" y="230" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="10" font-weight="500" fill="white">Boss</text>
+
+    <!-- FOG OF WAR: inner chamber -->
+    <rect x="10" y="352" width="200" height="90" rx="3" fill="rgba(0,0,0,0.82)"/>
+    <rect x="90" y="328" width="120" height="24" fill="rgba(0,0,0,0.55)"/>
+    <rect x="90" y="318" width="120" height="10" fill="rgba(0,0,0,0.22)"/>
+    <!-- small revealed peek -->
+    <rect x="10" y="352" width="50" height="42" fill="rgba(0,0,0,0.38)"/>
+  </svg>
+
+  <!-- Map controls -->
+  <div style="position:absolute;bottom:8px;right:8px;display:flex;flex-direction:column;gap:3px;">
+    <button style="font-size:11px;width:24px;height:24px;padding:0;background:rgba(13,17,24,0.75);border:0.5px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.6);border-radius:4px;cursor:pointer;">+</button>
+    <button style="font-size:11px;width:24px;height:24px;padding:0;background:rgba(13,17,24,0.75);border:0.5px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.6);border-radius:4px;cursor:pointer;">−</button>
+  </div>
+
+  <!-- Token inspector popup (Aria selected) -->
+  <div style="position:absolute;top:8px;left:8px;background:rgba(10,14,22,0.92);border:0.5px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 10px;">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:#185FA5;flex-shrink:0;"></div>
+      <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,0.9);">Aria Blackwood</span>
+    </div>
+    <div style="font-size:11px;color:rgba(200,210,230,0.6);line-height:1.7;">
+      HP <span style="color:#5BB8E8;">28 / 40</span><br>
+      AC <span style="color:rgba(220,230,245,0.85);">15</span> &nbsp; Speed <span style="color:rgba(220,230,245,0.85);">30 ft</span>
+    </div>
+    <div style="margin-top:6px;display:flex;gap:4px;">
+      <button style="font-size:10px;padding:2px 7px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);border-radius:3px;cursor:pointer;">Sheet</button>
+      <button style="font-size:10px;padding:2px 7px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);border-radius:3px;cursor:pointer;">Move</button>
+      <button style="font-size:10px;padding:2px 7px;background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);border-radius:3px;cursor:pointer;">Dmg</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHARACTER SHEET (right) -->
+<div style="border-left:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;overflow:hidden;">
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);flex-shrink:0;">
+    <div class="tab on" onclick="showTab('sheet',this)">Sheet</div>
+    <div class="tab" onclick="showTab('npc',this)">NPC</div>
+    <div class="tab" onclick="showTab('items',this)">Items</div>
+  </div>
+
+  <div style="overflow-y:auto;flex:1;">
+
+    <!-- SHEET TAB -->
+    <div id="tab-sheet" class="panel on">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--color-background-info);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-info);flex-shrink:0;">Ar</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Aria Blackwood</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);">Rogue 5 · Halfling</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);">Hit Points</span>
+          <span style="font-size:11px;font-weight:500;color:var(--color-text-primary);">28 / 40</span>
+        </div>
+        <div style="height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:70%;background:#1D9E75;border-radius:3px;"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:12px;">
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">AC</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">15</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">Speed</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">30</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">Init</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">+5</div></div>
+      </div>
+
+      <div style="font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Attributes</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:12px;">
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">STR</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">10</div><div style="font-size:9px;color:var(--color-text-secondary);">+0</div></div>
+        <div class="ab hi"><div style="font-size:9px;color:var(--color-text-info);">DEX</div><div style="font-size:12px;font-weight:500;color:var(--color-text-info);">18</div><div style="font-size:9px;color:var(--color-text-info);">+4</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">CON</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">12</div><div style="font-size:9px;color:var(--color-text-secondary);">+1</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">INT</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">14</div><div style="font-size:9px;color:var(--color-text-secondary);">+2</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">WIS</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">11</div><div style="font-size:9px;color:var(--color-text-secondary);">+0</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">CHA</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">13</div><div style="font-size:9px;color:var(--color-text-secondary);">+1</div></div>
+      </div>
+
+      <div style="font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Skills</div>
+      <div style="display:flex;flex-direction:column;gap:1px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;"><span style="color:var(--color-text-secondary);">Stealth</span><span style="font-weight:500;color:var(--color-text-primary);">+8</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;"><span style="color:var(--color-text-secondary);">Acrobatics</span><span style="font-weight:500;color:var(--color-text-primary);">+7</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;"><span style="color:var(--color-text-secondary);">Sleight of Hand</span><span style="font-weight:500;color:var(--color-text-primary);">+7</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;"><span style="color:var(--color-text-secondary);">Perception</span><span style="font-weight:500;color:var(--color-text-primary);">+4</span></div>
+      </div>
+
+      <div style="font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Conditions</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);font-style:italic;">None active</div>
+    </div>
+
+    <!-- NPC TAB -->
+    <div id="tab-npc" class="panel">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--color-background-danger);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-danger);flex-shrink:0;">OB</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">Orc War Boss</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);">CR 2 · Large Humanoid</div>
+        </div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:11px;color:var(--color-text-secondary);">Hit Points</span>
+          <span style="font-size:11px;font-weight:500;color:var(--color-text-primary);">45 / 60</span>
+        </div>
+        <div style="height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden;">
+          <div style="height:100%;width:75%;background:#E24B4A;border-radius:3px;"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:12px;">
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">AC</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">14</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">Speed</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">30</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">CR</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);">2</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:12px;">
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">STR</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">18</div><div style="font-size:9px;color:var(--color-text-secondary);">+4</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">DEX</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">10</div><div style="font-size:9px;color:var(--color-text-secondary);">+0</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">CON</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">16</div><div style="font-size:9px;color:var(--color-text-secondary);">+3</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">INT</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">8</div><div style="font-size:9px;color:var(--color-text-secondary);">−1</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">WIS</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">10</div><div style="font-size:9px;color:var(--color-text-secondary);">+0</div></div>
+        <div class="ab"><div style="font-size:9px;color:var(--color-text-tertiary);">CHA</div><div style="font-size:12px;font-weight:500;color:var(--color-text-primary);">9</div><div style="font-size:9px;color:var(--color-text-secondary);">−1</div></div>
+      </div>
+      <div style="font-size:10px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Actions</div>
+      <div style="background:var(--color-background-secondary);border-radius:6px;padding:8px;margin-bottom:5px;border:0.5px solid var(--color-border-tertiary);">
+        <div style="font-size:12px;font-weight:500;margin-bottom:2px;color:var(--color-text-primary);">Multiattack</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">Makes two Greataxe attacks.</div>
+      </div>
+      <div style="background:var(--color-background-secondary);border-radius:6px;padding:8px;border:0.5px solid var(--color-border-tertiary);">
+        <div style="font-size:12px;font-weight:500;margin-bottom:2px;color:var(--color-text-primary);">Greataxe · <span style="color:var(--color-text-info);font-weight:400;">+5 to hit</span></div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">1d12+3 slashing · Reach 5 ft.</div>
+      </div>
+    </div>
+
+    <!-- ITEMS TAB -->
+    <div id="tab-items" class="panel">
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px;">Aria's Inventory</div>
+
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:8px;margin-bottom:5px;background:var(--color-background-primary);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Shortsword</span>
+          <span style="font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:1px 5px;border-radius:3px;">Weapon</span>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">+5 hit · 1d6+4 piercing · Finesse, Light</div>
+      </div>
+
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:8px;margin-bottom:5px;background:var(--color-background-primary);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Cloak of Elvenkind</span>
+          <span style="font-size:10px;color:var(--color-text-success);background:var(--color-background-success);padding:1px 5px;border-radius:3px;">Uncommon</span>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">Advantage on Stealth checks.</div>
+      </div>
+
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:8px;margin-bottom:5px;background:var(--color-background-primary);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Thieves' Tools</span>
+          <span style="font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:1px 5px;border-radius:3px;">Tool</span>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">Proficient. Pick locks, disable traps.</div>
+      </div>
+
+      <div style="border:0.5px solid var(--color-border-tertiary);border-radius:6px;padding:8px;background:var(--color-background-primary);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">Healing Potion</span>
+          <span style="font-size:10px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:1px 5px;border-radius:3px;">×2</span>
+        </div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">Regain 2d4+2 HP. Bonus action.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DICE BAR -->
+<div style="grid-column:1/-1;display:flex;align-items:center;gap:4px;padding:0 10px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);">
+  <button class="dbt">d4</button>
+  <button class="dbt">d6</button>
+  <button class="dbt">d8</button>
+  <button class="dbt">d10</button>
+  <button class="dbt">d12</button>
+  <button class="dbt" style="background:var(--color-background-info);color:var(--color-text-info);border-color:var(--color-border-info);font-weight:500;">d20</button>
+  <span style="font-size:11px;color:var(--color-text-secondary);">mod</span>
+  <input type="number" value="5" style="width:32px;font-size:11px;text-align:center;padding:2px 4px;">
+  <button class="dbt" style="font-weight:500;">Roll</button>
+  <div style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">
+    d20 → <span style="color:var(--color-text-primary);font-weight:500;">18 + 5 = </span><span style="font-size:14px;font-weight:500;color:#1D9E75;">23</span>
+    <span style="margin-left:5px;font-size:10px;color:var(--color-text-tertiary);">Attack vs Orc Boss</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.getElementById('tab-' + id).classList.add('on');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>

@@ -107,9 +107,7 @@ describe('StateManager.canMoveToken', () => {
 
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // isGM() tests
-// ─────────────────────────────────────────────────────────────────────────────
 
 describe('StateManager.isGM', () => {
   it('returns true when power level is 50', () => {
@@ -158,9 +156,7 @@ describe('StateManager.isGM', () => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
 // canEditEntity() tests
-// ─────────────────────────────────────────────────────────────────────────────
 
 describe('StateManager.canEditEntity', () => {
   it('returns true when entity is owned via player_user_id matching current user', () => {

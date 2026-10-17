@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 import { getHPPercentage } from '../utils/ui-helpers.js';
 import { FOG_MODES } from '../utils/ui-constants.js';
-import { initiativeSignal, tokensSignal } from '../state/signals.js';
+import { initiativeSignal, tokensSignal, activeMapIdSignal } from '../state/signals.js';
 import { InitiativeEntry } from './InitiativeEntry.jsx';
 import { CombatInitiativeStrip } from './CombatInitiativeStrip.jsx';
 import { HelpIcon } from './HelpIcon.jsx';
@@ -29,8 +29,8 @@ const DEFAULT_ACTION_ECONOMY = [
 ];
 
 export function InitiativeBar({ ui, compact = false }) {
-  // Auto-subscribe to initiative + token state.
-  initiativeSignal.value; tokensSignal.value;
+  // Auto-subscribe to initiative + token + activeMap state.
+  initiativeSignal.value; tokensSignal.value; activeMapIdSignal.value;
 
   // Combat gets the slim ribbon beneath the map; every other phase gets
   // the full tracker. One mount either way - App used to swap two
@@ -52,10 +52,14 @@ export function InitiativeBar({ ui, compact = false }) {
 
   // At rest the tracker is one button, not a titled band announcing
   // that nothing is happening - that band cost the map ~90px to say so.
+  // When no map is loaded and no tokens exist, idle chrome is suppressed.
   if (!active) {
     if (!isGM) return null;
+    const hasMap = !!activeMapIdSignal.value || !!ui.state?.map || (ui.state?.tokens?.size > 0) || (ui.state?.maps === undefined && !('maps' in (ui.state ?? {})));
+    if (!hasMap) return null;
     return h('div', { class: 'initiative-idle' },
       h('button', {
+        id: 'start-combat-btn',
         class: 'dbt dbt--sm',
         'aria-label': 'Start combat and roll initiative',
         title: 'Roll initiative for all tokens',

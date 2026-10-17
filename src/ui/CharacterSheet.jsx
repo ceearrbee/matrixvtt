@@ -7,7 +7,10 @@
 import { h } from 'preact';
 import { EditIcon, MapsIcon, SheetIcon, PersonIcon } from './icons/index.jsx';
 import { charactersSignal, tokensSignal, settingsSignal } from '../state/signals.js';
-import { selectedCharacterIdSignal, selectedTokenSignal, tablePhaseSignal } from '../state/ui-signals.js';
+import {
+  selectedCharacterIdSignal, selectedTokenSignal, tablePhaseSignal,
+  tableModeSignal, gmPrepActiveSignal,
+} from '../state/ui-signals.js';
 import { renderSectionList, renderPrivateNotesSection } from './characterSheetSections.js';
 import { ENTITY_TYPES, LIBRARY_KIND } from '../utils/constants.js';
 import { CharacterSwitcher } from './CharacterSwitcher.jsx';
@@ -67,8 +70,12 @@ export function CharacterSheet({ ui }) {
     ]);
   }
 
-  const canEdit = ui.state.canEditEntity(character);
-  const systemConfig = ui.state.settings?.systemConfig;
+  const canEdit = typeof ui.state?.canEditEntity === 'function'
+    ? ui.state.canEditEntity(character)
+    : (ui.state?.isGM?.() ?? false);
+  const isPrep = gmPrepActiveSignal.value || tableModeSignal.value === 'prep';
+  const showAuthoring = canEdit && isPrep;
+  const systemConfig = ui.state?.settings?.systemConfig;
   const rulesetLoaded = !!systemConfig && Object.keys(systemConfig).length > 0;
   const sectionsRaw = systemConfig?.character_sheet?.sections;
   const sections = Array.isArray(sectionsRaw) ? sectionsRaw : [];
@@ -82,26 +89,26 @@ export function CharacterSheet({ ui }) {
       subtitle: `${character.class_level ?? ''} · ${character.species ?? ''}`,
       imageUrl: character.image_url,
       actions: [
-        canEdit && h('button', {
+        showAuthoring && h('button', {
           class: 'dbt dbt--sm', 'aria-label': 'Edit character', title: 'Edit character',
           onClick: () => ui.showEditCharacterForm(character.id),
         }, [h(EditIcon, {}), ' Edit']),
-        canEdit && h('button', {
+        showAuthoring && h('button', {
           class: 'dbt dbt--sm', 'aria-label': 'Save as template', title: 'Save as character template',
           onClick: () => ui.saveCharacterAsTemplate(character.id),
         }, h(SheetIcon, {})),
-        isGM && !ui.state.hasTokenForSheet(character.id) && h('button', {
+        isGM && isPrep && !ui.state.hasTokenForSheet(character.id) && h('button', {
           class: 'dbt dbt--sm', 'aria-label': 'Place on map', title: 'Place token on map',
           onClick: () => ui.placeSheetOnMap(character.id, ENTITY_TYPES.PC),
         }, [h(MapsIcon, {}), ' Place']),
-        canEdit && h(SaveToLibraryButton, {
+        showAuthoring && h(SaveToLibraryButton, {
           ui, kind: LIBRARY_KIND.CHARACTER, entity: character, compact: false, label: 'Library',
         }),
       ],
     }),
     showMissingWarning && h(SheetMissingSectionsWarning, { entityKind: 'pc' }),
     ...renderSectionList(ui, character, sections),
-    renderPrivateNotesSection(ui, character),
+    !sections.some((s) => s.kind === 'notes') && renderPrivateNotesSection(ui, character),
     h(Ownership, { ui, character, isGM, myUserId }),
   ]);
 }

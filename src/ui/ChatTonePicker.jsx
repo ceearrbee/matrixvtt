@@ -19,14 +19,19 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { chatToneSignal } from '../state/ui-signals.js';
 import { CHAT_TONES } from './chat-tones.js';
 import { HelpIcon } from './HelpIcon.jsx';
+import { trapFocusIn } from './modal-focus.js';
 
 export function ChatTonePicker({ onClose }) {
   const rootRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
   const [query, setQuery] = useState('');
   const [customName, setCustomName] = useState('');
-  const [customColor, setCustomColor] = useState('#888888');
+  const [customColor, setCustomColor] = useState('var(--color-text-tertiary)');
 
   useEffect(() => {
+    previouslyFocusedRef.current = /** @type {HTMLElement|null} */ (document.activeElement);
+    const cleanupTrap = rootRef.current ? trapFocusIn(rootRef.current) : undefined;
+
     const onDocClick = (e) => {
       if (rootRef.current && !rootRef.current.contains(e.target)) onClose?.();
     };
@@ -36,6 +41,11 @@ export function ChatTonePicker({ onClose }) {
     return () => {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
+      cleanupTrap?.();
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === 'function') {
+        try { prev.focus(); } catch { /* ignore */ }
+      }
     };
   }, [onClose]);
 

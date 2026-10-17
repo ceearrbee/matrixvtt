@@ -10,6 +10,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { showMapContextMenu, showTokenContextMenu } from '../map/context-menus.js';
+import { selectedTokenSignal } from '../state/ui-signals.js';
 
 function makeMr({ isGM = true, tokens = new Map() } = {}) {
   const mr = {
@@ -31,6 +32,7 @@ function makeMr({ isGM = true, tokens = new Map() } = {}) {
     _startFacingMode: vi.fn(),
     _clearFacing: vi.fn(),
     setSelectedToken: vi.fn(),
+    broadcastPing: vi.fn(),
   };
   return mr;
 }
@@ -88,25 +90,49 @@ describe('showTokenContextMenu', () => {
     const labels = [...menu.querySelectorAll('[role="menuitem"]')].map((el) => el.textContent);
     expect(labels).toEqual(expect.arrayContaining([
       expect.stringContaining('View Sheet'),
+      expect.stringContaining('Adjust HP & Conditions'),
+      expect.stringContaining('Ping Here'),
       expect.stringContaining('Remove Token'),
     ]));
     // Damage / heal / conditions moved to the selection bar; the menu
-    // stays within working-memory limits (<= 7 items).
+    // stays within working-memory limits (<= 8 items).
     expect(labels.join(' ')).not.toMatch(/Apply Damage|Add Condition/);
-    expect(labels.length).toBeLessThanOrEqual(7);
+    expect(labels.length).toBeLessThanOrEqual(8);
     const removeBtn = menu.querySelector('.context-menu-item--danger');
     expect(removeBtn).toBeTruthy();
     removeBtn.click();
     expect(mr.removeToken).toHaveBeenCalledWith('t1');
   });
 
-  it('non-GM non-owner sees only View Sheet', () => {
+  it('clicking Adjust HP & Conditions selects the token', () => {
+    const tokens = new Map([['t1', { id: 't1', name: 'Goblin', type: 'npc' }]]);
+    const mr = makeMr({ isGM: true, tokens });
+    const menu = showTokenContextMenu(mr, { id: 't1' }, 0, 0);
+    const adjustBtn = [...menu.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent.includes('Adjust HP'));
+    expect(adjustBtn).toBeTruthy();
+    adjustBtn.click();
+    expect(selectedTokenSignal.value).toBe('t1');
+    expect(mr.setSelectedToken).toHaveBeenCalledWith('t1');
+  });
+
+  it('clicking Ping Here broadcasts a ping at token coords', () => {
+    const tokens = new Map([['t1', { id: 't1', name: 'Goblin', type: 'npc', x: 120, y: 160 }]]);
+    const mr = makeMr({ isGM: true, tokens });
+    const menu = showTokenContextMenu(mr, { id: 't1' }, 0, 0);
+    const pingBtn = [...menu.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent.includes('Ping Here'));
+    expect(pingBtn).toBeTruthy();
+    pingBtn.click();
+    expect(mr.broadcastPing).toHaveBeenCalledWith(120, 160);
+  });
+
+  it('non-GM non-owner sees View Sheet and Ping Here', () => {
     const tokens = new Map([['t1', { id: 't1', name: 'PC', type: 'pc', owner_user_id: '@other:hs' }]]);
     const mr = makeMr({ isGM: false, tokens });
     const menu = showTokenContextMenu(mr, { id: 't1' }, 0, 0);
     const items = [...menu.querySelectorAll('[role="menuitem"]')];
-    expect(items.length).toBe(1);
+    expect(items.length).toBe(2);
     expect(items[0].textContent).toContain('View Sheet');
+    expect(items[1].textContent).toContain('Ping Here');
   });
 
   it('ArrowDown wraps and Enter activates the focused item', () => {

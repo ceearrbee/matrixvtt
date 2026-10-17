@@ -67,17 +67,30 @@ export function joinChunks(chunks) {
  * 0..total-1 are all present. Highest complete marker wins. Legacy
  * events with no idx/total are treated as { idx: 0, total: 1 }.
  *
- * @param {Array<{ content?: { data?: string, marker?: number, idx?: number, total?: number } }>} events
+ * @param {Array<{ content?: { data?: string, marker?: number, idx?: number, total?: number }, sender?: string }>} events
+ * @param {{ powerLevels?: any, sm?: any } | any} [options]
  * @returns {{ marker: number, chunks: Array<{idx: number, data: string}> } | null}
  *   `null` when no complete snapshot exists.
  */
-export function chooseLatestCompleteSnapshot(events) {
+export function chooseLatestCompleteSnapshot(events, options) {
   if (!Array.isArray(events) || events.length === 0) return null;
+
+  const pl = options?.powerLevels ?? (options?.users ? options : options?.sm?.powerLevels);
+  let candidates = events;
+  if (pl?.users && Object.values(pl.users).some((v) => typeof v === 'number' && v >= 50)) {
+    candidates = candidates.filter((e) => {
+      const sender = e?.sender;
+      const senderPl = (sender && typeof pl.users[sender] === 'number')
+        ? pl.users[sender]
+        : (typeof pl.users_default === 'number' ? pl.users_default : 0);
+      return senderPl >= 50;
+    });
+  }
 
   /** @type {Map<number, Map<number, { data: string, total: number }>>} */
   const byMarker = new Map();
 
-  for (const e of events) {
+  for (const e of candidates) {
     const c = e?.content;
     if (!c || typeof c.data !== 'string' || typeof c.marker !== 'number') continue;
     const idx   = Number.isInteger(c.idx)   ? c.idx   : 0;

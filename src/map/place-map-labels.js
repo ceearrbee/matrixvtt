@@ -21,7 +21,7 @@
  */
 import { layoutTokenLabels } from './token-label-layout.js';
 
-export function placeMapLabels(entries) {
+export function placeMapLabels(entries, obstacles = []) {
   if (!entries || entries.length === 0) return;
   const byId = new Map(entries.map((e) => [e.id, e]));
   // One stacking increment for the whole set - use the tallest label so
@@ -31,6 +31,7 @@ export function placeMapLabels(entries) {
   const anchors = layoutTokenLabels(boxes, {
     labelHeight,
     labelWidthOf: (t) => byId.get(t.id)?.labelWidth ?? t.w,
+    obstacles,
   });
   for (const a of anchors) byId.get(a.id)?.apply(a);
 }

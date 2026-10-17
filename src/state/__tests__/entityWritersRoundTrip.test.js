@@ -36,7 +36,7 @@ let sm;
 beforeEach(() => { sm = makeStateManager(); });
 afterEach(() => { sm.subscriptionManager?.destroy?.(); sm = null; });
 
-// ─── Keyed-collection round-trips ───────────────────────────────────────────
+// Keyed-collection round-trips
 
 const KEYED_CASES = [
   { coll: 'characters', update: 'updateCharacter', remove: 'removeCharacter', seed: { name: 'Aria' },    next: { name: 'Aria the Bold' } },
@@ -73,7 +73,7 @@ for (const c of KEYED_CASES) {
   });
 }
 
-// ─── Token-specific round-trips ─────────────────────────────────────────────
+// Token-specific round-trips
 
 describe('tokens round-trip', () => {
   beforeEach(async () => {

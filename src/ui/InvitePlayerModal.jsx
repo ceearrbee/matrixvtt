@@ -59,6 +59,12 @@ function InviteBody({ ui, close }) {
     return () => { alive = false; };
   }, []);
 
+  useEffect(() => {
+    if (links) {
+      document.getElementById('invite-player-link')?.focus();
+    }
+  }, [links]);
+
   const copy = async (value, what) => {
     setError('');
     try {

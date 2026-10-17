@@ -284,7 +284,7 @@
   }
 
   class FakeMatrixClient {
-    // ── Static auth surface (called via app.MatrixClient.X) ──────────────
+    // Static auth surface (called via app.MatrixClient.X)
     static async discoverHomeserver(hs) { return hs || HOMESERVER; }
     // Matches the real static: a bare flows array (AuthScreen calls
     // flows.some(...)). Configurable so the SSO-discovery spec can
@@ -355,7 +355,7 @@
       return { sid: 'fake-sid' };
     }
 
-    // ── Constructor + instance surface ───────────────────────────────────
+    // Constructor + instance surface
     constructor({ homeserver, accessToken, userId }) {
       this.homeserver = homeserver;
       this.accessToken = accessToken;

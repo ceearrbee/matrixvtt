@@ -16,7 +16,7 @@ import { h } from 'preact';
 import { useStorageSubscription } from './hooks/use-storage.js';
 import { IconRail } from './IconRail.jsx';
 import { useMediaQuery } from './hooks/use-media-query.js';
-import { layoutModeSignal } from '../state/ui-signals.js';
+import { layoutModeSignal, leftRailCollapsedSignal } from '../state/ui-signals.js';
 import { LAYOUT_MODES, ICON_RAIL_DRAWERS, STORAGE_KEYS } from '../utils/constants.js';
 import { ScenesDrawer, JournalDrawer } from './index-sections.js';
 import { openPopup } from '../state/popup-signals.js';
@@ -73,6 +73,7 @@ const COMPACT_QUERY = '(max-width: 768px)';
 export function LeftIndex({ ui }) {
   const compactViewport = useMediaQuery(COMPACT_QUERY);
   const iconLayout = layoutModeSignal.value === LAYOUT_MODES.ICON;
+  const collapsed = leftRailCollapsedSignal.value;
   const isGM = typeof ui?.state?.isGM === 'function' ? ui.state.isGM() : false;
   const sections = SECTIONS.filter((s) => !s.gmOnly || isGM);
 
@@ -83,9 +84,18 @@ export function LeftIndex({ ui }) {
   const toggle = (key) => () =>
     setOpenSections({ ...openSections, [key]: !openSections[key] });
 
-  if (compactViewport || iconLayout) return h(IconRail, { ui });
+  if (compactViewport || iconLayout || collapsed) return h(IconRail, { ui });
 
-  return h('aside', { class: 'left-index', role: 'navigation', 'aria-label': 'Index' }, [
+  return h('nav', { class: 'left-index', 'aria-label': 'Index' }, [
+    h('div', { class: 'left-index__head' }, [
+      h('button', {
+        type: 'button',
+        class: 'dbt dbt--sm left-index__collapse-btn',
+        'aria-label': 'Collapse left sidebar',
+        title: 'Collapse sidebar',
+        onClick: () => { leftRailCollapsedSignal.value = true; },
+      }, '«'),
+    ]),
     h('div', { class: 'left-index__sections' },
       sections.map((s) => h(IndexSection, {
         key: s.key,

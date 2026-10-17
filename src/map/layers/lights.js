@@ -23,12 +23,13 @@ function parseColor(raw) {
   return DEFAULT_COLOR;
 }
 
-export function createLightsLayer(stage, _mr) {
+export function createLightsLayer(stage, mr) {
   const layer = new Konva.Layer({ listening: false });
   layer.opacity(0.55);
   stage.add(layer);
 
   const circles = new Map();
+  let _lastSig = '';
 
   function sync() {
     const lights = lightsSignal.value;
@@ -36,11 +37,13 @@ export function createLightsLayer(stage, _mr) {
     // Look the active map up via mapsSignal (matches grid / map-bg /
     // env-tint pattern). Reading `mr.state.map` would skip the
     // signal-subscribe and miss the map-hydrated re-render.
-    const map = activeId ? mapsSignal.value.get(activeId) : null;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    let w = null;
+    let h = null;
     if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
         && typeof map.cell_px === 'number') {
-      const w = map.width_cells * map.cell_px;
-      const h = map.height_cells * map.cell_px;
+      w = map.width_cells * map.cell_px;
+      h = map.height_cells * map.cell_px;
       // Konva.Layer + clipFunc applies `ctx.clip()` against the layer's
       // local canvas transform, which honours stage pan/zoom correctly.
       // The clipX/Y/Width/Height setters store the values but on Layer
@@ -52,11 +55,27 @@ export function createLightsLayer(stage, _mr) {
       // passing zero-sized dimensions.
       layer.clipFunc(null);
     }
+
+    let sig = `${activeId || ''}|${w ?? ''}|${h ?? ''};`;
+    if (lights) {
+      for (const [id, l] of lights) {
+        if (!l || !Number.isFinite(l.x) || !Number.isFinite(l.y)) continue;
+        if (!Number.isFinite(l.radius_px) || l.radius_px <= 0) continue;
+        if (l.map_id !== activeId) continue;
+        sig += `${id}|${l.x}|${l.y}|${l.radius_px}|${l.color}|${l.intensity};`;
+      }
+    }
+    if (sig === _lastSig) {
+      layer.batchDraw();
+      return;
+    }
+    _lastSig = sig;
+
     const keep = new Set();
     if (lights) {
       for (const [id, l] of lights) {
-        if (!l || typeof l.x !== 'number' || typeof l.y !== 'number') continue;
-        if (typeof l.radius_px !== 'number' || l.radius_px <= 0) continue;
+        if (!l || !Number.isFinite(l.x) || !Number.isFinite(l.y)) continue;
+        if (!Number.isFinite(l.radius_px) || l.radius_px <= 0) continue;
         if (l.map_id !== activeId) continue;
         keep.add(id);
         let circle = circles.get(id);
@@ -66,7 +85,7 @@ export function createLightsLayer(stage, _mr) {
           layer.add(circle);
         }
         const color = parseColor(l.color);
-        const intensity = typeof l.intensity === 'number' ? l.intensity : DEFAULT_INTENSITY;
+        const intensity = Number.isFinite(l.intensity) ? l.intensity : DEFAULT_INTENSITY;
         circle.x(l.x);
         circle.y(l.y);
         circle.radius(l.radius_px);

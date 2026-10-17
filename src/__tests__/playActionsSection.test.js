@@ -130,4 +130,21 @@ describe('play_actions section', () => {
     render(_kindsForTest.play_actions({ ui, character, config }));
     expect(screen.getByText(/nothing to do|no actions/i)).toBeTruthy();
   });
+
+  it('folds common actions into a details element collapsed outside combat and open during combat', () => {
+    const ui = makeUi({ commonActions: [{ label: 'Dodge', description: 'Defensive' }] });
+    const character = { id: 'c1', name: 'Aria' };
+
+    const { container, unmount } = render(_kindsForTest.play_actions({ ui, character, config }));
+    const details = container.querySelector('details.narrative-group');
+    expect(details).not.toBeNull();
+    expect(details.hasAttribute('open')).toBe(false);
+    unmount();
+
+    ui.state.initiative = { active: true };
+    const { container: containerCombat } = render(_kindsForTest.play_actions({ ui, character, config }));
+    const detailsCombat = containerCombat.querySelector('details.narrative-group');
+    expect(detailsCombat).not.toBeNull();
+    expect(detailsCombat.hasAttribute('open')).toBe(true);
+  });
 });

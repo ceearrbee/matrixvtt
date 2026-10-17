@@ -8,6 +8,7 @@ import { KnockRequests } from './KnockRequests.jsx';
 import { EmptyState } from './EmptyState.jsx';
 import { conditionAbbr, conditionLabel } from '../state/rulesets.js';
 import { TABS } from '../utils/constants.js';
+import { normalizeEmDashes } from '../utils/format.js';
 
 function _findTokenFor(ui, entityId) {
   if (!entityId || !ui?.state?.tokens) return null;
@@ -30,7 +31,7 @@ function HpBar({ current, max }) {
 
 function RosterCard({ ui, entity, isNPC = false }) {
   const token = _findTokenFor(ui, entity.id);
-  const name = entity.name || (isNPC ? 'Unnamed NPC' : 'Unnamed character');
+  const name = normalizeEmDashes(entity.name || (isNPC ? 'Unnamed NPC' : 'Unnamed character'));
   const subtitleParts = [];
   if (entity.race) subtitleParts.push(entity.race);
   if (entity.class_name) {
@@ -73,7 +74,7 @@ function RosterCard({ ui, entity, isNPC = false }) {
         size: 40,
       }),
       h('div', { class: 'party-roster__meta' }, [
-        h('div', { class: 'party-roster__name' }, name),
+        h('div', { class: 'party-roster__name' }, normalizeEmDashes(name)),
         subtitle && h('div', { class: 'party-roster__subtitle' }, subtitle),
       ]),
     ]),
@@ -129,9 +130,8 @@ export function PartyRoster({ ui }) {
     : [];
 
   if (characters.length === 0 && companions.length === 0) {
-    return h('aside', {
+    return h('section', {
       class: 'party-roster',
-      role: 'complementary',
       'aria-label': 'Party roster',
     }, [h(KnockRequests, { ui }), h(EmptyState, {
       glyph: '🎭',
@@ -143,9 +143,8 @@ export function PartyRoster({ ui }) {
     })]);
   }
 
-  return h('aside', {
+  return h('section', {
     class: 'party-roster',
-    role: 'complementary',
     'aria-label': 'Party roster',
   }, [
     h(KnockRequests, { ui }),

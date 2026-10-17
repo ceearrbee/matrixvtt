@@ -7,6 +7,7 @@
 import { VTTError, ErrorType, showErrorNotification } from '../../utils/errorHandling.js';
 import { EVENT_TYPES, ENTITY_TYPES } from '../../utils/constants.js';
 import { levelFromXp, nextLevelThreshold } from '../../engine/progression.js';
+import { esc } from '../../utils/domHelpers.js';
 
 export async function applyLongRest(ui) {
   const character = ui.state.getCurrentCharacter();
@@ -31,7 +32,7 @@ export async function applyLongRest(ui) {
     return;
   }
 
-  ui._log('😴', `${character.name} takes a long rest - HP and spell slots restored`);
+  ui._log('😴', `${esc(character.name)} takes a long rest - HP and spell slots restored`);
 }
 
 export async function adjustXP(ui, charId, amount) {

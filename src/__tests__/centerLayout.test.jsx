@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, h } from 'preact';
+import fs from 'node:fs';
 
 vi.mock('../ui/useKeyboardShortcuts.js', () => ({ useKeyboardShortcuts: () => {} }));
 vi.mock('../ui/Header.jsx', () => ({ Header: () => h('div', { 'data-stub': 'header' }) }));
@@ -73,5 +74,23 @@ describe('Almanac center layout', () => {
     expect(chronicle).not.toBeNull();
     expect(chronicle.querySelector('[data-stub="log"]')).not.toBeNull();
     expect(chronicle.lastElementChild.getAttribute('data-stub')).toBe('dice');
+  });
+
+  it('mounts Header outside .shell inside .vt-root so columns occupy the single row', () => {
+    render(h(App, { ui: makeUi() }), host);
+    const root = host.querySelector('.vt-root');
+    expect(root).not.toBeNull();
+    const header = root.querySelector('[data-stub="header"]');
+    const shell = root.querySelector('.shell');
+    expect(header).not.toBeNull();
+    expect(shell).not.toBeNull();
+    expect(shell.contains(header)).toBe(false);
+  });
+
+  it('does not constrain .shell with multi-row grid-template-rows starting with header height', () => {
+    const almanacCss = fs.readFileSync('src/themes/almanac.css', 'utf8');
+    const stylesCss = fs.readFileSync('src/styles.css', 'utf8');
+    expect(almanacCss).not.toMatch(/\.shell\s*\{[^}]*grid-template-rows/);
+    expect(stylesCss).not.toMatch(/\.shell\s*\{[^}]*grid-template-rows:\s*var\(--header-h/);
   });
 });

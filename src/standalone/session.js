@@ -9,6 +9,7 @@ import { h, render } from 'preact';
 import { logger } from '../utils/logger.js';
 import { upsertRecentSession, removeRecentSession, saveActiveRoom } from './sessionStore.js';
 import { describeAuthError } from './auth-errors.js';
+import { describeNetworkError } from '../utils/errorHandling.js';
 import { isConnectionLostError } from '../utils/connection-error.js';
 import { ConnectionLost } from '../ui/ConnectionLost.jsx';
 import { MatrixClient } from '../client/MatrixClient.js';
@@ -109,7 +110,7 @@ async function _tryKnock(app, idOrAlias) {
     if (code === 'M_FORBIDDEN') {
       app.setError('discovery-error', `Knock rejected: ${idOrAlias} does not allow knocks. Ask a member to invite you directly.`);
     } else {
-      app.setError('discovery-error', `Knock failed: ${err.message}`);
+      app.setError('discovery-error', `Knock failed: ${describeNetworkError(err)}`);
     }
     return true; // Error was surfaced; don't fall through to the generic message.
   }
@@ -157,7 +158,7 @@ export async function startVTT(app, session, forceWizard = false) {
     }
 
     app.showScreen('discovery');
-    app.setError('discovery-error', 'Failed to open campaign: ' + err.message);
+    app.setError('discovery-error', 'Failed to open campaign: ' + describeNetworkError(err));
   }
 }
 
@@ -198,7 +199,7 @@ export async function handleCreateRoom(app) {
     if (app.matrixVTTClient) app.matrixVTTClient.pendingCampaign = { name, system };
     await app.enterRoom(roomId, name, true);
   } catch (err) {
-    app.setError('discovery-error', 'Could not create room: ' + err.message);
+    app.setError('discovery-error', 'Could not create room: ' + describeNetworkError(err));
   } finally {
     btn.disabled = false;
     btn.textContent = 'Create Room';

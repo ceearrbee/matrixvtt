@@ -44,3 +44,11 @@ export function getHPZone(entity) {
   if (ratio >= HP_ZONES.WOUNDED) return 'wounded';
   return 'critical';
 }
+
+export function normalizeEmDashes(text) {
+  if (typeof text !== 'string') return text ?? '';
+  return text
+    .replace(/\s+[\u2013\u2014]\s*|\s*[\u2013\u2014]\s+/g, ' - ')
+    .replace(/[\u2013\u2014]/g, '-');
+}
+

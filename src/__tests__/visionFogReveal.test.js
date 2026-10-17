@@ -86,7 +86,7 @@ describe('revealFogAroundToken with walls', () => {
     };
     const sm = makeSm({ token, walls: [wall], map: map10 });
     await revealFogAroundToken(sm, 't1', 25);
-    // Near side (same side as token at col 2–4) should be revealed.
+    // Near side (same side as token at col 2-4) should be revealed.
     expect(sm.fog.revealed).toContain('3,5');
     // Far side (past the wall) should not be revealed.
     expect(sm.fog.revealed).not.toContain('6,5');

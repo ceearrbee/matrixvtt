@@ -232,7 +232,7 @@ export function RegisterPanel({ app, onLogin, onBack, initialHs = 'https://matri
       }),
       needsEmail && h('label', { for: 'register-email' }, 'Email address'),
       needsEmail && h('input', {
-        id: 'register-email', class: 'form-input', type: 'text',
+        id: 'register-email', class: 'form-input', type: 'email',
         autocomplete: 'email', ref: emailRef,
       }),
       needsToken && h('label', { for: 'register-token' }, 'Registration token'),

@@ -128,9 +128,8 @@ export async function awardItemToCharacter(ui, charId, itemId) {
 }
 
 /**
- * Set the one-shot placement signal. The map-stage click handler reads
- * `pendingPlacementSignal` and, when matched, spawns the token + clears
- * the signal.
+ * The map-stage click handler reads `pendingPlacementSignal` and, when matched,
+ * spawns the token + clears the signal.
  *
  * Closes any open modals first - otherwise the GM is left with a modal
  * (loot-action, GM panel) over the map. The next click would hit the

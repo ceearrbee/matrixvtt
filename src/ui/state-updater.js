@@ -14,7 +14,7 @@ export async function handleDiceRollResult(ui, event) {
 
   const labelPart = rollData.label ? ` <span style="color:var(--color-text-tertiary)">${esc(rollData.label)}</span>` : '';
   const secretTag = rollData.secret ? ' <span style="color:var(--color-text-tertiary)">[secret]</span>' : '';
-  ui._log('🎲', `${rollData.expression} → <b>${rollData.total}</b>${labelPart}${secretTag}`);
+  ui._log('🎲', `${esc(rollData.expression)} → <b>${rollData.total}</b>${labelPart}${secretTag}`);
 
   if (ui.chat && !rollData.secret) {
     try {

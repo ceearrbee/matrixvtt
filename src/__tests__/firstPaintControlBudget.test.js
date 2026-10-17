@@ -46,7 +46,8 @@ const { UI_MODES, TOOL_GROUPS, LAYOUT_MODES } = await import('../utils/constants
 // budget is about. Both land on a blank campaign, the worst case -
 // which is also the case with no map, so the drawing toolbar and the
 // zoom controls are not on screen to be counted.
-const CEILING = { gm: 30, player: 24 };
+// Sidebar collapse buttons add 1 control each to left rail and desktop companion bar.
+const CEILING = { gm: 31, player: 26 };
 
 function makeUi(isGM) {
   return /** @type {any} */ ({

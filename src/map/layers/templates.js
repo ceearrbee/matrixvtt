@@ -9,7 +9,7 @@
 
 import { effect } from '@preact/signals';
 import Konva from 'konva';
-import { templatesSignal, activeMapIdSignal } from '../../state/signals.js';
+import { templatesSignal, activeMapIdSignal, mapsSignal } from '../../state/signals.js';
 import { TOKEN_COLORS } from '../../utils/ui-constants.js';
 
 export function createTemplatesLayer(stage, mr) {
@@ -96,6 +96,15 @@ export function createTemplatesLayer(stage, mr) {
   function sync() {
     const templates = templatesSignal.value;
     const activeId = activeMapIdSignal.value;
+    const map = mr.state?.map || (activeId ? mapsSignal.value?.get(activeId) : null);
+    if (map && typeof map.width_cells === 'number' && typeof map.height_cells === 'number'
+        && typeof map.cell_px === 'number') {
+      const w = map.width_cells * map.cell_px;
+      const h = map.height_cells * map.cell_px;
+      layer.clipFunc((ctx) => { ctx.rect(0, 0, w, h); });
+    } else {
+      layer.clipFunc(null);
+    }
     const keep = new Set();
     const cellPx = mr.state?.map?.cell_px ?? 40;
     const zoom = mr.zoom || 1;
@@ -134,6 +143,7 @@ export function createTemplatesLayer(stage, mr) {
   const dispose = effect(() => {
     templatesSignal.value;
     activeMapIdSignal.value;
+    mapsSignal.value;
     sync();
   });
 

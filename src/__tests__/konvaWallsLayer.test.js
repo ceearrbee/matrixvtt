@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
 import Konva from 'konva';
-import { wallsSignal, activeMapIdSignal } from '../state/signals.js';
+import { wallsSignal, activeMapIdSignal, mapsSignal } from '../state/signals.js';
 import { createWallsLayer } from '../map/layers/walls.js';
 
 beforeAll(() => {
@@ -56,6 +56,7 @@ describe('createWallsLayer', () => {
 
   beforeEach(() => {
     wallsSignal.value = new Map();
+    mapsSignal.value = new Map();
     activeMapIdSignal.value = 'map-a';
     stage = makeStage();
     ({ layer, lines, dispose } = createWallsLayer(stage, makeMr()));
@@ -66,6 +67,7 @@ describe('createWallsLayer', () => {
     stage.destroy();
     stage.container()?.remove();
     wallsSignal.value = new Map();
+    mapsSignal.value = new Map();
     activeMapIdSignal.value = null;
   });
 
@@ -157,13 +159,14 @@ describe('createWallsLayer', () => {
 });
 
 describe('createWallsLayer - per-map scoping (Phase 1)', () => {
-  let stage, dispose, lines;
+  let stage, dispose, lines, layer;
 
   beforeEach(() => {
     wallsSignal.value = new Map();
+    mapsSignal.value = new Map();
     activeMapIdSignal.value = 'map-a';
     stage = makeStage();
-    ({ lines, dispose } = createWallsLayer(stage, makeMr()));
+    ({ layer, lines, dispose } = createWallsLayer(stage, makeMr()));
   });
 
   afterEach(() => {
@@ -171,6 +174,7 @@ describe('createWallsLayer - per-map scoping (Phase 1)', () => {
     stage.destroy();
     stage.container()?.remove();
     wallsSignal.value = new Map();
+    mapsSignal.value = new Map();
     activeMapIdSignal.value = null;
   });
 
@@ -190,5 +194,33 @@ describe('createWallsLayer - per-map scoping (Phase 1)', () => {
     expect(lines.size).toBe(1);
     activeMapIdSignal.value = 'map-b';
     expect(lines.size).toBe(0);
+  });
+
+  it('clips layer to map bounds when map is loaded', () => {
+    expect(layer.clipFunc()).toBeFalsy();
+
+    mapsSignal.value = new Map([
+      ['map-a', { id: 'map-a', width_cells: 10, height_cells: 8, cell_px: 50 }],
+    ]);
+    const fn = layer.clipFunc();
+    expect(typeof fn).toBe('function');
+    const calls = [];
+    fn({ rect: (...args) => calls.push(args) });
+    expect(calls).toEqual([[0, 0, 10 * 50, 8 * 50]]);
+  });
+
+  it('updates clipFunc when activeMapId changes to a different map', () => {
+    mapsSignal.value = new Map([
+      ['map-a', { id: 'map-a', width_cells: 10, height_cells: 8, cell_px: 50 }],
+      ['map-b', { id: 'map-b', width_cells: 14, height_cells: 14, cell_px: 40 }],
+    ]);
+    const callsA = [];
+    layer.clipFunc()({ rect: (...args) => callsA.push(args) });
+    expect(callsA).toEqual([[0, 0, 500, 400]]);
+
+    activeMapIdSignal.value = 'map-b';
+    const callsB = [];
+    layer.clipFunc()({ rect: (...args) => callsB.push(args) });
+    expect(callsB).toEqual([[0, 0, 14 * 40, 14 * 40]]);
   });
 });

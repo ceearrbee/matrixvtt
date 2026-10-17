@@ -10,6 +10,7 @@ import { h } from 'preact';
 import { render, cleanup } from '@testing-library/preact';
 import dnd5e from '../content/rulesets/dnd5e.json';
 import { renderSectionList } from '../ui/characterSheetSections.js';
+import { StatGrid } from '../ui/character-sheet-sections/display.js';
 
 afterEach(() => cleanup());
 
@@ -31,6 +32,21 @@ describe('dnd5e sheet collapses trailing reference sections', () => {
       ['resource_track', 'play_actions', 'stat_grid'].includes(k)
     );
     expect(alwaysOpen).toEqual(expect.arrayContaining(['resource_track', 'play_actions', 'stat_grid']));
+  });
+});
+
+describe('Load and Wealth stat grid renders inside collapsible details', () => {
+  it('renders a closed <details> with a <summary> label', () => {
+    const ui = { state: { canEditEntity: () => true, settings: { systemConfig: {} } } };
+    const character = { id: 'c1' };
+    const { container } = render(h(StatGrid, {
+      ui, character,
+      config: { label: 'Load and Wealth', stats: [{ label: 'Load', formula: 'carried_weight' }] },
+    }));
+    const details = container.querySelector('details.sheet-section-collapsible');
+    expect(details).not.toBeNull();
+    expect(details.open).toBe(false);
+    expect(details.querySelector('summary.section-header').textContent).toBe('Load and Wealth');
   });
 });
 

@@ -1,10 +1,12 @@
 /* Dark theme - the central fallback when no data-theme attribute is set.
    Imported first; subsequent themes override on [data-theme="X"] match. */
 :root, :root[data-theme="dark"] {
+  color-scheme: dark;
   --color-background-primary: #16191f;
   --color-background-secondary: #1f2430;
   --color-background-tertiary: #2d3444;
   --color-background-hover: rgba(255, 255, 255, 0.05);
+  --color-bg-inset: rgba(0, 0, 0, 0.2);
   --vendor-icon-filter: invert(0.85);
   --color-background-info: rgba(24, 95, 165, 0.15);
   --color-background-success: rgba(29, 158, 117, 0.15);
@@ -12,8 +14,8 @@
   --color-background-danger: rgba(226, 75, 74, 0.15);
 
   --color-text-primary: rgba(255, 255, 255, 0.92);
-  --color-text-secondary: rgba(200, 210, 230, 0.75);
-  --color-text-tertiary: rgba(180, 195, 215, 0.8);
+  --color-text-secondary: rgba(226, 232, 245, 0.88);
+  --color-text-tertiary: rgba(215, 223, 240, 0.78);
   --color-text-info: #5BB8E8;
   --color-text-success: #25BD8D;
   --color-text-warning: #EF9F27;

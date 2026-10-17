@@ -61,7 +61,7 @@ function makeChar(overrides = {}) {
 
 beforeEach(() => { document.body.innerHTML = ''; });
 
-// ── CharacterSheet - core render ─────────────────────────────────────────────
+// CharacterSheet - core render
 
 describe('<CharacterSheet> - rendering', () => {
   it('shows the character name and subtitle', () => {
@@ -88,7 +88,7 @@ describe('<CharacterSheet> - rendering', () => {
   });
 });
 
-// ── CharacterSheet - claim / release flow ────────────────────────────────────
+// CharacterSheet - claim / release flow
 
 describe('<CharacterSheet> - claim / release', () => {
   it('character claimed by current user shows "Your Character" and Release control', () => {
@@ -129,7 +129,7 @@ describe('<CharacterSheet> - claim / release', () => {
   });
 });
 
-// ── NPCSheet - core render ───────────────────────────────────────────────────
+// NPCSheet - core render
 
 function makeNPC(overrides = {}) {
   return {

@@ -1,0 +1,27 @@
+/* Design tokens for tabletop stage and theme backdrops */
+:root {
+  color-scheme: dark;
+  --map-stage-bg: #181a1f;
+  --bg-2: var(--color-background-tertiary, #2d3444);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --map-stage-bg: #e4e2db;
+  --bg-2: var(--color-background-tertiary, #e8ecf1);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --map-stage-bg: #e4e2db;
+    --bg-2: var(--color-background-tertiary, #e8ecf1);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --map-stage-bg: #181a1f;
+  --bg-2: var(--color-background-tertiary, #2d3444);
+}
+

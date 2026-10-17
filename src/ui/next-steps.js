@@ -78,6 +78,7 @@ export function nextStepsFor({
   const mapDone = hasRealMap(maps);
   const tokenDone = (tokens?.size ?? 0) > 0;
   const combatDone = !!initiative?.active || (initiative?.order?.length ?? 0) > 0;
+  const inviteDone = memberCount > 1 || (mapDone && tokenDone && combatDone);
 
   return [
     {
@@ -91,7 +92,7 @@ export function nextStepsFor({
       key: NEXT_STEP_KEYS.INVITE,
       label: 'Invite players',
       hint: 'Copy the link that walks a player through signing in and joining.',
-      done: memberCount > 1,
+      done: inviteDone,
       blockedBy: null,
     },
     step({

@@ -5,7 +5,7 @@
  * Synapse default: 50 MB; community servers commonly 10 MB). A
  * 4000+ pixel battle-map JPEG quickly crosses the smaller caps;
  * a federation-safe target is 2048 px on the longer edge, which
- * yields ~1–3 MB JPEGs.
+ * yields ~1-3 MB JPEGs.
  *
  * `resizeImageBlob(file, maxDim, quality)`:
  *  - Returns the original file unchanged when no scaling is needed.

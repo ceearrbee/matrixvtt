@@ -50,6 +50,7 @@ export function setupLayers(mr) {
   mr._layerDisposers = [
     mapBg.dispose, grid.dispose, drawings.dispose, walls.dispose,
     lights.dispose, templates.dispose, envTint.dispose, pins.dispose, fog.dispose,
+    speechBubbles.destroy, pings.destroy,
   ];
   mr._layerSyncers = [
     mapBg.sync, grid.sync, drawings.sync, walls.sync, lights.sync,

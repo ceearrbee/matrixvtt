@@ -116,7 +116,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-// ─── mousedown ───────────────────────────────────────────────────────────────
+// mousedown
 
 describe('mousedown handler', () => {
   it('ignores middle-click', () => {
@@ -159,7 +159,7 @@ describe('mousedown handler', () => {
   });
 });
 
-// ─── mousemove ───────────────────────────────────────────────────────────────
+// mousemove
 
 describe('mousemove handler', () => {
   it('updates area-selection rectangle while a selection is in progress', () => {
@@ -189,7 +189,7 @@ describe('mousemove handler', () => {
   });
 });
 
-// ─── mouseup ─────────────────────────────────────────────────────────────────
+// mouseup
 
 describe('mouseup handler', () => {
   it('ignores non-left-click while a stroke is active', async () => {
@@ -223,7 +223,7 @@ describe('mouseup handler', () => {
   });
 });
 
-// ─── click ───────────────────────────────────────────────────────────────────
+// click
 
 describe('click handler', () => {
   it('does nothing when isDragging', () => {
@@ -291,7 +291,7 @@ describe('click handler', () => {
   });
 });
 
-// ─── contextmenu ────────────────────────────────────────────────────────────
+// contextmenu
 
 describe('contextmenu handler', () => {
   it('routes to token context menu when a token is under the cursor', () => {
@@ -332,7 +332,7 @@ describe('contextmenu handler', () => {
   });
 });
 
-// ─── long-press ─────────────────────────────────────────────────────────────
+// long-press
 
 describe('touch long-press', () => {
   it('opens the context menu after a 500ms hold with no drift', () => {

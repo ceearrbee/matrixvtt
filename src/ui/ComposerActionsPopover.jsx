@@ -13,17 +13,22 @@ import { useEffect, useRef } from 'preact/hooks';
 import { activeSceneSignal } from '../state/ui-signals.js';
 
 import { showSceneStartModal } from './SceneStartModal.js';
+import { trapFocusIn } from './modal-focus.js';
 import {
   DiceButtons, ModifierRow, ExtraRolls, ChatModePills,
 } from './composer/dice-controls.jsx';
 
 export function ComposerActionsPopover({ ui, selected, onSelectedChange, onClose }) {
   const rootRef = useRef(null);
+  const previouslyFocusedRef = useRef(null);
   const scene = activeSceneSignal.value;
 
   // Outside-click + Escape close. Matches src/ui/ChatTonePicker.jsx - the
   // same pattern the header popovers use.
   useEffect(() => {
+    previouslyFocusedRef.current = /** @type {HTMLElement|null} */ (document.activeElement);
+    const cleanupTrap = rootRef.current ? trapFocusIn(rootRef.current) : undefined;
+
     const onDocClick = (e) => {
       if (rootRef.current && !rootRef.current.contains(e.target)) onClose?.();
     };
@@ -33,6 +38,11 @@ export function ComposerActionsPopover({ ui, selected, onSelectedChange, onClose
     return () => {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
+      cleanupTrap?.();
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === 'function') {
+        try { prev.focus(); } catch { /* ignore */ }
+      }
     };
   }, [onClose]);
 

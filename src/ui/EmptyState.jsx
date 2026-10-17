@@ -20,22 +20,24 @@
  * @param {string} [props.glyph]     Single-character icon shown above title.
  * @param {{ label: string, onClick: () => void }} [props.cta]
  * @param {{ label: string, onClick: () => void }} [props.secondary]
+ * @param {boolean} [props.compact]
  */
 import { h } from 'preact';
 
 export function EmptyState({
   message = '', eyebrow = '', heading = '', title = '', body = '',
-  glyph = '', cta = null, secondary = null,
+  glyph = '', cta = null, secondary = null, compact = false,
 }) {
   const headingText = heading || title;
   const editorial = !!(eyebrow || headingText || body || glyph);
-  return h('div', { class: 'empty-state', role: 'status' }, [
-    glyph && h('div', { class: 'empty-state__glyph', 'aria-hidden': 'true' }, glyph),
+  const cls = compact ? 'empty-state empty-state--compact' : 'empty-state';
+  return h('div', { class: cls, role: 'status' }, [
+    !compact && glyph && h('div', { class: 'empty-state__glyph', 'aria-hidden': 'true' }, glyph),
     editorial
       ? h('div', { class: 'empty-state__editorial' }, [
           eyebrow && h('span', { class: 'eyebrow' }, eyebrow),
           headingText && h('h3', { class: 'editorial-heading empty-state__title' }, headingText),
-          body && h('p', { class: 'editorial-body' }, body),
+          !compact && body && h('p', { class: 'editorial-body' }, body),
         ])
       : h('p', { class: 'empty-state__msg' }, message),
     cta && h(

@@ -11,7 +11,7 @@ import { MapCanvas } from './MapCanvas.jsx';
 import { TokenActionBar } from './TokenActionBar.jsx';
 import { UI_MODES, TOOL_GROUPS } from '../utils/constants.js';
 import { activeMapIdSignal, tokensSignal } from '../state/signals.js';
-import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal } from '../state/ui-signals.js';
+import { tablePhaseSignal, gmPrepActiveSignal, activeToolGroupSignal, tableModeSignal } from '../state/ui-signals.js';
 import { useMapStripSize } from '../utils/map-strip-size.js';
 import { confirm } from './confirm-dialogs.jsx';
 import { isCoarsePointer } from '../utils/pointer.js';
@@ -126,23 +126,21 @@ function DrawToolbar({ ui }) {
   const isGM = ui.state?.isGM?.() === true;
   const phase = tablePhaseSignal.value;
   const prepActive = gmPrepActiveSignal.value;
-  // The map is always present (it shares the column with the chat), so its
-  // toolbar is available in every phase. Combat still locks the toolbar to
-  // Navigation (drawing/wall work belongs to prep, not the middle of a turn).
+  // Combat locks scene authoring to prep, but navigation and drawing
+  // remain unlocked so measuring and tactical drawing work mid-combat.
   const isCombat = phase === UI_MODES.COMBAT && !prepActive;
   const userGroup = activeToolGroupSignal.value;
+  const isLive = tableModeSignal.value === 'live';
   // The Scene group is GM authoring, so it rides the Prep axis; a GM not
-  // in prep sees the same two groups a player does.
-  const groupTabs = isGM && prepActive
+  // in prep or in Live mode sees the same two groups a player does.
+  const showGmGroup = isGM && prepActive && !isLive;
+  const groupTabs = showGmGroup
     ? [TOOL_GROUPS.NAVIGATION, TOOL_GROUPS.DRAWING, TOOL_GROUPS.GM]
     : [TOOL_GROUPS.NAVIGATION, TOOL_GROUPS.DRAWING];
-  // Combat locks the toolbar to Navigation regardless of user pick -
-  // wall/template/drawing work belongs to prep, not the middle of a turn.
-  // So does a group that is no longer offered, e.g. Scene when prep ends.
   const groupOffered = groupTabs.some((g) => g === userGroup);
-  const activeGroup = isCombat || !groupOffered ? TOOL_GROUPS.NAVIGATION : userGroup;
+  const activeGroup = !groupOffered ? TOOL_GROUPS.NAVIGATION : userGroup;
   // Build the full tool list once, then filter to the active group.
-  const allTools = isGM && prepActive
+  const allTools = showGmGroup
     ? [...TOOLS, ...GM_TOOLS.map((t) => (t === null ? null : { tuple: t, kind: 'gm' }))]
     : TOOLS;
   const tools = allTools.filter((t) => {
@@ -151,30 +149,37 @@ function DrawToolbar({ ui }) {
     return GROUP_TOOL_IDS[activeGroup]?.has(id);
   });
   const switchGroup = (g) => {
-    if (isCombat) return; // locked
     activeToolGroupSignal.value = g;
   };
 
   return h('div', {
-    class: `draw-toolbar${collapsed ? ' draw-toolbar--collapsed' : ''}`,
+    class: `draw-toolbar map-toolbar${collapsed ? ' draw-toolbar--collapsed' : ''}`,
     role: 'toolbar', 'aria-label': 'Drawing tools',
   }, [
-    h('div', { class: 'draw-toolbar__groups', role: 'tablist', 'aria-label': 'Tool group' },
-      groupTabs.map((g) => h('button', {
+    h('div', { class: 'draw-toolbar__groups', role: 'tablist', 'aria-label': 'Tool group' }, [
+      ...groupTabs.map((g) => h('button', {
         key: g,
         type: 'button',
         role: 'tab',
         class: `dtb-group${g === activeGroup ? ' dtb-group--active' : ''}`,
         'data-tool-group': g,
         'aria-selected': String(g === activeGroup),
-        'aria-disabled': isCombat ? 'true' : 'false',
+        'aria-disabled': 'false',
         onClick: () => switchGroup(g),
       }, GROUP_LABELS[g])),
-    ),
-    isCombat && h('span', { class: 'draw-toolbar__lock-note' }, 'Drawing locked during combat'),
-    h('button', { class: 'dtb-btn dtb-btn--toggle', id: 'toggle-toolbar', 'aria-label': 'Toggle toolbar', title: 'Toggle toolbar', onClick: onToggle }, [
-      h(PanelIcon, {}), h('span', { class: 'sr-only' }, 'Toggle toolbar'),
+      h('button', {
+        class: 'dtb-btn dtb-btn--toggle',
+        id: 'toggle-toolbar',
+        'data-tooltip': 'Toggle toolbar',
+        'aria-label': 'Toggle toolbar',
+        title: 'Toggle toolbar',
+        onClick: onToggle,
+      }, [
+        h(PanelIcon, {}),
+        h('span', { class: 'sr-only' }, 'Toggle toolbar'),
+      ]),
     ]),
+    isCombat && h('span', { class: 'draw-toolbar__lock-note' }, 'Scene authoring locked during combat'),
     h('div', { class: 'draw-toolbar__content', onClick: onTool }, [
       ...tools.map((t, i) => {
         const tuple = Array.isArray(t) ? t : t.tuple;
@@ -203,73 +208,109 @@ function DrawToolbar({ ui }) {
         h('div', { class: 'dtb-sep', role: 'separator' }),
         h('button', {
           class: 'dtb-btn', 'data-scene-action': 'add-token',
+          'data-tooltip': 'Add a token, then click the map to place it',
           'aria-label': 'Add a token, then click the map to place it',
           title: 'Add a token, then click the map to place it',
           onClick: (e) => { e.stopPropagation(); ui.beginTokenPlacement?.(); },
         }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(PersonIcon, {})), h('span', { class: 'sr-only' }, 'Add token')]),
         h('button', {
           class: 'dtb-btn', 'data-scene-action': 'reveal-fog',
+          'data-tooltip': 'Reveal a fog area: drag a rectangle on the map',
           'aria-label': 'Reveal a fog area: drag a rectangle on the map',
           title: 'Reveal a fog area: drag a rectangle on the map',
           onClick: (e) => { e.stopPropagation(); ui.revealFogArea?.(); },
         }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(EyeIcon, {})), h('span', { class: 'sr-only' }, 'Reveal fog area')]),
         h('button', {
           class: 'dtb-btn', 'data-scene-action': 'hide-fog',
+          'data-tooltip': 'Hide a fog area: drag a rectangle on the map',
           'aria-label': 'Hide a fog area: drag a rectangle on the map',
           title: 'Hide a fog area: drag a rectangle on the map',
           onClick: (e) => { e.stopPropagation(); ui.hideFogArea?.(); },
         }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(FogIcon, {})), h('span', { class: 'sr-only' }, 'Hide fog area')]),
       ] : []),
-      h('div', { class: 'dtb-sep', role: 'separator' }),
-      h('button', {
-        class: 'dtb-btn', 'data-tool': 'erase',
-        'data-tooltip': 'Erase drawings (E)', 'aria-label': 'Erase tool (E)', title: 'Erase drawings (E)',
-      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(EraseIcon, {})), h('span', { class: 'sr-only' }, 'Erase')]),
-      h('div', { class: 'dtb-sep', role: 'separator' }),
-      h('input', {
-        type: 'color', id: 'draw-color', value: '#ff4444',
-        title: 'Stroke colour', 'aria-label': 'Stroke colour', class: 'dtb-color',
-        onChange: (e) => ui.setDrawColor?.(e.target.value),
-      }),
-      h('select', {
-        id: 'draw-width', title: 'Line width', 'aria-label': 'Line width', class: 'dtb-width',
-        onChange: (e) => ui.setDrawWidth?.(e.target.value),
-      }, [
-        h('option', { value: '2' }, 'Thin'),
-        h('option', { value: '3', selected: true }, 'Normal'),
-        h('option', { value: '6' }, 'Thick'),
-      ]),
-      h('div', { class: 'dtb-sep', role: 'separator' }),
-      h('button', {
-        class: `dtb-btn${overflowOpen ? ' dtb-btn--active' : ''}`,
-        'data-map-overflow': true,
-        'aria-label': 'Undo, redo and clear drawings',
-        'aria-expanded': String(overflowOpen),
-        title: 'Undo, redo, clear',
-        onClick: (e) => { e.stopPropagation(); setOverflowOpen((v) => !v); },
-      }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, '⋯'), h('span', { class: 'sr-only' }, 'More actions')]),
-      ...(overflowOpen ? [
+      ...(activeGroup === TOOL_GROUPS.DRAWING ? [
+        h('div', { class: 'dtb-sep', role: 'separator' }),
         h('button', {
-          class: 'dtb-btn', 'data-action': 'undo-drawing',
-          'aria-label': 'Undo last drawing stroke', title: 'Undo last stroke (Ctrl+Z)',
-          onClick: (e) => { e.stopPropagation(); ui.undoDrawing?.(); },
-        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(UndoIcon, {})), h('span', { class: 'sr-only' }, 'Undo')]),
+          class: 'dtb-btn', 'data-tool': 'erase',
+          'data-tooltip': 'Erase drawings (E)', 'aria-label': 'Erase tool (E)', title: 'Erase drawings (E)',
+        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(EraseIcon, {})), h('span', { class: 'sr-only' }, 'Erase')]),
+        h('div', { class: 'dtb-sep', role: 'separator' }),
+        h('input', {
+          type: 'color', id: 'draw-color', value: '#ff4444',
+          title: 'Stroke colour', 'aria-label': 'Stroke colour', class: 'dtb-color',
+          onChange: (e) => ui.setDrawColor?.(e.target.value),
+        }),
+        h('select', {
+          id: 'draw-width', title: 'Line width', 'aria-label': 'Line width', class: 'dtb-width',
+          onChange: (e) => ui.setDrawWidth?.(e.target.value),
+        }, [
+          h('option', { value: '2' }, 'Thin'),
+          h('option', { value: '3', selected: true }, 'Normal'),
+          h('option', { value: '6' }, 'Thick'),
+        ]),
+        h('div', { class: 'dtb-sep', role: 'separator' }),
         h('button', {
-          class: 'dtb-btn', 'data-action': 'redo-drawing',
-          'aria-label': 'Redo drawing stroke', title: 'Redo stroke (Ctrl+Y)',
-          onClick: (e) => { e.stopPropagation(); ui.redoDrawing?.(); },
-        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(RedoIcon, {})), h('span', { class: 'sr-only' }, 'Redo')]),
-        h('button', {
-          class: 'dtb-btn dtb-btn--danger', id: 'clear-drawings',
-          'aria-label': 'Clear all drawings', title: 'Clear all drawings',
-          onClick: (e) => {
-            e.stopPropagation();
-            confirm('This deletes every drawing on the map, for everyone. This can\'t be undone.',
-              () => ui.clearDrawings?.(),
-              { title: 'Clear drawings', confirmText: 'Clear all', confirmClass: 'dbt--danger', id: 'confirm-clear-drawings' });
-          },
-        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(TrashIcon, {})), h('span', { class: 'sr-only' }, 'Clear')]),
+          class: `dtb-btn${overflowOpen ? ' dtb-btn--active' : ''}`,
+          'data-map-overflow': true,
+          'data-tooltip': 'Undo, redo and clear drawings',
+          'aria-label': 'Undo, redo and clear drawings',
+          'aria-expanded': String(overflowOpen),
+          title: 'Undo, redo, clear',
+          onClick: (e) => { e.stopPropagation(); setOverflowOpen((v) => !v); },
+        }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, '⋯'), h('span', { class: 'sr-only' }, 'More actions')]),
+        ...(overflowOpen ? [
+          h('button', {
+            class: 'dtb-btn', 'data-action': 'undo-drawing',
+            'data-tooltip': 'Undo last stroke (Ctrl+Z)',
+            'aria-label': 'Undo last drawing stroke', title: 'Undo last stroke (Ctrl+Z)',
+            onClick: (e) => { e.stopPropagation(); ui.undoDrawing?.(); },
+          }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(UndoIcon, {})), h('span', { class: 'sr-only' }, 'Undo')]),
+          h('button', {
+            class: 'dtb-btn', 'data-action': 'redo-drawing',
+            'data-tooltip': 'Redo stroke (Ctrl+Y)',
+            'aria-label': 'Redo drawing stroke', title: 'Redo stroke (Ctrl+Y)',
+            onClick: (e) => { e.stopPropagation(); ui.redoDrawing?.(); },
+          }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(RedoIcon, {})), h('span', { class: 'sr-only' }, 'Redo')]),
+          h('button', {
+            class: 'dtb-btn dtb-btn--danger', id: 'clear-drawings',
+            'data-tooltip': 'Clear all drawings',
+            'aria-label': 'Clear all drawings', title: 'Clear all drawings',
+            onClick: (e) => {
+              e.stopPropagation();
+              confirm('This deletes every drawing on the map, for everyone. This can\'t be undone.',
+                () => ui.clearDrawings?.(),
+                { title: 'Clear drawings', confirmText: 'Clear all', confirmClass: 'dbt--danger', id: 'confirm-clear-drawings' });
+            },
+          }, [h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, h(TrashIcon, {})), h('span', { class: 'sr-only' }, 'Clear')]),
+        ] : []),
       ] : []),
+      h('div', { class: 'dtb-sep', role: 'separator' }),
+      h('div', { class: 'map-toolbar__zoom map-controls', role: 'group', 'aria-label': 'Map zoom controls' }, [
+        h('button', {
+          id: 'zoom-out',
+          type: 'button',
+          class: 'dtb-btn map-tool-btn',
+          'data-tooltip': 'Zoom out',
+          'aria-label': 'Zoom out',
+          title: 'Zoom out',
+          onClick: (e) => { e.stopPropagation(); ui.zoomOut?.(); },
+        }, [
+          h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, '−'),
+          h('span', { class: 'sr-only' }, 'Zoom out'),
+        ]),
+        h('button', {
+          id: 'zoom-in',
+          type: 'button',
+          class: 'dtb-btn map-tool-btn',
+          'data-tooltip': 'Zoom in',
+          'aria-label': 'Zoom in',
+          title: 'Zoom in',
+          onClick: (e) => { e.stopPropagation(); ui.zoomIn?.(); },
+        }, [
+          h('span', { class: 'dtb-btn__glyph', 'aria-hidden': 'true' }, '+'),
+          h('span', { class: 'sr-only' }, 'Zoom in'),
+        ]),
+      ]),
     ]),
   ]);
 }
@@ -321,7 +362,7 @@ export function MapStrip({ ui }) {
 
   return h('main', {
     id: 'main-content',
-    class: `map-strip map-container${collapsed ? ' map-strip--collapsed' : ''}`,
+    class: `map-strip map-container map-viewport${collapsed ? ' map-strip--collapsed' : ''}`,
     role: 'main', 'aria-label': 'Game map',
   }, [
     h('button', {
@@ -334,29 +375,26 @@ export function MapStrip({ ui }) {
       onClick: onToggleCollapse,
     }, collapsed ? '▾' : '▴'),
     !hasMap ? h(MapEmptyPlaceholder, { key: 'empty', ui }) : null,
-    showTokenHint && h('div', { key: 'token-hint', class: 'map-hint', role: 'status' },
-      isCoarsePointer()
-        ? 'No tokens on this map yet. Open the Scene tab of the toolbar and press Token, or long-press a square.'
-        : 'No tokens on this map yet. Open the Scene tab of the toolbar and press Token, or right-click a square.'),
+    showTokenHint && h('div', { key: 'token-hint', class: 'map-hint', role: 'status' }, [
+      h('span', null, isCoarsePointer()
+        ? 'No tokens on this map yet. Long-press a square, or '
+        : 'No tokens on this map yet. Right-click a square, or '),
+      h('button', {
+        type: 'button',
+        class: 'map-hint__action',
+        onClick: () => ui.beginTokenPlacement?.(),
+      }, 'Place a token'),
+      '.',
+    ]),
     h(TokenActionBar, { key: 'token-bar', ui }),
     h(MapCanvas, { key: 'canvas', ui }),
     h('p', { key: 'desc', id: 'map-canvas-desc', class: 'sr-only' },
-      'Drag tokens to move them. Scroll or pinch to zoom. Space+drag to pan. Press M on a selected token to enter movement mode, then arrow keys to move. Press Escape to cancel.'),
+      'Drag tokens to move them. Scroll or pinch to zoom. Space+drag to pan. Press N or Shift+N to cycle tokens, arrow keys to move the selected token, Enter to confirm move, Escape to cancel, or M to measure distance.'),
     // Tools and zoom act on a map, so they wait for one. Without this a
     // fresh campaign's first screen stacks twelve controls - stroke
     // colour, line width, measure, zoom - on top of the placeholder
     // that is asking the GM to add the map they would act on.
     hasMap && h(DrawToolbar, { key: 'toolbar', ui }),
-    hasMap && h('div', { key: 'controls', class: 'map-controls', 'aria-label': 'Map zoom controls' }, [
-      h('button', { id: 'zoom-in', 'aria-label': 'Zoom in', title: 'Zoom in', onClick: () => ui.zoomIn?.() }, [
-        h('span', { class: 'map-controls__word' }, 'Zoom '),
-        h('span', { class: 'map-controls__glyph', 'aria-hidden': 'true' }, '+'),
-      ]),
-      h('button', { id: 'zoom-out', 'aria-label': 'Zoom out', title: 'Zoom out', onClick: () => ui.zoomOut?.() }, [
-        h('span', { class: 'map-controls__word' }, 'Zoom '),
-        h('span', { class: 'map-controls__glyph', 'aria-hidden': 'true' }, '−'),
-      ]),
-    ]),
     h('div', { key: 'inspector', id: 'token-inspector', class: 'token-inspector', style: 'display: none;' }),
   ]);
 }

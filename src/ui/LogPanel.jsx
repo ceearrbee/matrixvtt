@@ -33,6 +33,10 @@ import { Avatar } from './Avatar.jsx';
 import { EmptyState } from './EmptyState.jsx';
 import { isNarrativeLog } from './mode-registry.js';
 import { buildLogItems, SYNTH_ENTRY_ICONS } from './log-grouping.js';
+import { resolveWikiTokens } from '../utils/wikilinks.js';
+import { handleWikilinkClick } from './FloatingDoc.jsx';
+import { normalizeEmDashes } from '../utils/format.js';
+
 
 /**
  * Log-entry body sink. Entries feed in from `ui._log(icon, html)` and
@@ -83,7 +87,8 @@ async function _toggleReaction(ui, entry, reaction) {
 function displayNameFor(sender) {
   if (!sender) return 'System';
   const idx = sender.indexOf(':');
-  return idx > 1 ? sender.slice(1, idx) : sender;
+  const name = idx > 1 ? sender.slice(1, idx) : sender;
+  return normalizeEmDashes(name);
 }
 
 export function LogPanel({ ui }) {
@@ -193,7 +198,7 @@ export function LogPanel({ ui }) {
           replyContextSignal.value = {
             rootEventId: e.threadOf || e.eventId,
             rootSender: e.sender,
-            rootPreview: (e.text || '').slice(0, 60),
+            rootPreview: normalizeEmDashes((e.text || '').slice(0, 60)),
           };
         },
       }, h(ReplyIcon, {})),
@@ -226,7 +231,7 @@ export function LogPanel({ ui }) {
       onPointerEnter: e.eventId ? () => setActiveRow(e.eventId) : undefined,
       onFocusIn: e.eventId ? () => setActiveRow(e.eventId) : undefined,
     }, [
-      h(TrustedMarkup, { class: bodyClass, html: e.html }),
+      h(TrustedMarkup, { class: bodyClass, html: resolveWikiTokens(e.html, ui) }),
       e.long && h('button', {
         type: 'button',
         class: 'log-body__more',
@@ -275,7 +280,7 @@ export function LogPanel({ ui }) {
   };
 
   const renderSceneCard = (e) => {
-    const title = e.sceneTitle || 'Scene';
+    const title = normalizeEmDashes(e.sceneTitle || 'Scene');
     return h('div', {
       class: 'log-scene-card',
       'data-event-id': e.eventId ?? undefined,
@@ -285,7 +290,7 @@ export function LogPanel({ ui }) {
       h('div', { class: 'log-scene-card__title' }, title),
       // Body may already contain the scene-root wrapper from
       // formatSceneRootBody; render via TrustedMarkup either way.
-      h(TrustedMarkup, { class: 'log-scene-card__body', html: e.html }),
+      h(TrustedMarkup, { class: 'log-scene-card__body', html: resolveWikiTokens(e.html, ui) }),
       h('span', { class: 'log-scene-card__ts' }, e.ts),
     ]);
   };
@@ -300,7 +305,7 @@ export function LogPanel({ ui }) {
       key: e.eventId ?? e.ts,
     }, [
       h('span', { class: 'log-icon' }, e.icon),
-      h(TrustedMarkup, { class: bodyClass, html: e.html }),
+      h(TrustedMarkup, { class: bodyClass, html: resolveWikiTokens(e.html, ui) }),
       e.long && h('button', {
         type: 'button',
         class: 'log-body__more',
@@ -351,7 +356,7 @@ export function LogPanel({ ui }) {
       canLoadMore,
       loading: !!ui._logLoadingHistory,
     }),
-    h('div', { class: 'log-panel__feed' },
+    h('div', { class: 'log-panel__feed', onClick: (ev) => handleWikilinkClick(ui, ev) },
       items.length === 0
         ? [h(EmptyState, {
             key: 'empty',

@@ -16,6 +16,7 @@ import { showInvitePlayerModal } from '../ui/InvitePlayerModal.jsx';
 import {
   mapsSignal, tokensSignal, charactersSignal, initiativeSignal, roomMembersSignal,
 } from '../state/signals.js';
+import { tableModeSignal, resetUiSignals } from '../state/ui-signals.js';
 
 vi.mock('../ui/InvitePlayerModal.jsx', () => ({ showInvitePlayerModal: vi.fn() }));
 
@@ -37,13 +38,17 @@ function makeUi({ isGM = true } = {}) {
 describe('NextSteps panel', () => {
   beforeEach(() => {
     localStorage.clear();
+    resetUiSignals();
     mapsSignal.value = new Map();
     tokensSignal.value = new Map();
     charactersSignal.value = new Map();
     initiativeSignal.value = { active: false, round: 0, current_index: 0, order: [] };
     roomMembersSignal.value = [{ userId: '@gm:hs' }];
   });
-  afterEach(cleanup);
+  afterEach(() => {
+    cleanup();
+    resetUiSignals();
+  });
 
   it('renders one chip per step', () => {
     const { container } = render(h(NextSteps, { ui: makeUi() }));
@@ -106,6 +111,28 @@ describe('NextSteps panel', () => {
     const { container, rerender } = render(h(NextSteps, { ui }));
     fireEvent.click(container.querySelector('.next-steps__dismiss'));
     rerender(h(NextSteps, { ui }));
+    expect(container.querySelector('.next-steps')).toBeNull();
+  });
+
+  it('auto-hides when combat is active', () => {
+    const ui = makeUi();
+    ui.state.initiative = { active: true, order: [] };
+    const { container } = render(h(NextSteps, { ui }));
+    expect(container.querySelector('.next-steps')).toBeNull();
+  });
+
+  it('auto-hides for solo or demo session once map, token, and combat are done', () => {
+    const ui = makeUi({ isGM: true });
+    ui.state.roomMembers = [{ userId: '@gm:hs' }]; // memberCount = 1
+    ui.state.maps = new Map([['m1', { id: 'm1', image_url: 'mxc://x/y' }]]);
+    ui.state.tokens = new Map([['t1', { id: 't1', sheet_id: 'c1' }]]);
+    ui.state.initiative = { active: false, order: [{ token_id: 't1' }] };
+    mapsSignal.value = ui.state.maps;
+    tokensSignal.value = ui.state.tokens;
+    initiativeSignal.value = ui.state.initiative;
+    roomMembersSignal.value = ui.state.roomMembers;
+
+    const { container } = render(h(NextSteps, { ui }));
     expect(container.querySelector('.next-steps')).toBeNull();
   });
 });
