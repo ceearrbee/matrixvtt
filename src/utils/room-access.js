@@ -17,7 +17,7 @@ export const READABLE_ROOM_NOTICE =
 export const PUBLIC_ROOM_NOTICE = 'This is a public room: anyone can join and read it.';
 
 /** @param {any} content - an m.room.encryption event's content */
-export function hasEncryptionAlgorithm(content) {
+function hasEncryptionAlgorithm(content) {
   return typeof content?.algorithm === 'string';
 }
 

@@ -72,6 +72,17 @@ function _renderMenu(items) {
   }).join('');
 }
 
+const MENU_MARGIN = 8;
+
+// A menu opened near the right or bottom edge, as a long-press on a
+// phone often is, would otherwise run off the screen.
+export function menuPosition(x, y, menuWidth, menuHeight, viewportWidth, viewportHeight) {
+  return {
+    left: Math.max(MENU_MARGIN, Math.min(x, viewportWidth - menuWidth - MENU_MARGIN)),
+    top: Math.max(MENU_MARGIN, Math.min(y, viewportHeight - menuHeight - MENU_MARGIN)),
+  };
+}
+
 function _mountMenu({ id, ariaLabel, screenX, screenY, items }) {
   closeAnyOpenMenu();
   if (items.length === 0) return null;
@@ -80,10 +91,13 @@ function _mountMenu({ id, ariaLabel, screenX, screenY, items }) {
   menu.id = id;
   menu.setAttribute('role', 'menu');
   menu.setAttribute('aria-label', ariaLabel);
-  menu.style.left = `${screenX}px`;
-  menu.style.top = `${screenY}px`;
   menu.innerHTML = _renderMenu(items);
   document.body.appendChild(menu);
+  const { left, top } = menuPosition(
+    screenX, screenY, menu.offsetWidth, menu.offsetHeight, window.innerWidth, window.innerHeight,
+  );
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
   _wireMenu(menu, items.filter((i) => i !== 'separator'));
   return menu;
 }

@@ -75,10 +75,13 @@ describe('ui/MapForm.jsx', () => {
 describe('knip.json', () => {
   // `_public-surface.js` left the list once `uiCallSitesExist.test.js`
   // began reading it to check call sites, which made it a real consumer
-  // rather than a file knip had to be told to overlook.
+  // rather than a file knip had to be told to overlook. What remains is
+  // reached only through a vite.config.js alias, which knip cannot follow.
   it('no longer hides unused exports inside four live files', () => {
     const config = JSON.parse(read('knip.json'));
-    expect(config.ignore).toEqual(['src/utils/no-op.js']);
+    expect(config.ignore).toEqual(['src/utils/no-op.js', 'src/client/crypto-wasm-stub.js']);
+    const vite = read('vite.config.js');
+    for (const file of config.ignore) expect(vite).toContain(`'${file}'`);
   });
 });
 

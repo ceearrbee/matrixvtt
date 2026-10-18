@@ -154,3 +154,15 @@ describe('high-contrast borders (non-text 3:1)', () => {
     expect(r, `${border} = ${r?.toFixed(2)}`).toBeGreaterThanOrEqual(3);
   });
 });
+
+// The token pairs above only hold while nothing dims the text. A done
+// next-steps chip faded its tertiary text with opacity to 2.6:1 in the
+// light theme; the line-through already says it is done.
+describe('done next-steps chips keep their text contrast', () => {
+  it('the done chip is not faded with opacity', () => {
+    const css = readFileSync(`${process.cwd()}/src/styles.css`, 'utf8');
+    const rule = css.match(/\.next-steps__chip\[data-done="true"\]\s*\{([^}]*)\}/);
+    expect(rule).not.toBeNull();
+    expect(rule[1]).not.toMatch(/opacity/);
+  });
+});

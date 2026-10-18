@@ -30,6 +30,8 @@ The app is static and browser-only; the Matrix homeserver is the only enforcemen
 ## Resolved
 
 - **joi RangeError (GHSA-q7cg-457f-vx79):** fixed 2026-07-01 via `overrides` to `^17.13.4` (transitive via `@matrix-widget-toolkit/api`).
+- **joi `isoDate()` ReDoS (GHSA-6h2x-m376-mqjq, high) and prototype advisories:** fixed 2026-10-18 by raising the override to `^17.13.8`.
+- **prosemirror-view paste XSS (GHSA-c8x8-7fp4-3x9w, high):** fixed 2026-10-18 by moving the lockfile to `1.42.6`, inside `@toast-ui/editor`'s `^1.18.7` range.
 
 ## Audit verification
 

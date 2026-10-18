@@ -117,6 +117,9 @@ test.describe('icon picker - save flow', () => {
     // decoding, and naturalWidth becomes non-zero on success.
     const firstImg = page.locator('.icon-picker__tile img').first();
     await firstImg.waitFor({ state: 'visible' });
+    // On a phone the category chips fill the first screen, so the grid
+    // starts below the fold and a lazy tile waits to be scrolled to.
+    await firstImg.scrollIntoViewIfNeeded();
     await page.waitForFunction(() => {
       const img = document.querySelector('.icon-picker__tile img');
       return img instanceof HTMLImageElement && img.complete && img.naturalWidth > 0;

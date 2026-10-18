@@ -211,3 +211,29 @@ describe('RightCompanion - persistent tab set', () => {
     expect(container.textContent).toContain("Aria's Inventory");
   });
 });
+
+// Picking a character in render moved the map selection: a GM's marquee
+// collapsed to one token, and clicking an NPC token jumped to a PC.
+describe('RightCompanion - nothing selected on the Sheet tab', () => {
+  it('leaves the selection alone and offers the characters to pick from', () => {
+    const selected = [];
+    const ui = makeUi({ isGM: true });
+    ui.state.getCurrentCharacter = () => null;
+    ui.state.canEditEntity = () => true;
+    ui.selectCharacterById = (id) => selected.push(id);
+    activeTabSignal.value = TABS.SHEET;
+    const { container } = render(h(RightCompanion, { ui }));
+    expect(selected).toEqual([]);
+    expect(container.querySelector('[data-character-card="c1"]')).not.toBeNull();
+  });
+
+  it('keeps the sheet sub-tabs, so a tab stays selected and Items stays reachable', () => {
+    const ui = makeUi({ isGM: true });
+    ui.state.getCurrentCharacter = () => null;
+    ui.state.canEditEntity = () => true;
+    activeTabSignal.value = TABS.SHEET;
+    const { container } = render(h(RightCompanion, { ui }));
+    expect(container.querySelector('.ctabs--sub .ctab[data-tab="sheet"]').getAttribute('aria-selected')).toBe('true');
+    expect(tab(container, TABS.ITEMS)).not.toBeNull();
+  });
+});

@@ -945,6 +945,18 @@ input {
   align-items: center;
   overflow: hidden;
 }
+.companion-tabbar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+}
+.companion-tabbar > .ctabs {
+  flex: 1;
+  min-width: 0;
+  border-bottom: none;
+}
 .ctabs--sub {
   background: var(--color-bg-inset, rgba(0, 0, 0, 0.2));
   padding: var(--space-2xs);
@@ -4094,7 +4106,7 @@ input {
   background: var(--color-background-primary);
   border: 0.5px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-lg);
-  min-width: 400px;
+  min-width: min(400px, 100vw);
   /* Default width for modals that don't set their own maxWidth; wider on a
      desktop widescreen, never past the viewport on a narrow window. */
   max-width: min(92vw, 680px);
@@ -4522,7 +4534,6 @@ input {
 }
 .next-steps__chip[data-done="true"] {
   color: var(--color-text-tertiary);
-  opacity: 0.55;
   background: transparent;
   border-color: transparent;
 }
@@ -6094,6 +6105,13 @@ button.item-card__tag--holder:hover {
   padding: var(--space-2xs);
   background: var(--color-background-secondary);
   border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.draw-toolbar__group-tabs {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-width: 0;
 }
 .draw-toolbar__lock-note {
   display: block;

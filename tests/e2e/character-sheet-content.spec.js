@@ -31,6 +31,8 @@ test.describe('character sheet content', () => {
   test('Edit button on the sheet opens the entity form', async ({ page }) => {
     await openSheetRail(page);
     await openCharacterSheet(page);
+    // Authoring actions on a sheet show only in Prep.
+    await page.locator('#gm-prep-btn').click();
     await page.locator('.char-sheet').getByRole('button', { name: /edit character/i }).click();
     await expect(page.locator('#entity-form-modal')).toBeVisible({ timeout: 5_000 });
     await expect(page.locator('#entity-name')).toHaveValue('Aria Blackwood');

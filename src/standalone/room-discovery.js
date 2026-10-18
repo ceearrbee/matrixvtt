@@ -44,7 +44,9 @@ export async function loadDiscovery(app) {
   const activeEmpty = app.doc.getElementById('active-empty');
   if (activeEmpty) activeEmpty.style.display = 'none';
 
-  app.setError('discovery-error', '');
+  // An error raised while switching here (an encrypted room, a failed
+  // join) belongs to this visit; anything older is cleared.
+  app.setError('discovery-error', app.takeHeldError('discovery-error'));
 
   const recentSessions = loadRecentSessions().filter((s) => s.userId === app.auth.userId);
   renderRecentSessions(app, recentSessions);

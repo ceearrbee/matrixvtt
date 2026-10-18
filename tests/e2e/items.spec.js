@@ -32,15 +32,15 @@ async function selectCharacter(page) {
 }
 
 /**
- * Open the item form. `exact` matters: the per-character inventory
- * toolbar is labelled "Add new item to inventory", so a loose match
- * resolves two buttons and `.first()` picks by render order.
+ * Open the item form. With a character selected, the GM sees that
+ * character's inventory, whose add button carries this label; the
+ * campaign-wide list behind "All items" opens the same form.
  */
 async function openItemForm(page) {
   await openSheetRail(page);
   await selectCharacter(page);
   await page.locator('[data-tab="items"]').click();
-  await page.getByRole('button', { name: 'Add new item', exact: true }).click();
+  await page.getByRole('button', { name: 'Add new item to inventory', exact: true }).click();
   await expect(page.locator('#item-form-modal')).toBeVisible({ timeout: 5_000 });
 }
 

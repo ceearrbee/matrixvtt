@@ -56,6 +56,7 @@ export class StandaloneApp {
 
     this._uiBound = false;
     this._disposers = [];
+    this.heldErrors = new Map();
 
     this.leaveRoom = () => leaveRoom(this);
     this.returnToRoomList = () => returnToRoomList(this);
@@ -115,18 +116,23 @@ export class StandaloneApp {
     // Overridden by StandaloneShell at mount time.
   }
 
-  setError(elId, msg, _retried = false) {
+  setError(elId, msg) {
     const el = this.doc.getElementById(elId);
     if (!el) {
       // Callers often switch screens and set the error in the same
-      // breath; the Preact screen (and its error element) mounts a
-      // tick later. One retry bridges that gap instead of dropping
-      // the message on the floor.
-      if (!_retried) setTimeout(() => this.setError(elId, msg, true), 100);
+      // breath, before the Preact screen (and its error element) has
+      // mounted. loadDiscovery shows the held message.
+      this.heldErrors.set(elId, msg);
       return;
     }
     el.textContent = msg;
     el.classList.toggle('visible', !!msg);
+  }
+
+  takeHeldError(elId) {
+    const msg = this.heldErrors.get(elId) ?? '';
+    this.heldErrors.delete(elId);
+    return msg;
   }
 
   bindUI() {
@@ -159,6 +165,7 @@ export class StandaloneApp {
     }
     this._disposers = [];
     this._uiBound = false;
+    this.heldErrors.clear();
   }
 
   loadDiscovery() { return loadDiscovery(this); }

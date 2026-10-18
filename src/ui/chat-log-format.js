@@ -139,7 +139,7 @@ export function formatSayLogBody(displayName, body, personaName = null, fmt = nu
   return `<b>${esc(displayName)}</b>: ${rendered}`;
 }
 
-export function stripRedundantSceneTitle(openingBody, title) {
+function stripRedundantSceneTitle(openingBody, title) {
   if (!openingBody || typeof openingBody !== 'string') return '';
   if (!title || typeof title !== 'string') return openingBody;
   const rawBody = openingBody.trimStart();

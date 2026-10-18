@@ -101,7 +101,8 @@ function _assertEntityWritePermission(sm, coll, id, action, value) {
     const existing = sm.characters?.get(id) ?? sm.yjs?.charactersMap?.get(id);
     if (existing) {
       const owner = existing.player_user_id || existing.claimed_by_user_id;
-      if (!owner || owner !== userId) {
+      const claiming = !owner && action === 'update' && value?.claimed_by_user_id === userId;
+      if (owner !== userId && !claiming) {
         throw new VTTError(ErrorType.PERMISSION, 'Denied: cannot modify or delete unowned or another player character');
       }
     } else if (action === 'delete') {

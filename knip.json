@@ -13,7 +13,8 @@
     "src/**/*.{js,jsx}"
   ],
   "ignore": [
-    "src/utils/no-op.js"
+    "src/utils/no-op.js",
+    "src/client/crypto-wasm-stub.js"
   ],
   "ignoreDependencies": [
     "matrix-widget-api",

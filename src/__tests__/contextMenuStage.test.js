@@ -9,7 +9,7 @@
  * dispatch.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { showMapContextMenu, showTokenContextMenu } from '../map/context-menus.js';
+import { showMapContextMenu, showTokenContextMenu, menuPosition } from '../map/context-menus.js';
 import { selectedTokenSignal } from '../state/ui-signals.js';
 
 function makeMr({ isGM = true, tokens = new Map() } = {}) {
@@ -172,5 +172,27 @@ describe('showTokenContextMenu', () => {
     const labels = [...menu.querySelectorAll('[role="menuitem"]')].map((el) => el.textContent);
     expect(labels.join(' ')).toContain('Remove from Initiative');
     expect(labels.join(' ')).not.toContain('Add to Initiative');
+  });
+});
+
+// A menu opened near the right or bottom edge, as a long-press on a
+// phone often is, ran off the screen and its items could not be tapped.
+describe('menus stay on screen', () => {
+  it('keeps the menu at the pointer when it fits', () => {
+    expect(menuPosition(100, 200, 150, 120, 1024, 768)).toEqual({ left: 100, top: 200 });
+  });
+
+  it('pulls a menu back from the right and bottom edges', () => {
+    expect(menuPosition(400, 600, 150, 240, 320, 568)).toEqual({ left: 162, top: 320 });
+  });
+
+  it('never pushes a menu past the top-left corner', () => {
+    expect(menuPosition(-20, -20, 150, 120, 320, 568)).toEqual({ left: 8, top: 8 });
+  });
+
+  it('places an opened menu inside the window', () => {
+    const menu = showMapContextMenu(makeMr({ isGM: true }), window.innerWidth + 500, window.innerHeight + 500, 3, 4);
+    expect(parseFloat(menu.style.left)).toBeLessThanOrEqual(window.innerWidth);
+    expect(parseFloat(menu.style.top)).toBeLessThanOrEqual(window.innerHeight);
   });
 });

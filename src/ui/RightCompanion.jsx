@@ -14,9 +14,9 @@
 
 import { h } from 'preact';
 import { TABS, LAYOUT_MODES } from '../utils/constants.js';
-import { settingsSignal, initiativeSignal } from '../state/signals.js';
+import { settingsSignal, initiativeSignal, charactersSignal } from '../state/signals.js';
 import {
-  activeTabSignal, layoutModeSignal, sheetPanelWidthSignal, companionCollapsedSignal, selectedCharacterIdSignal,
+  activeTabSignal, layoutModeSignal, sheetPanelWidthSignal, companionCollapsedSignal,
 } from '../state/ui-signals.js';
 
 import { CombatTab } from './CombatTab.jsx';
@@ -68,40 +68,13 @@ function CompanionTab({ id, label, title, current, onClick, pulse = false, badge
   ]);
 }
 
-export function resolveFallbackCharacter(ui) {
-  if (!ui?.state?.characters || ui.state.characters.size === 0) return null;
-  const chars = ui.state.characters;
-  const myUserId = ui.widgetManager?.userId;
-  // 1. If in combat and current turn is a character
-  if (ui.state.initiative?.active && Array.isArray(ui.state.initiative.order)) {
-    const cur = ui.state.initiative.order[ui.state.initiative.current_index];
-    if (cur) {
-      if (cur.entity_id && chars.has(cur.entity_id)) return chars.get(cur.entity_id);
-      if (cur.token_id && ui.state.tokens?.has(cur.token_id)) {
-        const t = ui.state.tokens.get(cur.token_id);
-        if (t?.sheet_id && chars.has(t.sheet_id)) return chars.get(t.sheet_id);
-      }
-    }
-  }
-  // 2. Player's claimed character
-  if (myUserId) {
-    for (const c of chars.values()) {
-      if (c && (c.player_user_id === myUserId || c.claimed_by_user_id === myUserId)) return c;
-    }
-  }
-  // 3. First party character
-  for (const c of chars.values()) {
-    if (c) return c;
-  }
-  return null;
-}
-
 const SHEET_FAMILY = new Set([TABS.SHEET, TABS.SPELLS, TABS.SKILLS, TABS.ITEMS]);
 
 export function RightCompanion({ ui }) {
-  // Reading these signals re-renders when the ruleset or initiative change,
-  // which is what gates the Spells/Skills/Combat tabs.
-  settingsSignal.value; initiativeSignal.value; selectedCharacterIdSignal.value;
+  // Reading these signals re-renders when the ruleset, initiative or roster
+  // change, which is what gates the Spells/Skills/Combat tabs and the
+  // sheet sub-nav.
+  settingsSignal.value; initiativeSignal.value; charactersSignal.value;
   const tab = activeTabSignal.value;
   // In icon layout mode, tabs show an icon instead of a text label. The
   // accessible name is preserved via CompanionTab's title/aria-label.
@@ -117,20 +90,7 @@ export function RightCompanion({ ui }) {
   const hasSpells = Array.isArray(ruleset?.spell_schools) && ruleset.spell_schools.length > 0;
   const hasSkills = Array.isArray(ruleset?.skills) && ruleset.skills.length > 0;
   const inSheetFamily = SHEET_FAMILY.has(tab);
-  const charactersCount = ui?.state?.characters?.size ?? 0;
-  let currentCharacter = ui?.state?.getCurrentCharacter?.() || null;
-  if (!currentCharacter && inSheetFamily && charactersCount > 0) {
-    const fallback = resolveFallbackCharacter(ui);
-    if (fallback) {
-      currentCharacter = fallback;
-      if (typeof ui.selectCharacterById === 'function') {
-        ui.selectCharacterById(fallback.id);
-      } else {
-        selectedCharacterIdSignal.value = fallback.id;
-      }
-    }
-  }
-  const showSubTabs = inSheetFamily && charactersCount > 0 && !!currentCharacter;
+  const showSubTabs = inSheetFamily && (ui?.state?.characters?.size ?? 0) > 0;
   // PARTY has no dedicated body distinct from the roster; default a missing
   // mapping to the roster so an unknown stored tab never blanks the panel.
   const TabContent = TAB_COMPONENTS[tab] || PartyRoster;
@@ -189,30 +149,33 @@ export function RightCompanion({ ui }) {
       tabindex: '0',
       ...dragHandlers,
     }),
-    h('div', {
-      class: 'ctabs companion-tabs', role: 'tablist', 'aria-label': 'Companion sections',
-      onKeyDown: onTablistKeyDown,
-    }, [
-      combatActive && h(CompanionTab, {
-        id: TABS.COMBAT,
-        label: [h(CombatIcon, {}), !iconMode && h('span', { class: 'ctab__txt' }, ' Combat')],
-        title: 'Combat tracker',
-        current: tab, onClick: select(TABS.COMBAT),
-        pulse: tab !== TABS.COMBAT,
-        badge: ui.state.initiative?.order?.length ?? null,
-      }),
-      h(CompanionTab, {
-        id: TABS.SHEET, label: lbl(SheetIcon, 'Sheet'), title: 'Character sheet',
-        // The Sheet tab represents the whole family, so it stays lit
-        // while a family member (Spells / Skills / Items) is active.
-        // The head is a group opener: it lights up and takes focus for the
-        // family, but the concrete selection is always the sub-nav row.
-        current: inSheetFamily ? TABS.SHEET : tab,
-        selected: false,
-        onClick: select(TABS.SHEET),
-      }),
-      h(CompanionTab, { id: TABS.PARTY, label: lbl(CONCEPT_ICONS.party, 'Party'), title: 'Party roster', current: tab, onClick: select(TABS.PARTY) }),
-      h(CompanionTab, { id: TABS.NPC, label: lbl(CONCEPT_ICONS.npc, 'NPCs'), title: 'NPC list', current: tab, onClick: select(TABS.NPC) }),
+    // A tablist may hold only tabs, so the collapse button sits beside it.
+    h('div', { class: 'companion-tabbar' }, [
+      h('div', {
+        class: 'ctabs companion-tabs', role: 'tablist', 'aria-label': 'Companion sections',
+        onKeyDown: onTablistKeyDown,
+      }, [
+        combatActive && h(CompanionTab, {
+          id: TABS.COMBAT,
+          label: [h(CombatIcon, {}), !iconMode && h('span', { class: 'ctab__txt' }, ' Combat')],
+          title: 'Combat tracker',
+          current: tab, onClick: select(TABS.COMBAT),
+          pulse: tab !== TABS.COMBAT,
+          badge: ui.state.initiative?.order?.length ?? null,
+        }),
+        h(CompanionTab, {
+          id: TABS.SHEET, label: lbl(SheetIcon, 'Sheet'), title: 'Character sheet',
+          // The Sheet tab represents the whole family, so it stays lit
+          // while a family member (Spells / Skills / Items) is active.
+          // The head is a group opener: it lights up and takes focus for the
+          // family, but the concrete selection is always the sub-nav row.
+          current: inSheetFamily ? TABS.SHEET : tab,
+          selected: false,
+          onClick: select(TABS.SHEET),
+        }),
+        h(CompanionTab, { id: TABS.PARTY, label: lbl(CONCEPT_ICONS.party, 'Party'), title: 'Party roster', current: tab, onClick: select(TABS.PARTY) }),
+        h(CompanionTab, { id: TABS.NPC, label: lbl(CONCEPT_ICONS.npc, 'NPCs'), title: 'NPC list', current: tab, onClick: select(TABS.NPC) }),
+      ]),
       collapseBtn,
     ]),
     showSubTabs && h('div', {

@@ -5,7 +5,9 @@
  * any code path that recreates StandaloneApp leaks listeners.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { h, render } from 'preact';
 import { StandaloneApp } from '../standalone/bootstrap.js';
+import { DiscoveryScreen } from '../standalone/DiscoveryScreen.jsx';
 
 function setupDom() {
   document.body.innerHTML = '';
@@ -45,20 +47,51 @@ describe('StandaloneApp lifecycle', () => {
   });
 });
 
-describe('setError survives a screen switch', () => {
-  it('retries once when the target element has not mounted yet', async () => {
+describe('an error raised while switching to discovery', () => {
+  // Callers run showScreen('discovery') and then setError before Preact
+  // mounts the screen, and loadDiscovery used to blank the error as it
+  // started. A single 100ms retry won that race only some of the time.
+  const client = {
+    getJoinedRooms: async () => [],
+    getInvitedRooms: async () => [],
+    sync: () => new Promise(() => {}),
+  };
+
+  async function openDiscovery(app) {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    render(h(DiscoveryScreen, { app }), host);
+    await app.loadDiscovery();
+    app.inviteAbort?.abort();
+    return () => { render(null, host); host.remove(); };
+  }
+
+  function makeApp() {
     const app = new StandaloneApp({
       doc: document, win: window, container: document.createElement('div'),
     });
-    // Element appears AFTER the call, as happens when showScreen('discovery')
-    // is followed synchronously by setError before Preact mounts the screen.
+    app.auth = { client, userId: '@u:hs', displayName: 'U' };
+    return app;
+  }
+
+  it('is still shown once the screen has loaded, however late it mounts', async () => {
+    const app = makeApp();
     app.setError('discovery-error', 'Failed to start session: boom');
-    const el = document.createElement('div');
-    el.id = 'discovery-error';
-    document.body.appendChild(el);
-    await new Promise((r) => setTimeout(r, 120));
+    await new Promise((r) => setTimeout(r, 250));
+    const close = await openDiscovery(app);
+    const el = document.getElementById('discovery-error');
     expect(el.textContent).toContain('boom');
     expect(el.classList.contains('visible')).toBe(true);
-    el.remove();
+    close();
+  });
+
+  it('belongs to that visit: the next load clears it', async () => {
+    const app = makeApp();
+    app.setError('discovery-error', 'boom');
+    const close = await openDiscovery(app);
+    await app.loadDiscovery();
+    app.inviteAbort?.abort();
+    expect(document.getElementById('discovery-error').textContent).toBe('');
+    close();
   });
 });

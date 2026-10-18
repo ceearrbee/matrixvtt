@@ -156,17 +156,19 @@ function DrawToolbar({ ui }) {
     class: `draw-toolbar map-toolbar${collapsed ? ' draw-toolbar--collapsed' : ''}`,
     role: 'toolbar', 'aria-label': 'Drawing tools',
   }, [
-    h('div', { class: 'draw-toolbar__groups', role: 'tablist', 'aria-label': 'Tool group' }, [
-      ...groupTabs.map((g) => h('button', {
-        key: g,
-        type: 'button',
-        role: 'tab',
-        class: `dtb-group${g === activeGroup ? ' dtb-group--active' : ''}`,
-        'data-tool-group': g,
-        'aria-selected': String(g === activeGroup),
-        'aria-disabled': 'false',
-        onClick: () => switchGroup(g),
-      }, GROUP_LABELS[g])),
+    // A tablist may hold only tabs, so the toggle sits beside it.
+    h('div', { class: 'draw-toolbar__groups' }, [
+      h('div', { class: 'draw-toolbar__group-tabs', role: 'tablist', 'aria-label': 'Tool group' },
+        groupTabs.map((g) => h('button', {
+          key: g,
+          type: 'button',
+          role: 'tab',
+          class: `dtb-group${g === activeGroup ? ' dtb-group--active' : ''}`,
+          'data-tool-group': g,
+          'aria-selected': String(g === activeGroup),
+          'aria-disabled': 'false',
+          onClick: () => switchGroup(g),
+        }, GROUP_LABELS[g]))),
       h('button', {
         class: 'dtb-btn dtb-btn--toggle',
         id: 'toggle-toolbar',

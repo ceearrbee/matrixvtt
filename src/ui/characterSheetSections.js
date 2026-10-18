@@ -60,7 +60,6 @@ const KINDS = {
 // without going through the full sheet dispatcher. Not part of the
 // public surface - do not import from production code.
 export const _kindsForTest = KINDS;
-export { PrivateNotes };
 
 // Sections flagged `collapsed` in the ruleset (low-frequency reference
 // blocks like coinage / personality / notes) render inside a native

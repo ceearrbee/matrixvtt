@@ -8,7 +8,9 @@ import { test, expect, waitForVttReady, openMapPane, showMobilePane } from './fi
 
 async function startCombat(page) {
   await openMapPane(page);
-  await page.getByRole('button', { name: 'Start combat and roll initiative' }).click();
+  // While the first-run checklist is up, its Start combat chip stands in
+  // for the idle tracker button; both roll initiative.
+  await page.getByRole('button', { name: /^Start combat/ }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Randomize all' }).click();
   await page.waitForFunction(() => window.matrixVTTClient.state.initiative.active === true);
 }

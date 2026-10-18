@@ -122,7 +122,7 @@ function evict() {
   }
 }
 
-export function release(value) {
+function release(value) {
   if (typeof value === 'string' && value.startsWith('blob:')) URL.revokeObjectURL(value);
 }
 
@@ -138,7 +138,7 @@ export function clearMediaSession() {
   mediaDownloaderSignal.value = null;
 }
 
-export function clearMediaCache() {
+function clearMediaCache() {
   for (const value of resolved.values()) release(value);
   resolved.clear();
   inFlight.clear();

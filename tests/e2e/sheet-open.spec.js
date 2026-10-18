@@ -32,6 +32,8 @@ test.describe('character sheet open flow', () => {
     await openSheetRail(page);
     await page.locator('[data-character-card="chr-aria"]').click();
     await expect(page.locator('.char-sheet[data-entity-id="chr-aria"]')).toBeVisible({ timeout: 5_000 });
+    // Authoring actions on a sheet show only in Prep.
+    await page.locator('#gm-prep-btn').click();
     await page.locator('.char-sheet').getByRole('button', { name: /edit character/i }).click();
     await expect(page.locator('#entity-form-modal')).toBeVisible({ timeout: 5_000 });
     await expect(page.locator('#entity-name')).toHaveValue('Aria Blackwood');

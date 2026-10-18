@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { h, render } from 'preact';
+import { act } from 'preact/test-utils';
 import { FloatingDocs, openDoc, closeAllDocs } from '../ui/FloatingDoc.jsx';
 import { openDocsSignal } from '../state/ui-signals.js';
 import { handoutsSignal, pagesSignal } from '../state/signals.js';
@@ -21,8 +22,11 @@ function makeUi(handouts = new Map()) {
   });
 }
 
-async function flush() {
-  await new Promise((r) => setTimeout(r, 10));
+// act runs the effects a render queued. A fixed wait lost the race on a
+// slow CI runner, where the effect that marks a doc resolved had not run
+// before the doc was deleted.
+function renderDocs(ui, host) {
+  act(() => { render(h(FloatingDocs, { ui }), host); });
 }
 
 describe('FloatingDocs missing-document behavior', () => {
@@ -33,74 +37,67 @@ describe('FloatingDocs missing-document behavior', () => {
     document.body.innerHTML = '';
   });
 
-  it('auto-closes a doc that resolved once and was then deleted', async () => {
+  it('auto-closes a doc that resolved once and was then deleted', () => {
     const handouts = new Map([['h1', { id: 'h1', title: 'An invitation', body: 'x' }]]);
     const ui = makeUi(handouts);
     const host = document.createElement('div');
     document.body.appendChild(host);
 
     openDoc('handout', 'h1');
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
     expect(host.textContent).toContain('An invitation');
 
     handouts.delete('h1');
     handoutsSignal.value = new Map();
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
 
     expect(openDocsSignal.value).toHaveLength(0);
     expect(host.textContent).not.toContain('Document missing');
   });
 
-  it('does not auto-close while a sync refresh has the collections emptied', async () => {
+  it('does not auto-close while a sync refresh has the collections emptied', () => {
     const handouts = new Map([['h1', { id: 'h1', title: 'An invitation', body: 'x' }]]);
     const ui = makeUi(handouts);
     const host = document.createElement('div');
     document.body.appendChild(host);
 
     openDoc('handout', 'h1');
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
 
     ui.state.refreshing = true;
     handouts.delete('h1');
     handoutsSignal.value = new Map();
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
     expect(openDocsSignal.value).toHaveLength(1);
 
     handouts.set('h1', { id: 'h1', title: 'An invitation', body: 'x' });
     ui.state.refreshing = false;
     handoutsSignal.value = new Map(handouts);
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
     expect(openDocsSignal.value).toHaveLength(1);
     expect(host.textContent).toContain('An invitation');
   });
 
-  it('keeps the placeholder for a never-resolved doc, dismissable via its close button', async () => {
+  it('keeps the placeholder for a never-resolved doc, dismissable via its close button', () => {
     const ui = makeUi();
     const host = document.createElement('div');
     document.body.appendChild(host);
 
     openDoc('handout', 'h-unknown');
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
 
     expect(host.textContent).toContain('Document missing');
     host.querySelector('.floating-doc__close').click();
     expect(ui.closeDoc).toHaveBeenCalledWith('handout:h-unknown');
   });
 
-  it('the placeholder closes on Escape like the normal panel', async () => {
+  it('the placeholder closes on Escape like the normal panel', () => {
     const ui = makeUi();
     const host = document.createElement('div');
     document.body.appendChild(host);
 
     openDoc('handout', 'h-unknown');
-    render(h(FloatingDocs, { ui }), host);
-    await flush();
+    renderDocs(ui, host);
 
     const panel = host.querySelector('.floating-doc');
     panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));

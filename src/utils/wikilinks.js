@@ -37,7 +37,7 @@ const PREVIEW_KINDS = {
   spell: { kind: 'spell',     collection: 'spells' },
 };
 
-export function formatEntityFallbackName(id) {
+function formatEntityFallbackName(id) {
   if (!id) return 'Unknown';
   const clean = id.replace(/^(?:chr|char|npc|item|spell|map)[-_]/i, '');
   return clean
