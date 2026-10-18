@@ -1,10 +1,11 @@
 /**
- * scan.js - parallel chunked fetch of room name + VTT state for a
- * list of room ids, plus the label update and deleted-recent
+ * scan.js - parallel chunked fetch of room name, VTT state and access
+ * (encryption, join rule) for a list of room ids, plus the label update and deleted-recent
  * prune helper. Network-only; no DOM bootstrap.
  */
 
 import { removeRecentSession } from '../sessionStore.js';
+import { roomAccessFor } from '../../utils/room-access.js';
 
 const SCAN_ROOM_LIMIT = 200;
 const SCAN_CHUNK_SIZE = 10;
@@ -19,11 +20,12 @@ export async function scanRooms(app, client, roomIds) {
     const chunkResults = await Promise.all(
       chunk.map(async (id) => {
         try {
-          const [name, vttState] = await Promise.all([
+          const [name, vttState, access] = await Promise.all([
             client.getRoomName(id),
             client.getVttState(id),
+            roomAccessFor(client, id),
           ]);
-          return { id, name, vttState };
+          return { id, name, vttState, access };
         } catch {
           return null;
         }
@@ -45,8 +47,10 @@ export function setScanningLabel(app, total, scanning) {
 /**
  * Drop stale recent-session entries - both rooms whose VTT state has
  * been tombstoned (state empty) and rooms the user is no longer joined
- * to (not in the scan result list). Returns the list of survivors;
- * caller re-renders the recent panel if the list shrank.
+ * to (not in the scan result list). A room that never held a campaign
+ * has no VTT state at all and stays, so a plain chat room opened here
+ * keeps its place. Returns the list of survivors; caller re-renders
+ * the recent panel if the list shrank.
  *
  * `joinedIds` is the full set of joined room ids from getJoinedRooms.
  * Without it (older callers), we treat scan results as the authority
@@ -64,7 +68,7 @@ export function pruneDeletedRecent(recentSessions, results, joinedIds) {
     }
     const result = resultMap.get(s.roomId);
     if (result) {
-      const isDeleted = !result.vttState || Object.keys(result.vttState).length === 0;
+      const isDeleted = result.vttState != null && Object.keys(result.vttState).length === 0;
       if (isDeleted) { removeRecentSession(s.userId, s.roomId); continue; }
     }
     survivors.push(s);

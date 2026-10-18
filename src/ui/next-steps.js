@@ -14,6 +14,7 @@
  */
 
 export const NEXT_STEP_KEYS = Object.freeze({
+  SETUP: 'setup',
   MAP: 'map',
   INVITE: 'invite',
   TOKEN: 'token',
@@ -48,8 +49,13 @@ function hasUnclaimedCharacter(characters) {
 }
 
 /**
+ * A room with no campaign is a plain chat room. The GM is offered setup
+ * and nothing else; a player is offered nothing, since every player
+ * step would write campaign data into the room.
+ *
  * @param {object} room
  * @param {boolean} room.isGM
+ * @param {boolean} [room.hasCampaign]
  * @param {number} room.memberCount
  * @param {Map<string, any>} room.maps
  * @param {Map<string, any>} room.tokens
@@ -59,8 +65,19 @@ function hasUnclaimedCharacter(characters) {
  * @returns {{key: string, label: string, hint: string, done: boolean, blockedBy: string|null, action?: string}[]}
  */
 export function nextStepsFor({
-  isGM, memberCount = 1, maps, tokens, characters, initiative, myUserId,
+  isGM, hasCampaign = true, memberCount = 1, maps, tokens, characters, initiative, myUserId,
 }) {
+  if (!hasCampaign) {
+    if (!isGM) return [];
+    return [{
+      key: NEXT_STEP_KEYS.SETUP,
+      label: 'Set up a campaign',
+      hint: 'Pick a game system and start a map. Until then this room stays plain chat.',
+      done: false,
+      blockedBy: null,
+    }];
+  }
+
   if (!isGM) {
     const canClaim = hasUnclaimedCharacter(characters);
     return [{

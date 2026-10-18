@@ -4,8 +4,7 @@
  * Owns the announcement-setting state (persisted to localStorage)
  * and the `matrix:timeline-event` listener. Incoming events are
  * dispatched to `chat/timeline-intake.js`; outbound announcements
- * and dice-roll posts live in `chat/announcements.js`; chat
- * `/roll` parsing and execution in `chat/dice-command.js`.
+ * and dice-roll posts live in `chat/announcements.js`.
  */
 
 import { VTTError, ErrorType, showErrorNotification } from './utils/errorHandling.js';
@@ -18,10 +17,6 @@ import {
   postDiceRollToChat, announceDamage, announceHeal, announceCombat,
   announceMapChange, announceInitiativeOrder, announceTurn, announceMessage,
 } from './chat/announcements.js';
-import {
-  parseDiceRollCommand, parseDiceNotation, executeDiceRollFromChat,
-  getCharacterNameForUser,
-} from './chat/dice-command.js';
 
 const DEFAULT_ANNOUNCEMENTS = { damage: true, combat: true, mapChanges: true, hideGMActions: true };
 
@@ -38,10 +33,9 @@ function _loadAnnouncements(userId) {
 }
 
 export class ChatIntegrator {
-  constructor(clientManager, state, diceRoller) {
+  constructor(clientManager, state) {
     this.clientManager = clientManager;
     this.state = state;
-    this.diceRoller = diceRoller;
     this.announcements = _loadAnnouncements(clientManager?.userId);
   }
 
@@ -98,10 +92,6 @@ export class ChatIntegrator {
   }
 
   handleTimelineEvent(event)          { return handleTimelineEvent(this, event); }
-  parseDiceRollCommand(message)       { return parseDiceRollCommand(message); }
-  parseDiceNotation(notation)         { return parseDiceNotation(notation); }
-  executeDiceRollFromChat(cmd, sender){ return executeDiceRollFromChat(this, cmd, sender); }
-  getCharacterNameForUser(userId)     { return getCharacterNameForUser(this, userId); }
 
   async _send(body) {
     const content = { msgtype: 'm.text', body };
@@ -116,29 +106,6 @@ export class ChatIntegrator {
     }
   }
 
-  /**
-   * Send a whisper - a private out-of-character message to one or
-   * more users. Backed by a `com.vtt.whisper` timeline event with a
-   * `to: [mxid, ...]` recipient list. The receiver-side filter in
-   * timeline-intake.js shows the message only when the local user is
-   * the sender or is in the `to` list. Whispers don't sync into
-   * `m.room.message`, so non-VTT Matrix clients won't see them either
-   * - that's the privacy guarantee.
-   */
-  async sendWhisper(toUserIds, body) {
-    if (!Array.isArray(toUserIds) || toUserIds.length === 0) return;
-    const trimmed = String(body ?? '').trim();
-    if (!trimmed) return;
-    try {
-      await this.state.sendRoomEvent(EVENT_TYPES.WHISPER, {
-        to: toUserIds,
-        body: trimmed,
-        ts: Date.now(),
-      });
-    } catch (err) {
-      showErrorNotification(new VTTError(ErrorType.NETWORK, `Whisper send failed: ${err.message}`, err));
-    }
-  }
   postDiceRollToChat(rollData)                        { return postDiceRollToChat(this, rollData); }
   announceDamage(tokenName, damage, newHp, maxHp)     { return announceDamage(this, tokenName, damage, newHp, maxHp); }
   announceHeal(tokenName, heal, newHp, maxHp)         { return announceHeal(this, tokenName, heal, newHp, maxHp); }

@@ -1,54 +1,26 @@
 /**
- * Pure first-render decision. The wizard-vs-welcome choice was racy:
- * startVTT stamped room-visited immediately after initVTT resolved,
- * which could land before render-policy's rAF read it and suppress the
- * wizard for the GM who just created the room. The decision is now a
- * pure function where an explicit forceWizard (create-room intent)
- * beats the visited stamp.
+ * Pure first-render decision. The setup wizard opens on its own only
+ * for a room the user just created, and never over campaign data that
+ * is already there. Every other room opens straight to its chat.
  */
 import { describe, it, expect } from 'vitest';
 import { decideFirstRender } from '../ui/first-render-decision.js';
 
-const base = {
-  alreadyVisited: false,
-  noMap: true,
-  forceWizard: false,
-  residual: 0,
-  snapshotState: 'unknown',
-};
+const base = { forceWizard: false, residual: 0, snapshotState: 'absent' };
 
 describe('decideFirstRender', () => {
-  it('fresh empty room shows the wizard', () => {
-    expect(decideFirstRender({ ...base }).showWizard).toBe(true);
+  it('a room with no campaign opens without the wizard', () => {
+    expect(decideFirstRender({ ...base })).toBe(false);
+    expect(decideFirstRender({ ...base, snapshotState: 'unknown' })).toBe(false);
   });
 
-  it('forceWizard beats the visited stamp on an empty room', () => {
-    const res = decideFirstRender({ ...base, alreadyVisited: true, forceWizard: true });
-    expect(res.showWizard).toBe(true);
+  it('a room the user just created opens the wizard', () => {
+    expect(decideFirstRender({ ...base, forceWizard: true })).toBe(true);
+    expect(decideFirstRender({ ...base, forceWizard: true, snapshotState: 'unknown' })).toBe(true);
   });
 
-  it('forceWizard still defers to residual entities and a server snapshot', () => {
-    expect(decideFirstRender({ ...base, forceWizard: true, residual: 3 }).showWizard).toBe(false);
-    expect(decideFirstRender({ ...base, forceWizard: true, snapshotState: 'present' }).showWizard).toBe(false);
-  });
-
-  it('a visited room never re-prompts on normal entry', () => {
-    expect(decideFirstRender({ ...base, alreadyVisited: true }).showWizard).toBe(false);
-  });
-
-  it('a stale stamp on a confirmed-empty room is invalidated', () => {
-    const res = decideFirstRender({ ...base, alreadyVisited: true, snapshotState: 'absent' });
-    expect(res.staleStamp).toBe(true);
-    expect(res.showWizard).toBe(true);
-  });
-
-  it('an unknown probe never invalidates the stamp', () => {
-    const res = decideFirstRender({ ...base, alreadyVisited: true, snapshotState: 'unknown' });
-    expect(res.staleStamp).toBe(false);
-    expect(res.showWizard).toBe(false);
-  });
-
-  it('residual entities suppress the wizard even with no map', () => {
-    expect(decideFirstRender({ ...base, residual: 2 }).showWizard).toBe(false);
+  it('the wizard never opens over existing campaign data', () => {
+    expect(decideFirstRender({ ...base, forceWizard: true, residual: 3 })).toBe(false);
+    expect(decideFirstRender({ ...base, forceWizard: true, snapshotState: 'present' })).toBe(false);
   });
 });

@@ -67,6 +67,34 @@ describe('confirmAndEnterRoom', () => {
     expect(modal.textContent).toContain('not found');
   });
 
+  it('offers no join for an encrypted room and says why', () => {
+    showRoomPreview(
+      { roomId: '!e:hs', name: 'Secret', memberCount: 3, accessible: true, encrypted: true, vtt: null, characters: [], npcs: [], joinRule: 'invite' },
+      { onConfirm: vi.fn() },
+    );
+    const modal = document.getElementById('room-preview-modal');
+    expect(modal.querySelector('[data-confirm]')).toBeNull();
+    expect(modal.textContent).toMatch(/does not support encrypted rooms/i);
+  });
+
+  it('says a public room can be read by anyone who joins', () => {
+    showRoomPreview(
+      { roomId: '!p:hs', name: 'Open Table', memberCount: 9, accessible: true, vtt: null, characters: [], npcs: [], joinRule: 'public' },
+      { onConfirm: vi.fn() },
+    );
+    expect(document.getElementById('room-preview-modal').textContent).toMatch(/anyone can join and read/i);
+  });
+
+  it('says a room with no campaign opens as plain chat', () => {
+    showRoomPreview(
+      { roomId: '!c:hs', name: 'Chat', memberCount: 4, accessible: true, vtt: null, characters: [], npcs: [], joinRule: 'invite' },
+      { onConfirm: vi.fn() },
+    );
+    const text = document.getElementById('room-preview-modal').textContent;
+    expect(text).toMatch(/opens as plain chat/i);
+    expect(text).not.toMatch(/setup wizard/i);
+  });
+
   it('shows "Request to Join" label for knock-required rooms', () => {
     showRoomPreview(
       { roomId: '!r:hs', name: 'Knock Room', memberCount: 5, accessible: true, vtt: null, characters: [], npcs: [], joinRule: 'knock' },

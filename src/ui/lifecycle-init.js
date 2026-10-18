@@ -233,7 +233,7 @@ function _setupChatListeners(ui) {
       ui._log('🎬', formatSceneRootBody(sceneTitle, body, fmt, resolveEntity), logOpts);
     } else if (whisperTo) {
       const toDisplay = whisperTo.split(':')[0].replace('@', '');
-      ui._log('🔒', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b>: ${esc(body)}`, logOpts);
+      ui._log('💬', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b> (not private): ${esc(body)}`, logOpts);
     } else if (msgtype === 'm.emote') {
       ui._log('💭', formatEmoteLogBody(displayName, body, personaName, fmt, resolveEntity), logOpts);
       if (!historical && tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, body);

@@ -390,11 +390,14 @@
         // reads them directly, but the snapshot blob is what actually
         // hydrates sm.characters / sm.npcs / sm.tokens. The fixture
         // builds the snapshot from initialState in logged-in.js.
+        // The seeded GM wrote the snapshot, whoever is viewing: the loader
+        // only trusts snapshots from PL 50+, so a player's view must not
+        // attribute it to the player.
         if (c.yjsSnapshot) {
           initMap.set('com.matrixvtt.yjs.snapshot::', {
             type: 'com.matrixvtt.yjs.snapshot',
             state_key: '',
-            sender: c.userId,
+            sender: USER_ID,
             room_id: c.roomId,
             content: { data: c.yjsSnapshot, marker: Date.now() },
           });
@@ -462,6 +465,10 @@
     async getRoomState(roomId) {
       const m = this._stateByRoom.get(roomId);
       return m ? Array.from(m.values()) : [];
+    }
+    // Matches the real client: null for a missing or unreadable event.
+    async getStateEventContent(roomId, type, stateKey = '') {
+      return this._stateByRoom.get(roomId)?.get(`${type}::${stateKey}`)?.content ?? null;
     }
     async getRoomMembers() { return [{ userId: cfg().userId, displayname: cfg().displayName, membership: 'join' }]; }
     async resolveRoomAlias(alias) { return alias.startsWith('#') ? cfg().roomId : alias; }

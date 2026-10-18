@@ -27,7 +27,6 @@ import { SubscriptionManager } from './widget/SubscriptionManager.js';
 import { StateManager } from './state/StateManager.js';
 import { createUI } from './ui/ui-methods.js';
 import { ChatIntegrator } from './chat-integrator.js';
-import { DiceRoller } from './dice-roller.js';
 import { clientManagerHasSnapshot } from './utils/room-snapshot-probe.js';
 import { clearMediaSession } from './utils/media-cache.js';
 
@@ -63,7 +62,6 @@ export class MatrixVTTClient {
     this.state = null;
     this.ui = null;
     this.chat = null;
-    this.diceRoller = null;
   }
 
   /**
@@ -83,9 +81,7 @@ export class MatrixVTTClient {
     this.state = new StateManager(this.clientManager, subscriptionManager);
     await this.state.init();
 
-    this.diceRoller = new DiceRoller(this.state);
-
-    this.chat = new ChatIntegrator(this.clientManager, this.state, this.diceRoller);
+    this.chat = new ChatIntegrator(this.clientManager, this.state);
     this.chat.init();
 
     this.ui = createUI(this.state, this.clientManager, this.chat);
@@ -93,13 +89,8 @@ export class MatrixVTTClient {
     // wizard confirms the choice instead of collecting it a second time.
     this.ui._pendingCampaign = this.pendingCampaign ?? null;
     this.pendingCampaign = null;
-    // forceWizard is passed by enterRoom when the user wasn't a member of
-    // the room according to /joined_rooms. That signal alone is unreliable
-    // (the response can be stale on network flakes and the wizard opening
-    // on a plain page reload is a known UX footgun). Gate the forcing on
-    // whether the server actually has a `com.vtt.settings` event - if it
-    // does, the room has a live VTT campaign and we should load it
-    // normally; if not, the room is empty and the wizard must seed it.
+    // forceWizard comes from Create Room. A room that already holds a
+    // published snapshot is loaded as it is, never re-seeded.
     if (forceWizard) {
       const hasSettings = await clientManagerHasSnapshot(this.clientManager);
       if (!hasSettings) {
@@ -123,7 +114,7 @@ export class MatrixVTTClient {
     this.chat?.destroy();
     this.clientManager?.destroy();
     clearMediaSession();
-    this.clientManager = this.state = this.ui = this.chat = this.diceRoller = window.ui = null;
+    this.clientManager = this.state = this.ui = this.chat = window.ui = null;
   }
 }
 

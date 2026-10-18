@@ -4484,6 +4484,42 @@ input {
   gap: var(--space-2xs);
 }
 .next-steps__mark { color: var(--color-text-success); }
+/* Who can read this room: a docked row like the checklist below it. */
+.room-notice {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+}
+.room-notice__text {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+/* A room's access said in words: "Public room", or that MatrixVTT
+   cannot open an encrypted one. */
+.room-access {
+  display: inline-block;
+  align-self: center;
+  padding: 0 var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-sm);
+}
+.room-access--blocked {
+  color: var(--color-text-warning);
+  border-color: var(--color-border-warning);
+}
+.next-steps__note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
 .next-steps__chip[data-done="true"] {
   color: var(--color-text-tertiary);
   opacity: 0.55;

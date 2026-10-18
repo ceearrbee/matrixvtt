@@ -61,6 +61,16 @@ describe('nextStepsFor - GM', () => {
   });
 });
 
+describe('nextStepsFor - room with no campaign', () => {
+  it('offers a GM campaign setup and nothing else', () => {
+    expect(keysOf(nextStepsFor(room({ hasCampaign: false })))).toEqual([NEXT_STEP_KEYS.SETUP]);
+  });
+
+  it('offers a player nothing that would write to the room', () => {
+    expect(nextStepsFor(room({ isGM: false, hasCampaign: false }))).toEqual([]);
+  });
+});
+
 describe('nextStepsFor - player', () => {
   it('asks a player for one thing only', () => {
     const steps = nextStepsFor(room({ isGM: false, myUserId: '@bo:hs' }));

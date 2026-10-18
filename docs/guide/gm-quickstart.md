@@ -8,7 +8,7 @@ This guide is for game masters and players, not developers. It walks from zero t
 - A Matrix account. Matrix is the open chat network MatrixVTT stores your game in. If you do not have an account, create a free one at [element.io](https://app.element.io/#/register) on the default `matrix.org` server, then come back.
 - The MatrixVTT app URL for your instance (for the public deployment, the `app.html` page).
 
-MatrixVTT itself stores nothing on any server of its own. Your campaign lives in a Matrix room on the homeserver you sign in to, and only people you invite can see it.
+MatrixVTT itself stores nothing on any server of its own. Your campaign lives in a Matrix room on the homeserver you sign in to, and everyone in that room can read all of it. See [Who can read your game](#who-can-read-your-game).
 
 ## 1. Sign in
 
@@ -19,6 +19,12 @@ You stay signed in on this device until you use Sign Out. Signing out ends the s
 ## 2. Create the game room
 
 On the discovery screen, enter a name under Create Room and confirm. You become the room creator, which makes you the GM: GM authority follows Matrix room power levels, so the person who created the room (or anyone later promoted to moderator) gets the GM tools.
+
+### Using a room you already have
+
+Paste the room's ID, alias or `matrix.to` link into the Join field, or pick it from **Show all joined rooms**. A room with no campaign opens straight to its chat: you can read and post as normal, and MatrixVTT adds nothing else to the room. When you want a campaign there, choose **Set up a campaign** in the Next steps row. Players who open the room before then see that there is no campaign yet, and their chat works as normal.
+
+Encrypted rooms are not supported. MatrixVTT will not open them; keep using those in Element or another Matrix app.
 
 ## 3. Pick a ruleset
 
@@ -57,6 +63,16 @@ Everything below syncs live to every player in the room:
 - **Compendium**: in a D&D 5e campaign, the SRD buttons on the Spells, Items, and NPC tabs search the compendium and add entries straight into the campaign.
 - **Handouts and journals**: share images, notes, and wiki-linked pages with the table.
 - **Travel pins**: drop a pin on each side of a doorway and set one to travel to the other. Moving the party through it switches everyone to that map and puts their tokens on the arrival pin.
+
+## Who can read your game
+
+Treat your game room as public to everyone in it.
+
+- Everything MatrixVTT stores in the room can be read by every member, from MatrixVTT or from any other Matrix app: maps, sheets, hidden tokens, GM notes, private and GM-visible pages, and whispers. "Private" and "GM-visible" only hide things inside MatrixVTT.
+- A whisper (`/w @player message`) is an ordinary room message. MatrixVTT shows it only to the two of you, but anyone in the room can read it in Element.
+- A public room adds anyone who joins. MatrixVTT marks those rooms **Public room** on the room list and in the header.
+- For something that really must stay private, use a separate room: a direct message for a whisper, or a room with only your GMs for secret prep.
+- Secret rolls are the exception: they stay on your device and are never posted to the room.
 
 ## Getting help in the app
 

@@ -7,7 +7,6 @@ import { VTT_EVENTS, EVENT_TYPES } from '../../utils/constants.js';
 import { FOG_MODES } from '../../utils/ui-constants.js';
 import { tombstoneStaleEvents } from '../first-time-setup.js';
 import { openProgress, waitForQueueDrain } from '../progress-modal.js';
-import { clearRoomVisited } from '../../utils/room-visited.js';
 
 
 export async function deleteSession(ui) {
@@ -74,7 +73,6 @@ export async function deleteSession(ui) {
   // via /state instead of briefly loading the prior snapshot.
   const { publishYjsSnapshot } = await import('../../state/yjs-snapshot-publish.js');
   await publishYjsSnapshot(ui.state);
-  clearRoomVisited(ui.widgetManager?.userId, ui.widgetManager?.roomId);
   ui._welcomeShown = false;
   requestAnimationFrame(() => ui.showFirstTimeSetup({ bypassAuthCheck: true }));
 }

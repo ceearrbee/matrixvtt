@@ -34,6 +34,8 @@ export const settingsSignal = signal({});
 export const activeMapIdSignal = signal(null);
 export const drawingsSignal = signal([]);
 export const roomMembersSignal = signal([]);
+// joinRule is null until the room manager has been asked.
+export const roomAccessSignal = signal({ encrypted: false, joinRule: null });
 export const pendingKnocksSignal = signal([]);
 export const reactionsSignal = signal(new Map());
 

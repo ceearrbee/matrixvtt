@@ -9,6 +9,7 @@ import { MatrixApiAdapter } from './MatrixApiAdapter.js';
 import { EVENT_TYPES } from '../utils/constants.js';
 import { computeNewPowerLevels } from '../widget/capabilities.js';
 import { assertJoinRule } from '../utils/join-rules.js';
+import { roomAccessFor } from '../utils/room-access.js';
 import { logger } from '../utils/logger.js';
 import { accessTokenSignal, homeserverSignal, mediaDownloaderSignal } from '../state/ui-signals.js';
 
@@ -224,6 +225,10 @@ export class ClientManager {
   async setJoinRule(rule) {
     assertJoinRule(rule);
     return this.sendStateEvent(EVENT_TYPES.JOIN_RULES, '', { join_rule: rule });
+  }
+
+  getRoomAccess() {
+    return roomAccessFor(this._client, this.roomId);
   }
 
   async kickUser(userId, reason = 'Kicked by GM') {

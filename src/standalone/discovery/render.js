@@ -60,7 +60,7 @@ export function renderRecentSessions(app, recentSessions, scanResults = []) {
   const enriched = recentSessions.map((s) => {
     const scan = byId.get(s.roomId);
     const niceName = scan?.vttState?.name || scan?.name || s.roomName || s.roomId;
-    return { ...s, roomName: niceName };
+    return { ...s, roomName: niceName, access: scan?.access };
   });
 
   renderRecentList(recentList, enriched, {

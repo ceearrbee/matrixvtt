@@ -7,6 +7,9 @@ import { Modal } from '../../ui/Modal.jsx';
 import { openModal } from '../../ui/modal-host.js';
 import { enterRoom } from '../session.js';
 import { describeNetworkError } from '../../utils/errorHandling.js';
+import {
+  isRoomEncrypted, isPublicJoinRule, ENCRYPTED_ROOM_MESSAGE, PUBLIC_ROOM_NOTICE,
+} from '../../utils/room-access.js';
 
 const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
   { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -62,6 +65,7 @@ export async function previewRoom(client, idOrAlias) {
         characters: [],
         npcs: [],
         joinRule: null,
+        encrypted: false,
       };
     }
   }
@@ -115,6 +119,7 @@ export async function previewRoom(client, idOrAlias) {
     name: name || roomId,
     memberCount,
     accessible,
+    encrypted: isRoomEncrypted(stateArr),
     vtt,
     characters,
     npcs,
@@ -130,7 +135,7 @@ function visibilityLabel(joinRule) {
 }
 
 function buildPreviewBody(preview) {
-  const { name, memberCount, vtt, characters, npcs, joinRule, accessible, notFound } = preview;
+  const { name, memberCount, vtt, characters, npcs, joinRule, accessible, notFound, encrypted } = preview;
   const safeName = escapeHtml(name);
   const memberLine = memberCount
     ? `<div class="room-meta">${memberCount} member${memberCount === 1 ? '' : 's'} · ${escapeHtml(visibilityLabel(joinRule))}</div>`
@@ -139,6 +144,8 @@ function buildPreviewBody(preview) {
   let warning = '';
   if (notFound) {
     warning = '<p class="error visible" style="margin: var(--space-xl) 0;">Room not found on this homeserver. Check the ID/alias and try again.</p>';
+  } else if (encrypted) {
+    warning = `<p class="error visible" style="margin: var(--space-xl) 0;">${escapeHtml(ENCRYPTED_ROOM_MESSAGE)}</p>`;
   } else if (!accessible) {
     warning = '<p style="margin: var(--space-xl) 0; opacity: 0.85;">Private room - details are hidden until you join.</p>';
   }
@@ -154,9 +161,13 @@ function buildPreviewBody(preview) {
         <div><strong>System:</strong> ${escapeHtml(vtt.system || 'generic')}</div>
         ${gms}
       </div>`;
-  } else if (accessible) {
-    campaign = '<p style="margin: var(--space-xl) 0; opacity: 0.85;">No VTT campaign set up here yet - you\'ll start with the setup wizard.</p>';
+  } else if (accessible && !encrypted) {
+    campaign = '<p style="margin: var(--space-xl) 0; opacity: 0.85;">No campaign here yet. The room opens as plain chat, and a GM can set one up later.</p>';
   }
+
+  const publicNotice = isPublicJoinRule(joinRule) && !encrypted
+    ? `<p style="margin: var(--space-xl) 0;">${escapeHtml(PUBLIC_ROOM_NOTICE)}</p>`
+    : '';
 
   let roster = '';
   const lines = [];
@@ -171,7 +182,7 @@ function buildPreviewBody(preview) {
   }
 
   const isKnock = joinRule === 'knock' || joinRule === 'knock_restricted';
-  const confirmLabel = notFound
+  const confirmLabel = notFound || encrypted
     ? null
     : (isKnock ? 'Request to Join' : 'Join Room');
   const confirmBtn = confirmLabel
@@ -182,6 +193,7 @@ function buildPreviewBody(preview) {
     <div class="room-name" style="font-size: 1.2em; margin-bottom: var(--space-xs);">${safeName}</div>
     ${memberLine}
     ${warning}
+    ${publicNotice}
     ${campaign}
     ${roster}
     <div class="form-actions" style="margin-top: var(--space-2xl);">

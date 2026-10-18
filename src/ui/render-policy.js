@@ -1,19 +1,14 @@
 /**
- * render-policy.js - initial render decision tree.
- * Mounts the Preact app, initialises the map renderer, wires
- * one-time global listeners, and decides whether to show the
- * setup wizard on first render. Everything else a new user needs
- * is the shell's own NextSteps checklist, which renders itself.
+ * render-policy.js - initial render.
+ * Mounts the Preact app and opens the setup wizard for a room the user
+ * just created. Every other room opens straight to its chat; the
+ * shell's NextSteps checklist offers setup from there.
  */
 
 import { mountApp } from './App.jsx';
 import { _countResidualEntities } from './setup-tombstone.js';
 import { probeRoomSnapshotState } from '../utils/room-snapshot-probe.js';
 import { decideFirstRender } from './first-render-decision.js';
-import {
-  roomAlreadyVisited, stampRoomVisited, clearRoomVisited,
-} from '../utils/room-visited.js';
-import { logger } from '../utils/logger.js';
 
 export function renderUI(ui) {
   const app = document.getElementById('app');
@@ -25,55 +20,18 @@ export function renderUI(ui) {
 
   ui._syncDisplayName();
 
-  if (!ui._welcomeShown) {
-    ui._welcomeShown = true;
-    requestAnimationFrame(async () => {
-      const userId = ui.widgetManager?.userId ?? null;
-      const roomId = ui.widgetManager?.roomId ?? null;
-
-      // Persistent stamp: once a user has successfully entered a room
-      // and renderUI took the non-wizard branch, the wizard is
-      // suppressed on subsequent reloads. The upstream snapshot probe
-      // is best-effort and trips on partial-sync timing; the stamp is
-      // a defense-in-depth layer.
-      const alreadyVisited = roomAlreadyVisited(userId, roomId);
-
-      const noMap = !ui.state.map || Object.keys(ui.state.map).length === 0;
-      const residual = _countResidualEntities(ui);
-
-      // Server probe: even if local state hasn't finished hydrating
-      // from the Yjs snapshot, the snapshot itself lives in /state.
-      let snapshotState = /** @type {'present' | 'absent' | 'unknown'} */ ('unknown');
-      if (noMap || ui._forceWizard) {
-        const api = ui.widgetManager?.getApi?.();
-        snapshotState = api ? await probeRoomSnapshotState(api) : 'unknown';
-      }
-
-      const { showWizard, staleStamp } = decideFirstRender({
-        alreadyVisited,
-        noMap,
-        forceWizard: !!ui._forceWizard,
-        residual,
-        snapshotState,
-      });
-      if (staleStamp) {
-        logger.warn('RenderPolicy',
-          `stale room-visited stamp on a confirmed-empty room - clearing so the wizard can fire`,
-        );
-        clearRoomVisited(userId, roomId);
-      }
-
-      logger.log('RenderPolicy',
-        `wizard decision: showWizard=${showWizard} alreadyVisited=${alreadyVisited} noMap=${noMap} forceWizard=${!!ui._forceWizard} residual=${residual} snapshotState=${snapshotState}`,
-      );
-
-      if (showWizard) {
-        ui.showFirstTimeSetup();
-      } else {
-        // Mark this (user, room) as visited so subsequent reloads
-        // bypass the wizard decision entirely.
-        stampRoomVisited(userId, roomId);
-      }
+  if (ui._welcomeShown || !ui._forceWizard) return;
+  ui._welcomeShown = true;
+  requestAnimationFrame(async () => {
+    // The local Yjs bridges may not have hydrated yet, so the published
+    // snapshot is checked on the server as well.
+    const api = ui.widgetManager?.getApi?.();
+    const snapshotState = api ? await probeRoomSnapshotState(api) : 'unknown';
+    const showWizard = decideFirstRender({
+      forceWizard: ui._forceWizard,
+      residual: _countResidualEntities(ui),
+      snapshotState,
     });
-  }
+    if (showWizard) ui.showFirstTimeSetup();
+  });
 }

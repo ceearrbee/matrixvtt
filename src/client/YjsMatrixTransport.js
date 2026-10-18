@@ -79,6 +79,10 @@ export class YjsMatrixTransport {
     this._coalesceBuffer = [];
     this._coalesceTimer = null;
 
+    // A Yjs event from another member: the room holds a campaign even
+    // when this client's document is still empty.
+    this._heardFromPeer = false;
+
     this._setup();
   }
 
@@ -174,7 +178,11 @@ export class YjsMatrixTransport {
    */
   handleIncomingEvent(event) {
     const { type, content } = event;
-    
+    const isYjs = type === YJS_EVENT_TYPES.UPDATE || type === YJS_EVENT_TYPES.SYNC_VECTOR;
+    if (isYjs && event.sender && event.sender !== this.matrixClient.userId) {
+      this._heardFromPeer = true;
+    }
+
     if (type === YJS_EVENT_TYPES.UPDATE) {
       const data = this._base64ToUint8(content?.data);
       if (!data || data.length === 0) return;
@@ -308,8 +316,12 @@ export class YjsMatrixTransport {
     const schedule = (delayMs) => {
       this._divergenceTimer = setTimeout(async () => {
         if (this._destroyed) return;
-        if (this.matrixClient.status === 'connected') {
-          const content = { vector: this._uint8ToBase64(this.yjsManager.getStateVector()) };
+        const vector = this.yjsManager.getStateVector();
+        // A room with no campaign carries no MatrixVTT traffic: stay
+        // quiet until this document has content or a peer has spoken.
+        const hasContent = Y.decodeStateVector(vector).size > 0;
+        if (this.matrixClient.status === 'connected' && (hasContent || this._heardFromPeer)) {
+          const content = { vector: this._uint8ToBase64(vector) };
           try {
             await this.matrixClient.sendVTTEvent(this.roomId, YJS_EVENT_TYPES.SYNC_VECTOR, null, content);
           } catch (err) {

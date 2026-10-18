@@ -83,11 +83,13 @@ function PageForm({ ui, id, existing, myId, onClose }) {
     ]),
     h('div', { class: 'form-group' }, [
       h('label', { for: 'page-visibility' }, 'Visibility'),
-      h('select', { id: 'page-visibility', class: 'form-input' }, [
+      h('select', { id: 'page-visibility', class: 'form-input', 'aria-describedby': 'page-visibility-hint' }, [
         h('option', { value: PAGE_VISIBILITY.PRIVATE, selected: visibility === PAGE_VISIBILITY.PRIVATE }, 'Private (you only)'),
         h('option', { value: PAGE_VISIBILITY.GM, selected: visibility === PAGE_VISIBILITY.GM }, 'GM-visible'),
         h('option', { value: PAGE_VISIBILITY.PLAYERS, selected: visibility === PAGE_VISIBILITY.PLAYERS }, 'Visible to all players'),
       ]),
+      h('p', { id: 'page-visibility-hint', class: 'form-hint' },
+        'This hides the page in MatrixVTT only. Everyone in this room can still read it from any Matrix app.'),
     ]),
     h('div', { class: 'form-group' },
       h(EditorModeToggle, { label: 'Body', for: 'page-body' })),

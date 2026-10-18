@@ -46,19 +46,17 @@ describe('app-client wiring - real-class contracts', () => {
     expect(dice.state).toBe(state);
   });
 
-  it('ChatIntegrator accepts (clientManager, state, diceRoller) and stores refs in that order', () => {
+  it('ChatIntegrator accepts (clientManager, state) and stores refs in that order', () => {
     const cm = makeFakeClientManager();
     const state = makeFakeState();
-    const dice = new DiceRoller(state);
-    const chat = new ChatIntegrator(cm, state, dice);
+    const chat = new ChatIntegrator(cm, state);
 
     expect(chat.clientManager).toBe(cm);
     expect(chat.state).toBe(state);
-    expect(chat.diceRoller).toBe(dice);
   });
 
   it('ChatIntegrator.init wires the timeline listener and destroy removes it', () => {
-    const chat = new ChatIntegrator(makeFakeClientManager(), makeFakeState(), new DiceRoller(makeFakeState()));
+    const chat = new ChatIntegrator(makeFakeClientManager(), makeFakeState());
     chat.init();
     expect(typeof chat._onTimelineEvent).toBe('function');
 
@@ -68,7 +66,7 @@ describe('app-client wiring - real-class contracts', () => {
 
   it('ChatIntegrator._send routes through state.sendRoomEvent (wiring proof)', async () => {
     const state = makeFakeState();
-    const chat = new ChatIntegrator(makeFakeClientManager(), state, new DiceRoller(state));
+    const chat = new ChatIntegrator(makeFakeClientManager(), state);
 
     await chat._send('hello');
 
@@ -81,7 +79,7 @@ describe('app-client wiring - real-class contracts', () => {
       'mvtt_announcements:@test:example.org',
       JSON.stringify({ rolls: false }),
     );
-    const chat = new ChatIntegrator(makeFakeClientManager(), makeFakeState(), new DiceRoller(makeFakeState()));
+    const chat = new ChatIntegrator(makeFakeClientManager(), makeFakeState());
     expect(chat.announcements.rolls).toBe(false);
   });
 });

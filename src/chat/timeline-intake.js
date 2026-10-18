@@ -1,18 +1,16 @@
 /**
  * timeline-intake.js - incoming Matrix timeline events routed to the
- * right side effects: typing banner, ping overlay, damage log, chat
- * message display, and dice-command execution.
+ * right side effects: typing banner, ping overlay, damage log and chat
+ * message display.
  */
 
 import { EVENT_TYPES, VTT_EVENTS } from '../utils/constants.js';
-import { parseDiceRollCommand, executeDiceRollFromChat } from './dice-command.js';
 import { reactionsSignal } from '../state/signals.js';
 
 export async function handleTimelineEvent(chat, event) {
   if (event.type === 'm.reaction') return _handleReaction(chat, event);
   if (event.type === EVENT_TYPES.PING) return _handlePing(chat, event);
   if (event.type === EVENT_TYPES.DAMAGE_EVENT) return _handleDamage(chat, event);
-  if (event.type === EVENT_TYPES.WHISPER) return _handleWhisper(chat, event);
   if (event.type === EVENT_TYPES.ROOM_MESSAGE) return _handleRoomMessage(chat, event);
 }
 
@@ -49,35 +47,6 @@ function _handleReaction(chat, event) {
     newMap.set(targetId, next);
     reactionsSignal.value = newMap;
   }
-}
-
-/**
- * Whisper: a private timeline event addressed to one or more user
- * ids. The receiver shows it only if the local user is the sender
- * or appears in the `to` list. Non-VTT Matrix clients see this as
- * an opaque com.vtt.whisper event with no body rendered - the
- * privacy guarantee is that only opted-in clients render it.
- */
-function _handleWhisper(chat, event) {
-  const c = event.content ?? {};
-  const sender = event.sender;
-  const myUserId = chat.clientManager?.userId;
-  const to = Array.isArray(c.to) ? c.to : [];
-  const isParticipant = sender === myUserId || to.includes(myUserId);
-  if (!isParticipant) return;
-  // Don't duplicate the local echo - sender already saw the
-  // outgoing message in their UI at send time.
-  if (sender === myUserId) return;
-  if (!c.body) return;
-  window.dispatchEvent(new CustomEvent(VTT_EVENTS.CHAT_MESSAGE, {
-    detail: {
-      sender,
-      body: c.body,
-      whisperTo: to,
-      isWhisper: true,
-      historical: event._historical === true,
-    },
-  }));
 }
 
 function _handlePing(chat, event) {
@@ -117,7 +86,7 @@ function _handleDamage(chat, event) {
  */
 export const CHAT_MSGTYPES = new Set(['m.text', 'm.emote', 'm.notice']);
 
-async function _handleRoomMessage(chat, event) {
+function _handleRoomMessage(chat, event) {
   if (!event.content) return;
   const { msgtype, body } = event.content;
   if (!CHAT_MSGTYPES.has(msgtype)) return;
@@ -163,12 +132,5 @@ async function _handleRoomMessage(chat, event) {
         format, formatted_body, isSceneRoot, sceneTitle,
       },
     }));
-  }
-
-  if (historical || msgtype !== 'm.text') return;
-
-  const rollCommand = parseDiceRollCommand(body);
-  if (rollCommand) {
-    await executeDiceRollFromChat(chat, rollCommand, sender);
   }
 }

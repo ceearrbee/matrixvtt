@@ -25,11 +25,8 @@ function isUsableSnapshotEvent(e) {
 
 /**
  * Tri-state version of the probe. Distinguishes "empty array" (room
- * confirmed empty) from "probe error" (cannot tell). Used by the
- * render-policy stamp-self-heal path: we only want to invalidate a
- * room-visited stamp when we've *positively confirmed* the room has
- * no snapshot - never on a probe error, because a network blip would
- * then surface the wizard for a populated room.
+ * confirmed empty) from "probe error" (cannot tell), so a network blip
+ * is never mistaken for a room with no snapshot.
  *
  * @param {{ receiveStateEvents?: (type: string) => Promise<unknown[]> }} api
  * @returns {Promise<'present' | 'absent' | 'unknown'>}

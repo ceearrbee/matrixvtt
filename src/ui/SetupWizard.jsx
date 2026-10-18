@@ -14,8 +14,8 @@ import { confirmTyped } from './confirm-dialogs.jsx';
 import { _countResidualEntities } from './setup-tombstone.js';
 import { runSetupFlow } from './setup/save-flow.js';
 import { HelpIcon } from './HelpIcon.jsx';
-import { stampRoomVisited } from '../utils/room-visited.js';
 import { docsHref } from '../utils/docs-link.js';
+import { READABLE_ROOM_NOTICE } from '../utils/room-access.js';
 import { describeRulesetContent, DEFAULT_RULESET_SLUG } from '../state/rulesets.js';
 
 const MODAL_ID = 'setup-wizard';
@@ -197,6 +197,7 @@ function SetupWizardBody({ ui, close }) {
         target: '_blank', rel: 'noopener',
       }, 'Read the GM quickstart'),
     ]),
+    h('p', { class: 'form-hint wizard-readable' }, READABLE_ROOM_NOTICE),
     h(BlankOptions, { presets, refs, pending, system, onSystemChange: setSystem }),
     h('div', { class: 'form-actions wizard-actions' }, [
       h('button', {
@@ -204,7 +205,7 @@ function SetupWizardBody({ ui, close }) {
         'data-wizard-open-room': '',
         onClick: onResume,
         disabled: busy,
-      }, 'Skip for now - opens the room as-is, and this screen returns next visit'),
+      }, 'Skip for now - the room stays plain chat, and Next steps offers setup later'),
       h('button', {
         type: 'button', class: 'dbt btn-primary',
         onClick: onConfirm,
@@ -225,13 +226,7 @@ export function renderSetupWizard(ui) {
   closeSetupWizard();
 
   _disposeWizard = openModal((dispose) => {
-    // Stamp the room as visited the moment the wizard exits - any exit
-    // path counts. Without this, reloading the page on a freshly
-    // wizard'd room would refire the wizard every time.
     const close = () => {
-      try {
-        stampRoomVisited(ui.widgetManager?.userId, ui.widgetManager?.roomId);
-      } catch { /* localStorage unavailable; safe to no-op */ }
       dispose();
       _disposeWizard = null;
     };

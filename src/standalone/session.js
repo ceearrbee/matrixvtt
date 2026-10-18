@@ -17,6 +17,7 @@ import { confirmed, confirmTyped } from '../ui/confirm-dialogs.jsx';
 import { promptKnock } from './KnockDialog.jsx';
 import { DEFAULT_RULESET_SLUG } from '../state/rulesets.js';
 import { DEFAULTS } from '../utils/constants.js';
+import { roomAccessFor, ENCRYPTED_ROOM_MESSAGE } from '../utils/room-access.js';
 
 export async function enterRoom(app, roomIdOrAlias, roomName, forceWizard = false, via = []) {
   app.appLog.add('info', `→ enterRoom ${roomIdOrAlias} forceWizard=${forceWizard}`);
@@ -28,14 +29,12 @@ export async function enterRoom(app, roomIdOrAlias, roomName, forceWizard = fals
   // 404 M_NOT_FOUND for bad IDs, 429 for rate limits) - we translate those
   // into human-readable copy before surfacing to the discovery screen.
   let roomId = roomIdOrAlias;
-  let justJoined = false;
   try {
     const joined = await app.auth.client.getJoinedRooms();
     const isJoined = joined.includes(roomIdOrAlias);
     if (!isJoined) {
       app.appLog.add('info', `  joining ${roomIdOrAlias}`);
       roomId = await app.auth.client.joinRoom(roomIdOrAlias, via);
-      justJoined = true;
     }
   } catch (err) {
     const code = err?.errcode || err?.data?.errcode;
@@ -74,6 +73,15 @@ export async function enterRoom(app, roomIdOrAlias, roomName, forceWizard = fals
     return;
   }
 
+  const access = await roomAccessFor(app.auth.client, roomId);
+  if (access.encrypted) {
+    app.appLog.add('warn', `✗ ${roomId} is encrypted; not opening it`);
+    saveActiveRoom(null);
+    app.showScreen('discovery');
+    app.setError('discovery-error', ENCRYPTED_ROOM_MESSAGE);
+    return;
+  }
+
   const session = {
     homeserver: app.auth.homeserver,
     userId: app.auth.userId,
@@ -83,7 +91,7 @@ export async function enterRoom(app, roomIdOrAlias, roomName, forceWizard = fals
     lastUsed: Date.now(),
   };
   upsertRecentSession(session);
-  await startVTT(app, session, forceWizard || justJoined);
+  await startVTT(app, session, forceWizard);
 }
 
 /**
@@ -142,11 +150,6 @@ export async function startVTT(app, session, forceWizard = false) {
       forceWizard
     );
     app.appLog.add('info', `✓ VTT started room=${session.roomId}`);
-    // Stamping room-visited belongs to render-policy's non-wizard
-    // branch and the wizard's own close handler. Stamping here raced
-    // the rAF read in render-policy and could suppress the wizard for
-    // the GM who just created the room; a reload mid-wizard on a
-    // still-empty room correctly re-offers setup.
   } catch (err) {
     logger.error('StandaloneApp', 'VTT init failed:', err);
     app.appLog.add('error', `✗ VTT init failed: ${err.message}`);

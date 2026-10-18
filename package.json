@@ -1,6 +1,6 @@
 {
   "name": "matrixvtt",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Production-ready virtual tabletop system built as a Matrix widget with fog of war, initiative tracking, and real-time multiplayer sync",
   "main": "src/app.js",
   "type": "module",

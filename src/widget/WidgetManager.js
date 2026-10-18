@@ -20,6 +20,7 @@ import {
   getPendingKnocks,
   inviteUser,
   setJoinRule,
+  getRoomAccess,
   kickUser,
   banUser,
   setRoomDisplayName,
@@ -243,6 +244,7 @@ export class WidgetManager {
   getPendingKnocks() { return getPendingKnocks(this); }
   inviteUser(userId) { return inviteUser(this, userId); }
   setJoinRule(rule) { return setJoinRule(this, rule); }
+  getRoomAccess() { return getRoomAccess(this); }
   kickUser(userId, reason) { return kickUser(this, userId, reason); }
   banUser(userId, reason) { return banUser(this, userId, reason); }
 

@@ -10,6 +10,7 @@
 import * as syncer from './syncer.js';
 import { migrateUnscopedEntities } from './migration-unscoped.js';
 import { logger } from '../utils/logger.js';
+import { roomAccessSignal } from './signals.js';
 
 // Periodic full-state refresh as belt-and-suspenders for missed
 // widget subscription events. Live subscriptions handle the
@@ -29,6 +30,7 @@ export async function init(sm) {
   sm.widgetManager?.getYjsTransport?.()?.restorePersistedPending?.();
 
   refreshPendingKnocks(sm);
+  refreshRoomAccess(sm);
 
   sm._onPageHide = () => {
     try { syncer.flushQueueToStorage(sm); } catch { /* storage unavailable */ }
@@ -53,6 +55,15 @@ export async function refreshPendingKnocks(sm) {
     sm.pendingKnocks = await sm.widgetManager.getPendingKnocks();
   } catch {
     // Knocks that arrive later still surface via live member events.
+  }
+}
+
+export async function refreshRoomAccess(sm) {
+  if (typeof sm.widgetManager?.getRoomAccess !== 'function') return;
+  try {
+    roomAccessSignal.value = await sm.widgetManager.getRoomAccess();
+  } catch {
+    // Unknown access leaves the default: no public mark is shown.
   }
 }
 

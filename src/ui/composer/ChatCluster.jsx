@@ -202,7 +202,7 @@ export function ChatCluster({ ui, isGM, extras = null, isMobile = false }) {
             ? 'Describe… (Shift+Enter for newline · markdown supported)'
             : mode === 'ooc'
               ? 'Out-of-character message… (Shift+Enter for newline · markdown supported)'
-              : 'Send message… (Ctrl+K to search or run a command · /w @user to whisper)',
+              : 'Send message… (Ctrl+K to search or run a command · /w @user to whisper (not private))',
         autocomplete: 'off',
         'aria-label': 'Chat message input',
         title: 'Chat message input. Enter to send, Shift+Enter for newline.',

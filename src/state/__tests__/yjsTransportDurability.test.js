@@ -144,6 +144,7 @@ describe('YjsMatrixTransport durability', () => {
   });
 
   it('broadcasts the first sync vector ~5s after construction, then every 60s +/- 15s', async () => {
+    managerB.settingsMap.set('', { name: 'Keep' });
     const vectorSends = () =>
       clientB.sendVTTEvent.mock.calls.filter(([, type]) => type === YJS_EVENT_TYPES.SYNC_VECTOR).length;
 

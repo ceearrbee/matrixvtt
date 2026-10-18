@@ -46,7 +46,8 @@ Gossip for repair. A client broadcasts its state vector; peers elect
 one responder, which replies with a differential update covering only
 what the asker lacks. An oversized diff triggers a fresh snapshot
 instead. This is how a client that was offline catches up without
-waiting for the GM.
+waiting for the GM. A client whose document is empty sends none, so
+a room with no campaign carries no MatrixVTT traffic.
 
 ## 2. Room state MatrixVTT reads or writes
 
@@ -55,6 +56,8 @@ waiting for the GM.
 - `m.room.member`: membership, including `knock` for join requests.
 - `m.room.join_rules`: invite, knock, or public.
 - `m.room.name`, `m.room.canonical_alias`, `m.room.tombstone`.
+- `m.room.encryption`: read only. MatrixVTT does not support encrypted
+  rooms and refuses to open one.
 - `com.vtt.library`, `com.vtt.library_entry`: the personal content
   library, in its own room. An entry is capped at 60000 bytes.
 
@@ -69,7 +72,8 @@ are not written any more: entity state goes into the Yjs document.
   described actions, `m.notice` for out-of-character. Extra content
   fields: `com.vtt.speak_as_token` (persona), `com.vtt.tone`,
   `com.vtt.scene_root` and `com.vtt.scene_title` (a scene is a thread
-  root), `whisper_to`.
+  root), `whisper_to`. `whisper_to` only filters what MatrixVTT shows;
+  the message is readable by every member in any client.
 - `m.reaction`: emoji reactions, with redaction to remove.
 - `com.vtt.damage_event`: an entry in the shared damage log.
 - `com.vtt.ping`: a transient map ping.

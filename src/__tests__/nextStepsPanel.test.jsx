@@ -50,6 +50,25 @@ describe('NextSteps panel', () => {
     resetUiSignals();
   });
 
+  it('offers a GM in a room with no campaign one chip that opens setup', () => {
+    const ui = makeUi();
+    ui.state.yjs = { settingsMap: new Map() };
+    ui.showFirstTimeSetup = vi.fn();
+    const { container } = render(h(NextSteps, { ui }));
+    const chips = container.querySelectorAll('.next-steps__chip');
+    expect(chips.length).toBe(1);
+    fireEvent.click(container.querySelector('[data-step="setup"]'));
+    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
+  });
+
+  it('tells a player in a room with no campaign that chat still works', () => {
+    const ui = makeUi({ isGM: false });
+    ui.state.yjs = { settingsMap: new Map() };
+    const { container } = render(h(NextSteps, { ui }));
+    expect(container.querySelector('.next-steps__chip')).toBeNull();
+    expect(container.textContent).toMatch(/no campaign in this room yet/i);
+  });
+
   it('renders one chip per step', () => {
     const { container } = render(h(NextSteps, { ui: makeUi() }));
     expect(container.querySelectorAll('.next-steps__chip').length).toBe(4);

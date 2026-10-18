@@ -40,11 +40,11 @@ function flushRAF() {
 describe('renderUI wizard gate', () => {
   beforeEach(() => { document.body.innerHTML = ''; });
 
-  it('shows the wizard when there is no map and no entities', async () => {
+  it('opens a room with no map and no entities straight to chat', async () => {
     const ui = makeUi({ map: null, force: false, tokens: 0 });
     renderUI(ui);
     await flushRAF();
-    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
+    expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
   });
 
   it('skips the wizard when entities exist, even if _forceWizard is set', async () => {

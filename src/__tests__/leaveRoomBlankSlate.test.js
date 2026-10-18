@@ -107,6 +107,12 @@ describe('pruneDeletedRecent', () => {
     expect(pruneDeletedRecent(recents, results, joinedIds)).toEqual([]);
   });
 
+  it('keeps a recent for a room that never held a campaign', () => {
+    const recents = [{ userId: '@me:hs', roomId: '!chat:hs' }];
+    const results = [{ id: '!chat:hs', vttState: null }];
+    expect(pruneDeletedRecent(recents, results, ['!chat:hs'])).toHaveLength(1);
+  });
+
   it('keeps a recent when the user is still joined and state is non-empty', () => {
     const recents = [{ userId: '@me:hs', roomId: '!a:hs' }];
     const results = [{ id: '!a:hs', vttState: { tokens: 1 } }];

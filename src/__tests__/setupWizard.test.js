@@ -65,7 +65,7 @@ describe('showFirstTimeSetup (Preact)', () => {
     const skip = document.querySelector('[data-wizard-open-room]');
     expect(skip).toBeTruthy();
     expect(skip.textContent).toMatch(/skip for now/i);
-    expect(skip.textContent).toMatch(/as-is/i);
-    expect(document.body.textContent).toMatch(/returns next visit|comes back|next visit/i);
+    expect(skip.textContent).toMatch(/plain chat/i);
+    expect(skip.textContent).toMatch(/next steps/i);
   });
 });

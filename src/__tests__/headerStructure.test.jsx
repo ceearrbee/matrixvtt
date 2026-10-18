@@ -10,7 +10,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/preact';
 import { h } from 'preact';
 import { Header } from '../ui/Header.jsx';
-import { settingsSignal, initiativeSignal, roomMembersSignal } from '../state/signals.js';
+import { settingsSignal, initiativeSignal, roomMembersSignal, roomAccessSignal } from '../state/signals.js';
 import { tablePhaseSignal, gmPrepActiveSignal } from '../state/ui-signals.js';
 import { UI_MODES } from '../utils/constants.js';
 
@@ -37,6 +37,26 @@ describe('Header structure', () => {
     gmPrepActiveSignal.value = false;
   });
   afterEach(cleanup);
+
+  it('marks a public room in words next to the title', () => {
+    roomAccessSignal.value = { encrypted: false, joinRule: 'public' };
+    try {
+      const { container } = render(h(Header, { ui: makeUi() }));
+      expect(container.querySelector('.vtt-header__left').textContent).toMatch(/public room/i);
+    } finally {
+      roomAccessSignal.value = { encrypted: false, joinRule: null };
+    }
+  });
+
+  it('shows no public mark for an invite-only room', () => {
+    roomAccessSignal.value = { encrypted: false, joinRule: 'invite' };
+    try {
+      const { container } = render(h(Header, { ui: makeUi() }));
+      expect(container.textContent).not.toMatch(/public room/i);
+    } finally {
+      roomAccessSignal.value = { encrypted: false, joinRule: null };
+    }
+  });
 
   it('renders two zones: __left and __right, and no center', () => {
     const { container } = render(h(Header, { ui: makeUi() }));

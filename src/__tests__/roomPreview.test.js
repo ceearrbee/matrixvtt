@@ -50,6 +50,16 @@ describe('previewRoom', () => {
     expect(p.joinRule).toBe('public');
   });
 
+  it('flags an encrypted room', async () => {
+    const client = makeClient({
+      getRoomState: vi.fn(async () => [
+        { type: 'm.room.encryption', state_key: '', content: { algorithm: 'm.megolm.v1.aes-sha2' } },
+      ]),
+    });
+    expect((await previewRoom(client, '!e:hs')).encrypted).toBe(true);
+    expect((await previewRoom(makeClient(), '!p:hs')).encrypted).toBe(false);
+  });
+
   it('marks accessible:false when state read returns empty (403 path)', async () => {
     const client = makeClient(); // all defaults: no name, no state, no vtt
     const p = await previewRoom(client, '!secret:hs');

@@ -6,7 +6,7 @@
  * Scope: lock the contract that `closeSetupWizard` is exported AND
  * is a safe no-op when no wizard is mounted. End-to-end mount/unmount
  * behaviour requires the full setup-wizard scaffolding (presets,
- * room-visited stamp, residual-entity probe) which isn't worth
+ * residual-entity probe) which isn't worth
  * recreating here - the wizard's own existing tests cover the mount
  * path.
  */

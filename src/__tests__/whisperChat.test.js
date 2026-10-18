@@ -1,9 +1,9 @@
 /**
- * Whisper / private chat
+ * Whisper: a chat message addressed to one user
  *
- * A whisper is a chat message that carries a `whisper_to` field containing
- * the target userId.  On receipt, messages are only displayed when the
- * viewer is the sender OR the recipient.
+ * A whisper is an ordinary room message that carries a `whisper_to` field
+ * with the target userId. MatrixVTT shows it only when the viewer is the
+ * sender OR the recipient; any member can still read it elsewhere.
  *
  * Parsing: `/w @alice:example.com <message>` extracts recipient and text.
  * Formatting: whisper messages render with a "whisper" indicator.

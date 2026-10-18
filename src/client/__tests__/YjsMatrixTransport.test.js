@@ -177,6 +177,53 @@ describe('YjsMatrixTransport', () => {
       const calls = mc.sendVTTEvent.mock.calls.filter(c => c[1] === YJS_EVENT_TYPES.SYNC_VECTOR);
       expect(calls).toHaveLength(1);
     });
+
+    it('sends nothing while the local document is empty', async () => {
+      yjs.getStateVector.mockReturnValue(Y.encodeStateVector(new Y.Doc()));
+      await vi.advanceTimersByTimeAsync(180000);
+      expect(mc.sendVTTEvent).not.toHaveBeenCalled();
+    });
+
+    it('an empty document asks for repair once a peer shows the room has a campaign', async () => {
+      yjs.getStateVector.mockReturnValue(Y.encodeStateVector(new Y.Doc()));
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(mc.sendVTTEvent).not.toHaveBeenCalled();
+
+      const peerDoc = new Y.Doc();
+      peerDoc.getMap('settings').set('', { name: 'Keep' });
+      transport.handleIncomingEvent({
+        type: YJS_EVENT_TYPES.SYNC_VECTOR,
+        sender: '@peer:m',
+        content: { vector: btoa(String.fromCharCode(...Y.encodeStateVector(peerDoc))) },
+      });
+      await vi.advanceTimersByTimeAsync(80000);
+      const calls = mc.sendVTTEvent.mock.calls.filter(c => c[1] === YJS_EVENT_TYPES.SYNC_VECTOR);
+      expect(calls.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('its own echoed events do not count as a campaign', async () => {
+      yjs.getStateVector.mockReturnValue(Y.encodeStateVector(new Y.Doc()));
+      transport.handleIncomingEvent({
+        type: YJS_EVENT_TYPES.SYNC_VECTOR,
+        sender: '@me:m',
+        content: { vector: 'AA==' },
+      });
+      await vi.advanceTimersByTimeAsync(80000);
+      expect(mc.sendVTTEvent).not.toHaveBeenCalled();
+    });
+
+    it('starts broadcasting once the document has content', async () => {
+      yjs.getStateVector.mockReturnValue(Y.encodeStateVector(new Y.Doc()));
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(mc.sendVTTEvent).not.toHaveBeenCalled();
+
+      const doc = new Y.Doc();
+      doc.getMap('settings').set('', { name: 'Keep' });
+      yjs.getStateVector.mockReturnValue(Y.encodeStateVector(doc));
+      await vi.advanceTimersByTimeAsync(80000);
+      const calls = mc.sendVTTEvent.mock.calls.filter(c => c[1] === YJS_EVENT_TYPES.SYNC_VECTOR);
+      expect(calls).toHaveLength(1);
+    });
   });
 
   describe('destroy', () => {

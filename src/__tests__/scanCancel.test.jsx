@@ -35,6 +35,7 @@ describe('scanRooms cancellation', () => {
         return 'room';
       }),
       getVttState: vi.fn(async () => ({})),
+      getStateEventContent: vi.fn(async () => null),
     };
     const roomIds = Array.from({ length: 40 }, (_, i) => `!r${i}:hs`);
 

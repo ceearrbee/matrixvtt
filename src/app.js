@@ -9,13 +9,13 @@ import { SubscriptionManager } from './widget/SubscriptionManager.js';
 import { StateManager } from './state/StateManager.js';
 import { createUI } from './ui/ui-methods.js';
 import { ChatIntegrator } from './chat-integrator.js';
-import { DiceRoller } from './dice-roller.js';
 import { showErrorNotification } from './utils/errorHandling.js';
 import { renderFatalError } from './utils/appErrorView.js';
 import { showSyncDeadBanner } from './ui/sync-status.js';
 import { applyAccessibilitySettings } from './ui/settings-helpers.js';
 import { logger } from './utils/logger.js';
 import { VTT_EVENTS } from './utils/constants.js';
+import { ENCRYPTED_ROOM_MESSAGE } from './utils/room-access.js';
 
 // Initialize remote logging (sends console logs to terminal)
 initRemoteLogging();
@@ -29,7 +29,6 @@ export class MatrixVTT {
     this.state = null;
     this.ui = null;
     this.chat = null;
-    this.diceRoller = null;
     this.isInitialized = false;
   }
 
@@ -43,12 +42,20 @@ export class MatrixVTT {
       this.widgetManager = new WidgetManager();
       await this.widgetManager.init();
 
+      const access = await this.widgetManager.getRoomAccess();
+      if (access.encrypted) {
+        renderFatalError(document.getElementById('app'), {
+          title: 'Encrypted room',
+          hint: ENCRYPTED_ROOM_MESSAGE,
+        });
+        return;
+      }
+
       const subscriptionManager = new SubscriptionManager();
       this.state = new StateManager(this.widgetManager, subscriptionManager);
       await this.state.init();
 
-      this.diceRoller = new DiceRoller(this.state);
-      this.chat = new ChatIntegrator(this.widgetManager, this.state, this.diceRoller);
+      this.chat = new ChatIntegrator(this.widgetManager, this.state);
       this.chat.init();
 
       this.ui = createUI(this.state, this.widgetManager, this.chat);

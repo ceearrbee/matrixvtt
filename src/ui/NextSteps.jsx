@@ -16,6 +16,7 @@
 import { h } from 'preact';
 import {
   mapsSignal, tokensSignal, charactersSignal, initiativeSignal, roomMembersSignal,
+  settingsSignal,
 } from '../state/signals.js';
 import { useStorageSubscription } from './hooks/use-storage.js';
 import { STORAGE_KEYS, TABS } from '../utils/constants.js';
@@ -25,6 +26,7 @@ import { CheckIcon } from './icons/index.jsx';
 
 function runKey(ui, step) {
   const key = step.key;
+  if (key === NEXT_STEP_KEYS.SETUP) return ui.showFirstTimeSetup?.();
   if (key === NEXT_STEP_KEYS.MAP) return ui.openMapsPanel?.();
   if (key === NEXT_STEP_KEYS.INVITE) return showInvitePlayerModal(ui);
   if (key === NEXT_STEP_KEYS.TOKEN) return ui.beginTokenPlacement?.();
@@ -42,6 +44,22 @@ function runStep(ui, step) {
   return runKey(ui, step.blockedBy ? { key: step.blockedBy } : step);
 }
 
+// Campaign settings live in the room's Yjs document. A room that never
+// ran setup has none and is treated as plain chat.
+function roomHasCampaign(state) {
+  const settings = state?.yjs?.settingsMap;
+  if (!settings) return true;
+  return settings.size > 0;
+}
+
+function DismissButton({ onClick }) {
+  return h('button', {
+    type: 'button', class: 'standalone-link-btn next-steps__dismiss',
+    'aria-label': 'Dismiss the next-steps checklist',
+    onClick,
+  }, 'Dismiss');
+}
+
 export function NextSteps({ ui }) {
   const myUserId = ui.widgetManager?.userId ?? null;
   const [dismissed, setDismissed] = useStorageSubscription(
@@ -50,13 +68,23 @@ export function NextSteps({ ui }) {
   // Subscribe to every collection a step reads, so a step ticks the
   // moment the room state that completes it lands.
   mapsSignal.value; tokensSignal.value; charactersSignal.value;
-  initiativeSignal.value; roomMembersSignal.value;
+  initiativeSignal.value; roomMembersSignal.value; settingsSignal.value;
 
   if (dismissed === '1') return null;
   if (ui.state?.initiative?.active === true) return null;
 
+  const isGM = ui.state?.isGM?.() === true;
+  const hasCampaign = roomHasCampaign(ui.state);
+  if (!hasCampaign && !isGM) {
+    return h('section', { class: 'next-steps', 'aria-label': 'Room status' }, [
+      h('span', { class: 'next-steps__note' }, 'No campaign in this room yet. Chat works as normal.'),
+      h(DismissButton, { onClick: () => setDismissed('1') }),
+    ]);
+  }
+
   const steps = nextStepsFor({
-    isGM: ui.state?.isGM?.() === true,
+    isGM,
+    hasCampaign,
     memberCount: ui.state?.roomMembers?.length ?? 0,
     maps: ui.state?.maps,
     tokens: ui.state?.tokens,
@@ -88,10 +116,6 @@ export function NextSteps({ ui }) {
       step.done && h('span', { class: 'next-steps__mark', 'aria-hidden': 'true' }, h(CheckIcon, {})),
       h('span', { class: 'next-steps__label' }, step.label),
     ])),
-    h('button', {
-      type: 'button', class: 'standalone-link-btn next-steps__dismiss',
-      'aria-label': 'Dismiss the next-steps checklist',
-      onClick: () => setDismissed('1'),
-    }, 'Dismiss'),
+    h(DismissButton, { onClick: () => setDismissed('1') }),
   ]);
 }

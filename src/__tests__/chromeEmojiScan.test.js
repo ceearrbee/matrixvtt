@@ -36,7 +36,6 @@ const EMOJI = /\p{Extended_Pictographic}/gu;
  */
 const ALLOWED = {
   // Activity-log glyphs: they label a line of transcript, not a control.
-  'chat/dice-command.js': ['🎲'],
   'ui/character-sheet-sections/lists.js': ['⚔'],
   'ui/chat-log-format.js': ['🎬'],
   'ui/combat/opposed-roll.js': ['⚔'],
@@ -72,8 +71,8 @@ const ALLOWED = {
   'ui/attack-modal.js': ['⚔', '💥', '🎯', '💨', '❌'],
   // Speaking mode marks the line it was said in, not the control that
   // set it - the composer's Say / Describe / OOC pills are words.
-  'ui/chat-send.js': ['💬', '🔒', '💭', '📢'],
-  'ui/lifecycle-init.js': ['🎬', '💬', '🔒', '💭', '📢'],
+  'ui/chat-send.js': ['💬', '💭', '📢'],
+  'ui/lifecycle-init.js': ['🎬', '💬', '💭', '📢'],
   // Reaction palettes: the emoji IS the reaction being sent.
   'ui/LogPanel.jsx': ['💬', '👍', '👎', '❤', '😂'],
   'ui/ThreadView.jsx': ['🎲', '⚔', '👍', '👎', '❤', '😂', '💔', '💚'],

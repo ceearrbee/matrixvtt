@@ -56,25 +56,19 @@ describe('renderUI - wizard gate', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('truly empty room (no map, no entities): show the wizard', async () => {
+  it('a room with no campaign opens straight to chat', async () => {
     const ui = makeUi();
     renderUI(ui);
     await flushRaf();
-    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
+    expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
+    expect(document.querySelector('.modal-overlay')).toBeNull();
   });
 
-  it('forceWizard (just created the room) beats a racing visited stamp', async () => {
-    const { stampRoomVisited, clearRoomVisited } = await import('../utils/room-visited.js');
-    stampRoomVisited('@gm:hs', '!fresh:hs');
-    try {
-      const ui = makeUi({ forceWizard: true });
-      ui.widgetManager = { userId: '@gm:hs', roomId: '!fresh:hs' };
-      renderUI(ui);
-      await flushRaf();
-      expect(ui.showFirstTimeSetup).toHaveBeenCalled();
-    } finally {
-      clearRoomVisited('@gm:hs', '!fresh:hs');
-    }
+  it('a room this user just created opens the wizard', async () => {
+    const ui = makeUi({ forceWizard: true });
+    renderUI(ui);
+    await flushRaf();
+    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
   });
 
   it('room has tokens but ui.state.map is empty: DO NOT show the wizard', async () => {

@@ -159,7 +159,7 @@ export async function sendChatMessage(ui, rawValue) {
 
   if (whisperTo) {
     const toDisplay = whisperTo.split(':')[0].replace('@', '');
-    ui._log('🔒', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b>: ${esc(finalBody)}`, { eventId, sender: myUserId });
+    ui._log('💬', `<b>${esc(displayName)}</b> whispers to <b>${esc(toDisplay)}</b> (not private): ${esc(finalBody)}`, { eventId, sender: myUserId });
   } else if (mode === 'describe') {
     ui._log('💭', formatEmoteLogBody(displayName, finalBody, personaName, fmt, resolveEntity), { eventId, sender: myUserId, msgtype: 'm.emote' });
     if (tokenId && ui.mapRenderer?.showSpeechBubble) ui.mapRenderer.showSpeechBubble(tokenId, finalBody);

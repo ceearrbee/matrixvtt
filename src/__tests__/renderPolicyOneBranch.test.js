@@ -13,13 +13,14 @@ vi.mock('../utils/room-snapshot-probe.js', () => ({
 
 const { renderUI } = await import('../ui/render-policy.js');
 
-function makeUi({ hasMap = false } = {}) {
+function makeUi({ hasMap = false, forceWizard = false } = {}) {
   return /** @type {any} */ ({
     state: { map: hasMap ? { id: 'm' } : null, tokens: new Map(), characters: new Map(),
       npcs: new Map(), items: new Map(), spells: new Map(), handouts: new Map(),
       tables: new Map(), maps: new Map(), walls: new Map(), templates: new Map(),
       pins: new Map(), lights: new Map(), pages: new Map(), drawings: [] },
     widgetManager: { userId: '@u:hs', roomId: '!r:hs', getApi: () => null },
+    _forceWizard: forceWizard,
     restoreTheme: vi.fn(),
     _syncDisplayName: vi.fn(),
     showFirstTimeSetup: vi.fn(),
@@ -34,8 +35,16 @@ describe('renderUI first-render decision', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('opens the wizard for a room with no campaign', async () => {
+  it('opens a room with no campaign straight to chat', async () => {
     const ui = makeUi();
+    renderUI(ui);
+    await flush();
+    expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
+    expect(document.querySelector('.modal-overlay')).toBeNull();
+  });
+
+  it('opens the wizard for a room the user just created', async () => {
+    const ui = makeUi({ forceWizard: true });
     renderUI(ui);
     await flush();
     expect(ui.showFirstTimeSetup).toHaveBeenCalled();

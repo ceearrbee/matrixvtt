@@ -3,9 +3,8 @@
  *
  * Distinguishes 'present' (room has a usable Yjs snapshot), 'absent'
  * (probe succeeded but found nothing), and 'unknown' (probe errored
- * or returned a non-array). The render-policy stamp self-heal path
- * only invalidates a room-visited stamp on 'absent' - never on
- * 'unknown', so this contract matters for first-load correctness.
+ * or returned a non-array). Snapshot republish acts only on 'absent',
+ * never on 'unknown', so a network blip cannot trigger it.
  */
 import { describe, it, expect } from 'vitest';
 import { probeRoomSnapshotState } from '../utils/room-snapshot-probe.js';

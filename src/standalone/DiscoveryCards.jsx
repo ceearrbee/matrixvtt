@@ -2,6 +2,19 @@
 import { h, render } from 'preact';
 import { relativeDate } from './app-log.js';
 import { KickIcon, TrashIcon } from '../ui/icons/index.jsx';
+import { isPublicJoinRule } from '../utils/room-access.js';
+
+// Said in words, not only styled: MatrixVTT cannot open an encrypted
+// room, and anyone who joins a public room can read it.
+function AccessLabel({ access }) {
+  if (access?.encrypted) {
+    return h('span', { class: 'room-access room-access--blocked' }, 'Encrypted: MatrixVTT cannot open it');
+  }
+  if (isPublicJoinRule(access?.joinRule)) {
+    return h('span', { class: 'room-access' }, 'Public room');
+  }
+  return null;
+}
 
 function InviteCard({ invite, onAccept, onDecline }) {
   return h('div', { class: 'room-card' }, [
@@ -32,9 +45,10 @@ function RecentSessionCard({ session, onResume, onRemove }) {
       h('div', { class: 'session-name' }, session.roomName || session.roomId),
       h('div', { class: 'session-meta' },
         `${session.displayName || session.userId} · ${relativeDate(session.lastUsed)}`),
+      h(AccessLabel, { access: session.access }),
     ]),
     h('div', { class: 'session-card-actions' }, [
-      h('button', {
+      !session.access?.encrypted && h('button', {
         type: 'button',
         class: 'dbt btn-primary recent-resume',
         onClick: (e) => { e.preventDefault(); e.stopPropagation(); onResume(); },
@@ -57,9 +71,10 @@ function ActiveSessionCard({ room, onJoin, onLeave }) {
     h('div', { class: 'room-card-info' }, [
       h('div', { class: 'room-name' }, campaignName),
       h('div', { class: 'room-meta' }, `${room.name} · ${system}`),
+      h(AccessLabel, { access: room.access }),
     ]),
     h('div', { style: 'display: flex; gap: var(--space-sm);' }, [
-      h('button', {
+      !room.access?.encrypted && h('button', {
         type: 'button',
         class: 'dbt btn-primary room-join',
         onClick: (e) => { e.preventDefault(); e.stopPropagation(); onJoin(); },

@@ -17,6 +17,9 @@ export const STORAGE_KEYS = {
   ACCESSIBILITY: 'vtt:accessibility',
   COMBAT_AUTOMATION: 'vtt:combat-automation',
   HIDE_NEXT_STEPS: 'vtt:hide-next-steps',
+  // Base key for "who can read this room" being acknowledged. Per-room:
+  // `${READABLE_NOTICE_SEEN}:${roomId}`, then user-scoped.
+  READABLE_NOTICE_SEEN: 'vtt:readable-notice-seen',
   ACTIVE_ROOM: 'vtt:active-room',
   PENDING_INVITE: 'vtt:pending-invite',
   // Active UI mode (combat | narrative | gm-prep). Base key; per-room
@@ -173,6 +176,7 @@ export const EVENT_TYPES = {
   ROOM_MESSAGE: 'm.room.message',
   POWER_LEVELS: 'm.room.power_levels',
   JOIN_RULES: 'm.room.join_rules',
+  ROOM_ENCRYPTION: 'm.room.encryption',
   CANONICAL_ALIAS: 'm.room.canonical_alias',
   TOMBSTONE: 'm.room.tombstone',
   SPEAK_AS_TOKEN: 'com.vtt.speak_as_token',
@@ -182,11 +186,6 @@ export const EVENT_TYPES = {
   // so clients can colour-tint the entry.
   TONE: 'com.vtt.tone',
   DAMAGE_EVENT: 'com.vtt.damage_event',
-  // Whisper: timeline event for private out-of-character chat. The
-  // sender targets a user-id list via `to: [mxid, …]`; the receiver
-  // filters incoming whispers to messages where the local user is
-  // in the `to` list OR they're the sender.
-  WHISPER: 'com.vtt.whisper',
   // GM-suggested UI mode broadcast. Empty state_key (one per room).
   // Content: { mode: 'combat' | 'narrative' | 'gm-prep' }.
   // The local GM's own broadcast is echo-suppressed on the receive path.

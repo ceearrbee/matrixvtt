@@ -12,7 +12,7 @@ import {
   tokensSignal, charactersSignal, npcsSignal, itemsSignal, spellsSignal,
   handoutsSignal, tablesSignal, pinsSignal, templatesSignal, wallsSignal,
   lightsSignal, mapsSignal, pagesSignal, assetsSignal, fogSignal, initiativeSignal, settingsSignal,
-  activeMapIdSignal, drawingsSignal, roomMembersSignal, reactionsSignal,
+  activeMapIdSignal, drawingsSignal, roomMembersSignal, roomAccessSignal, reactionsSignal,
 } from './signals.js';
 import { replyContextSignal } from './ui-signals.js';
 
@@ -37,6 +37,7 @@ export function resetSignals() {
   initiativeSignal.value = { active: false, round: 0, current_index: 0, order: [] };
   drawingsSignal.value = [];
   roomMembersSignal.value = [];
+  roomAccessSignal.value = { encrypted: false, joinRule: null };
   reactionsSignal.value = new Map();
   replyContextSignal.value = null;
 }

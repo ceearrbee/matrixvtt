@@ -24,6 +24,7 @@ import { FloatingDocs } from './FloatingDoc.jsx';
 import { LegacyChatPopups } from './LegacyChatPopups.jsx';
 import { SyncProgress } from './sync/SyncProgress.jsx';
 import { NextSteps } from './NextSteps.jsx';
+import { RoomReadableNotice } from './RoomReadableNotice.jsx';
 
 export function App({ ui }) {
   useKeyboardShortcuts(ui);
@@ -155,6 +156,7 @@ export function App({ ui }) {
       h('section', { class: 'shell__chat', key: 'chat' }, [
         // First-run checklist above the map, not inside it: the
         // initiative tracker overlays the map's top edge.
+        h(RoomReadableNotice, { ui, key: 'room-notice' }),
         h(NextSteps, { ui, key: 'next-steps' }),
         // Map region - the "page". The initiative strip overlays the top of
         // the map in Combat; other phases use the older InitiativeBar. The

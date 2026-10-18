@@ -28,8 +28,9 @@ import { syncOkSignal, tablePhaseSignal, queueCountSignal, gmPrepActiveSignal, l
 import { LAYOUT_MODES } from '../utils/constants.js';
 import { syncChipText } from './sync-chip.js';
 import {
-  settingsSignal, initiativeSignal, roomMembersSignal,
+  settingsSignal, initiativeSignal, roomMembersSignal, roomAccessSignal,
 } from '../state/signals.js';
+import { isPublicJoinRule } from '../utils/room-access.js';
 import { openGMPanelModal } from './GMTab.jsx';
 import { openSettingsModal } from './Settings.jsx';
 import { LeaveIcon, MicIcon, KickIcon, BanIcon, PlusIcon, StarIcon, MenuIcon, DotIcon, RefreshIcon, PanelIcon, WrenchIcon } from './icons/index.jsx';
@@ -126,6 +127,7 @@ export function Header({
     : phase === UI_MODES.COMBAT ? 'Combat staged' : 'No combat';
   const subtitle = normalizeEmDashes(rawSubtitle);
   const title = normalizeEmDashes(name || '');
+  const isPublic = isPublicJoinRule(roomAccessSignal.value.joinRule);
 
   const returnToRooms = useCallback(
     () => window.dispatchEvent(new CustomEvent(VTT_EVENTS.RETURN_TO_ROOMS)),
@@ -146,6 +148,10 @@ export function Header({
         h('h1', { class: 'vtt-header__title' }, title),
         h('span', { class: `vtt-header__subtitle${rawSubtitle === 'No combat' ? ' vtt-header__subtitle--idle' : ''}` }, subtitle),
       ]),
+      isPublic && h('span', {
+        class: 'room-access',
+        title: 'Anyone can join this room and read everything in it.',
+      }, 'Public room'),
     ]),
     h('div', { class: 'vtt-header__right' }, [
       h(PresenceBadge, { ui, isGM }),

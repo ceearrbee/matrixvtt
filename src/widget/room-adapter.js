@@ -14,6 +14,7 @@ import { VTTError, ErrorType, showErrorNotification } from '../utils/errorHandli
 import { computeNewPowerLevels, RECEIVABLE_STATE_TYPES } from './capabilities.js';
 import { retryOnRateLimit } from '../utils/matrixRetry.js';
 import { assertJoinRule } from '../utils/join-rules.js';
+import { readRoomAccess } from '../utils/room-access.js';
 
 const MOD_POWER_LEVEL = 50;
 
@@ -56,6 +57,17 @@ export async function getRoomState(wm) {
   return results
     .flatMap((r) => (r.ok && Array.isArray(r.value) ? r.value : []))
     .map((e) => ({ type: e.type, state_key: e.state_key, content: e.content, event_id: e.event_id }));
+}
+
+async function readStateContent(wm, type) {
+  if (!wm.widgetApi) return null;
+  const result = await withRoomIdFallback(wm, (opts) => wm.widgetApi.receiveStateEvents(type, opts));
+  if (!result.ok || !Array.isArray(result.value)) return null;
+  return result.value[0]?.content ?? null;
+}
+
+export function getRoomAccess(wm) {
+  return readRoomAccess((type) => readStateContent(wm, type));
 }
 
 export async function getUserPowerLevel(wm) {

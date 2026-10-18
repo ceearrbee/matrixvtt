@@ -59,11 +59,11 @@ function tick() {
 }
 
 describe('renderUI - wizard suppression', () => {
-  it('shows the wizard on a genuine empty room (no snapshot, no maps)', async () => {
+  it('opens an empty room the user did not just create straight to chat', async () => {
     const ui = makeUi({ snapshotEvents: [] });
     renderUI(ui);
     await tick();
-    expect(ui.showFirstTimeSetup).toHaveBeenCalled();
+    expect(ui.showFirstTimeSetup).not.toHaveBeenCalled();
   });
 
   it('SUPPRESSES the wizard on reload when the room has a snapshot', async () => {

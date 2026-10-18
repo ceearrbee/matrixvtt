@@ -53,20 +53,12 @@ describe('MatrixVTTClient', () => {
     }));
     vi.doMock('../chat-integrator.js', () => ({
       ChatIntegrator: class {
-        constructor(clientManager, state, diceRoller) {
+        constructor(clientManager, state) {
           this.clientManager = clientManager;
           this.state = state;
-          this.diceRoller = diceRoller;
         }
         init() { chatInit(); }
         destroy() {}
-      }
-    }));
-    vi.doMock('../dice-roller.js', () => ({
-      DiceRoller: class {
-        constructor(state) {
-          this.state = state;
-        }
       }
     }));
 

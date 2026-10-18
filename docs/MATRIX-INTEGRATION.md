@@ -25,6 +25,7 @@ MatrixVTT operates within an iframe, communicating with the Matrix client via th
 | Capability | Scope |
 |------------|-------|
 | `receive.state_event:com.vtt.*` | Read application state |
+| `receive.state_event:m.room.encryption` | Refuse encrypted rooms |
 | `send.state_event:com.vtt.*` | Write application state |
 | `receive.event:m.room.message` | Read timeline events |
 | `send.event:m.room.message` | Write timeline events |
@@ -32,7 +33,7 @@ MatrixVTT operates within an iframe, communicating with the Matrix client via th
 
 ## Security Model
 
-1. **Trust Boundary**: MatrixVTT utilizes unencrypted state events. Data confidentiality requires self-hosted, private homeservers.
+1. **Trust Boundary**: MatrixVTT uses unencrypted events and refuses to open encrypted rooms. Everything it stores in a room is readable by every member of that room, from any Matrix client.
 2. **State Validation**: All event validation occurs client-side. Production environments require a server-side validation bot to mitigate malicious state injection.
 3. **Power Levels**:
    - `0`: Default execution privilege.
@@ -98,7 +99,11 @@ Journal and lore documents utilize Yjs CRDTs serialized over Matrix. Operations 
 
 ### Chat and Threading
 
-Outgoing chat utilizes the `org.matrix.custom.html` format. Threading leverages standard `m.thread` relationships, scoped explicitly to active narrative scenes to prevent cross-contamination.
+Outgoing chat utilizes the `org.matrix.custom.html` format. Threading leverages standard `m.thread` relationships, scoped explicitly to active narrative scenes to prevent cross-contamination. Messages from other clients are displayed and never acted on, so a room's own bots keep working alongside MatrixVTT.
+
+### Rooms with no campaign
+
+A room opens straight to its chat when it holds no campaign. Until a GM chooses to set one up, MatrixVTT sends nothing to the room beyond the user's own chat.
 
 ### Content Library (`com.vtt.library`, `com.vtt.library_entry`)
 

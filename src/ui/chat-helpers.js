@@ -29,8 +29,10 @@ export function parseWhisperCommand(body) {
 }
 
 /**
- * Determine whether a chat message should be visible to the given viewer.
- * Non-whisper messages are always visible.
+ * Determine whether MatrixVTT shows a chat message to the given viewer.
+ * Non-whisper messages are always shown. A whisper is an ordinary room
+ * message, so this only declutters the log: any member can read it in
+ * another Matrix app.
  * @param {{ sender?: string, whisper_to?: string }} msg
  * @param {string} myUserId
  */

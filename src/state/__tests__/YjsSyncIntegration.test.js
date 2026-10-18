@@ -89,7 +89,8 @@ describe('Distributed Sync Integration (Yjs + Matrix)', () => {
 
   it('detects divergence via periodic sync vectors', async () => {
     const divergenceSpy = vi.spyOn(managerB, 'compareStateVector');
-    
+    managerA.settingsMap.set('', { name: 'Keep' });
+
     // Advance time by 30s to trigger check
     await vi.advanceTimersByTimeAsync(31000);
 
